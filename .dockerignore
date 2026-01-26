@@ -1,0 +1,45 @@
+# Tool/Editor folders/files
+.idea
+.vscode
+.vagrant
+.python-version
+Dockerfile*
+
+# Build artifacts
+build/
+dist/
+
+# Unnecessary folders
+examples/
+elastic_index_export/
+/*.scd
+
+# Generated during testing
+**/tmp
+*.egg-info
+py3env
+py2env
+results/
+peat_results/
+.venv/
+venv/
+htmlcov/
+pillage_results/
+pillage_temp/
+
+# Auto-generated
+.cache
+.tox
+.mypy_cache
+**/.doctrees/
+.coverage*
+.pytest_cache
+*.ipynb
+.pdm-build
+.ruff_cache
+.pdm-python
+
+# Python bytecode files
+**/*.pyc
+**/*.pyo
+**/__pycache__

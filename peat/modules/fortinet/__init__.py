@@ -1,0 +1,1 @@
+from .fortigate import Fortigate

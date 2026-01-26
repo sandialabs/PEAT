@@ -1,0 +1,139 @@
+# -*- mode: python ; coding: utf-8 -*-
+
+import os.path
+from PyInstaller.utils.hooks import copy_metadata
+
+
+# NOTE: if pysnmp breaks again => https://stackoverflow.com/q/21838777/
+# Any static files that should be included in the package and distribution
+core_mods_src = os.path.join('..', 'peat', 'parsing', 'plc_open', 'core_modules')
+core_mods_dst = 'peat/parsing/plc_open/core_modules'
+data_files = [
+    (os.path.join(core_mods_src, 'iec_std.csv'), core_mods_dst),
+    (os.path.join(core_mods_src, 'Additional_Function_Blocks.xml'), core_mods_dst),
+    (os.path.join(core_mods_src, 'Standard_Function_Blocks.xml'), core_mods_dst),
+    (os.path.join(core_mods_src, 'tc6_xml_v201.xsd'), core_mods_dst),
+    (os.path.join(os.path.join('..', 'peat', 'parsing', 'plc_open'), 'COPYING'), 'peat/parsing/plc_open'),
+]  # type: list[tuple[str, str]]
+
+siemens_mibs_src = os.path.join('..', 'peat', 'modules', 'siemens', 'mibs')
+siemens_mibs_dst = 'peat/modules/siemens/mibs'
+data_files.extend([
+    (os.path.join(siemens_mibs_src, 'IEC62439.py'), siemens_mibs_dst),
+    (os.path.join(siemens_mibs_src, 'SIEMENS-SMI.py'), siemens_mibs_dst),
+    (os.path.join(siemens_mibs_src, 'SipEthernet.py'), siemens_mibs_dst),
+    (os.path.join(siemens_mibs_src, 'SipGoose.py'), siemens_mibs_dst),
+    (os.path.join(siemens_mibs_src, 'SipOptical.py'), siemens_mibs_dst),
+])
+
+# NOTE(cegoes, 04/06/22): some MIBs are no longer included with pysnmp (for unknown reasons)
+# If you need a MIB that's missing, build it using "mibdump.py" (which is included with pysmi)
+# Output will go to ~/.pysnmp/mibs/
+# Example for "IF-MIB":
+#   mibdump.py --generate-mib-texts --destination-format pysnmp IF-MIB
+#   ls ~/.pysnmp/mibs/
+#   mv ~/.pysnmp/mibs/*.py ./peat/protocols/mibs/
+snmp_mibs_src = os.path.join('..', 'peat', 'protocols', 'mibs')
+snmp_mibs_dst = 'peat/protocols/mibs'
+data_files.extend([
+    (os.path.join(snmp_mibs_src, 'IANAifType-MIB.py'), snmp_mibs_dst),
+    (os.path.join(snmp_mibs_src, 'IF-MIB.py'), snmp_mibs_dst),
+])
+
+# manuf file for resolving MAC OUIs
+# To update: manuf --update --manuf ./peat/protocols/manuf 00:00:00:00:00:00
+manuf_src = os.path.join('..', 'peat', 'protocols')
+manuf_dst = 'peat/protocols'
+data_files.extend([
+    (os.path.join(manuf_src, 'manuf'), manuf_dst),
+])
+
+# Windows EXE resources
+# NOTE: "SPECPATH" is a PyInstaller-provided variable
+version_info_path = os.path.abspath(os.path.join(SPECPATH, 'file_version_info.txt'))
+icon_path = os.path.abspath(os.path.join(SPECPATH, 'tbird.ico'))
+
+# NOTE: if a third-party module (e.g. middleware) is using a Python
+# standard library module that isn't directly imported anywhere in PEAT,
+# it will need to be included here. Otherwise you'll get an error like:
+#   "Failed to import mypackage.mymodule: No module named 'csv'"
+# NOTE: pysnmp pre-compiled MIBs from pysmi need to be included by PyInstaller
+#   https://stackoverflow.com/a/47285367
+hidden_imports = [
+    'csv', 'dateutil', 'pysmi',
+    'pysnmp.smi.mibs', 'pysnmp.smi.mibs.instances',
+    'pysnmp.smi.exval', 'pysnmp.cache',
+    'dataclasses', 'pydantic',
+    'tzlocal', 'manuf',
+]
+
+
+excludes = [
+    'matplotlib', 'IPython', 'jedi', 'Cryptodome',
+    'zmq', 'pydoc', 'setuptools', 'pycryptodomex',
+    'pygments', 'traitlets', 'tcl', 'Tkinter',
+    'Cython', 'cython', 'ipython', 'tox', 'wheel', 'virtualenv',
+    'requests-toolbelt', 'fire', 'coverage', 'mypy', 'pip', 'PyGObject',
+    'importlib_resources', 'pandas', 'numpy', 'PyInstaller', 'pyinstaller', 'orjson',
+    'manuf/manuf', 'orjson',
+]
+# excludes = []
+
+# Handle package metadata for importlib.metadata
+data_files += copy_metadata('PEAT', recursive=True)
+
+a = Analysis(['../peat/__main__.py'],
+             pathex=['../peat/', '../'],
+             binaries=[],
+             datas=data_files,
+             hiddenimports=hidden_imports,
+             hookspath=['./', './distribution'],
+             runtime_hooks=[],
+             excludes=excludes,
+             win_no_prefer_redirects=False,
+             win_private_assemblies=False,
+             noarchive=False)
+
+# Remove extraneous files from the executable
+# LICENSE files: every package has one, they add up
+# manuf package includes it's own manuf file...
+# TODO: use glob here?
+exclude_files = ['manuf/manuf', '/LICENSE']
+new_datas = []
+for d in a.datas:
+    if not any(e in d[0] for e in exclude_files):
+        new_datas.append(d)
+a.datas = TOC(new_datas)
+
+pyz = PYZ(a.pure, a.zipped_data)
+
+
+exe = EXE(pyz,
+          a.scripts,
+          a.binaries,
+          a.zipfiles,
+          a.datas,
+          [],
+          name='peat',
+          debug=False,  # debug="imports",
+          bootloader_ignore_signals=False,
+          strip=False,
+          upx=False,
+          runtime_tmpdir=None,
+          console=True,
+          version=version_info_path,
+          icon=icon_path)
+
+# Uncomment this if you want to view the files generated by the build
+# coll = COLLECT(exe,
+#                a.binaries,
+#                a.zipfiles,
+#                a.datas,
+#                strip=False,
+#                upx=False,
+#                upx_exclude=[],
+#                name='peat')
+
+
+# OSX app
+app = BUNDLE(exe, name='peat.app', icon=icon_path, bundle_identifier=None)

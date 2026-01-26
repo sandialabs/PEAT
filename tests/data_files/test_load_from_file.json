@@ -1,0 +1,5 @@
+{
+    "ALPHA": false,
+    "ENV_PREFIX": "TEST_",
+    "TEST_OPTION": "default_value"
+}

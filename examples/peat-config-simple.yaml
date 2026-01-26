@@ -1,0 +1,293 @@
+metadata:
+  name: "simple-peat-config"
+  description: "Simplified PEAT configuration with all comments removed"
+  author: "cegoes"
+  created: "May 22nd, 2024"
+  updated: ""
+
+additional_modules: []
+debug: 0
+env_prefix: "PEAT_CONFIG_"
+hash_algorithms:
+- md5
+- sha1
+- sha256
+- sha512
+
+verbose: false
+quiet: false
+no_print_results: false
+print_results: false
+no_color: false
+no_logo: false
+dry_run: false
+assume_online: false
+max_threads: 260
+default_timeout: 5.0
+
+resolve_ip: true
+resolve_mac: true
+resolve_hostname: true
+
+force_online_method_ping: false
+force_online_method_tcp: false
+icmp_fallback_tcp_syn: true
+syn_port: 80
+push_skip_scan: false
+scan_sweep: false
+intensive_scan: false
+
+out_dir: &OUTDIR "./peat_results/"
+run_dir: &RUNDIR !JOIN [*OUTDIR, "default_run_dir/"]
+device_dir: !JOIN [*RUNDIR, "devices/"]
+summaries_dir: !JOIN [*RUNDIR, "summaries/"]
+elastic_dir: !JOIN [*RUNDIR, "elastic_data/"]
+meta_dir: !JOIN [*RUNDIR, "peat_metadata/"]
+log_dir: !JOIN [*RUNDIR, "logs/"]
+temp_dir: !JOIN [*RUNDIR, "temp/"]
+zeek_logdir: !JOIN [*RUNDIR, "zeek_logs/"]
+
+elastic_server: null
+elastic_save_logs: true
+elastic_save_config: true
+elastic_save_state: true
+elastic_save_blobs: false
+elastic_timeout: 10.0
+elastic_disable_dated_indices: false
+elastic_additional_tags: []
+elastic_log_index: "vedar-logs"
+elastic_scan_index: "scan-summaries"
+elastic_pull_index: "peat-pull-summaries"
+elastic_parse_index: "peat-parse-summaries"
+elastic_config_index: "peat-configs"
+elastic_state_index: "peat-state"
+elastic_hosts_index: "ot-device-hosts-timeseries"
+elastic_files_index: "ot-device-files"
+elastic_registers_index: "ot-device-registers"
+elastic_tags_index: "ot-device-tags"
+elastic_io_index: "ot-device-io"
+elastic_events_index: "ot-device-events"
+elastic_memory_index: "ot-device-memory"
+elastic_uefi_hashes_index: "uefi-hashes"
+elastic_uefi_files_index: "uefi-files"
+
+heat_elastic_server: null
+heat_index_names: "packetbeat-*"
+heat_date_range: null
+heat_exclude_ips: []
+heat_only_ips: []
+heat_file_only: false
+heat_artifacts_dir: !JOIN [*RUNDIR, "heat_artifacts/"]
+heat_protocols: []
+pcaps: null
+no_run_zeek: false
+zeek_dir: null
+
+pillage:
+  auto_copy: true
+  recursive: true
+  default:
+    locations: []
+    filenames: []
+    extensions: []
+  brands:
+    Siemens:
+      locations: []
+      filenames: []
+      extensions:
+        - mc7
+    SEL:
+      locations: []
+      filenames:
+        - set_all.txt
+        - cfg.txt
+        - ser.txt
+        - history.txt
+        - cser.txt
+        - chistory.txt
+      extensions:
+        - rdb
+        - cid
+    Modicon:
+      extensions:
+        - apx
+    L5X:
+      extensions:
+        - l5x
+    ION:
+      filenames:
+        - DEVINFO.DAT
+        - SITEINFO.DAT
+        - 61850_log.txt
+      extensions:
+        - upg
+    Woodward:
+      extensions:
+        - wset
+        - tc
+
+device_options:
+  baudrates: []
+  timeout: 5.0
+  fortigate:
+    pull_methods:
+      - ssh
+      - https
+    log_pull_timeout: 30.0
+  sceptre_plc_compatible_st_logic: false
+  sceptre:
+    ftp_testing: false
+    bennu_filename: "bennu-field-deviced.firmware"
+  sel:
+    pull_methods:
+      - http
+      - ftp
+      - telnet
+    allow_telnet_file_download: true
+    force_telnet_file_download: false
+    force_serial_pull: false
+    force_ymodem: false
+    only_download_files: []
+    only_download_dirs: []
+    never_download_files: []
+    never_download_dirs: []
+    restart_after_push: false
+    old_ftp: false
+    handle_download_errors: true
+    creds:
+      acc: "OTTER"
+      2ac: "TAIL"
+      bac: "EDITH"
+      cal: "CLARKE"
+    pull_http: true
+    pull_postgres: true
+    rtac_monitor_enable: false
+    rtac_monitor_count: 3
+    rtac_monitor_pause_for: 4.0
+  m340:
+    use_network_for_config: true
+    generate_openplc_project: null
+  ge:
+    menu_sleep_seconds: 5.0
+  rockwell:
+    pull_methods:
+      - cip
+      - ftp
+      - http
+      - snmp
+  # ion:
+  #   pull_methods:
+  #     - ssh
+  #     - ion_protocol
+  #     - telnet
+  #     - http
+  sage:
+    pull_methods:
+      - telnet
+      - ftp
+      - ssl
+      - ssh
+      - http
+      - https
+    ftp_filesystems:
+      - /ata0a
+      - /ramDrv
+    ssh_filepaths:
+      - /ata0a/scripts/vxworks_start.scp
+      - /ata0a/scripts/startup.scp
+  idirect:
+    pull_methods:
+      - ssh
+      - ssl
+  woodward:
+    pull_methods:
+      - servlink_tcp
+      - ftp
+  web:
+    user: ""
+    pass: ""
+    timeout: 30.0  # Used by Sage
+    users: []  # Used by SELRTAC
+    passwords: []  # Used by SELRTAC
+  ftp:
+    port: 21
+    timeout: 5.0
+    user: ""
+    pass: ""
+    creds: []
+    pull_delay: 0.5  # Used by SELRelay
+  telnet:
+    port: 23
+    timeout: 5.0
+    user: ""
+    pass: ""
+    meter_pass: "0"
+    pull_delay: 0
+  ssh:
+    port: 22
+    timeout: 5.0
+    user: ""
+    pass: ""
+    passphrase: ""
+    key_filename: ""
+    look_for_keys: false
+  http:
+    port: 80
+    timeout: 5.0
+    user: ""
+    pass: ""
+  https:
+    port: 443
+    timeout: 5.0
+  snmp:
+    port: 161
+    timeout: 5.0
+    community: public
+    communities:
+      - public
+      - private
+  serial:
+    baudrate: 0
+    timeout: 5.0
+  modbus_tcp:
+    port: 502
+    timeout: 5.0
+  servlink_tcp:
+    port: 666
+    timeout: 5.0
+  servlink_serial:
+    timeout: 5.0
+  postgres:
+    port: 5432
+    timeout: 5.0
+    user: ""
+    pass: ""
+    users: []  # Used by SELRTAC
+    passwords: []  # Used by SELRTAC
+  cip:
+    port: 44818
+    timeout: 5.0
+  digsi:
+    port: 50000
+    timeout: 5.0
+  ion_protocol:
+    port: 7700
+    timeout: 5.0
+    pull_ion_log: true
+    pull_ion_config: true
+    authenticated: false
+    advanced_security: false
+    user: "0"
+    pass: "0"
+
+hosts:
+  - label: "example-host"
+    comment: "User-specified text that may be included in results or other output (e.g. log messages)"
+    identifiers:
+      ip: "192.168.0.1"
+      mac: "00:00:00:00:00:00"
+      serial_port: "COM0"
+      name: "some-device-name"
+      hostname: "a-hostname"
+    peat_module: "AwesomeModule"
+    options: {}

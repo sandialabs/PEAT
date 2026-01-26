@@ -1,0 +1,127 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Dev/etc
+*.py 		    text eol=lf
+.dockerignore   text eol=lf
+.editorconfig   text eol=lf
+.gitattributes  text eol=lf
+.gitmodules     text eol=lf
+.gitignore      text eol=lf
+AUTHORS         text eol=lf
+Dockerfile      text eol=lf
+LICENSE         text eol=lf
+manuf		    text eol=lf
+tox.ini         text eol=lf
+*.spec          text eol=lf
+*.toml          text eol=lf
+pdm.lock        text eol=lf
+
+# Nmap files
+*.nmap      text eol=lf
+*.gnmap     text eol=lf
+
+# Windows files
+*.ps1       text eol=crlf
+*.bat       text eol=crlf
+
+# Linux files
+*.sh        text eol=lf
+*.bash      text eol=lf
+*.bats      text eol=lf
+
+# Schneider ION
+*.upg       text eol=crlf
+*.dcf       binary
+*.dat       text
+
+# Sage
+soelog.txt  text eol=crlf
+USERLOG.LOG text eol=crlf
+SYSLOG.LOG  text eol=crlf
+
+# Rockwell Studio5000/RSLogix5000 .L5X XML files
+*.l5x       text eol=crlf
+*.L5X       text eol=crlf
+
+# Binary files
+*.db		binary
+*.pkl 		binary
+*.dmk       binary
+*.apx       binary
+*.ztx       binary
+*.stu       binary
+*.bin       binary
+*.mc7       binary
+*.firmware  binary
+*.wset      binary
+*.CID       binary
+WebServer.out   binary
+vxWorks     binary
+BOOTROM.SYS binary
+
+# Text files
+*.txt       text
+*.st        text eol=lf
+*.conf      text eol=lf
+*.mib       text eol=lf
+*.log       text eol=lf
+*.json      text eol=lf
+*.yml       text eol=lf
+*.yaml      text eol=lf
+*.xml       text eol=lf
+*.md        text eol=lf
+*.rst       text eol=lf
+*.cql       text eol=lf
+*.csv       text
+*.cfg       text
+*.html      text eol=lf
+*.htm       text eol=lf
+*.cert      text eol=lf
+*.crt       text eol=lf
+
+# C/C++
+*.c         text eol=lf
+*.cpp       text eol=lf
+*.h         text eol=lf
+*.hpp       text eol=lf
+
+# Documents
+*.doc	    diff=astextplain
+*.DOC	    diff=astextplain
+*.docx      diff=astextplain
+*.DOCX      diff=astextplain
+*.dot       diff=astextplain
+*.DOT       diff=astextplain
+*.pdf       diff=astextplain
+*.PDF	    diff=astextplain
+*.rtf	    diff=astextplain
+*.RTF	    diff=astextplain
+*.adoc      text
+*.textile   text
+*.mustache  text
+*.tab       text
+*.tsv       text
+*.sql       text
+
+# Graphics
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.tif       binary
+*.tiff      binary
+*.ico       binary
+# SVG treated as an asset (binary) by default. If you want to treat it as text,
+# comment-out the following line and uncomment the line after.
+*.svg       binary
+#*.svg      text
+*.eps       binary
+
+#**/*set_all.txt     text
+#**/*set_all*        text
+#set_all.txt         text
+#SET_ALL.TXT         text
+
+# Rockwell tests
+tests/modules/rockwell/data_files/*.txt     text eol=lf

@@ -1,0 +1,32 @@
+{
+    "PEAT": {
+        "DEBUG": 0,
+        "DEFAULT_TIMEOUT": 5.0,
+        "MAX_THREADS": 260,
+        "env_prefix": "PEAT_"
+    },
+    "PILLAGE": {
+        "auto_copy": true,
+        "recursive": true,
+        "default":{
+            "locations": [],
+            "filenames": [],
+            "extensions": []
+        },
+        "brands":{
+            "Siemens":{
+                "locations": [],
+                "filenames": [],
+                "extensions": ["mc7"]
+            },
+            "SEL":{
+                "locations": [],
+                "filenames": ["set_all.txt", "cfg.txt"],
+                "extensions": ["rdb"]
+            },
+            "Modicon": {
+                "extensions": ["apx"]
+            }
+        }
+    }
+}

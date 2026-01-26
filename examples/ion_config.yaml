@@ -1,0 +1,55 @@
+# -----------------------------------------------------------------------------
+
+# --- Information about this configuration, such as who created it and what it's for ---
+
+metadata:
+  name: "8650_config"
+  description: "ION8650 PEAT configuration to pick pulling Log, Feature Manger or Both"
+  author: "mstroble"
+  created: "April 14th, 2025"
+  updated: "July 29th, 2025"
+
+# -- Options for configuring Elasticsearch --
+# -- Leaving these and overriding them with environment variables
+# elastic_server: "http://localhost:9201/"
+# elastic_save_blobs: false
+# elastic_save_static: false
+# elastic_timeout: 10.0
+
+# -----------------------------------------------------------------------------
+
+credentials: &credentials
+  user: "0"
+  pass: "0"
+
+# Used for the regular telnet password
+meter_password: &meter_password
+  meter_pass: "0"
+
+hosts:
+  - label: "ION Power Meter"
+    comment: "Schneider Electric ION Model"
+    identifiers:
+      ip: 192.0.2.123
+    peat_module: "ION"
+    options:
+      ion:
+        pull_methods:
+          - "ssh"
+          - "ion_protocol"
+          - "telnet"
+          - "http"
+      ion_protocol:
+        pull_ion_log: True
+        pull_ion_config: True
+        authenticated: False
+        advanced_security: False
+        <<: *credentials
+      ssh:
+        <<: *credentials
+      telnet:
+        <<: *credentials
+        meter_pass: "0"
+        pull_delay: 0
+      http:
+        <<: *credentials

@@ -1,0 +1,49 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    // Created By: Matthew Stroble
+
+    // In the root of the peat folder create a folder called .vscode
+    // Place this file in that folder and fill in the following fileds.
+    // Replace the value in "name": This will be the name that shows in the drop down.
+    // Replace "module name" with the module you call on the CLI
+    // If using config, put the path in the place of Path/to/config
+    // Click the play button on the left vertical menu and choose
+    // from the drop down menu to the right of RUN AND DEBUG
+    // Now you can click play to launch with debugging and line breaks.
+
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "PEAT Device Test Using a Config YAML",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/peat/__main__.py",
+            "console": "integratedTerminal",
+            "args": [
+                "pull",
+                "-d",
+                "module name",
+                "-i",
+                "ip_address",
+                "-c",
+                "Path/to/config"
+            ]
+        },
+        {
+            "name": "PEAT Device Testing like CLI",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/peat/__main__.py",
+            "console": "integratedTerminal",
+            "args": [
+                "pull",
+                "-d",
+                "mpdule name",
+                "-i",
+                "ip address"
+            ]
+        }
+    ]
+}

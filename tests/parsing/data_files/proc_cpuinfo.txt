@@ -1,0 +1,17 @@
+processor	: 0
+cpu		: e500v2
+clock		: 799.999992MHz
+revision	: 5.1 (pvr 8021 2051)
+bogomips	: 66.66
+
+processor	: 1
+cpu		: e500v2
+clock		: 799.999992MHz
+revision	: 5.1 (pvr 8021 2051)
+bogomips	: 66.66
+
+total bogomips	: 133.33
+timebase	: 33333333
+platform	: P1020 RDB
+model		: fsl,P1020
+Memory		: 256 MB

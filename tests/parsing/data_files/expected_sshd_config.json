@@ -1,0 +1,8 @@
+[
+    "AuthorizedKeysFile\t.ssh/authorized_keys",
+    "PermitEmptyPasswords yes",
+    "AllowTcpForwarding no",
+    "UsePrivilegeSeparation sandbox\t\t# Default for new installations.",
+    "ClientAliveInterval 900",
+    "ClientAliveCountMax 0"
+]

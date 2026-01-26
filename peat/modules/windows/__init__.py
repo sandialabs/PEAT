@@ -1,0 +1,1 @@
+from .wince import WindowsCE

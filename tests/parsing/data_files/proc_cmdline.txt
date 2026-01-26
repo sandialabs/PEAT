@@ -1,0 +1,1 @@
+root=/dev/mmcblk0p1 rw rootdelay=2 console=ttyS0,9600 ramdisk_size=0x250000 cache-sram-size=0x10000 quiet

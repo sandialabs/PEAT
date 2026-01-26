@@ -1,0 +1,53 @@
+{
+    "description": {
+        "vendor": {
+            "id": "ACME",
+            "name": "ACME, Inc."
+        }
+    },
+    "id": "192.168.0.20",
+    "ip": "192.168.0.20",
+    "name": "SomeDevice",
+    "type": "PLC",
+    "os": {
+        "full": "Ubuntu 19.10",
+        "name": "Ubuntu",
+        "version": "19.10"
+    },
+    "interface": [
+        {
+            "type": "ethernet",
+            "ip": "192.168.0.20",
+            "subnet_mask": "255.255.255.0",
+            "gateway": "192.168.0.1",
+            "services": [
+                {
+                    "enabled": true,
+                    "port": 21,
+                    "protocol": "telnet",
+                    "transport": "tcp"
+                }
+            ]
+        }
+    ],
+    "service": [
+        {
+            "enabled": true,
+            "port": 21,
+            "protocol": "telnet",
+            "transport": "tcp"
+        }
+    ],
+    "related": {
+        "ip": [
+            "192.168.0.1",
+            "192.168.0.20"
+        ],
+        "ports": [
+            21
+        ],
+        "protocols": [
+            "telnet"
+        ]
+    }
+}

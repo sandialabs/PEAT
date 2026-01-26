@@ -1,0 +1,12 @@
+[
+    "stv6111",
+    "stv0900",
+    "lnb9492isl",
+    "i2c_opencore",
+    "fpga",
+    "gpio_p1020",
+    "spi_eeprom",
+    "spi_cpld",
+    "rawio",
+    "io_helpers"
+]

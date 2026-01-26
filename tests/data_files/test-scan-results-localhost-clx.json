@@ -1,0 +1,17 @@
+{
+    "scan_duration": 1.0,
+    "scan_targets": [
+        "127.0.0.1"
+    ],
+    "scan_type": "unicast_ip",
+    "scan_modules": [
+        "ControlLogix"
+    ],
+    "num_hosts_active": 0,
+    "num_hosts_online": 0,
+    "num_hosts_verified": 0,
+    "hosts_online": [],
+    "hosts_verified": [],
+    "peat_version": "2021.01.12",
+    "peat_run_id": 161067818971
+}

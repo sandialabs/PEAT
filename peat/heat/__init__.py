@@ -1,0 +1,12 @@
+from typing import Type
+
+from .ftp_extractor import FTPExtractor
+from .heat_classes import HeatProtocol
+from .telnet_extractor import TelnetExtractor
+from .umas_extractor import UmasExtractor
+
+HEAT_EXTRACTORS: list[Type[HeatProtocol]] = [
+    UmasExtractor,
+    FTPExtractor,
+    TelnetExtractor,
+]

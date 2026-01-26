@@ -1,0 +1,711 @@
+# Resources
+#
+# - https://packaging.python.org/en/latest/specifications/pyproject-toml/
+# - https://packaging.python.org/en/latest/tutorials/packaging-projects/
+# - https://betterprogramming.pub/a-pyproject-toml-developers-cheat-sheet-5782801fb3ed
+#
+# Examples of pyproject.toml files from open-source projects:
+# - https://github.com/carlosperate/awesome-pyproject
+# - https://github.com/SpikeInterface/spikeinterface/blob/master/pyproject.toml
+# - https://github.com/codespell-project/codespell/blob/master/pyproject.toml
+# - https://github.com/hynek/structlog/blob/main/pyproject.toml
+#
+# PDM references
+# - PDM documentation: https://pdm-project.org/en/stable
+# - pdm-backend docs: https://backend.pdm-project.org
+# - awesome-pdm: https://github.com/pdm-project/awesome-pdm
+
+
+[build-system]
+requires = ["pdm-backend>=2.3.0"]
+build-backend = "pdm.backend"
+
+[tool.pdm.version]
+source = "scm"
+
+[project]
+name = "PEAT"
+dynamic = ["version"]
+description = "Process Extraction and Analysis Tool (PEAT)"
+readme = "README.md"
+requires-python = ">=3.9,<3.14"
+license = {file = "LICENSE"}
+authors = [
+    {name = "PEAT Developers", email = "peat@sandia.gov"},
+]
+keywords = ["peat", "vedizar", "ics", "scada", "ot", "sandia"]
+classifiers = [
+    # https://pypi.org/classifiers/
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "License :: OSI Approved",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: Microsoft :: Windows :: Windows 7",
+    "Operating System :: Microsoft :: Windows :: Windows 10",
+    "Operating System :: Microsoft :: Windows :: Windows 11",
+    "Operating System :: POSIX",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Framework :: Pydantic",
+    "Framework :: Pydantic :: 1",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Manufacturing",
+    "Intended Audience :: Other Audience",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: System Administrators",
+    "Intended Audience :: Telecommunications Industry",
+    "Topic :: File Formats :: JSON",
+    "Topic :: Internet :: File Transfer Protocol (FTP)",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System",
+    "Topic :: System :: Networking",
+    "Topic :: Utilities",
+    "Topic :: Security",
+    "Typing :: Typed",
+]
+
+# Required dependencies
+# NOTE: Versions are pinned in pdm.lock, not here.
+# This merely specifies allowed version range.
+#
+# Dependency string format: https://peps.python.org/pep-0508/
+# Package details can be found at: https://pypi.org/project/<package-name>
+#
+# Check for updates: "pdm outdated"
+# Check specific package: "pdm outdated <package-name>"
+dependencies = [
+    # Awesome logging library enabling all of PEAT's fancy output
+    "loguru>=0.7.2",
+
+    # Data model machinery
+    "pydantic==1.10.22",
+
+    # YAML parsing and writing
+    "PyYAML==6.0.2",
+
+    # Packet crafting and manipulation, as well as networking utilities
+    "scapy==2.6.1",
+
+    # Timestamp string parsing and advanced date/time calculations
+    "python-dateutil==2.8.2",
+    "tzlocal==2.1.0",
+
+    # Detailed information about the current Linux distribution
+    "distro==1.9.0;platform_system=='Linux'",
+
+    # Formatting of timestamps, file sizes, output, and other utilities in PEAT
+    "humanfriendly==10.0",
+
+    # Cross-platform filename and filepath validation, normalization, and sanitization
+    "pathvalidate==3.3.1",
+
+    # Elasticsearch functionality
+    "elasticsearch<9",
+
+    # OpenSearch compatibility
+    # "opensearch-py~=2.8.0",
+    # opensearch-py 2.7 requires requests 2.30+, which PEAT can't support yet
+    "opensearch-py>=2.6.0",
+
+    # HTTP requests
+    # Required for: ION, SELRelay, SELRTAC, Siprotec, Sage, GERelay, ControlLogix, Fortigate, Totus
+    #
+    # NOTE: Requests 2.30 moved to urllib 2.0
+    # There are a number of changes that break things for PEAT. It's going to
+    # take some development work to untangle how to support urllib 2.0 (or if we even can
+    # due to how old some of the devices PEAT interacts with are). For now,
+    # leave it pinned at 2.29
+    # Details: https://urllib3.readthedocs.io/en/latest/v2-migration-guide.html
+    "requests==2.29.0",
+
+    # Get local network interface configuration and status
+    # NOTE: as of June 2021, netifaces is unmaintained and in an archived read-only state
+    # netifaces-plus is a fork with updated wheels: https://github.com/tsukumijima/netifaces-plus
+    "netifaces-plus==0.12.4",
+
+    # Resolve MAC address OUIs to Vendor names.
+    # The reason we use the manuf package instead of Scapy's conf.manufdb
+    # is the manuf package bundles the manuf file in the package itself instead
+    # of relying on it being on the system, as well as having a more robust parser.
+    # To update manuf file: "pdm run update-manuf"
+    # TODO: vendor the manuf package, it's GPLv3 or Apache 2.0 licensed and not a lot of code.
+    # This would avoid us accidentally including a duplicate manuf file.
+    "manuf==1.1.5",
+
+    # XML parsing
+    # Required for: PLCOpen parser, M340, GERelay
+    # This also is used by BeautifulSoup4 for improved HTML parsing
+    "lxml==5.4.0",
+
+    # HTML parsing
+    # Required for: GERelay
+    "html5lib==1.1",
+
+    # SNMP communication
+    # Required for: M340, SIPROTEC
+    #
+    # NOTE: the original author of pysnmp passed away in August 2022. There have
+    # since been several forks created. We're using the one maintained by some
+    # folks at Splunk. If the ecosystem evolves, we may move to another fork in
+    # the future.
+    # - https://github.com/etingof/pysnmp/issues/429
+    # - https://github.com/etingof/pysnmp/issues/427
+    #
+    # (May 7th, 2024) This fork, lextudio, seems better maintained than pysnmplib
+    # - https://github.com/lextudio/pysnmp
+    # - https://github.com/etingof/pysnmp/issues/429
+    #
+    # NOTE: 6.0.0 moved to asyncio to better support Python 3.12, but breaks our threading.
+    # "pysnmp-lextudio==6.1.2",
+    # TODO: https://pypi.org/project/pysnmp-sync-adapter/
+    "pysnmp-lextudio==5.0.34",
+    # NOTE: pyasn1 0.6.1 breaks this version of pysnmp.
+    # It can be unpinned once pysnmp is updated.
+    "pyasn1<=0.6.0",
+
+    # Advanced HTML parsing for effective web interface scraping
+    # Required for: SELRelay, SELRTAC, ION, Totus, GERelay, ControlLogix
+    "beautifulsoup4==4.12.3",
+
+    # Serial communication
+    # Required for: SELRelay, Woodward 2301E
+    #
+    # WARNING: pyserial 3.5 STILL breaks the Windows EXE build as of
+    # July 8, 2021. It builds, but the built exe throws exception when run.
+    "pyserial==3.4",
+
+    # Siemens Snap7 protocol (Required for: S7 [not yet integrated in PEAT])
+    # "python-snap7==0.11",
+
+    # Library to read and parse Compound Binary File Format
+    # Required for: SELRelay (parsing SEL *.rdb project files from SELACCelerator)
+    "olefile==0.47",
+
+    # PostgreSQL database interaction
+    # Required for: SELRTAC
+    # TODO: move to a pure-Python postgres library to avoid exe build issues (and reduce package size)
+    # - https://github.com/tlocke/pg8000
+    #   pg8000 is 55kb, vs psycopg2 1MB (Windows) to 3MB (Linux)
+    # NOTE: "psycopg2-binary" provides pre-built binary wheels
+    "psycopg2-binary==2.9.10",
+
+    # Library to load kernel modules for PEAT Pillage
+    "kmodpy~=0.1.13;platform_system=='Linux'",
+
+    # Library for initial parsing of L5X files
+    # Required for: L5X
+    "l5x==1.6",
+
+    # Library to read elf files for EC and FADC modules
+    # Required for: MicroNet
+    "pyelftools==0.31",
+
+    # Library for SSH handling
+    # Required for: Sage, Idirect, ION, Fortigate
+    # TODO: do NOT update to paramiko 3.0+, need to test code after updating
+    "paramiko==2.12.0",
+    "cryptography==38.0.4",
+
+    # SCP over SSH, leveraging paramiko
+    # Required for: Fortigate
+    "scp>=0.15.0",
+    "textual>=6.1.0",
+]
+
+[project.scripts]
+peat = "peat.__main__:main"
+
+[project.urls]
+"Repository" = "https://github.com/sandialabs/peat"
+"Documentation" = "https://sandialabs.github.io/peat/"
+"Issue Tracker" = "https://github.com/sandialabs/peat/issues"
+"Changelog" = "https://github.com/sandialabs/peat/blob/main/CHANGELOG.md"
+
+[tool.pdm.dev-dependencies]
+lint = [
+    # checks for spelling mistakes
+    "codespell>=2.2.6",
+    # required for codespell to parse pyproject.toml
+    "tomli",
+
+    # Ruff checks for quality issues and potential bugs
+    "ruff",
+
+    # vulture checks for unused code
+    "vulture",
+
+    # automatic code formatting to follow a consistent style
+    "isort",
+    "black",
+
+    # Type analysis
+    "mypy",
+    "types-tzlocal",
+    "types-PyYAML",
+
+    # Validation that no stray files made it into the sdist (source distribution)
+    "check-sdist",
+]
+test = [
+    # Handles most of the testing work, including execution
+    # Docs: https://docs.pytest.org/en/stable/contents.html
+    "pytest~=8.2",
+
+    # "Coverage" is how much of the code is actually run (it's "coverage")
+    # Generates coverage reports from test suite runs
+    "pytest-cov",
+    "tomli",
+
+    # pytest wrapper around the "mock" library
+    "pytest-mock",
+
+    # Randomizes the order of test execution
+    "pytest-randomly",
+
+    # Required for comparing device data exports and a few other complex structures
+    # Docs: https://zepworks.com/deepdiff/current/
+    "deepdiff[optimize]",
+
+    # Test parallelization, as well as remote execution (which we may do someday)
+    "pytest-xdist[psutil]",
+
+    # Better parsing of doctests
+    "xdoctest",
+
+    # Mocking of HTTP responses for the "requests" module
+    "requests-mock",
+
+    # Colors for doctest output
+    "Pygments>=2.13.0",
+
+    # Integrate pytest with loguru
+    "pytest-loguru",
+
+    # Nicer pytest output
+    "pytest-sugar",
+]
+exe = [
+    "tomli",
+    "pyinstaller==6.15.0",
+    "staticx==0.14.1;platform_system=='Linux'",
+    "setuptools<70.0.0",  # Fix various issues with setuptools lately
+]
+dev = [
+    # Useful for building quick scripts for testing purposes
+    # https://github.com/google/python-fire
+    "fire",
+    # Analyzing dependencies
+    # install graphviz to generate graphs
+    "graphviz",
+    "pipdeptree",
+    # Diagram generation
+    "pylint",
+]
+
+
+# https://backend.pdm-project.org/build_config/
+# Timestamp for files in wheel is 2016/01/01 by default
+# NOTE: PKG-INFO file in the sdist already includes dependencies, README, and LICENSE
+[tool.pdm.build]
+includes = ["peat/", "NOTICE", "COPYRIGHT.md"]
+source-includes = ["AUTHORS", "CHANGELOG.md", "SECURITY.md"]
+# If we some day want to include test and dev dependencies in the sdist
+# (e.g. for packaging),then we can do that. For now, exclude.
+excludes = ["tests/"]
+
+
+[tool.pdm.options]
+run = ["--quiet"]  # suppress output from "pdm run" to facilitate testing
+
+
+# List scripts: pdm run -l
+[tool.pdm.scripts.format]
+help = "Auto-format code using Black and isort"
+composite = [
+    "isort peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
+    "black peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
+]
+
+[tool.pdm.scripts.unused]
+help = "Check for unused code with vulture"
+cmd = "vulture --min-confidence 100 peat distribution distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
+
+[tool.pdm.scripts.check]
+help = "Run ruff on code in check mode (no auto-fix)"
+cmd = "ruff check peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
+
+[tool.pdm.scripts.fix]
+help = "Run ruff and automatically fix errors it can safely fix"
+cmd = "ruff check --fix peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
+
+[tool.pdm.scripts.spelling]
+help = "Spelling checks on all relevant files"
+cmd = "codespell --toml ./pyproject.toml peat tests distribution .github CHANGELOG.md CODE_OF_CONDUCT.md COPYRIGHT.md Dockerfile LICENSE NOTICE README.md SECURITY.md .dockerignore .editorconfig .gitignore .gitattributes pyproject.toml distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
+
+[tool.pdm.scripts.lint]
+help = "Run all linting checks: unused, spelling, ruff, and formatting"
+composite = [
+    "unused",
+    "spelling",
+    "ruff check peat tests",
+    "black --check peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
+    "isort --check peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
+]
+
+[tool.pdm.scripts.test]
+help = "Run unit tests, excluding 'slow' tests"
+cmd = "pytest --durations=5 -m 'not slow' --cov-report term-missing:skip-covered --cov-report html --cov=peat --no-cov-on-fail --xdoctest -n 4 ./tests ./peat"
+
+[tool.pdm.scripts.test-full]
+help = "Run unit tests, including 'slow' tests"
+cmd = "pytest --durations=10 --run-slow --cov-report term-missing:skip-covered --cov-report html --cov=peat --no-cov-on-fail --xdoctest -n 8 ./tests ./peat"
+
+[tool.pdm.scripts.wheel-files]
+help = "List files in the wheel file (.whl) after running 'pdm build'"
+shell = "python -m zipfile --list ./dist/*.whl"
+
+[tool.pdm.scripts.diagrams]
+help = "Generate images of the PEAT class and module structures. Requires Graphviz. Creates multiple files named classes_*.png and packages_*.png"
+shell = """
+pyreverse -o png -p peat-data --ignore plc_open,mibs,csharp_reader.py,namedlist.py ./peat/data
+pyreverse -o png -p peat-modules --ignore plc_open,mibs,csharp_reader.py,namedlist.py ./peat/modules
+pyreverse -o png -p peat-all --ignore plc_open,mibs,csharp_reader.py,namedlist.py ./peat
+"""
+
+# You will need graphviz
+# Linux: 'sudo apt install graphviz'
+# Windows: go to graphviz's website, download and run the installer
+#
+# If there are extraneous packages, run "pdm sync --clean" to remove packages that
+# are leftover from manual installs or otherwise left over from dependency changes.
+[tool.pdm.scripts.dep-graph]
+help = "Generate a image of PEAT's package dependency graph. Creates the file 'package_dependencies.png'. If there are extraneous packages, run 'pdm sync --clean', then re-run graph creation. NOTE: 'graphviz' must be installed. Linux: 'sudo apt install graphviz'. Windows: download and run the installer from graphviz's website."
+shell = """
+pipdeptree --graph-output png --exclude pipdeptree,graphviz,pylint,pytest,flake8,ruff,pyinstaller,staticx,tox,tox-pdm,black,isort,vulture,mypy,check-sdist,codespell,pytest-cov,pytest-mock,pytest-randomly,deepdiff,pytest-xdist,pytest-json-report,xdoctest,requests-mock,Pygments,fire,pdm-backend,check-manifest,pyinstaller-hooks-contrib,virtualenv,types-tzlocal,types-PyYAML,wheel,setuptools,pip,better-exceptions,pyproject-api,packaging,build,pytest-metadata,coverage,mypy-extensions,pyproject_hooks,feedparser,requirements-parser,validate-pyproject,types-pytz,distlib,pluggy,wheel,iniconfig,pathspec,platformdirs,dill,filelock,altgraph,execnet,click,cachetools,exceptiongroup,chardet,tomli,ordered-set,tomlkit,mccabe > package_dependencies.png
+"""
+
+[tool.pdm.scripts.update-manuf-linux]
+help = "(Linux) Update the manuf MAC address file included with PEAT (NOTE: doesn't work on Windows)"
+cmd = "wget https://www.wireshark.org/download/automated/data/manuf -O ./peat/protocols/manuf"
+
+[tool.pdm.scripts.update-manuf-windows]
+help = "(Windows) Update the manuf MAC address file included with PEAT using PowerShell (NOTE: doesn't work on Linux)"
+cmd = "powershell -Command \"Invoke-WebRequest 'https://www.wireshark.org/download/automated/data/manuf' -OutFile '.\\peat\\protocols\\manuf'\""
+
+[tool.pdm.scripts.build-exe]
+help = "Build the executable using PyInstaller, without staticx (not portable to other OS versions or Linux distributions). Use this when building on Windows."
+cmd = "python -m PyInstaller --clean --noconfirm ./distribution/peat.spec"
+
+[tool.pdm.scripts.build-sneakypeat]
+help = "Build the sneakypeat executable, without staticx (not portable to other OS versions or Linux distributions). Use this when building on Windows."
+cmd = "python -m PyInstaller --clean --noconfirm ./distribution/sneakypeat.spec"
+
+# NOTE: you may need to install some packages:
+# sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5
+[tool.pdm.scripts.build-linux-exe]
+help = "(Linux) Build the executable on Linux, with staticx run to make it portable to other OS versions/distributions. NOTE: some packages that may be required: 'sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5'"
+# TODO: better workaround to handle psycopg2 headers
+shell = """
+python -m pip install --no-binary=psycopg2 --no-cache-dir --force-reinstall --use-pep517 'psycopg2==2.9.10'
+bash ./distribution/build-linux-package.sh
+"""
+
+[tool.pdm.scripts.build-linux-sneakypeat]
+help = "(Linux) Build the sneakypeat executable on Linux, with staticx run to make it portable to other OS versions/distributions. NOTE: some packages that may be required: 'sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5'"
+# TODO: better workaround to handle psycopg2 headers
+shell = """
+python -m pip install --no-binary=psycopg2 --no-cache-dir --force-reinstall --use-pep517 'psycopg2==2.9.10'
+bash ./distribution/build-linux-package.sh sneakypeat
+"""
+
+# position, length, uncompressed_length, is_compressed, typecode, name
+# pdm run pyi-archive_viewer -l build/peat-pyinstaller-pre-staticx | awk 'NR>4{print $0}' | sort -t ',' -nk3 -r  > archive_contents.txt
+[tool.pdm.scripts.inspect-exe]
+help = "Inspect the PyInstaller-built exe (archive) using pyi-archive_viewer"
+cmd = "python -m pyi-archive_viewer --list build/peat-pyinstaller-pre-staticx"
+
+[tool.pdm.scripts.build-docker]
+help = "Build Docker image"
+cmd = "bash ./distribution/build-docker.sh"
+
+[tool.pdm.scripts.clean-pyc]
+help = "(Linux) Delete Python cache files"
+shell = """
+find . -name "*.py[cod]" -exec rm -f {} +
+find . -name "*~" -exec rm -f {} +
+find . -name "__pycache__" -exec rm -rf {} +
+find . -name ".cache" -exec rm -rf {} +
+"""
+
+[tool.pdm.scripts.clean-build]
+help = "(Linux) Delete build artifacts"
+shell = """
+rm -rf dist/
+rm -rf build/
+rm -rf deb_dist/
+rm -rf *.dist-info
+"""
+
+[tool.pdm.scripts.clean-tests]
+help = "(Linux) Delete test artifacts and caches"
+shell = """
+rm -rf htmlcov/
+rm -rf .pytest_cache/
+rm -rf .mypy_cache/
+rm -rf .ruff_cache/
+rm -rf .coverage.py*
+rm -f .coverage*
+"""
+
+[tool.pdm.scripts.clean-output]
+help = "(Linux) Delete PEAT output files"
+shell = """
+rm -rf peat_results/
+rm -rf pillage_results/
+"""
+
+[tool.pdm.scripts.clean]
+help = "(Linux) Clean most ephemeral artifacts and caches"
+composite = ["clean-pyc", "clean-build", "clean-tests"]
+
+[tool.pdm.scripts.clean-all]
+help = "(Linux) Clean everything. Resets back to clean state."
+composite = [
+    "clean-pyc",
+    "clean-build",
+    "clean-tests",
+    "clean-output",
+    "rm -rf .docenv/",
+    "rm -rf *.egg-info",
+    "rm -rf elastic_index_export/",
+    "find . -name '*.cpython*.so' -exec rm -f {} +",
+    "find . -name '.doctrees' -exec rm -rf {} +",
+    "rm -f ./classes_*.png",
+    "rm -f ./packages_*.png",
+]
+
+
+[tool.codespell]
+# codespell supports pyproject.toml since version 2.2.2
+# NOTE: the "tomli" package must be installed for this to work
+# https://github.com/codespell-project/codespell#using-a-config-file
+# NOTE: ignore words for codespell must be lowercase
+check-filenames = ""
+ignore-words-list = "datas,bre,ser,mot,ot,aci,noe,optin,ro,inh,ardvark,hart,tru,nd,carmel"
+skip = "forked_telnetlib.py,manuf,data_files,htmlcov,.doctrees,built_docs,plc_open,mibs,enip,cip,clx_relay_ladder_parser.py,*.pyc,*.class,*.xsd,*.xml,*.ico,*.apx,*.dmk,*.out,*.stu,*.sta,*.ztx,*.PNG,*.inv,*.png,*.jpg,*.dot"
+
+
+[tool.black]
+line-length = 88
+force-exclude = '''
+(
+    mibs
+    | plc_open
+    | csharp_reader\.py
+    | namedlist\.py
+    | peat/__init__\.py
+    | peat/protocols/forked_telnetlib\.py
+)
+'''
+
+
+[tool.isort]
+profile = "black"
+known_first_party = ["peat"]
+extend_skip_glob  = [
+    "peat/modules/woodward/csharp_reader.py",
+    "peat/modules/woodward/namedlist.py",
+    "peat/protocols/mibs/*",
+    "peat/parsing/plc_open/*",
+    "peat/__init__.py",
+    "peat/data/models.py",
+    "peat/protocols/ftp.py",
+    "peat/protocols/http.py",
+    "peat/protocols/snmp.py",
+    "peat/protocols/ssh.py",
+    "peat/protocols/telnet.py",
+    "peat/protocols/forked_telnetlib.py",
+]
+
+
+[tool.ruff]
+line-length = 99
+output-format = "full"
+
+# Files to exclude from linting
+extend-exclude = [
+    "*.pyc",
+    "__pycache__",
+    "plc_open",
+    "mibs",
+    "namedlist.py",
+    "csharp_reader.py",
+    "forked_telnetlib.py",
+]
+
+[tool.ruff.lint]
+# Rules: https://docs.astral.sh/ruff/rules/
+# If you violate a rule, lookup the rule on the Rules page in ruff docs.
+# Many rules have links you can click with a explanation of the rule and how to fix it.
+# If there isn't a link, go to the project the rule was source from (e.g. flake8-bugbear)
+# and review it's docs for the corresponding rule.
+# If you're still confused, ask a fellow developer for assistance.
+# You can also run "ruff rule <rule>" to explain a rule on the command line, without a browser or internet access.
+select = [
+    "E",    # pycodestyle
+    "F",    # Pyflakes
+    "W",    # Warning
+    "B",    # flake8-bugbear
+    "A",    # flake8-builtins
+    "C4",   # flake8-comprehensions
+    "T10",  # flake8-debugger
+    "EXE",  # flake8-executable,
+    "ISC",  # flake8-implicit-str-concat
+    "G",    # flake8-logging-format
+    "PIE",  # flake8-pie
+    "T20",  # flake8-print
+    "PT",   # flake8-pytest-style
+    "RSE",  # flake8-raise
+    "RET",  # flake8-return
+    "TID",  # flake8-tidy-imports
+    "ARG",  # flake8-unused-arguments
+    "PGH",  # pygrep-hooks
+    "PLC",  # Pylint Convention
+    "PLE",  # Pylint Errors
+    "PLW",  # Pylint Warnings
+    "RUF",  # Ruff-specific rules
+    "Q",    # flake8-quotes
+
+    # ** Things to potentially enable in the future **
+    # DTZ requires all usage of datetime module to have timezone-aware
+    # objects (so have a tz argument or be explicitly UTC).
+    # "DTZ",  # flake8-datetimez
+    # "PTH",  # flake8-use-pathlib
+    # "SIM",  # flake8-simplify
+]
+
+# Linting error codes to ignore
+ignore = [
+    "F403",    # unable to detect undefined names from star imports
+    "F405",    # undefined locals from star imports
+    "W605",    # invalid escape sequence
+    "A003",    # shadowing python builtins
+    "RET505",  # unnecessary 'else' after 'return' statement
+    "RET504",  # Unnecessary variable assignment before return statement
+    "RET507",  # Unnecessary {branch} after continue statement
+    "PT011",   # pytest-raises-too-broad
+    "PT012",   # pytest.raises() block should contain a single simple statement
+    "PLW0603", # Using the global statement to update is discouraged
+    "PLW2901", # for loop variable overwritten by assignment target
+    "G004",    # Logging statement uses f-string
+    "PIE790",  # no-unnecessary-pass
+    "PIE810",  # multiple-starts-ends-with
+    "PGH003",  # Use specific rule codes when ignoring type issues
+    "RUF012",  # Mutable class attributes should be annotated with typing.ClassVar
+    "RUF010",  # Use explicit conversion flag
+    "PLC0415", # 'import' should be at the top-level of a file
+    # "PLC1901", # compare-to-empty-string
+    # "E203",    # Whitespace before ':'
+]
+
+# Linting error codes to ignore on a per-file basis
+[tool.ruff.lint.per-file-ignores]
+"distribution/sneakypeat.py" = ["T201", "T203"]
+"tests/conftest.py" = ["RET503"]
+"tests/generate_test_data_files.py" = ["T201", "T203"]
+"__init__.py" = ["F401"]
+"peat/__init__.py" = ["E402"]
+"peat/cli_args.py" = ["E501"]
+"peat/data/models.py" = ["E501"]
+"peat/modules/woodward/easygen_svl.py" = ["E501"]
+"peat/modules/rockwell/clx_relay_ladder_parser.py" = ["ARG001"]
+
+
+# Configuration for mypy
+# https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml-file
+[tool.mypy]
+python_version = "3.9"
+follow_imports = "skip"
+ignore_missing_imports = true
+files = "peat"
+exclude = [
+    "peat/data",
+    "peat/heat",
+    "peat/modules",
+    "peat/protocols",
+    "peat/device\\.py",
+    "module_manager\\.py",
+    "csharp_reader\\.py",
+    "namedlist\\.py",
+    "plc_open",
+    "mibs"
+]
+
+
+# Configuration for pytest
+# https://docs.pytest.org/en/latest/reference/customize.html#pyproject-toml
+[tool.pytest.ini_options]
+# verbosity_assertions = 2
+testpaths = ["tests"]
+norecursedirs = [
+    "peat/modules/siemens",
+    ".vscode",
+    "__pycache__"
+]
+# filterwarnings = [
+#     "ignore::DeprecationWarning"
+# ]
+markers = [
+    "slow: lower-importance tests that take an excessive amount of time",
+    "gitlab_ci_only: run tests that are intended to be run only in the GitLab CI environment",
+    "broadcast_ci: run live broadcast tests intended to be used in GitLab CI on PEAT rack"
+]
+# This is apparently the only straightforward to exclude a file from collection in pytest in 2025...sigh
+# The other option is to add a hook to conftest.py...
+addopts = "--ignore-glob='*forked_telnetlib.py'"
+
+
+# Configuration for coverage.py
+[tool.coverage.run]
+omit = [
+    'peat/parsing/plc_open/*',
+    'peat/modules/siemens/mibs/*',
+    'peat/modules/sel/relay_serial.py',
+    'peat/protocols/mibs/*',
+    'peat/protocols/forked_telnetlib.py',
+    'peat/modules/woodward/namedlist.py',
+    'peat/modules/woodward/csharp_reader.py',
+    'peat/modules/schneider/m340/umas_codes.py',
+    'peat/modules/woodward/easygen_enums.py',
+]
+
+
+# Configuration for vulture
+[tool.vulture]
+exclude = [
+    "plc_open",
+    "mibs",
+    "*namedlist.py",
+    "*csharp_reader.py",
+]
+
+
+# https://github.com/henryiii/check-sdist
+[tool.check-sdist]
+sdist-only = ["peat", "AUTHORS", "CHANGELOG.md", "COPYRIGHT.md", "SECURITY.md", "NOTICE"]
+git-only = [".*", "distribution", "examples", "scripts", "tests", ".venv", ".dockerignore", ".editorconfig", ".gitattributes", ".gitignore", "*.spec", "pdm.lock", "CODE_OF_CONDUCT.md", "Dockerfile", "pyproject.toml", "README.md", "LICENSE"]
+default-ignore = true
+recurse-submodules = false

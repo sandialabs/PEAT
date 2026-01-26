@@ -1,0 +1,14 @@
+metadata:
+  name: "peat-config-sel-serial-testing"
+  description: "Testing the new SEL serial pulling code"
+  author: "cegoes"
+  created: "November 8th, 2022"
+  updated: ""
+
+no_logo: true
+debug: 1
+
+device_options:
+  sel:
+    only_download_files: ["SET_P1.TXT"]
+    # force_ymodem: true

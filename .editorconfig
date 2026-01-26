@@ -1,0 +1,53 @@
+# https://editorconfig.org/
+root = true
+
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+
+[*.py]
+max_line_length = 99
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.rst]
+indent_size = 3
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{yml,yaml}]
+indent_size = 2
+trim_trailing_whitespace = true
+
+[*.json]
+insert_final_newline = unset
+
+[Makefile]
+indent_style = tab
+
+[*.{ps1,bat}]
+end_of_line = crlf
+
+[*.{xml,xslt}]
+indent_size = 2
+
+[*.lua]
+indent_size = 2
+trim_trailing_whitespace = true
+
+[tox.ini]
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[Dockerfile*]
+indent_size = 2
+
+[*.toml]
+insert_final_newline = true
+trim_trailing_whitespace = true

@@ -1,0 +1,47 @@
+[
+    {
+        "login_name": "root",
+        "password": "",
+        "user_id": "0",
+        "group_id": "0",
+        "comment": "root",
+        "home_directory": "/root",
+        "shell": "/bin/sh"
+    },
+    {
+        "login_name": "nobody",
+        "password": "",
+        "user_id": "99",
+        "group_id": "99",
+        "comment": "Nobody",
+        "home_directory": "/",
+        "shell": "/sbin/nologin"
+    },
+    {
+        "login_name": "ftp",
+        "password": "",
+        "user_id": "14",
+        "group_id": "50",
+        "comment": "FTP User",
+        "home_directory": "/var/ftp",
+        "shell": "/sbin/nologin"
+    },
+    {
+        "login_name": "sshd",
+        "password": "",
+        "user_id": "74",
+        "group_id": "74",
+        "comment": "Privilege-separated SSH",
+        "home_directory": "/var/empty/sshd",
+        "shell": "/sbin/nologin"
+    },
+    {
+        "login_name": "admin",
+        "password": "",
+        "user_id": "500",
+        "group_id": "500",
+        "comment": "Linux User,,,",
+        "home_directory": "/var/empty",
+        "shell": "/usr/sbin/admin_ssh_shell"
+    }
+]

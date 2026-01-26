@@ -1,0 +1,29 @@
+{
+    "hash": {
+        "md5": "12339264F2860B599210C65A3CB858BA",
+        "sha1": "9DD862E4450AA1C43E692FE3D6D6AF1348260886",
+        "sha256": "175AC6B2C38467A79A6E5DA26860371B4641813EC833042F0E7BB338D77109BA",
+        "sha512": "FCA699ACB437E732336D30584BC2CFC55D6E3B1AA9C335C806F15E892370D726E0C32E8DBDAFA5EA0C78C86CDEF9A7D18A939A967A68C7006D9B4E8D49208582"
+    },
+    "issuer": {
+        "common_name": "192.168.1.1",
+        "country": "US",
+        "locality": "Houston",
+        "organization": "Telvent",
+        "organizational_unit": "RTU",
+        "state_or_province": "Texas"
+    },
+    "not_after": "2042-03-30 16:54:51+00:00",
+    "not_before": "2012-03-30 16:54:51+00:00",
+    "original": "-----BEGIN CERTIFICATE-----\nMIICQTCCAaoCCQDYeWzFQID7PjANBgkqhkiG9w0BAQUFADBlMQswCQYDVQQGEwJV\nUzEOMAwGA1UECAwFVGV4YXMxEDAOBgNVBAcMB0hvdXN0b24xEDAOBgNVBAoMB1Rl\nbHZlbnQxDDAKBgNVBAsMA1JUVTEUMBIGA1UEAwwLMTkyLjE2OC4xLjEwHhcNMTIw\nMzMwMTY1NDUxWhcNNDIwMzMwMTY1NDUxWjBlMQswCQYDVQQGEwJVUzEOMAwGA1UE\nCAwFVGV4YXMxEDAOBgNVBAcMB0hvdXN0b24xEDAOBgNVBAoMB1RlbHZlbnQxDDAK\nBgNVBAsMA1JUVTEUMBIGA1UEAwwLMTkyLjE2OC4xLjEwgZ8wDQYJKoZIhvcNAQEB\nBQADgY0AMIGJAoGBALXW/hyxRQNy+m8RAxQnvodSOHRZl8+LwpUQK8LpXlZaZYes\nLeHZBJjyc7KsrlHZJTFEPtGOQX3+mxaJ7Rwqbap0swy2cpFMeIUBJXMD91yO2HTv\nW3jbO4vgWIYrR/w1Mpg9dCIyc+aUOz+lHyCf2bchRW6zh5ztWmjKqtPDEn35AgMB\nAAEwDQYJKoZIhvcNAQEFBQADgYEAr6MJ1syGDJ/aB3CTvuIuDvvv9QTHbr02s60J\nIwBqnkuxxQmSMyCqmBMbZK+/GjmX6AnqqERqEhN6FFxGcvb6tnWovRpvzsSQDpfh\nHZOXNmf4QtP1mwNMZp6o6Pigpn47rV++UKYtB3DMrGXCBDx4mqyC5nwTRFZ0WYFb\naZL6UAE=\n-----END CERTIFICATE-----\n",
+    "serial_number": "D8796CC54080FB3E",
+    "subject": {
+        "common_name": "192.168.1.1",
+        "country": "US",
+        "locality": "Houston",
+        "organization": "Telvent",
+        "organizational_unit": "RTU",
+        "state_or_province": "Texas"
+    },
+    "version_number": "1"
+}

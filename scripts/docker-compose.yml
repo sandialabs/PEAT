@@ -1,0 +1,66 @@
+x-service-base: &service-base
+  network_mode: "host"
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+# To test with PEAT, use the "-e" PEAT argument, then use "localhost" as the hostname.
+# Example: peat parse -e http://localhost:9200 ./examples/devices/sel/sel_351
+# Verify connectivity with curl: curl http://localhost:9200
+
+services:
+  elasticsearch:
+    <<: *service-base
+    container_name: peat-elastic
+    hostname: peat-elastic
+    image: "elasticsearch:${ES_VERSION:-8.12.1}"
+    healthcheck:
+      test: "curl -f http://localhost:9200 || exit 1"
+      timeout: 10s
+      start_period: 120s
+    environment:
+      - node.name=peat-dev
+      - cluster.name=peat-development-cluster
+      - discovery.type=single-node
+      - network.host=127.0.0.1
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "TAKE_FILE_OWNERSHIP=true"
+      - xpack.security.enabled=true
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    # Uncomment following two lines to persist data when container is killed
+    #volumes:
+    #  - ./es-data:/usr/share/elasticsearch/data
+
+  kibana:
+    <<: *service-base
+    container_name: peat-kibana
+    hostname: peat-kibana
+    image: "kibana:${ES_VERSION:-8.12.1}"
+    healthcheck:
+      test: "curl -f http://localhost:5601 || exit 1"
+      start_period: 120s
+    environment:
+      # https://www.elastic.co/guide/en/kibana/7.9/docker.html
+      - elasticsearch.hosts="http://peat-elastic:9200"
+      - server.host=localhost
+      - server.name=peat-kibana
+      - telemetry.enabled=false
+      - telemetry.optIn=false
+      - xpack.monitoring.enabled=false
+      - xpack.monitoring.kibana.collection.enabled=false
+      - xpack.monitoring.ui.enabled=false
+      - xpack.monitoring.ui.container.elasticsearch.enabled=false
+      - xpack.infra.enabled=false
+      - xpack.spaces.enabled=false
+      - xpack.license.management.enabled=false
+    depends_on: ["elasticsearch"]
+
+# TODO: use docker networks instead of "localhost"
+#   with a nice alias or something to make it easier to use locally?
+#   Use the "docker-hoster" image to do hostname resolution?

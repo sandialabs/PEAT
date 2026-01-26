@@ -1,0 +1,32 @@
+{
+    "alternative_names": [
+        "info@selinc.com"
+    ],
+    "hash": {
+        "md5": "B127DA14C2F8B86BF368DE019DE2237D",
+        "sha1": "BCE2D9C65D16B002A71DD1637431A144423AC79C",
+        "sha256": "C139F80C9538742E80232E878308CAE31457B34F702E4C32F8F475F7E7F40A2C",
+        "sha512": "975DF63C739BB1125F68EBF054004EF131C68E47D603EE04C70C2AE0834EBB66C72AE954CA11992F9E45DB65482156E9A1DF54AA6F7211DCD26AE72D03ABD2DC"
+    },
+    "issuer": {
+        "common_name": "http://www.selinc.com/EthernetCommunications/",
+        "country": "US",
+        "locality": "Pullman",
+        "organization": "Schweitzer Engineering Laboratories",
+        "organizational_unit": "LAN",
+        "state_or_province": "Washington"
+    },
+    "not_after": "2032-05-07 21:53:13+00:00",
+    "not_before": "2012-02-02 21:53:13+00:00",
+    "original": "-----BEGIN CERTIFICATE-----\nMIIDCTCCAnICCQCMbVaXnKxH7DANBgkqhkiG9w0BAQUFADCByDELMAkGA1UEBhMC\nVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1B1bGxtYW4xLDAqBgNV\nBAoTI1NjaHdlaXR6ZXIgRW5naW5lZXJpbmcgTGFib3JhdG9yaWVzMQwwCgYDVQQL\nEwNMQU4xNjA0BgNVBAMTLWh0dHA6Ly93d3cuc2VsaW5jLmNvbS9FdGhlcm5ldENv\nbW11bmljYXRpb25zLzEeMBwGCSqGSIb3DQEJARYPaW5mb0BzZWxpbmMuY29tMB4X\nDTEyMDIwMjIxNTMxM1oXDTMyMDUwNzIxNTMxM1owgcgxCzAJBgNVBAYTAlVTMRMw\nEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdQdWxsbWFuMSwwKgYDVQQKEyNT\nY2h3ZWl0emVyIEVuZ2luZWVyaW5nIExhYm9yYXRvcmllczEMMAoGA1UECxMDTEFO\nMTYwNAYDVQQDEy1odHRwOi8vd3d3LnNlbGluYy5jb20vRXRoZXJuZXRDb21tdW5p\nY2F0aW9ucy8xHjAcBgkqhkiG9w0BCQEWD2luZm9Ac2VsaW5jLmNvbTCBnzANBgkq\nhkiG9w0BAQEFAAOBjQAwgYkCgYEA3DaecAhtlP7b0mqy0qXgHJSf8rBq6c31jbud\nNYSjJiCYn0C8QqKhjnrolK3hLfkkVxj9xONckiCrJR14ZgUSgsmBTfDOvU1jhIvE\nwvCXSi9StBDpD6lsAumaqChElYbaSCZblOlxkZFfK8UB7siNKkry1zYioO3bKPXK\nFss535UCAwEAATANBgkqhkiG9w0BAQUFAAOBgQDRODfez2pXbmyPTk4AMVn6wR34\nFloQQc1sijiHYZsyKfiKf3Nvll0Xcnw7YOGL+JPUfFM0IgHdMHyPSr2tUcitacTZ\nUT/E+XOTFfbMPP1o5Dl55i+NGhGpBYw+0bpLEDZA/9Y1EaJ4+aEtcAlI1vyQeeFh\nMgVP/3tt0bZY13nuRQ==\n-----END CERTIFICATE-----\n",
+    "serial_number": "8C6D56979CAC47EC",
+    "subject": {
+        "common_name": "http://www.selinc.com/EthernetCommunications/",
+        "country": "US",
+        "locality": "Pullman",
+        "organization": "Schweitzer Engineering Laboratories",
+        "organizational_unit": "LAN",
+        "state_or_province": "Washington"
+    },
+    "version_number": "1"
+}

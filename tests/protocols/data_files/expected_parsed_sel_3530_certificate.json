@@ -1,0 +1,29 @@
+{
+    "hash": {
+        "md5": "E974407985C823EEC1D31E7DD50AB932",
+        "sha1": "242C2A1B6C608F2EDA25639B729848F9FE169B8E",
+        "sha256": "338CA18AF89855A3965019114918800D74D59B3393CD3EFBD32B90699740DA85",
+        "sha512": "0346FE13FDCB0140B3EEF0AACF09B7C6D1FA0F8A57CDBC7E10E7F2250B764D777D4B38A2F44373450BF351FC29574630473ABD8CA89AE1A67E4A86440800AC49"
+    },
+    "issuer": {
+        "common_name": "SEL-3530-4 RTAC",
+        "country": "US",
+        "locality": "Pullman",
+        "organization": "Schweitzer Engineering Laboratories, Inc.",
+        "organizational_unit": "Automation and Integration Engineering",
+        "state_or_province": "Washington"
+    },
+    "not_after": "2038-01-19 03:14:07+00:00",
+    "not_before": "2019-03-06 20:14:56+00:00",
+    "original": "-----BEGIN CERTIFICATE-----\nMIIE8zCCA9ugAwIBAgIJAKT39FJZciH0MA0GCSqGSIb3DQEBCwUAMIGzMQswCQYD\nVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjEQMA4GA1UEBwwHUHVsbG1hbjEy\nMDAGA1UECgwpU2Nod2VpdHplciBFbmdpbmVlcmluZyBMYWJvcmF0b3JpZXMsIElu\nYy4xLzAtBgNVBAsMJkF1dG9tYXRpb24gYW5kIEludGVncmF0aW9uIEVuZ2luZWVy\naW5nMRgwFgYDVQQDDA9TRUwtMzUzMC00IFJUQUMwHhcNMTkwMzA2MjAxNDU2WhcN\nMzgwMTE5MDMxNDA3WjCBszELMAkGA1UEBhMCVVMxEzARBgNVBAgMCldhc2hpbmd0\nb24xEDAOBgNVBAcMB1B1bGxtYW4xMjAwBgNVBAoMKVNjaHdlaXR6ZXIgRW5naW5l\nZXJpbmcgTGFib3JhdG9yaWVzLCBJbmMuMS8wLQYDVQQLDCZBdXRvbWF0aW9uIGFu\nZCBJbnRlZ3JhdGlvbiBFbmdpbmVlcmluZzEYMBYGA1UEAwwPU0VMLTM1MzAtNCBS\nVEFDMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtpoFIOmsCdYWEJGb\nXjC1UqVIU+icKFXJCIsmtFYJTV6+CR+UyYpNaAWSrd1PmqbHGAKbvASD109FMvVv\nvrJKNrGr1OgTzRbBSND7Puh5aWPyeoLuYJaytEXDCZr7iGAHeIANW4CiVwO6v0Fo\n36bGoXLM8+nzfZAC04g6qEAkalAuE7jn0b2aDHsHd3CFglmujsk30K8AKesFV21+\nhaV3fJVpFQhYrVJq4tjvseH1/g29xEbBUw4ViczlEIWsQi6TYJQkOHVOgPwMbS35\nmgYlkrnGwRcyiwdR4IaXo9botuuU5w+7aitKsiejz5xAZqAWAyDGltOgkRz0qu1Q\nMhz4aQIDAQABo4IBBjCCAQIwDAYDVR0TBAUwAwEB/zCB0gYDVR0jBIHKMIHHoYG5\npIG2MIGzMQswCQYDVQQGEwJVUzETMBEGA1UECAwKV2FzaGluZ3RvbjEQMA4GA1UE\nBwwHUHVsbG1hbjEyMDAGA1UECgwpU2Nod2VpdHplciBFbmdpbmVlcmluZyBMYWJv\ncmF0b3JpZXMsIEluYy4xLzAtBgNVBAsMJkF1dG9tYXRpb24gYW5kIEludGVncmF0\naW9uIEVuZ2luZWVyaW5nMRgwFgYDVQQDDA9TRUwtMzUzMC00IFJUQUOCCQCk9/RS\nWXIh9DAdBgNVHQ4EFgQUriolugNdNRj08gINBUWxVLixHCQwDQYJKoZIhvcNAQEL\nBQADggEBADML44DL2zrjZyKX2+94CGf1Go8ByPme0wd1AoPHRKa73meR94d6f5Pf\nZhzxilMZeBtR5b+AWrI3vU/G/sSLioJhlA0AIS3LPclCnmuBtrFjQFHlCjX+i+z7\n2h6SbXKCXk+2zc+3tO9LEALkmRRpKLeh+HXiePk408pYQbeexe+ORytLBxlzXElb\n1sfHftqluw9AqVshSQ7HMbPAM4EDSBg8XzjjDftPH2BS2bQi5D28FAgejHWFW4Jw\nUeWOTHart/jBsIeUXGZiI9KhU2CXmlxBNZX6COg8dBK+fPuaPAAwX+USHyiwEToD\nxcer/6CHGjuQHFopusMcAOFd91RTUKg=\n-----END CERTIFICATE-----\n",
+    "serial_number": "A4F7F452597221F4",
+    "subject": {
+        "common_name": "SEL-3530-4 RTAC",
+        "country": "US",
+        "locality": "Pullman",
+        "organization": "Schweitzer Engineering Laboratories, Inc.",
+        "organizational_unit": "Automation and Integration Engineering",
+        "state_or_province": "Washington"
+    },
+    "version_number": "3"
+}

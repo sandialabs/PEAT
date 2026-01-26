@@ -1,0 +1,5 @@
+root:x:0:0:root:/root:/bin/sh
+nobody:x:99:99:Nobody:/:/sbin/nologin
+ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+sshd:x:74:74:Privilege-separated SSH:/var/empty/sshd:/sbin/nologin
+admin:x:500:500:Linux User,,,:/var/empty:/usr/sbin/admin_ssh_shell

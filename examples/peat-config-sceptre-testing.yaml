@@ -1,0 +1,26 @@
+# pip3 install Twisted
+# sudo -H $(which twistd) -n ftp --auth=anonymous -r examples/devices/sceptre/
+# peat pull -d sceptre -i 127.0.0.1 --assume-online -v -c ./examples/peat-config-sceptre-testing.yaml
+
+metadata:
+  name: "sceptre-test-config"
+  description: "Config for testing SCEPTRE module FTP functionality locally using twistd"
+  author: "cegoes"
+  created: "March 14th, 2022"
+  updated: ""
+
+no_logo: true
+
+hosts:
+  - label: "localhost sceptre"
+    identifiers:
+      ip: 127.0.0.1
+      hostname: "localhost"
+    peat_module: "SCEPTRE"
+    options:
+      ftp:
+        port: 2121
+        user: anonymous
+        pass: anonymous
+      sceptre:
+        ftp_testing: true

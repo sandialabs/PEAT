@@ -1,0 +1,13 @@
+{
+    "SSH_CLIENT": "192.168.0.111 35502 22",
+    "MAIL": "/var/mail/root",
+    "USER": "root",
+    "HOME": "/root",
+    "SSH_TTY": "/dev/pts/1",
+    "LOGNAME": "root",
+    "TERM": "screen",
+    "PATH": "/usr/bin:/bin:/usr/sbin:/sbin",
+    "SHELL": "/bin/sh",
+    "PWD": "/root",
+    "SSH_CONNECTION": "192.168.0.111 35502 192.168.0.1 22"
+}

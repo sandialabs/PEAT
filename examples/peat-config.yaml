@@ -1,0 +1,814 @@
+# Configuration file for PEAT (the Process Extraction and Analysis Tool)
+#
+# PEAT uses PyYAML (https://pyyaml.org/) for YAML parsing, so anything
+# that works for PyYAML will work here. YAML version 1.2 is used.
+#
+# Resources
+# - Introduction to YAML: https://learnxinyminutes.com/docs/yaml/
+# - YAML 1.2 specification: https://yaml.org/spec/1.2.2/
+# - YAML anchors (&) and aliases (*): https://www.educative.io/blog/advanced-yaml-syntax-cheatsheet
+#
+# Refer to the PEAT Configure section in the VEDAR documentation for further
+# details on using the config files and configuring PEAT.
+#
+# -----------------------------------------------------------------------------
+
+# --- Information about this configuration, such as who created it and what it's for ---
+
+metadata:
+  name: "reference-peat-config"
+  description: "Reference PEAT configuration with all possible options listed"
+  author: "cegoes"
+  created: "August 5th, 2021"
+  updated: ""
+
+# -----------------------------------------------------------------------------
+
+# --- General configuration options ---
+
+# File paths to external/third-party PEAT device modules to import.
+# These can be the path to a .py file with a DeviceModule subclass or a
+# path to a folder with an __init__.py file and any number of .py
+# files containing DeviceModule subclasses to import.
+additional_modules: []
+
+# DEBUG level (higher = more output, 0 = disabled)
+debug: 0
+
+# Prefix used for PEAT environment variables
+env_prefix: "PEAT_CONFIG_"
+
+# Hash algorithms to use wherever hashes are calculated.
+#
+# Available algorithms are any of the algorithms provided
+# by Python's built-in "hashlib" library.
+# https://docs.python.org/3/library/hashlib.html
+hash_algorithms:
+- md5
+- sha1
+- sha256
+- sha512
+
+# -----------------------------------------------------------------------------
+
+# --- Options for configuring PEAT's Command Line Interface (CLI) output ---
+
+# Include DEBUG-level messages in the terminal output
+verbose: false
+
+# Don't write log messages to the terminal
+quiet: false
+
+# DEPRECATED. Setting this no longer has any effect, as it's now the default behavior.
+no_print_results: false
+
+# Print JSON-formatted results from the operation to
+# the terminal (stdout). Note that log messages will still
+# be printed unless 'quiet' is true.
+print_results: false
+
+# Don't color log messages in the terminal
+no_color: false
+
+# Don't print the PEAT logo at startup
+no_logo: false
+
+# "Dry run" when running on the CLI, do everything except running commands or
+# connecting to servers. Actions won't be executed, but logs and state will
+# still be written to files and saved to Elasticsearch (if enabled).
+# This includes loading and verifying configuration and importing modules.
+
+# Useful for verifying a YAML config file or other settings are correct,
+# or that a third-party PEAT module is imported correctly.
+dry_run: false
+
+# Skip the host online check before scan/pull/push
+assume_online: false
+
+# Maximum number of threads for any concurrent operations (scanning, etc.)
+max_threads: 260
+
+# Default timeout for sockets and potentially other things
+default_timeout: 5.0
+
+# -----------------------------------------------------------------------------
+
+# --- Options for controlling lookups of addresses ---
+
+# If PEAT should attempt to resolve device IP address from a hostname or MAC address
+resolve_ip: true
+
+# If PEAT should attempt to resolve device MAC address from its IP address
+resolve_mac: true
+
+# If PEAT should attempt to resolve device hostname from its IP address
+resolve_hostname: true
+
+# -----------------------------------------------------------------------------
+
+# --- Options for controlling how PEAT finds active hosts on a network ---
+
+# Force ARP and ICMP requests to be used to check if a host is online,
+# even if the system running PEAT isn't able to use them
+force_online_method_ping: false
+
+# Force TCP SYNs to be used to check if a host is online,
+# even if the system running PEAT is able to use ARP/ICMP to perform the checks.
+force_online_method_tcp: false
+
+# In the case of a ICMP failure, fallback to attempting a
+# TCP SYN RST to check if the host is online. If false,
+# then ICMP failures will result in the host being marked
+# as down, even if they're blocked by a firewall or gateway.
+icmp_fallback_tcp_syn: true
+
+# Default port used for basic TCP SYN online checks
+# The default HTTP (web) port 80 is generally safe to check
+syn_port: 80
+
+# Skip scanning and verification of hosts being pushed to and assume
+# all hosts are online and valid devices. NOTE: requires a single
+# device type to be specified.
+push_skip_scan: false
+
+# Simple host up/down check (equivalent to "nmap -Pn <hosts>").
+# If serial ports are targeted, this will enumerate the active
+# serial ports on the host.
+scan_sweep: false
+
+# Force identification checks of all ports during scanning
+intensive_scan: false
+
+# -----------------------------------------------------------------------------
+
+# --- Options for configuring where PEAT saves files ---
+# Note: "!JOIN" is a custom YAML construct to join variables
+# and static strings into a single value.
+
+# Default directory for all file output
+# Note: changing this option will change the base directory for all other
+# "*_dir" options, unless they're set to a non-default value.
+out_dir: &OUTDIR "./peat_results/"
+
+# Output directory for all files associated with a single run of PEAT.
+#
+# The name of this directory is automatically generated.
+# This can be overridden by manual configuration,
+# just be aware of the consequences when doing so.
+#
+# Name format: <command>_<config-name>_<timestamp>_<run-id>
+# - <command> : PEAT command, e.g. "scan", "pull", "parse", etc.
+# - <config-name> : name of YAML config file, set in metadata: name: "name".
+#     If no config name is specified, then the string default-config is used.
+# - <timestamp> : start time of the PEAT run, e.g. 2022-06-15_13-08-59.
+#     This value is retrieved from consts.START_TIME.
+# - <run-id> : Run ID, aka agent.id, e.g. 165532013980.
+#     This value is retrieved from consts.RUN_ID.
+#
+# Examples:
+# - pull_sceptre-test-config_2022-06-17_165532013980
+# - scan_default-config_2022-09-27_165532013980
+run_dir: &RUNDIR !JOIN [*OUTDIR, "default_run_dir/"]
+
+# Output of device modules (pulled configuration files, firmware images, etc.)
+# This is the most relevant directory for the majority of PEAT users
+#
+# Device file output can be disabled entirely by setting this to an empty string
+# or null. This can be useful for low-footprint use cases.
+device_dir: !JOIN [*RUNDIR, "devices/"]
+
+# High-level API file output (scan API, parse API, etc.)
+summaries_dir: !JOIN [*RUNDIR, "summaries/"]
+
+# Directory where raw documents pushed to Elasticsearch are saved in JSON format.
+# These can be used to rebuild the Elasticsearch indices if needed
+# To disable this functionality, set this field to 'null' or empty string.
+elastic_dir: !JOIN [*RUNDIR, "elastic_data/"]
+
+# Directory for PEAT's run metadata (PEAT's configs and internal state)
+meta_dir: !JOIN [*RUNDIR, "peat_metadata/"]
+
+# Directory for PEAT's log files, including:
+# - Human-readable PEAT log file
+# - Human-readable Elasticsearch log file
+# - JSON files for rebulding "vedar-logs" index in Elasticsearch
+# - Various other log files generated by specific modules, e.g. Telnet
+log_dir: !JOIN [*RUNDIR, "logs/"]
+
+# Working directory for file artifacts. May be cleaned up on exit.
+temp_dir: !JOIN [*RUNDIR, "temp/"]
+
+# Directory where Zeek logs will be saved
+# Also contains Zeek artifacts
+zeek_logdir: !JOIN [*RUNDIR, "zeek_logs/"]
+
+
+# -----------------------------------------------------------------------------
+
+# --- Options for configuring Elasticsearch or OpenSearch ---
+# PEAT is compatible with Elasticsearch 7.x and 8.x, and OpenSearch 2.6+,
+# and can be used with Malcolm's OpenSearch instance via '/mapi/opensearch'.
+# At runtime, PEAT will determine if the server is running OpenSearch, and
+# automatically use the appropriate API. All "elastic_*" options apply to
+# OpenSearch as well.
+
+# URL of the Elasticsearch or OpenSearch server.
+# Elasticsearch exporting is disabled if this value is null or empty.
+# Elasticsearch example: "http://localhost:9200/"
+# Malcolm example: "https://user:pass@localhost/mapi/opensearch"
+elastic_server: null
+
+# Control what PEAT metadata is automatically saved to Elasticsearch.
+# The relevant indices are configurable via ELASTIC_*_INDEX,
+# e.g. ELASTIC_CONFIG_INDEX for PEAT configs.
+elastic_save_logs: true  # If PEAT logs should be sent to Elasticsearch
+elastic_save_config: true  # PEAT's configuration
+elastic_save_state: true  # PEAT's state
+
+# If large binary blobs should be stored in Elasticsearch (e.g. firmware images)
+elastic_save_blobs: false
+
+# Timeout to connect to the Elasticsearch server
+elastic_timeout: 10.0
+
+# Append the current date to Elasticsearch index names.
+# Example: when enabled, a push to "ot-device-hosts-timeseries" on April 29 2022
+# will actually push to an index named "ot-device-hosts-timeseries-2022.04.29".
+# When disabled, the push will go to "ot-device-hosts-timeseries", without the date.
+elastic_disable_dated_indices: false
+
+# Additional tag strings to add to each document pushed to Elasticsearch
+elastic_additional_tags: []
+
+# -- Elasticsearch index base names --
+# NOTE: a date will be automatically appended to the name if
+# ELASTIC_DISABLE_DATED_INDICES is false (the default).
+
+# Base name of Elasticsearch index to use PEAT logging events.
+elastic_log_index: "vedar-logs"
+
+# Base name of Elasticsearch index to use for scan result summaries,
+# e.g. what normally gets written in peat_results/scan_results/.
+elastic_scan_index: "scan-summaries"
+
+# Base name of Elasticsearch index to use for pull result summaries,
+# e.g. what normally gets written in peat_results/pull_results/
+elastic_pull_index: "peat-pull-summaries"
+
+# Base name of Elasticsearch index to use for parse result summaries,
+# e.g. what normally gets written in peat_results/parse_results/
+elastic_parse_index: "peat-parse-summaries"
+
+# Base name of Elasticsearch index to use for PEAT configuration dumps
+# from runs of PEAT, e.g. what normally gets written in
+# peat_results/metadata/configs/
+elastic_config_index: "peat-configs"
+
+# Base name of Elasticsearch index to use for PEAT state dumps
+# from runs of PEAT, e.g. what normally gets written in
+# peat_results/metadata/state/
+elastic_state_index: "peat-state"
+
+# Information collected by PEAT from field devices or parsed files.
+# A new Elasticsearch document is created for every pull of data
+# from a device (the data is 'timeseries', with differences visible
+# between pulls over time).
+elastic_hosts_index: "ot-device-hosts-timeseries"
+
+# Information about files present on the device, or that were present
+# on the device at one point in time.
+elastic_files_index: "ot-device-files"
+
+# Information about individual communication 'registers'
+# (e.g. Modbus registers/coils, DNP3 data points, BACNet objects, etc.)
+# that are configured on devices, as extracted from device
+# configuration information.
+elastic_registers_index: "ot-device-registers"
+
+# Information about tag variables that are configured on devices,
+# as extracted from device configuration information.
+elastic_tags_index: "ot-device-tags"
+
+# Information about I/O (Input/Output) available and/or configured
+# on a device, as extracted from device configuration information.
+elastic_io_index: "ot-device-io"
+
+# Logging and other event history as extracted from devices.
+# Examples include access logs, system logs, or protection history.
+elastic_events_index: "ot-device-events"
+
+# Memory reads from devices, including address in memory,
+# the value read, and information about where it came
+# from and when the read occurred.
+elastic_memory_index: "ot-device-memory"
+
+# Specific UEFI file index that includes the CRC32 of files
+# from a UEFI System and paths of files from an SPI dump
+elastic_uefi_files_index: "uefi-files"
+
+# Specific UEFI Hash index that includes the hash of files
+# from a UEFI System and files.
+elastic_uefi_hashes_index: "uefi-hashes"
+
+# -----------------------------------------------------------------------------
+
+# --- HEAT (High-fidelity Extraction of Artifacts from Traffic) ---
+# Refer to the HEAT section in the VEDAR documentation for details.
+
+# Elasticsearch server to pull HEAT data from
+heat_elastic_server: null
+
+# Names and/or patterns of Elasticsearch indices with Packetbeat data
+heat_index_names: "packetbeat-*"
+
+# Date range to filter HEAT extraction to
+heat_date_range: null
+
+# IP addresses to exclude from packetbeat search (source and/or destination IP)
+heat_exclude_ips: []
+
+# IP address to limit packetbeat search to (source or destination IP)
+heat_only_ips: []
+
+# Extract the file(s) but don't parse them using PEAT
+heat_file_only: false
+
+# Directory where HEAT artifacts should be saved
+heat_artifacts_dir: !JOIN [*RUNDIR, "heat_artifacts/"]
+
+# List of HEAT protocol extractors to run.
+# Defaults to all available protocols if empty or unspecified.
+#
+# Available HEAT protocol extractors:
+# - UmasExtractor : UMAS protocol for Schneider Modicon PLCs
+# - TelnetExtractor : Telnet protocol for SEL relays
+# - FTPExtractor : FTP protocol for SEL relays
+heat_protocols: []
+
+# Specify folder that contains PCAPS for processing by HEAT.
+pcaps: null
+
+# Don't have PEAT run Zeek on a PCAP, instead run it
+# on a PCAP file, then process the output of the PCAP.
+# NOTE: zeek_dir must be specified if no_run_zeek is true.
+no_run_zeek: false
+
+# Directory with existing Zeek output to use as input
+# This is an alternative to PEAT running Zeek on the PCAPs itself
+# NOTE: This argument is required if no_run_zeek is true.
+zeek_dir: null
+
+# -----------------------------------------------------------------------------
+
+# --- Configuration for "peat pillage" ---
+# Refer to the Pillage section in the VEDAR documentation for details.
+# Filenames and extensions are matched case-insensitively.
+# For example, "set_all.txt" will also match "SET_ALL.TXT".
+
+pillage:
+  auto_copy: true
+  recursive: true
+  default:
+    locations: []
+    filenames: []
+    extensions: []
+  brands:
+    Siemens:
+      locations: []
+      filenames: []
+      extensions:
+        - mc7
+    SEL:
+      locations: []
+      filenames:
+        - set_all.txt
+        - cfg.txt
+        - ser.txt
+        - history.txt
+        - cser.txt
+        - chistory.txt
+      extensions:
+        - rdb
+        - cid
+    Modicon:
+      extensions:
+        - apx
+    # Rockwell Studio5000
+    L5X:
+      extensions:
+        - l5x
+    ION:
+      filenames:
+        - DEVINFO.DAT
+        - SITEINFO.DAT
+        - 61850_log.txt
+      extensions:
+        - upg
+    Woodward:
+      extensions:
+        - wset
+        - tc
+
+# -----------------------------------------------------------------------------
+
+# --- Protocol and module configuration options that apply to all hosts ---
+# Note: these options will be overridden by values configured in the "hosts" section.
+
+device_options:
+  # Serial baud rates to use when scanning/pulling a serial device (e.g. RS-232)
+  # Example: [9600, 57600]
+  baudrates: []
+
+  # Default timeout for all protocols
+  timeout: 5.0
+
+  # Configuration specific to the Fortinet FortiGate firewalls
+  fortigate:
+    # Select what protocols PEAT is allowed to use
+    # for pulling data from FortiGate devices.
+    pull_methods:
+      - ssh
+      - https
+
+    # How long to wait before timing out when pulling log files.
+    # This may need to be increased for very large log files.
+    log_pull_timeout: 30.0
+
+  # Enable SCEPTRE/OpenPLC compatibility changes to Structured Text logic output
+  sceptre_plc_compatible_st_logic: false
+
+  # Configuration specific to the SCEPTRE module
+  sceptre:
+    # Enable local development of SCEPTRE module using Twisted
+    # (refer to SCEPTRE module docstring for details)
+    ftp_testing: false
+
+    # Name of bennu firmware file.
+    # This will be auto-determined if a scan is performed.
+    bennu_filename: "bennu-field-deviced.firmware"
+
+  # Configuration specific to the SEL modules (SELRelay and SELRTAC)
+  sel:
+    # Select what protocols PEAT is allowed to use
+    # for pulling data from SEL relays.
+    pull_methods:
+      - http
+      - ftp
+      - telnet
+
+    # Run a variety of SEL terminal commands that PEAT knows.
+    # This can provide information that are not in config files, or
+    # provide an alternate source of data to config files when they
+    # aren't able to be retrieved for whatever reason.
+    # This is disabled by default as it is relatively untested and
+    # can potentially be very slow.
+    attempt_more_commands: false
+
+    # Enable PEAT to attempt to download files via Telnet, if able to,
+    # and if the files haven't already been downloaded via FTP.
+    allow_telnet_file_download: true
+
+    # Force files to be downloaded via Telnet,
+    # even downloading via FTP is successful.
+    force_telnet_file_download: false
+
+    # Force serial to be used for the pull, instead
+    # of auto-determining if it should be used.
+    force_serial_pull: false
+
+    # Use YMODEM rz/sz (from lrzsz package) to perform file transfers
+    # instead of using the ASCII interface.
+    #
+    # NOTE: this ONLY works on Linux, and requires "lrzsz" package
+    # to be installed ("sudo apt install lrzsz").
+    force_ymodem: false
+
+    # Restrict the files/directories downloaded to only those in these lists
+    # Note: files in "only_*" lists will OVERRIDE any values
+    #   specified in the "never_*" lists
+    only_download_files: []  # Example: ["SET_6.TXT"]
+    only_download_dirs: []  # Example: ["SETTINGS", "EVENTS"]
+
+    # Never download the files/directories in these lists
+    never_download_files: []  # Example: ["CFG.XML", "SWCFG.ZIP"]
+    never_download_dirs: []  # Example: ["EVENTS", "HMI"]
+
+    # If the relay should be restarted (rebooted) after pushing updated configs ("peat push").
+    restart_after_push: false
+
+    # Alternate method of FTP pulls that may work on older devices.
+    # Only enable this if debugging issues with FTP downloads.
+    old_ftp: false
+
+    # If exceptions during file downloads should be caught and logged.
+    # Set this to false if debugging issues with downloads.
+    handle_download_errors: true
+
+    # Credentials for standard SEL accounts, e.g. "acc" and "2ac".
+    # This applies to Telnet, Serial, and HTTP communication methods,
+    # and also applies to FTP in many cases (but not all).
+    #
+    # NOTE: these are available in SEL's documentation for each relay model,
+    # For further information about featured available at each level,
+    # consult the SEL documentation for the relay model of interest.
+    creds:
+      # Access level 1 ("acc"). Provides access to status and listing commands,
+      # including "fil show" and "fil dir" commands for reading
+      # files and directories.
+      acc: "OTTER"
+      # Access level 2 ("2ac"). Provides access to more commands,
+      # including the ability to reboot the relay.
+      2ac: "TAIL"
+      # bac: "BREAKER" access level (present on 351S and others)
+      #
+      # "bac" isn't currently used by PEAT, but is left here
+      # for future compatibility and documentation/reference.
+      bac: "EDITH"
+      # cal: "CALIBRATION" access level. This provides access to advanced
+      # commands intended for use by SEL employees, such as the ability
+      # to read and write arbitrary memory and many other functions.
+      #
+      # PEAT uses cal when performing memory reads.
+      #
+      # SEL-451 "cal" default: "Sel-1"
+      cal: "CLARKE"
+
+    # SELRTAC: If the pull should collect data via HTTP
+    pull_http: true
+
+    # SELRTAC: If the pull should collect data via Postgres
+    pull_postgres: true
+
+    # SELRTAC: enable "monitoring"
+    # This regularly pulls device data and compares the pulls over time
+    # NOTE: this feature was a initial proof of concept and may not work anymore
+    rtac_monitor_enable: false
+
+    # Number of pulls to do before finishing monitoring
+    rtac_monitor_count: 3
+
+    # How long to wait between each pull during monitoring, in seconds
+    rtac_monitor_pause_for: 4.0
+
+  # Configuration specific to the M340 module
+  m340:
+    # Pull only the project file from a M340 via Modbus,
+    # don't use network services to pull additional information (SNMP, FTP, etc.)
+    use_network_for_config: true
+
+    # Generate a OpenPLC project with generated TC6 XML from the results of
+    # parsing the project from the M340. If a directory path is provided
+    # (e.g. "~/project_dir/"), then the project files will be created in
+    # that directory. If the string "dev_out_dir" is specified, then the
+    # files will be created in a project-named directory in the device's
+    # output directory.
+    generate_openplc_project: null
+
+  # Configuration specific to the GE modules (GERTU and GERelay)
+  ge:
+    # GERTU: How long to sleep between selecting menu options over
+    # Telnet on the GE D25 RTU.
+    menu_sleep_seconds: 5.0
+
+  # Configuration specific to the ControlLogix module
+  rockwell:
+    # What protocols to use for pulling from Rockwell devices
+    # Available methods: cip, ftp, http, snmp
+    pull_methods:
+      - cip
+      - ftp
+      - http
+      - snmp
+    # NOTE: the "ftp" option (below) should be used to specify custom
+    # login credentials for FTP server on the ControlLogix.
+    #
+    # NOTE: the "web" option (below) should be used to configure custom
+    # login credentials used for the HTTP server on the ControlLogix.
+
+  # ion:
+  #   # Select what protocols PEAT is allowed to use
+  #   # for pulling data from ION meters.
+  #   pull_methods:
+  #     - ssh
+  #     - ion_protocol
+  #     - telnet
+  #     - http
+
+  # Configuration specific to the Sage module
+  sage:
+    # Available methods: telnet, ftp, ssl, ssh
+    pull_methods:
+      - telnet
+      - ftp
+      - ssl
+      - ssh
+      - sftp
+      - http
+      - https
+    # Filesystems on the device that will be enumerated via FTP
+    ftp_filesystems:
+      - /ata0a
+      - /ramDrv
+    ssh_filepaths:
+      - /ata0a/scripts/vxworks_start.scp
+      - /ata0a/scripts/startup.scp
+
+  # Configuration for iDirect devices
+  #
+  # "idirect" is used by the following modules: Idirect
+  idirect:
+    # Available methods: ssh, ssl
+    pull_methods:
+      - ssh
+      - ssl
+
+  # Configuration for Woodward modules
+  #
+  # "woodward" is used by the following modules: MicroNet, Easygen3500XT, WDW2301E
+  woodward:
+    # Available methods: servlink_tcp, ftp
+    pull_methods:
+      - servlink_tcp
+      - ftp
+
+  # Combination of HTTP and HTTPS configurations into a single option
+  #
+  # "web" is used by the following modules: ControlLogix, SELRelay, SELRTAC
+  web:
+    user: ""
+    pass: ""
+    timeout: 30.0  # Used by Sage
+    users: []  # Used by SELRTAC
+    passwords: []  # Used by SELRTAC
+
+  # File Transfer Protocol (FTP)
+  #
+  # "ftp" is used by the following modules:
+  #   Sage, SCEPTRE, SELRelay, M340, Micronet, Easygen3500XT
+  ftp:
+    port: 21
+    timeout: 5.0
+    user: ""
+    pass: ""
+    creds: []
+    pull_delay: 0.5  # Used by SELRelay
+
+  # Telnet protocol
+  #
+  # "telnet" is used by the following modules: GERTU, ION, SELRelay, Sage
+  telnet:
+    port: 23
+    timeout: 5.0
+    # NOTE: for SELRelay, configure "creds" under "sel" instead
+    user: ""
+    pass: ""
+    # ION specific option for advanced security mode
+    meter_pass: "0"
+    # ION specific options for network latency adjustments
+    pull_delay: 0
+
+  # SSH protocol
+  #
+  # "ssh" is used by the following modules: Sage
+  ssh:
+    port: 22
+    timeout: 5.0          # Timeout (seconds) before timing out
+    user: ""              # Login username
+    pass: ""              # Login password
+    passphrase: ""        # Pem key_file passphrase
+    key_filename: ""      # Location of pem key (must be openssh)
+    look_for_keys: false  # Don't look for ssh keys
+
+  # Hyper-Text Transfer Protocol (HTTP)
+  #
+  # "http" is used by the following modules:
+  #   ControlLogix, GERelay, ION, Totus, M340, Sage, SELRelay, SELRTAC, Siprotec
+  #
+  # NOTE: ControlLogix only uses "http" for port/timeout, use
+  # "web" to configure credentials (user/pass).
+  http:
+    port: 80
+    timeout: 5.0
+    user: ""
+    pass: ""
+
+  # HTTPS (encrypted HTTP)
+  #
+  # "https" is used by the following modules: Sage, SELRelay, SELRTAC, Siprotec
+  https:
+    port: 443
+    timeout: 5.0
+
+  # Simple Network Management Protocol (SNMP)
+  #
+  # "snmp" is used by the following modules: ControlLogix, M340, Siprotec
+  snmp:
+    port: 161
+    timeout: 5.0
+    community: public
+    communities:
+      - public
+      - private
+
+  # Serial connection options (RS-232, etc.)
+  #
+  # NOTE: PEAT uses "8N1" for all serial connections.
+  # This is not configurable currently.
+  serial:
+    baudrate: 0
+    timeout: 5.0
+
+  # Modbus/TCP protocol
+  #
+  # "modbus_tcp" is used by the following modules: M340
+  modbus_tcp:
+    port: 502
+    timeout: 5.0
+
+  # ServLink/TCP protocol
+  #
+  # "servlink_tcp" is used by the following modules: Easygen3500XT
+  servlink_tcp:
+    port: 666
+    timeout: 5.0
+
+  # ServLink protocol (for serial links)
+  #
+  # "servlink_serial" is used by the following modules: Easygen3500XT, WDW2301E
+  servlink_serial:
+    timeout: 5.0
+
+  # PostgreSQL protocol (used for communicating with PostgreSQL databases)
+  #
+  # "postgres" is used by the following modules: SELRTAC
+  postgres:
+    port: 5432
+    timeout: 5.0
+    user: ""
+    pass: ""
+    users: []  # Used by SELRTAC
+    passwords: []  # Used by SELRTAC
+
+  # Common Industrial Protocol (CIP)
+  #
+  # "cip" is used by the following modules: ControlLogix
+  cip:
+    port: 44818
+    timeout: 5.0
+
+  # Siemens SIPROTEC DIGSI protocol
+  #
+  # "digsi" is used by the following modules: Siprotec
+  digsi:
+    port: 50000
+    timeout: 5.0
+
+  ion_protocol:
+    port: 7700
+    timeout: 5.0
+    pull_ion_log: true
+    pull_ion_config: true
+    authenticated: false
+    advanced_security: false
+    user: "0"
+    pass: "0"
+
+# -----------------------------------------------------------------------------
+
+# --- Specify or override options for specific hosts ---
+# For example, if login credentials are known for specific hosts,
+# then those can be specified here.
+# Note: these will override values specified in the "device_options" section above.
+#
+# If you have a network inventory, such as a spreadsheet or network diagram,
+# this section ("hosts") is where you would enter the information from that
+# inventory.
+
+hosts:
+  # The Label can be used to reference the host in commands, e.g. "peat scan -i example-host"
+  # Labels are case-insensitive, e.g. "example-host" and "Example-Host" are considored the same
+  # IMPORTANT: Labels MUST be unique, and must not match any other device.
+  - label: "example-host"
+    comment: "User-specified text that may be included in results or other output (e.g. log messages)"
+
+    # Identifying information for the host.
+    # NOTE: At least ONE identifier value must be set.
+    identifiers:
+      ip: "192.168.0.1"
+      mac: "00:00:00:00:00:00"
+      serial_port: "COM0"
+      name: "some-device-name"
+      hostname: "a-hostname"
+
+    # This option forces a specific PEAT module to be used for this host.
+    # No other modules will be attempted or otherwise used for this host.
+    # For example, if "ION" is specified, then only the ION module will
+    # be used for fingerprinting and pulling from this host.
+    peat_module: "AwesomeModule"
+
+    # Options for this specific device.
+    # These options will override any values specified in the
+    # "device_options" section above for this host only. They
+    # will also override any default values.
+    options: {...}
+# -----------------------------------------------------------------------------

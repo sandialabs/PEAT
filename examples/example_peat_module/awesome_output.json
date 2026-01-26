@@ -1,0 +1,14 @@
+{
+    "hostIp": "192.168.0.20",
+    "hostName": "SomeDevice",
+    "osName": "Ubuntu 19.10",
+    "networkInterfaces": [
+        {
+            "ipAddress": "192.168.0.20",
+            "subnetMask": "255.255.255.0",
+            "ipGateway": "192.168.0.1",
+            "telnetEnabled": "yes",
+            "telnetPort": 21
+        }
+    ]
+}
