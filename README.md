@@ -1,5 +1,8 @@
 # Process Extraction and Analysis Tool (PEAT)
 
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11835/badge)](https://www.bestpractices.dev/projects/11835)
+[![pdm-managed](https://img.shields.io/endpoint?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fpdm-project%2F.github%2Fbadge.json)](https://pdm-project.org)
+
 PEAT is a Operational Technology (OT) device interrogator, including pulling, parsing and uploading artifacts (configuration, firmware, process logic, etc.) and network discovery ("scanning"). It runs on most systems, including Linux, Windows, and as a Docker container.
 
 Documentation about installation, usage, development, and other information is in the PEAT documentation.
@@ -7,6 +10,7 @@ Documentation about installation, usage, development, and other information is i
 ## Basic install
 
 Notes
+
 - These steps make a lot of assumptions, and are meant if you find/clone/whatever the repo without context or SRN access. Refer to the documentation for complete information about installation and setup.
 - If you're on Windows, make sure you're using PowerShell.
 - Edits to the code (`.py` files) don't necessitate a reinstall. You only need to install on first setup, or if the dependencies change (these are defined in `pyproject.toml`).
@@ -14,16 +18,19 @@ Notes
 - Tests are run using `pytest`
 
 ### Install PDM
+
 Full instructions: https://pdm-project.org/en/stable/
 
 #### Linux
 
 Installer method:
+
 ```bash
 curl -sSL https://pdm-project.org/install-pdm.py | python3 -
 ```
 
 [pipx](https://pipx.pypa.io/stable/) method:
+
 ```bash
 pipx install pdm
 ```
@@ -31,11 +38,13 @@ pipx install pdm
 #### Windows
 
 Installer method:
+
 ```powershell
 [System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri https://pdm-project.org/install-pdm.py).Content) | python -
 ```
 
 [Scoop](https://scoop.sh/) method:
+
 ```shell
 scoop bucket add frostming https://github.com/frostming/scoop-frostming.git
 scoop install pdm
@@ -44,16 +53,19 @@ scoop install pdm
 #### Mac
 
 Installer method:
+
 ```bash
 curl -sSL https://pdm-project.org/install-pdm.py | python3 -
 ```
 
 Homebrew method:
+
 ```bash
 brew install pdm
 ```
 
 ### Setup development environment
+
 ```bash
 # Ensure PDM is installed
 # Clone repo, if it hasn't been already
@@ -83,6 +95,7 @@ pdm run -l
 ```
 
 ### Basic development commands
+
 ```shell
 # List available scripts
 pdm run -l
