@@ -68,17 +68,32 @@ excludes = [
 # Handle package metadata for importlib.metadata
 data_files += copy_metadata('PEAT', recursive=True)
 
+# search path
+pathex = ['../peat/', '../']
+if IS_WINDOWS:
+    pathex.append('C:/Program Files (x86)/Windows Kits/10/Redist/10.0.22000.0/ucrt/DLLs/x64')
+
 a = Analysis(['./sneakypeat.py'],
-             pathex=['../peat/', '../', 'C:/Program Files (x86)/Windows Kits/10/Redist/10.0.22000.0/ucrt/DLLs/x64'],
+             pathex=pathex,
              binaries=[],
              datas=data_files,
              hiddenimports=hidden_imports,
-             hookspath=[],  # ['./', './distribution']
+             hookspath=[],
              runtime_hooks=[],
              excludes=excludes,
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              noarchive=False)
+
+# Remove extraneous files from the executable
+# LICENSE files: every package has one, they add up
+# TODO: use glob here?
+exclude_files = ['/LICENSE']
+new_datas = []
+for d in a.datas:
+    if not any(e in d[0] for e in exclude_files):
+        new_datas.append(d)
+a.datas = TOC(new_datas)
 
 
 pyz = PYZ(a.pure, a.zipped_data)
@@ -91,7 +106,7 @@ exe = EXE(pyz,
           a.datas,
           [],
           name='sneakypeat',
-          debug=False,
+          debug=False,  # debug="imports",
           bootloader_ignore_signals=False,
           strip=False if IS_WINDOWS else True,  # NOTE: strip breaks on Windows
           upx=False,
