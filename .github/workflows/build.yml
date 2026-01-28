@@ -1,0 +1,143 @@
+name: Build
+
+on:
+  release:
+  push:
+  pull_request:
+  # Allow manual run from Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python-build:
+    name: Build Python package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.11"
+          cache: true
+      - name: Install dependencies
+        run: pdm sync
+      - name: Build Python package
+        run: |
+          pdm build --dest ./peat_python_package
+          ls -lAhS peat_python_package
+          ls peat_python_package | grep py3-none-any.whl
+          ls peat_python_package | grep .tar.gz
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: python-package
+          path: peat_python_package/
+          if-no-files-found: error
+
+  linux-build:
+    name: Build Linux Executables
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Install apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: python3-dev patchelf binutils scons libpq-dev libpq5
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.11"
+          cache: true
+      # Pip is needed to manually reinstall psycopg2
+      - name: Install dependencies
+        run: |
+          pdm sync -G exe
+          pdm run python -m ensurepip
+      # TODO: include manpage here?
+      - name: Build executable
+        run: |
+          pdm run build-linux-exe
+          ls -lAht dist/
+          mkdir -p peat_linux
+          mv dist/peat peat_linux/
+          cp distribution/linux-install-script.sh peat_linux
+          cp examples/peat-config.yaml peat_linux/
+          cp examples/peat-config-simple.yaml peat_linux/
+          ls -lAht peat_linux/
+      - name: List executable contents
+        run: pdm run inspect-exe
+      - name: Check executable
+        run: |
+          peat_linux/peat --help
+          peat_linux/peat --version
+          peat_linux/peat parse --list-modules
+          peat_linux/peat parse -vVV -d AwesomeTool -I examples/example_peat_module/ -- examples/example_peat_module/awesome_output.json
+      - name: Build Sneakypeat executable
+        run: |
+          pdm run build-linux-sneakypeat
+          ls -lAht dist/
+          mkdir -p sneakypeat_linux
+          mv dist/sneakypeat sneakypeat_linux/
+      - name: List Sneakypeat executable contents
+        run: pdm run inspect-exe
+      - name: Check Sneakypeat executable
+        run: |
+          sneakypeat_linux/sneakypeat --help
+          sneakypeat_linux/sneakypeat --scan localhost
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: linux-exes
+          path: |
+            peat_linux/
+            sneakypeat_linux/
+          if-no-files-found: error
+
+  windows-build:
+    name: Build Windows Executables
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.11"
+          cache: true
+      - name: Install dependencies
+        run: pdm sync -G exe
+      - name: Build executable
+        shell: powershell
+        run: |
+          $CURRENT_PEAT_VERSION = git describe --tags --abbrev=0
+          if ([string]::IsNullOrWhiteSpace($CURRENT_PEAT_VERSION)) {
+            $CURRENT_PEAT_VERSION = "0.0.0"
+          }
+          Write-Host "CURRENT_PEAT_VERSION=$CURRENT_PEAT_VERSION"
+          pdm run python .\distribution\update_file_version_info.py $CURRENT_PEAT_VERSION
+          pdm run build-exe --dist ./peat_windows
+      - name: Check executable
+        run: |
+          ./peat_windows/peat.exe --version
+          ./peat_windows/peat.exe --help
+          ./peat_windows/peat.exe parse --list-modules
+          ./peat_windows/peat.exe parse -vVV -d AwesomeTool -I examples/example_peat_module/ -- examples/example_peat_module/awesome_output.json
+      - name: Build Sneakypeat executable
+        run: |
+          pdm run build-sneakypeat --dist ./sneakypeat_windows
+      - name: Check Sneakypeat executable
+        run: |
+          ./sneakypeat_windows/sneakypeat.exe --help
+          ./sneakypeat_windows/sneakypeat.exe --scan localhost
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: windows-exe
+          path: |
+            peat_windows/
+            sneakypeat_windows/
+          if-no-files-found: error
