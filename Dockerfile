@@ -70,6 +70,7 @@ RUN set -ex \
   && pip install --no-cache-dir --upgrade pdm
 
 WORKDIR /PEAT
+COPY ./COPYRIGHT.md ./
 COPY ./LICENSE ./
 COPY ./NOTICE ./
 COPY ./AUTHORS ./
@@ -96,9 +97,12 @@ FROM ${REGISTRY_IMAGE}:${PYTHON_VERSION}-slim-bookworm AS release
 # The args are used for setting the image metadata below
 ARG REGISTRY_IMAGE=python
 ARG PYTHON_VERSION=3.11.11
-LABEL org.opencontainers.image.authors="PEAT Development Team" \
+LABEL \
+  org.opencontainers.image.authors="PEAT Development Team" \
   org.opencontainers.image.vendor="Sandia National Laboratories" \
-  org.opencontainers.image.source="https://ghcr.io/sandialabs/peat:latest" \
+  org.opencontainers.image.licenses="GPL-3.0-only" \
+  org.opencontainers.image.url="https://github.com/sandialabs/peat" \
+  org.opencontainers.image.source="https://github.com/sandialabs/peat" \
   org.opencontainers.image.documentation="https://sandialabs.github.io/peat/" \
   org.opencontainers.image.title="PEAT" \
   org.opencontainers.image.description="The Process Extraction and Analysis Tool (PEAT) Command Line Interface (CLI) packaged as a Docker image" \
