@@ -20,7 +20,7 @@ jobs:
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: true
       - name: Install dependencies
         run: pdm sync
@@ -39,19 +39,25 @@ jobs:
 
   linux-build:
     name: Build Linux Executables
-    runs-on: ubuntu-latest
+    # NOTE: ubuntu-24 needed for python3.12
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+      # - name: Install apt dependencies
+      #   uses: awalsh128/cache-apt-pkgs-action@v1
+      #   with:
+      #     packages: python3-dev patchelf binutils scons libpq-dev libpq5
       - name: Install apt dependencies
-        uses: awalsh128/cache-apt-pkgs-action@v1
-        with:
-          packages: python3-dev patchelf binutils scons libpq-dev libpq5
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-dev patchelf binutils scons libpq-dev libpq5
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
-          python-version: "3.11"
-          cache: true
+          # use runner's python
+          # python-version: "3.12"
+          cache: false
       # Pip is needed to manually reinstall psycopg2
       - name: Install dependencies
         run: |
@@ -106,7 +112,7 @@ jobs:
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: true
       - name: Install dependencies
         run: pdm sync -G exe

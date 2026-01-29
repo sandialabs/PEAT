@@ -8,14 +8,14 @@ on:
 jobs:
   code-quality:
     name: Code Quality Checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
-          python-version: "3.11"
+          python-version: "3.12"
           cache: true
       - name: Install dependencies
         run: pdm sync -G lint
@@ -28,7 +28,7 @@ jobs:
   # TODO: test on osx?
   linux-unit-tests:
     name: Linux Unit Tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
@@ -49,7 +49,7 @@ jobs:
       - name: Upload Test Results
         uses: actions/upload-artifact@v6
         with:
-          name: linux-test-results
+          name: linux-test-results-${{ matrix.python-version }}
           path: |
             linux-test-results.xml
             htmlcov/
@@ -78,7 +78,7 @@ jobs:
       - name: Upload Test Results
         uses: actions/upload-artifact@v6
         with:
-          name: windows-test-results
+          name: windows-test-results-${{ matrix.python-version }}
           path: |
             windows-test-results.xml
             htmlcov/
