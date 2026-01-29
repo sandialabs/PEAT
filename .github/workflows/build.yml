@@ -28,8 +28,12 @@ jobs:
         run: |
           pdm build --dest ./peat_python_package
           ls -lAhS peat_python_package
+      - name: Ensure package files exist
+        run: |
           ls peat_python_package | grep py3-none-any.whl
           ls peat_python_package | grep .tar.gz
+      - name: List files in wheel
+        run: pdm run python -m zipfile --list ./peat_python_package/*.whl
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
@@ -48,18 +52,23 @@ jobs:
       #   uses: awalsh128/cache-apt-pkgs-action@v1
       #   with:
       #     packages: python3-dev patchelf binutils scons libpq-dev libpq5
-      - name: Install apt dependencies
+      - name: Install tool dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y python3-dev patchelf binutils scons libpq-dev libpq5
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@v4
-        with:
-          # use runner's python
-          # python-version: "3.12"
-          cache: false
+          sudo apt-get install -y python3-dev python3-pip patchelf binutils scons libpq-dev libpq5
+          python3 --version
+          python3 -m pip --version
+          pip install -U pdm
+          pdm config check_update false
+          pdm --version
+      # - name: Setup PDM
+      #   uses: pdm-project/setup-pdm@v4
+      #   with:
+      #     # use ubuntu 24 runner's python
+      #     python-version: "3.12"
+      #     cache: false
       # Pip is needed to manually reinstall psycopg2
-      - name: Install dependencies
+      - name: Install Python packages (venv)
         run: |
           pdm sync -G exe
           pdm run python -m ensurepip
@@ -137,8 +146,9 @@ jobs:
           pdm run build-sneakypeat --dist ./sneakypeat_windows
       - name: Check Sneakypeat executable
         run: |
+          ./sneakypeat_windows/sneakypeat.exe --version
           ./sneakypeat_windows/sneakypeat.exe --help
-          ./sneakypeat_windows/sneakypeat.exe --scan localhost
+          ./sneakypeat_windows/sneakypeat.exe --scan -v localhost
       - name: Upload artifacts
         uses: actions/upload-artifact@v6
         with:
