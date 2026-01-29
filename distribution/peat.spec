@@ -133,7 +133,3 @@ exe = EXE(pyz,
 #                upx=False,
 #                upx_exclude=[],
 #                name='peat')
-
-
-# OSX app
-app = BUNDLE(exe, name='peat.app', icon=icon_path, bundle_identifier=None)
