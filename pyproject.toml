@@ -29,7 +29,10 @@ dynamic = ["version"]
 description = "Process Extraction and Analysis Tool (PEAT)"
 readme = "README.md"
 requires-python = ">=3.9,<3.14"
-license = {file = "LICENSE"}
+license-files = [
+    "LICENSE",
+    "COPYRIGHT.md",
+]
 authors = [
     {name = "PEAT Developers", email = "peat@sandia.gov"},
 ]
