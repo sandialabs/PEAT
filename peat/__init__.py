@@ -11,9 +11,21 @@ log.remove()
 
 # Add custom logging levels
 # NOTE: loguru's built-in "TRACE" level is level 5
-TRACE2 = log.level(name="TRACE2", no=4, color="<white>")
-TRACE3 = log.level(name="TRACE3", no=3, color="<white>")
-TRACE4 = log.level(name="TRACE4", no=2, color="<white>")
+# NOTE: guard to prevent re-initialization of loggers
+if not hasattr(log.__class__, "trace2"):
+    TRACE2 = log.level(name="TRACE2", no=4, color="<white>")
+    TRACE3 = log.level(name="TRACE3", no=3, color="<white>")
+    TRACE4 = log.level(name="TRACE4", no=2, color="<white>")
+
+    # Add helper functions for custom logging levels
+    # Per: https://loguru.readthedocs.io/en/stable/resources/recipes.html
+    log.__class__.trace2 = partialmethod(log.__class__.log, TRACE2.name)
+    log.__class__.trace3 = partialmethod(log.__class__.log, TRACE3.name)
+    log.__class__.trace4 = partialmethod(log.__class__.log, TRACE4.name)
+else:
+    TRACE2 = log.level(name="TRACE2")
+    TRACE3 = log.level(name="TRACE3")
+    TRACE4 = log.level(name="TRACE4")
 
 DEBUG_LEVELS = {
     0: "DEBUG",
@@ -23,11 +35,6 @@ DEBUG_LEVELS = {
     4: "TRACE4",
 }
 
-# Add helper functions for custom logging levels
-# Per: https://loguru.readthedocs.io/en/stable/resources/recipes.html
-log.__class__.trace2 = partialmethod(log.__class__.log, TRACE2.name)
-log.__class__.trace3 = partialmethod(log.__class__.log, TRACE3.name)
-log.__class__.trace4 = partialmethod(log.__class__.log, TRACE4.name)
 
 # Capture warnings that modules and Python use (e.g. deprecation warnings)
 # Replaces "logging.captureWarnings(True)""
