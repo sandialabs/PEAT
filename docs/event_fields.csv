@@ -1,0 +1,21 @@
+Field, "`Data Type <https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html>`__", Example(s), Description
+event.action, keyword, "threshold-exceeded, port-change, firmware-update", Action captured by the alert.
+event.category, keyword, host, "ECS category of the event\, out of the `allowed values defined by ECS <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html>`__. This is usually ``host`` for PEAT data. `Further reading in the ECS documentation <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html>`__"
+event.created, date, 2016-05-23T08:05:34.853Z, When the event occurred
+event.dataset, keyword, metering_reads, What log the event came from. Especially important on devices with multiple log types.
+event.geo.timezone, keyword, "America/Denver", "Timezone should be populated when the event’s timestamp does not include timezone information already (e.g. default Syslog timestamps). It’s optional otherwise. Acceptable timezone formats are: a canonical ID (e.g. Europe/Amsterdam), abbreviated (e.g. EST) or an HH:mm differential (e.g. -05:00)."
+event.hash.md5, keyword, 75926..., MD5 hash of raw event field (event.original) to be able to demonstrate log integrity
+event.hash.sha1, keyword, 50CD3..., SHA1 hash of raw event field (event.original) to be able to demonstrate log integrity
+event.hash.sha256, keyword, 5702F..., SHA 256 hash of raw event field (event.original) to be able to demonstrate log integrity
+event.hash.sha512, keyword, B19FC..., SHA 512 hash of raw event field (event.original) to be able to demonstrate log integrity
+event.ingested, date, 2016-05-23T08:05:34.853Z, "When the event was generated, e.g. when it was parsed or pulled from a device. This should almost always differ from ``event.created`` and the two should NOT be confused."
+event.kind, keyword, alert, "Gives high-level information about what type of information the event contains\, without being specific to the contents of the event. For example\, values of this field distinguish alert events from metric events. `Further reading in the ECS documentation. <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-kind.html>`__"
+event.message, text, "Some message", "Simplified message body\, for example a human-readable portion of the raw event. This should be set in addition to setting the original field."
+event.meta, nested, {...}, "Other event metadata (this field is not well defined yet)"
+event.module, keyword, m340, PEAT module that generated the event
+event.original, text, "...", Raw text to be used. This can be thought of as the long description of message. This can also include non-human readable information that would be used by another tool.
+event.outcome, keyword, "success", "Outcome of the event. Must be one of: success\, failure\, unknown. `Further reading in the ECS documentation. <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-outcome.html>`__"
+event.provider, keyword, "192.0.2.22", "Source of the event. This is almost always the Device ID\, usually a IP address."
+event.sequence, long, 42, "Sequence number of the event. The sequence number is a value published by some event sources, to make the exact ordering of events unambiguous, regardless of the timestamp precision."
+event.severity, long, 6, "Severity or log level of the event as stored on the device."
+event.type, keyword, change, "List of event category “sub-buckets” the alert falls under. For example, an alert regarding a device configuration change would have change as a value. Valid values: access, change, creation, deletion, end, error, info, installation, start. `Further reading in the ECS documentation. <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html>`__"

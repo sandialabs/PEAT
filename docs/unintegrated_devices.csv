@@ -1,0 +1,4 @@
+"Vendor", "Device", "Supported Functions", "Protocols", "Notes", "Estimated :term:`TRL`"
+ABB, "RTU 560 RTU", "Pull config, Pull firmware", "HTTP", "Standalone module. Not currently open-source.", "TRL 2"
+Allen-Bradley, "Micrologix 1100 PLC", "N/A", ":term:`CIP`", "Exists as an Independent script. Not currently open-source.", "TRL 2"
+Siemens, "S7 PLCs", "N/A", "SNAP7", "Exists as an Independent script. Not currently open-source.", "TRL 2"

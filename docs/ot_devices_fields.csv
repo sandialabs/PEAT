@@ -1,0 +1,259 @@
+Field, "`Data Type <https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html>`__", Example(s), Description
+
+host.architecture, keyword, mips, Architecture of the device CPU\, if known.
+host.hostname, keyword, relay-1.local, Hostname of the device (if resolved). In the case of a device with multiple communication modules\, this is the hostname of the module PEAT primarily uses to communicate (or first discovered).
+host.id, keyword, West-relay-1223423, Unique identifier for the device. Can be anything\, as long as it's consistent.
+host.ip, ip, 192.0.2.36, IP address of the device. In the case of a device with multiple communication modules\, this is the IP address of the module PEAT primarily uses to communicate (or first discovered).
+host.mac, keyword, 00:00:00:11:22:33, MAC address of the device. In the case of a device with multiple communication modules\, this is the MAC address of the module PEAT primarily uses to communicate (or first discovered).
+host.serial_port, keyword, COM8, "Serial port on the local system connected to the device. This could be a Windows COM port, e.g. COM4, or a Linux file path, e.g. /dev/ttyS0. This is also used for USB connections. To get the specific serial settings, lookup the interface with the matching port in interface." 
+host.name, keyword, relay-1, Name to refer to the device as\, e.g. as pulled from a config or resolved via DNS.
+host.part_number, keyword, "0700G12B1B1B7281A468", "Part number of the device, as defined by the vendor and stored on the device."
+host.type, keyword, "PLC, Power Meter", "The class of device, e.g. PLC, Relay, RTU, Controller (catch-all), etc."
+host.serial_number, keyword, 1877625, Unique serial number of the device.
+host.manufacturing_date, date, 2016-02-11:11:22:33, "When the device was manufactured (physically created)."
+host.run_mode, keyword, "PROG, RUN", "Run mode of the device. For example, on a PLC, there may be a key in the front of the device that sets PROG or RUN (program vs running). What this field means depends on the device, for instance a PLC's potential run modes will differ from a RTU's potential run modes."
+host.slot, keyword, 1, "Position of the device in a rack or larger device. This can be a relative position, e.g. '0' for the first module in a PLC, or a name or other identifier for the position (such as an internal bus address)."
+host.start_time, date, 2016-02-11:11:22:33, UTC timestamp of when the device last powered on.
+host.status, keyword, "some_status", "Status of the device. The meaning of this field is device-dependant."
+host.uptime, long, 112442424, Seconds the host has been up (powered on/online).
+host.module, host, {...}, Physical add-on modules in a device\, e.g. slots in a PLC or rack. These also include add-on components\, such as a wireless radio. These can include analog and digital I/O modules\, COMMs modules (Ethernet\, various serial protocols\, Wi-Fi\, LTE\, etc.)\, CPU modules\, and anything else really. The fields are the same as host.*\, and modules may be further nested (e.g. a module may itself have modules).
+"host.extra", flattened, {...}, Additional vendor/model-specific information that doesn't fit into any of the other fields. module is the tool pushing the data. In PEAT\, this would be the lowercase name of the device module\, e.g. m340.
+
+
+host.description.brand, keyword, ControlLogix\, PowerLogic ION, Brand of the device. Can be empty if not applicable e.g. most SEL devices.
+host.description.description, text, "this PLC is used for controlling Process A", "Free-form description of the device, such as a 'description' configuration value extracted from the device or other general information that is useful to note."
+host.description.full, keyword, "Schneider Electric PowerLogic ION 8650A", Combination of vendor\, brand\, model\, sub_model\, and any other identifiers. Used to perform lookups with fuzzy string matching.
+host.description.full.text, text, "Schneider Electric PowerLogic ION 8650A", Same content as full\, just indexed as text. This enables searching arbitrary words that are a part of the field\, e.g. 'Allen-Bradley' or 'S7-1200'. This is implemented as a Elasticsearch Multi-Field.
+host.description.model, keyword, 8650A, Model of the device.
+host.description.product, keyword, "PowerLogic ION 8650A", The product identifier for the device\, minus the vendor. This is includes the brand and model.
+host.description.product.text, text, SIPROTEC 4 7SJ64, product indexed as text in Elasticsearch instead of keyword.
+host.description.vendor.name, keyword, "Schweitzer Engineering Laboratory", The full expanded vendor name. Used for display in a visualization or dashboard.
+host.description.vendor.id, keyword, SEL, Abbreviated version of the vendor name that can be used for lookups.
+
+
+host.event.action, keyword, device-config-change, "What happened in the event."
+host.event.category, keyword, host, "ECS category of the event\, out of the `allowed values defined by ECS <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html>`__. This is usually ``host`` for PEAT data. `Further reading in the ECS documentation <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html>`__"
+host.event.created, date, 2016-02-11:11:22:33, When the event occurred.
+host.event.dataset, keyword, metering_reads, What log the event came from. Especially important on devices with multiple log types.
+host.event.extra, flattened, {...}, "Other event metadata (this field is not well defined yet)"
+host.event.geo.timezone, keyword, America/Denver, "Timezone should be populated when the event's timestamp does not include timezone information already (e.g. default Syslog timestamps). It's optional otherwise. Acceptable timezone formats are: a canonical ID (e.g. Europe/Amsterdam)\, abbreviated (e.g. EST) or an HH:mm differential (e.g. -05:00)."
+host.event.hash.md5, keyword, 75926..., MD5 hash of raw event field (event.original) to be able to demonstrate log integrity
+host.event.hash.sha1, keyword, 50CD3..., SHA1 hash of raw event field (event.original) to be able to demonstrate log integrity
+host.event.hash.sha256, keyword, 5702F..., SHA 256 hash of raw event field (event.original) to be able to demonstrate log integrity
+host.event.hash.sha512, keyword, B19FC..., SHA 512 hash of raw event field (event.original) to be able to demonstrate log integrity
+host.event.ingested, date, 2016-02-11:11:22:33, "When the event was generated by PEAT, e.g. when it was parsed or pulled from a device. This should almost always differ from 'created' and the two should NOT be confused."
+host.event.kind, keyword, "event", "Gives high-level information about what type of information the event contains\, without being specific to the contents of the event. For example\, values of this field distinguish alert events from metric events. `Further reading in the ECS documentation. <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-kind.html>`__"
+host.event.message, text, "Some message", "Simplified message body\, for example a human-readable portion of the raw event. This should be set in addition to setting the original field."
+host.event.module, keyword, "SELRelay", "Name of the module this data is coming from, e.g. the PEAT module."
+host.event.original, keyword, Power on, "Original raw text of the log entry."
+host.event.outcome, keyword, "success", "Outcome of the event. Must be one of: success\, failure\, unknown. `Further reading in the ECS documentation. <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-outcome.html>`__"
+host.event.reason, keyword, IPv4 address in device configuration differed from previous known value, "Reason why this event happened. This describes the why of a particular action or outcome captured in the event. Where event.action captures the action from the event\, event.reason describes why that action was taken. For example\, a web proxy with an event.action which denied the request may also populate event.reason with the reason why (e.g. blocked site)."
+host.event.provider, keyword, 192.0.2.36, "Source of the event. This is almost always the Device ID."
+host.event.sequence, long, 8, "Sequence number of the event. The sequence number is a value published by some event sources, to make the exact ordering of events unambiguous, regardless of the timestamp precision."
+host.event.severity, keyword, debug, "Severity or log level of the event as stored on the device."
+host.event.type, keyword, "[change\, error]", "List of event category 'sub-buckets' the alert falls under. For example\, an alert regarding a device configuration change would have change as a value. Valid values: access\, change\, creation\, deletion\, end\, error\, info\, installation\, start. `Further reading in the ECS documentation. <https://www.elastic.co/guide/en/ecs/current/ecs-allowed-values-event-category.html>`__"
+
+
+host.firmware.checksum, keyword, 12345, Checksum used by the device to verify the firmware image is valid.
+host.firmware.extra, flattened, {...}, "Additional unstructured information related to the firmware, generally vendor-specific information such as 'settings_version'."
+host.firmware.file.created, date, 2016-02-11:11:22:33, File creation time
+host.firmware.file.device, keyword, relay-louie, Device that is the source of the file. If this is a static parse\, then it should be the name of the system the file was recovered from or parsed on. Otherwise\, this should be the ID of the device it was pulled from.
+host.firmware.file.directory, keyword, /home/ubuntu/, Path to directory where the file is located.
+host.firmware.file.extension, keyword, dpk, File extension of the firmware image file as stored on the device or loaded into parse\, if known. Note: this does NOT include a . character.
+host.firmware.file.path, keyword, /relay_1/SET_ALL.TXT, Path of the file\, either on disk or on the device
+host.firmware.file.local_path, keyword, "/home/myuser/peat_results/relay_1/SET_ALL.TXT", "Path of the file, in it's original form. This may be either the path to the file on the device, or the path from the system it originated from (e.g. as extracted from a project file or using PEAT Pillage)."
+host.firmware.file.group, keyword, ubuntu, File's owning group\, if known.
+host.firmware.file.mime_type, keyword, application/gzip, MIME type should identify the format of the file or stream of bytes using IANA official types\, where possible. When more than one type is applicable\, the most specific type should be used.
+host.firmware.file.mtime, date, 2016-02-11:11:22:33, Last time the file content was modified
+host.firmware.file.name, keyword, 1234.dpk, Name including extension of the firmware image file as stored on the device or loaded into parse\, if known.
+host.firmware.file.owner, keyword, SomeUser, File owner's username of the firmware image file as stored on the device or loaded into parse\, if known. This applies to files provided to peat parse\, and we've also seen this with a project file pulled from a device (M340).
+host.firmware.file.size, long, 4096, Firmware image size in bytes. Only relevant when file.type is 'file'.
+host.firmware.file.type, keyword, file, "Firmware image file type: ``file``, ``dir``, or ``symlink``. This is usually ``file``, though there may (likely) be exceptions to this in the future, hence it's inclusion."
+host.firmware.file.hash.md5, keyword, 75926..., MD5 hash of the firmware image file. Only relevant when file.type is 'file'.
+host.firmware.file.hash.sha1, keyword, 50CD3..., SHA1 hash of the firmware image file. Only relevant when file.type is 'file'.
+host.firmware.file.hash.sha256, keyword, 5702F..., SHA 256 hash of the firmware image file. Only relevant when file.type is 'file'.
+host.firmware.file.hash.sha512, keyword, B19FC..., SHA 512 hash of the firmware image file. Only relevant when file.type is 'file'.
+host.firmware.hash.md5, keyword, 75926..., MD5 hash of the firmware image (the contents of the original). This may differ from the file hash\, if present.
+host.firmware.hash.sha1, keyword, 50CD3..., SHA1 hash of the firmware image (the contents of the original). This may differ from the file hash\, if present.
+host.firmware.hash.sha256, keyword, 5702F..., SHA 256 hash of the firmware image (the contents of the original). This may differ from the file hash\, if present.
+host.firmware.hash.sha512, keyword, B19FC..., SHA 512 hash of the firmware image (the contents of the original). This may differ from the file hash\, if present.
+host.firmware.id, keyword, SEL-351S-0-R000-V0-Z000000-D00000000, Firmware identification string\, e.g. the FID or BFID strings in SEL devices.
+host.firmware.last_updated, date, 2016-02-11:11:22:33, The timestamp of when the firmware was last updated on the device.
+host.firmware.original, binary, E1B0336271..., Base64-encoded full binary image of the device's firmware.
+host.firmware.revision, keyword, 1, Revision of the device's current firmware (or operating system). Common field seen on devices that's sometimes distinct from the canonical version string.
+host.firmware.release_date, date, 2019-01-11:00:00:00, The release date of the firmware.
+host.firmware.timestamp, date, 2015-05-28:07:05:50, Timestamp as extracted from the device or firmware\, device-dependent meaning. Often represents when the firmware was compiled/built or released.
+host.firmware.version, keyword, 2.6, Version of the device's current firmware (or operating system).
+
+
+host.boot_firmware.*, N/A, N/A, "This field stores information about the devices boot firmware (what it uses to boot up). It uses the same fields as ``host.firmware``."
+
+
+host.geo.city_name, keyword, Albuquerque, Name of the city where the device is physically located.
+host.geo.country_name, keyword, USA, Name of the country where the device is physically located\, in whatever form is reasonable.
+host.geo.location, geo_point, "{ 'lon': -73.000000, 'lat': 45.000000 }", Longitude and latitude of the device's physical location.
+host.geo.name, keyword, "some-city, 1st floor network closet", Custom location as retrieved from the device.
+host.geo.timezone, keyword, "America/Denver", Timezone configured on the device.
+
+
+host.hardware.id, keyword, "33234SLDKSJ", Hardware ID of the device
+host.hardware.storage_available, long, 572896, Amount of persistent storage currently available on the device
+host.hardware.storage_usage, long, 201264, Amount of persistent storage currently in use on the device
+host.hardware.storage_total, long, 774160, Total amount of storage on the device
+host.hardware.storage_type, keyword, hdd, "Type of storage on the device, lowercase and underscore-separated (e.g. hdd, ssd, nvram)"
+host.hardware.memory_available, long, 572896, "Amount of volatile memory (e.g. RAM) currently available"
+host.hardware.memory_usage, long, 201264, "Amount of volatile memory (e.g. RAM) currently in use"
+host.hardware.memory_total, long, 774160, "Total amount of volatile memory (e.g. RAM) on the device"
+host.hardware.memory_type, keyword, "ddr2_sdram", "Type of volatile memory on the device, lowercase and underscore-separated (e.g. ddr2_sdram)"
+
+
+host.io.address, keyword, 29, "Address of the I/O point (if applicable)"
+host.io.description, text, "some tag description", "Human-readable description of the I/O point"
+host.io.direction, keyword, input, "Direction of the I/O point. Possible values: input, output"
+host.io.id, keyword, O0, ID of the I/O point.
+host.io.name, keyword, "fuel-rtu-1_I16", "I/O point name or label (typically referenced by a tag)"
+host.io.type, keyword, analog, "Data type of the I/O point. Possible values: analog, binary"
+host.io.slot, keyword, 1, "Slot number(s) of the module(s) the point is associated with, if any"
+
+
+host.interface.application, keyword, modbus, Higher-level communication protocol being used regardless of whether the device is connected via serial or IP.
+host.interface.connected, boolean, true, "If the interface is currently connected to something (e.g. carrier signal on Ethernet or connected to a tower for wireless interfaces)"
+host.interface.description, Description, ..., "Identifying information for the interface's hardware or software, such as vendor, brand, and model. uses the same fields as ``host.description.*``."
+host.interface.enabled, boolean, true, If the interface is enabled in the device's configuration.
+host.interface.extra, flattened, {...}, "Additional unstructured information related to the interface, generally this is vendor-specific information."
+host.interface.name, keyword, port_f, "Interface name, as defined by the device. Example: SEL refers to the serial and network ports by names such as 1, 2, 3, F, etc."
+host.interface.type, keyword, ethernet, "The type of physical communication medium the communication interface utilizes. Lowercase, underscore separators, e.g. 'rs_422'."
+host.interface.hostname, keyword, relay2-backup.local, Hostname of the network interface (if resolved).
+host.interface.mac, keyword, 00:00:00:00:00:00, The IEEE 802 standard 48-bit MAC address of the interface. Only applicable to Ethernet-type interfaces. Note: this is a keyword -type per Elastic's guidance.
+host.interface.mtu, long, 1500, "Maximum Transmission Unit (MTU) size configured for the interface. This generally only applies to Ethernet interfaces."
+host.interface.promiscuous_mode, boolean, true, "If the interface is in Promiscuous Mode (passive capture)."
+host.interface.speed, long, 1000, "Transmission rate of the interface, in Mbps (megabits per second). Example: for Gigabit Ethernet, this would be 1000."
+host.interface.uptime, long, 23345, "How long the interface has been connected, in milliseconds."
+host.interface.id, keyword, "Port 3", "Identifier for the interface. The meaning of this value is device-dependent."
+host.interface.ip, ip, 192.0.2.1, "The Internet Protocol (IP) version 4 address of the interface. This is usually applicable to Ethernet-type interfaces, but could be applicable to serial interfaces as well."
+host.interface.subnet_mask, ip, 255.255.255.0, "IPv4 subnet mask of the interface, in standard dotted-decimal notation."
+host.interface.gateway, ip, 192.0.2.254, "IPv4 address of the default gateway of the interface, in standard dotted-decimal notation."
+host.interface.serial_port, keyword, /dev/ttyS0, "Serial port on the local system connected to the device. This could be a Windows COM port, e.g. COM4, or a Linux file path, e.g. /dev/ttyS0. This is also used for USB connections."
+host.interface.baudrate, integer, 56700, Data rate of the serial link. Only applicable to serial interfaces.
+host.interface.data_bits, byte, 8, Number of data bits for a serial link. Only applicable to serial interfaces.
+host.interface.parity, keyword, none, "Parity setting for the serial link. Only applicable to serial interfaces. Typical values: none, even, odd"
+host.interface.stop_bits, byte, 0, Number of stop bits for the serial link. Only applicable to serial interfaces.
+host.interface.flow_control, keyword, none, "Flow control setting for the serial link. Only applicable to serial interfaces. Typical values: none, rts/cts"
+host.interface.services, flattened, {...}, "Services associated with the interface. Refer to the ``host.service.*`` fields for details on the fields of each service."
+host.interface.version, keyword, "1.2.3", "Version of the interface's firmware or software."
+
+
+host.logic.author, keyword, "Killroy", "Name of the person/organization/program that wrote the logic"
+host.logic.description, keyword, "Some description", "Description for the logic or project file"
+host.logic.description.text, text, "Some description", "Same content as ``host.logic.description``, indexed as ``text`` type. This enables searching arbitrary words that are a part of the field."
+host.logic.file.created, date, 2016-02-11:11:22:33, File creation time
+host.logic.file.device, keyword, relay-louie, Device that is the source of the file. If this is a static parse\, then it should be the name of the system the file was recovered from or parsed on. Otherwise\, this should be the ID of the device it was pulled from.
+host.logic.file.directory, keyword, "/home/ubuntu/", Path to directory where the file is located.
+host.logic.file.extension, keyword, dpk, File extension of the logic file as stored on the device or loaded into parse\, if known. Note: this does NOT include a . character.
+host.logic.file.path, keyword, /relay_1/SET_ALL.TXT, Path of the file\, either on disk or on the device
+host.logic.file.local_path, keyword, "/home/ubuntu/peat_results/relay_1/SET_ALL.TXT", "Path of the file, in it's original form. This may be either the path to the file on the device, or the path from the system it originated from (e.g. as extracted from a project file or using PEAT Pillage)."
+host.logic.file.group, keyword, ubuntu, File's owning group\, if known.
+host.logic.file.mime_type, keyword, application/gzip, MIME type should identify the format of the file or stream of bytes using IANA official types\, where possible. When more than one type is applicable\, the most specific type should be used.
+host.logic.file.mtime, date, 2016-02-11:11:22:33, Last time the file content was modified
+host.logic.file.name, keyword, 1234.dpk, Name including extension of the logic file as stored on the device or loaded into parse\, if known.
+host.logic.file.owner, keyword, SomeUser, File owner's username of the logic file as stored on the device or loaded into parse\, if known. This applies to files provided to peat parse\, and we've also seen this with a project file pulled from a device (M340).
+host.logic.file.size, long, 4096, Logic size in bytes. Only relevant when file.type is 'file'.
+host.logic.file.type, keyword, file, "Logic file type: ``file``, ``dir``, or ``symlink``. This is usually ``file``, though there may (likely) be exceptions to this in the future, hence it's inclusion."
+host.logic.file.hash.md5, keyword, 75926..., MD5 hash of the logic file.
+host.logic.file.hash.sha1, keyword, 50CD3..., SHA1 hash of the logic file.
+host.logic.file.hash.sha256, keyword, 5702F..., SHA 256 hash of the logic file.
+host.logic.file.hash.sha512, keyword, B19FC..., SHA 512 hash of the logic file.
+host.logic.formats, nested, "{'tc6': '<...>'}", "Sub-formats the logic has been parsed into, such as ``"structured_text"`` or ``"tc6"``. Device dependent."
+host.logic.hash.md5, keyword, 75926..., MD5 hash of the raw logic (the contents of the original). This may differ from the file hash\, if present.
+host.logic.hash.sha1, keyword, 50CD3..., SHA1 hash of the raw logic (the contents of the original). This may differ from the file hash\, if present.
+host.logic.hash.sha256, keyword, 5702F..., SHA 256 hash of the raw logic (the contents of the original). This may differ from the file hash\, if present.
+host.logic.hash.sha512, keyword, B19FC..., SHA 512 hash of the raw logic (the contents of the original). This may differ from the file hash\, if present.
+host.logic.id, keyword, "142342SERU", "Project ID or a similar identifier for the logic, e.g. a machine-generated UUID for the logic stored by the device."
+host.logic.last_updated, date, 2016-02-11:11:22:33, UTC timestamp of when the logic was last updated on the device.
+host.logic.name, keyword, "project-1", "Project name or other such identifier for the logic, e.g. a human-readable name for the logic stored by the device"
+host.logic.original, text, "CHUTES: AND LATTERS", "Unparsed device program logic\, in whatever format makes sense for that device. It is the file(s) that make up the process state logic\, e.g.\, the ladder logic on a PLC or the configured protection schemes on a substation relay."
+host.logic.parsed, text, "CHUTES: AND LATTERS", "Complete parsed device program logic\, in whatever format makes sense for that device. It is the file(s) that make up the process state logic\, e.g.\, the ladder logic on a PLC or the configured protection schemes on a substation relay."
+
+
+host.memory.address, keyword, 0x4000FFFF, Address in memory of the read (the location).
+host.memory.created, date, 2016-02-11:11:22:33, When the read occurred. Represents when in time the memory address had the value.
+host.memory.dataset, keyword, "watchdog_log", "Memory region or source the read is associated with, if applicable."
+host.memory.device, keyword, relay-louie, Source of the read. This is almost always the device ID.
+host.memory.value, keyword, 0xFFFFFFFF, "The value read from memory, as a hexadecimal string."
+host.memory.extra, flattened, "{...}", "Additional data or metadata about the memory read."
+
+
+host.os.family, keyword, linux, "OS family (such as redhat, debian, freebsd, windows)."
+host.os.full, keyword, WindRiver VxWorks 7, Operating system name\, including the version or code name.
+host.os.kernel, keyword, 4.4.0-112-generic, Operating system kernel version as a raw string.
+host.os.name, keyword, VxWorks, Operating system name\, without the version.
+host.os.timestamp, date, 2015-05-28:07:05:50, Timestamp as extracted from the device or firmware\, device-dependent meaning. Often represents when the OS was compiled/built or released.
+host.os.vendor.name, keyword, Wind River Systems, The full name of the vendor of the OS\, if known.
+host.os.vendor.id, keyword, WindRiver, Abbreviated vendor of the OS\, if known.
+host.os.version, keyword, 7, Operating system version as a raw string.
+
+
+host.registers.address, keyword, "23, 24112016, pump-jack-six", "Address of the data. Tells protocol parser how to identify a data field in a packet. A number string, or more complex identifier. For Object Oriented (OO) protocols, this field flattens the data_address. BACNET example: ObjectType_InstanceNumber_PropertyIdentifier_[Fixed structure for each property type]"
+host.registers.data_type, keyword, "float_16", "Data type of the register. Tells parser how to interpret the field."
+host.registers.description, text, "Intake Fuel - Valve 1 - Second Boiler", Human-readable description of the register (some device configurations or project files have this).
+host.registers.extra, flattened, {...}, "Additional metadata for the register"
+host.registers.measurement_type, keyword, analog, "Type of information the register is tracking (e.g analog I/O, Discrete I/O). Tells analytic which algorithms to deploy. For example, in Modbus a 16-bit register can track an event count (Discrete), a temperature (analog), or could be a set of 16 Boolean flags (alarms)."
+host.registers.protocol, keyword, dnp3, The Parser uses this to distinguish protocols. Not all vendors follow the protocol spec. Indicate if this is a vendor deviation from the standard using the syntax [protocol]_[device or vendor name].
+host.registers.read_write, keyword, read_write, "Direction of information flow. Is register read, write, or both? Possible values: read, write, read_write"
+host.registers.tag, keyword, valve_1, Register tag given in config file. Provides analytic with some register context. May be a human-readable display name.
+
+
+host.related.emails, keyword, "example@example.com", "Any email addresses related to the device or users on the device"
+host.related.files, keyword, "config.xml", "Any files found on the device or referenced from the device's configuration. These can either be absolute paths or just filenames. Absolute paths are preferred, if known."
+host.related.hash, keyword, 75926..., "Any hashes related to the device or interface"
+host.related.hosts, keyword, "relay-1", "Any hostnames or names related to the device or interface"
+host.related.ip, keyword, 192.168.0.1, "Any IP addresses related to the device or interface"
+host.related.mac, keyword, 00:A0:C9:14:C8:29, "Any MAC addresses related to the device or interface"
+host.related.ports, long, "80, 443, 20000", "TCP or UDP ports related to the device or interface"
+host.related.protocols, keyword, "bacnet, modbus_tcp, dnp3, ftp", "Application layer (OSI Layer 7) protocols related to a device or interface"
+host.related.roles, keyword, "admin, operator", "Authentication roles, e.g. 'admin' or 'operator'"
+host.related.urls, keyword, "https://example.com/example", "URLs related to the device or found on the device"
+host.related.users, keyword, "Administrator", "Any usernames related to the device or interface. Examples: users that logged into a service or users configured on the device."
+
+
+host.service.enabled, boolean, true, "If the service is enabled in the device configuration. NOTE: do not assume this matches the status!"
+host.service.extra, flattened, "{...}", "Additional information about the service, such as a banner grab, odd behavior, or other miscellaneous data"
+host.service.port, long, 502, "Port the service is listening on (for TCP/IP transports)."
+host.service.protocol, keyword, "modbus_tcp", "Protocol of the service. Lowercase, underscore separators."
+host.service.protocol_id, keyword, 10, "Unique protocol identifier for the device, e.g. BACnet device identifier ('BACnet ID') or Modbus slave ID."
+host.service.role, keyword, "dnp3_master", "The operational role of the device for a given protocol."
+host.service.status, keyword, verified, "State of the service. Valid values: ``open``, ``closed``, ``verified``, and ``""``. ``verified``: service was used to positiviely identify the device (e.g. this is a SEL 351S) and the service. ``open``: something is listening, though it may not be the named service. ``closed``: port is not able to be accessed. NOTE: verified means verified over the a live connection, not just read from a configuration file. Instead, the enabled field should be used to store the configuration."
+host.service.transport, keyword, udp, "OSI Layer 4 transport protocol. Typical possible values: udp, tcp"
+
+
+host.ssh_keys.description, keyword, "", " Description of the SSH key and/or any comments"
+host.ssh_keys.description.text, text, "", "Text-mapped field for ``host.ssh_keys.description``"
+host.ssh_keys.file.*, nested, "", "The file associated with the key, if any. This has the same ``file.*`` fields as for other host fields."
+host.ssh_keys.host, keyword, "example.com", "Host associated with the key (hostname, DNS name, or IP)."
+host.ssh_keys.id, keyword, "", "Unique identifier for the key, if any"
+host.ssh_keys.original, keyword, "", "Complete contents of the key, with any trailing whitespace removed"
+host.ssh_keys.original.text, text, "", "Text-mapped field for ``host.ssh_keys.original``"
+host.ssh_keys.type, keyword, "public, private", "Type of key, either ``public`` or ``private``"
+host.ssh_keys.user, keyword, "bob", "Name of user associated with the key"
+
+
+host.tag.address, keyword, 29, Address of the tag.
+host.tag.description, keyword, "some tag description", Human-readable description of the tag.
+host.tag.description.text, text, "some tag description", "Same as above, but parsed as Elasticsearch ``text`` type."
+host.tag.io, keyword, rtu-8_I0, I/O point it's attached to (e.g. protocol register or physical I/O).
+host.tag.name, keyword, var_rtu-8_I0, Tag name or label (e.g. how it's referenced).
+host.tag.type, keyword, analog, "Data type of the tag. Typical possible values: analog, binary"
+
+
+host.users.description, keyword, "", "General description of the user (this is open to interpretation)"
+host.users.description.text, text, "", "Text-mapped field for ``host.users.description``"
+host.users.domain, keyword, "", "Name of the domain the user is a member of"
+host.users.email, keyword, "example@example.com", "User email address"
+host.users.full_name, keyword, "Billy Bob Joe", "The user's full name, if known"
+host.users.full_name.text, text, "", "Text-mapped field for ``host.users.full_name.text``"
+host.users.id, keyword, "bob_1", "Unique identifier of the user"
+host.users.name, keyword, "bob", "Short name or login of the user"
+host.users.name.text, text, "", "Text-mapped field for ``host.users.name.text``"
+host.users.permissions, keyword, "Login, Web", "Permissions the user has available"
+host.users.roles, keyword, "Administrator, User", "The user's roles, as strings"
+host.users.extra, flattened, "{...}", "Additional data or metadata about the user. This also includes unstructured raw data from the device that may be relevant."

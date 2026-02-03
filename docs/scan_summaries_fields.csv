@@ -1,0 +1,13 @@
+Field, "`Data Type <https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html>`__", Example(s), Description
+peat_version, keyword, 2.0.1.20210930, "Version of PEAT that performed the scan, if applicable"
+peat_run_id, keyword, "162493555659", "ID of the PEAT run for this scan. This is the value of ``agent.id`` in Elasticsearch. Used for associating other artifacts (e.g. device files) with this particular scan."
+scan_duration, double, 5.114307479001582, "Approximate time the scan took, in seconds"
+scan_modules, keyword, SELRelay, "PEAT device modules used to perform the scan"
+scan_type, keyword, "unicast_ip", "Type of scan. ``serial``, ``unicast_ip``, or ``broadcast_ip``."
+scan_targets, keyword, "192.0.2.0/24", "Targets used by the scan. These are the actual targets used after PEAT has parsed them into usable targets and removed duplicates."
+scan_original_targets, keyword, "``['eth1', '192.0.2.255', '10.1.2.255/24']``", "Original arguments used for the scan. This is the targets as provided by the user prior to PEAT parsing them into usable targets and removing duplicates."
+num_hosts_active, long, 1, "Number of hosts that responded, regardless of verification status"
+num_hosts_online, long, 1, "Number of hosts that responded but were not verified"
+num_hosts_verified, long, 1, "Number of hosts that were verified"
+hosts_online, ip, 192.0.2.36, IDs of hosts that responded. Note: this does NOT include verified hosts!
+hosts_verified, nested, {...}, "Information from hosts that were successfully verified"

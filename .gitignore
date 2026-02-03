@@ -7,6 +7,12 @@ pillage_temp/
 .pdm-python
 pdm.toml
 
+# Docs
+_build
+_built_docs
+_docs
+.doctrees
+
 # Log files
 /*.log
 /*.tar

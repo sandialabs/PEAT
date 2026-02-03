@@ -1,0 +1,12 @@
+Field, "`Data Type <https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html>`__", Example(s), Description
+peat_version, keyword, 2.0.1.20210930, "Version of PEAT that performed the parse, if applicable"
+peat_run_id, keyword, "162493555659", "ID of the PEAT run for this parse. This is the value of ``agent.id`` in Elasticsearch. Used for associating other artifacts (e.g. device files) with this particular parse."
+parse_duration, double, 5.114307479001582, "Approximate time parse took, in seconds"
+parse_modules, keyword, SELRelay, "PEAT device modules used to perform the parse"
+input_path, keyword, "/devices/", "Original argument to the parse"
+files_parsed, keyword, "/devices/set_all.txt", "Files that were parsed"
+num_files_parsed, long, 1, "Count of the files that were parsed"
+num_parse_successes, long, 1, "Count of successful parses"
+num_parse_failures, long, 1, "Count of failed parses"
+parse_failures, nested, {...}, "Results of failed parses"
+parse_results, nested, {...}, "Results of successful parses"
