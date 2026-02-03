@@ -314,6 +314,39 @@ dev = [
     # Diagram generation
     "pylint",
 ]
+docs = [
+    # Sphinx is the primary tool that builds the docs
+    "sphinx",
+
+    # HTML theme used by the pip documentation
+    # https://pradyunsg.me/furo/
+    "furo",
+
+    # Python 3 type annotation support
+    "sphinx-autodoc-typehints",
+
+    # Auto-generated documentation of the CLI
+    "sphinx-argparse-cli",
+
+    # Recursively generates inheritance graphs and module tables
+    "sphinx-automodapi",
+
+    # Adds a button to copy any code blocks to the clipboard
+    "sphinx-copybutton",
+
+    # Required for PEAT to document the Pydantic models
+    "autodoc-pydantic",
+
+    # Markdown file parsing
+    # TODO: recommonmark isn't maintained anymore as of 2022
+    #   Migrate to using MyST-Parser
+    #   https://github.com/readthedocs/recommonmark/issues/221
+    "myst-parser",
+    "recommonmark==0.7.1",
+
+    # For PDF building
+    "rinohtype",
+]
 
 
 # https://backend.pdm-project.org/build_config/
@@ -477,6 +510,15 @@ rm -rf peat_results/
 rm -rf pillage_results/
 """
 
+[tool.pdm.scripts.clean-docs]
+help = "Delete documentation build outputs and caches"
+shell = """
+rm -rf ./_built_docs/
+rm -rf ./docs/automodapi_tmp/
+rm -rf ./docs_doctree/
+find . -name ".doctrees" -exec rm -rf {} +
+"""
+
 [tool.pdm.scripts.clean]
 help = "(Linux) Clean most ephemeral artifacts and caches"
 composite = ["clean-pyc", "clean-build", "clean-tests"]
@@ -495,6 +537,22 @@ composite = [
     "find . -name '.doctrees' -exec rm -rf {} +",
     "rm -f ./classes_*.png",
     "rm -f ./packages_*.png",
+]
+
+[tool.pdm.scripts.docs-html]
+help = "Build HTML docs"
+cmd = "sphinx-build -b html docs _built_docs"
+
+[tool.pdm.scripts.docs-man]
+help = "Build man pages"
+cmd = "sphinx-build -b man docs _built_docs"
+
+# TODO: PDF format (using rinohtype)
+[tool.pdm.scripts.docs]
+help = "Build all doc formats"
+composite = [
+    "docs-html",
+    "docs-man",
 ]
 
 
@@ -706,6 +764,6 @@ exclude = [
 # https://github.com/henryiii/check-sdist
 [tool.check-sdist]
 sdist-only = ["peat", "AUTHORS", "CHANGELOG.md", "COPYRIGHT.md", "SECURITY.md", "NOTICE"]
-git-only = [".*", "distribution", "examples", "scripts", "tests", ".venv", ".dockerignore", ".editorconfig", ".gitattributes", ".gitignore", "*.spec", "pdm.lock", "CODE_OF_CONDUCT.md", "Dockerfile", "pyproject.toml", "README.md", "LICENSE"]
+git-only = [".*", "distribution", "examples", "scripts", "tests", "docs", ".venv", ".dockerignore", ".editorconfig", ".gitattributes", ".gitignore", "*.spec", "pdm.lock", "CODE_OF_CONDUCT.md", "Dockerfile", "pyproject.toml", "README.md", "LICENSE"]
 default-ignore = true
 recurse-submodules = false

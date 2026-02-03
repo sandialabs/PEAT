@@ -1,0 +1,36 @@
+Field, "`Data Type <https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html>`__", Example(s), Description
+log.level, keyword, ERROR, "The log level of the message. Typical values to expect are: CRITICAL, ERROR, WARNING, INFO, DEBUG, TRACE"
+log.logger, keyword, peat.protocols.snmp, "The name of the logger inside an application. This is usually the name of the class which initialized the logger, or can be a custom name."
+log.origin.file.line, integer, 108, The line number of the file containing the source code which originated the log event.
+log.origin.file.name, keyword, parse_api.py, The name of the file containing the source code which originated the log event. Note that this is not the name of the log file.
+log.origin.function, keyword, save_to_file, The name of the function or method which originated the log event.
+process.args, keyword, "['peat', 'parse', '--help']", Array of process arguments\, starting with the absolute path to the executable. May be filtered to protect sensitive information.
+process.args_count, long, 3, Length of the process.args array.
+process.command_line, keyword, "peat parse --help", Full command line that started the process\, including the absolute path to the executable\, and all arguments. Some arguments may be filtered to protect sensitive information.
+process.executable, keyword, "/venv/bin/python", Absolute path to the process executable.
+process.pid, long, "357", "Process ID (PID) of the process the log event originated from."
+process.parent.process.pid, long, "444", "Process ID (PID) of the parent process."
+process.name, keyword, "MainProcess", "Name of the process the log event originated from."
+process.start, date, 2016-05-23T08:05:34.853Z, The time the process started.
+process.working_directory, keyword, /home/ubuntu/peat/, The working directory of the process.
+process.thread.id, long, 140447875082048, "ID of the thread the log event originated from."
+process.thread.name, keyword, "MainThread", "Name of the thread the log event originated from."
+observer.hostname, keyword, "WORKSTATION-1", "Hostname of the system the log event originated from."
+observer.ip, keyword, "['127.0.0.1', '172.17.0.3']", "Array of IP addresses present on the host the log event originated from."
+observer.mac, keyword, 00:00:00:11:22:33, "Array of MAC addresses present on the host the log event originated from."
+observer.interface.name, keyword, "['lo', 'eth0']", "Array of names of network interfaces on the host the log event originated from."
+observer.os.family, keyword, ubuntu\, debian\, windows, OS family\, such as redhat\, debian\, freebsd\, or windows.
+observer.os.full, keyword, "Linux 5.0.0-20-generic (Ubuntu 19.04)", Full information on the system OS.
+observer.os.name, keyword, Windows, General name of the OS.
+observer.os.version, keyword, 19.04, Operating system version as a raw string.
+observer.geo.city_name, keyword, Albuquerque, Name of the city where the device is physically located.
+observer.geo.country_name, keyword, USA, Name of the country where the device is physically located\, in whatever form is reasonable.
+observer.geo.location, geo_point, "{'lon': -3.000000, 'lat': 45.000000}", Longitude and latitude of the device’s physical location.
+observer.geo.name, keyword, "some-city, 1st floor network closet", Custom location as retrieved from the device.
+observer.geo.timezone, keyword, America/Denver, Timezone of the system.
+user.name, keyword, ubuntu, Name of the user running the tool.
+peat.containerized, boolean, True, If PEAT was run as a container (Docker/Podman).
+peat.debug_level, long, 2, "Current debugging level of PEAT"
+peat.entrypoint, keyword, "CLI", "How PEAT was executed (the entrypoint). Possible values: CLI, Package, REST API"
+peat.podman, boolean, False, If PEAT was run as a container in Podman.
+peat.python_version, keyword, 3.6.7, The version of Python used to execute PEAT.

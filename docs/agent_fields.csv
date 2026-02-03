@@ -1,0 +1,4 @@
+Field, "`Data Type <https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html>`__", Example(s), Description
+agent.id, keyword, 163737449406, Unique identifier for a running instance of the tool. In PEAT\, this is the run_id.
+agent.type, keyword, PEAT\, Archimedes\, Packets, Name of the tool.
+agent.version, keyword, "2.0.1.20210930", Version of the tool.

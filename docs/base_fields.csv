@@ -1,0 +1,5 @@
+Field, "`Data Type <https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html>`__", Example(s), Description
+@timestamp, date, 2016-05-23T08:05:34.853Z, When the tool collected the data.
+ecs.version, keyword, 1.9.0, ECS version this event conforms to. ecs.version is a required field and must exist in all events.
+message, text, "Some summary", Human-friendly summary of the Elasticsearch document (80 char max length). The intent is that these will show up on dashboards.
+tags, keyword, "['field device', 'config', 'change']", Metadata that could potentially be used to filter or enrich events in a dashboard.

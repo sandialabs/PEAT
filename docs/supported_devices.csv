@@ -1,0 +1,53 @@
+Vendor,Device,Supported Functions, Protocols,Firmware Versions,Notes,Estimated :term:`TRL`
+Rockwell,"Allen-Bradley ControlLogix 1756 PLC. L7 and L8-series CPUs. EN2T/D, EWEB, EN2TR, and EN2TR/C communication modules and L8 CPU built-in Ethernet.","Scan, Pull logic, Push firmware, Parse pulled logic","FTP, HTTP, SNMP, :term:`CIP`","L74/B CPU v30.13,
+L74/B EN2T/D v10.7,
+L74/B EWEB/A v4.11,
+L81E/B CPU v33.11,
+L81E/B EN2TR/C v11.2,
+L81E/B EWEB/A v5.1,
+L83E/B CPU v33.11,
+L83E/B EN4TR/A v2.1,
+L83E/B IF8/A v1.5,
+L83E/B IF8/A v1.5","This has been run with some success against a PanelView HMI, so it may work with those devices and possibly other Rockwell CIP devices. Supported protocols and amount of data collected vary by model and type of the communication module being interrogated. For example, the L8-series CPUs built-in Ethernet interface doesn't have a HTTP interface PEAT can retrieve data from. Why TRL 6? The module was tested against a significant number of PLCs with real logic in a high-fidelity emulation in Summer 2021, which meets the requirement of testing a prototype or representative of a deliverable in an actual environment or in a high-fidelity laboratory environment that emulates the actual environment. PEAT module: :class:`~peat.modules.rockwell.controllogix.ControlLogix`. Device OS: VxWorks (version 6 or 7, not sure).",TRL 6
+Rockwell,Studio5000/RSLogix5000 L5X files,Parse,,,"Parsing of ``.l5x`` files exported from Rockwell Studio5000/RSLogix5000. This is the engineering software used for Rockwell/Allen-Bradley PLCs, such as the ControlLogix, MicroLogix, and others. PEAT module: :class:`~peat.modules.rockwell.logic_l5x.L5X`.",TRL 4
+Rockwell,PanelView Plus HMI,"Parse","N/A","WindowsCE 6.0","Parsing of output from the ``wince_pillage.exe`` tool. The wince_pillage tool collects data from Windows CE devices and outputs a JSON file. The WindowsCE PEAT module simply parses the output of that tool. PEAT module: :class:`~peat.modules.windows.wince.WindowsCE`. Device OS: Windows CE 6.0.",TRL 4
+Camlin,Totus G9 Dissolved Gas Analyzer (DGA),"Scan, Pull config",HTTP,,"PEAT module: :class:`~peat.modules.camlin.totus.Totus`. Device OS: Husarz (Camlin GNU/Linux Distribution) 2.2.4 (morty), Linux 3.10.107.",TRL 5
+GE,Multilin D25 RTU,"Pull config, logs, and logic",Telnet,,Why TRL 5? Used in several exercises in a realistic environment. PEAT module: :class:`~peat.modules.ge.ge_rtu.GERTU`. Device OS: Unknown (TBD).,TRL 5
+GE,Multilin T60 and L90 relays,"Pull config, logs, and logic",HTTP,,"Why TRL 5? Used in several exercises in a realistic environment. Should be compatible with D30 and N60 as well, but these have not been tested. PEAT module: :class:`~peat.modules.ge.ge_relay.GERelay`. Device OS: Unknown (TBD).",TRL 5
+GE,Multilin F35 relays,"Pull config, logs, and logic",HTTP,,"Compatibility of GERelay module with the F35 Relay has not been tested after major integration changes that were made in 2021 since we don't have one available for testing. Everything should still work, but it's not TRL 5. PEAT module: :class:`~peat.modules.ge.ge_relay.GERelay`. Device OS: Unknown (TBD).",TRL 4
+SEL,311C,"Scan, Pull basic info, Parse config, Parse project file, Pull memory",Telnet,"311C-2 R508.V0 (D2015-02-19)","PEAT has been tested against at least one SEL-311C over Telnet, with some success. PEAT module: :class:`~peat.modules.sel.sel_relay.SELRelay`. Device OS: ThreadX.",TRL 4
+SEL,311L,"Scan, Pull basic info, Parse config, Parse project file, Pull memory",Telnet,"311L-7 R502.V0 (D2014-11-06)","PEAT is able to pull basic information from the 311L, but not full configs, due to lack of ``fil`` command. PEAT is able to read live device memory, and verify regions pulled. A small section of sections can be pulled or all of memory. This is configurable in the PEAT YAML config file. PEAT module: :class:`~peat.modules.sel.sel_relay.SELRelay`. Device OS: ThreadX.",TRL 5
+SEL,"300G, 387, 587Z","Scan, Pull config, Parse config, Parse project file","FTP, Telnet",,"Active operations (Scan, Pull) have NOT been tested against actual devices for these models. We're confident they'll work like the other relays, perhaps with slightly different credentials, however your mileage may vary. PEAT module: :class:`~peat.modules.sel.sel_relay.SELRelay`. Device OS: ThreadX.",TRL 4
+SEL,"351, 351S, 451 protection relays","Scan, Pull config, Pull logs, Push config, Parse config, Parse project file","FTP, Telnet, HTTP, HTTPS, RS-232 (Serial)","351 Firmware R510.V0 (D2011-04-29),
+351 Boot Firmware R102,
+351S Firmware R516.V2 (D2019-01-11),
+351S Boot Firmware RS209.V0,
+451 Firmware R322.V0 (D2018-06-30),
+451 Boot Firmware R209.V0",PEAT module: :class:`~peat.modules.sel.sel_relay.SELRelay`. Device OS: ThreadX,TRL 6
+SEL,"411L, 487E protection relays","Scan, Pull config, Parse config, Parse project file","FTP, Telnet","411L Firmware R124.V0 (D2019-01-30)
+487E Firmware R317.V1 (D2019-02-11)",PEAT module: :class:`~peat.modules.sel.sel_relay.SELRelay`. Device OS: ThreadX.,TRL 5
+SEL,"700G, 710, 751 generator and motor protection relays","Scan, Pull config, Push config, Parse config, Parse project file","FTP, Telnet","700G Firmware R200.V0 (D2018-06-29),
+710 Firmware R411.V0 (D2017-06-23),
+751 Firmware R201.V1 (D2018-09-21),
+751 Firmware R300.V3 (D2021-01-04)",PEAT module: :class:`~peat.modules.sel.sel_relay.SELRelay`. Device OS: ThreadX.,TRL 6
+SEL,"2032 Communications Processor","Scan, Pull config, Push config, Parse config, Parse project file","FTP, Telnet","2032 Firmware R115.V1 (D2015-10-28)","PEAT module: :class:`~peat.modules.sel.sel_relay.SELRelay`. Partial support. PEAT will collect basic identification information and download files, but it doesn't do anything RTU-specific at the moment for this device. Device OS: Unknown (likely ThreadX).",TRL 4
+SEL,"3530, 3530-4, 3350 RTACs","Scan, Pull config, Parse project file","HTTP, PostgreSQL","3530 Firmware R144.V2 (D2019-02-16),
+3530 Firmware R149.V1 (D2021-12-14),
+3530-4 Firmware R144.V1 (D2019-01-11),
+3350 Firmware R152.V0 (D2023-11-07)","PEAT module: :class:`~peat.modules.sel.sel_rtac.SELRTAC`. Device OS: Linux (with custom kernel modules and whitelisting).",TRL 6
+SEL,"3620 Security Gateway","Scan, Pull config","HTTPS","SEL-3620 R212 V0 Z017006 (D2022-10-03)","PEAT module: :class:`~peat.modules.sel.sel_3620.SEL3620`","TRL 3"
+Sandia,SCEPTRE Virtual Field Device,"Scan, Pull config, Pull firmware, Push firmware, Push config, Parse config",FTP,,PEAT module: :class:`~peat.modules.sandia.sceptre_fcd.SCEPTRE`. Device OS: Ubuntu 14.04 LTS.,TRL 6
+Siemens,Siprotec 4 relay,"Scan, Pull network config","HTTP, SNMP",,PEAT module: :class:`~peat.modules.siemens.siprotec.Siprotec`. Device OS: Unknown (TBD).,TRL 4
+Siemens,SIMATIC TP700 Comfort HMI,Parse,,"WindowsCE 6.0","Parsing of output from the ``wince_pillage.exe`` tool. The ``wince_pillage`` tool collects data from Windows CE devices and outputs a JSON file. The WindowsCE PEAT module simply parses the output of that tool. PEAT module: :class:`~peat.modules.windows.wince.WindowsCE`. Device OS: Windows CE 6.0.",TRL 4
+Schneider Electric,Modicon M340 PLC (BMXP 3020 Ethernet module),"Scan, Pull config, Pull logic, Parse config, Parse logic","FTP, SNMP, Modbus/TCP (:term:`UMAS`)","CPU v02.90 IR2,
+ETH v03.20 IR2","This has been run once with some success against a Quantum 140 PLC, so it may work against that device. PEAT module: :class:`~peat.modules.schneider.m340.m340.M340`. Device OS: VxWorks version 7.",TRL 6
+Schneider Electric,PowerLogic ION 8650 power meter,"Scan, Pull config, Parse project file and firmware","Telnet, HTTP","v004.030.000
+v004.031.000B","PEAT module: :class:`~peat.modules.schneider.ion.ion.ION`. Device OS: KADAK AMX RTOS (Motorola PowerPC, ppc32 architecture, version 1.05a??).",TRL 5
+Schneider Electric,Sage 2400 and 3030M RTUs,"Scan, Pull config, Parse config, Parse firmware (rudimentary support for firmware parsing)","FTP, Telnet, SSH, HTTP, HTTPS",,"PEAT module: :class:`~peat.modules.schneider.sage.sage.Sage`. Device OS: VxWorks 6. Other models than 2400 and 3030M may work as well if they share the same baseboard controller as these devices, since Schneider reuses the baseboards with different motherboards and chassis. Note: the Sage RTUs were originally developed by Telvent until they were acquired by Schneider Electric in 2011. This is why there are references to 'Telvent' in various places in configs, and they were formerly called 'Telvent Sage RTUs'.",TRL 5
+Woodward,2301E,"Scan, Pull config",RS-232 serial (Servlink protocol),,PEAT module: :class:`~peat.modules.woodward.wdw_2301e.WDW2301E`. Device OS: VxWorks (possibly 6).,TRL 4
+Woodward,easYgen 3500XT,"Scan, Pull config","FTP, ServLink/TCP, RS-232 serial (Servlink protocol)",,The parsing code for ``.wset`` and ``.tc`` files isn't integrated yet (as of 2022). PEAT module: :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT`. Device OS: VxWorks 6.,TRL 4
+Woodward,MicroNet Plus,"Scan, Pull config, logic, and logs",FTP,,PEAT module: :class:`~peat.modules.woodward.micronet.MicroNet`. Device OS: VxWorks 5.5.1.,TRL 4
+Fortinet,FortiGate FG-100 Firewall,"Parse config, Parse logs","N/A",7.0.2,PEAT module: :class:`~peat.modules.fortinet.fortigate.Fortigate`.,TRL 3
+iDirect,"iDirect X-Series modems (X3, X5, X7)","Scan, Pull config and logs","SSH, HTTPS","","PEAT module: :class:`~peat.modules.idirect.idirect.Idirect`","TRL 4"
+Windows,"WindowsCE devices","Parse config","N/A","WindowsCE 6.0","Special functionality leveraging a Windows binary called ``wince_pillage.exe`` that is deployed on Windows CE device, collects data, then the collected info is parsed by PEAT. Tested with Siemens TP700 Comfort HMI Panel and Rockwell PanelView Plus 7 Standard HMI. PEAT module: :class:`~peat.modules.windows.wince.WindowsCE`.","TRL 4"
+UEFI,"UEFI SPIExtract dump parser", "Parse","N/A","","PEAT module for parsing a UEFI SPIExtract Dump. Right now this tool will parse ``*spi.*.txt`` files and ``*hashes.json`` files.","TRL 3"
