@@ -76,7 +76,7 @@ class SageCommands:
             filename = f"{command.replace(' ', '_')}_{ts}.txt"
             filename = filename.replace(",", "-")  # remove commas
 
-            if command.split(" ")[0] in ["d", "ti"]:
+            if command.split(" ", maxsplit=1)[0] in ["d", "ti"]:
                 file_path = self.resp_dir / "task_responses" / filename
             else:
                 file_path = self.resp_dir / filename

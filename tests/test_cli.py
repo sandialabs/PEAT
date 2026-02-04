@@ -295,7 +295,8 @@ def test_cli_logo(run_peat, tmp_path, mocker):
     assert not stdout  # no results if --print-results isn't specified
     assert "hosts_verified" not in stderr
     assert "/   /_____/_/  |_/_/" in stderr
-    assert stderr.count(__version__) == 1  # only should be version in logo
+    # only should be version in logo
+    assert stderr.count(f"PEAT {__version__}") == 1
     assert "CRITICAL" not in stderr
 
 

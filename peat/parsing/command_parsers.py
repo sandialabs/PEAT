@@ -28,7 +28,7 @@ from peat.data.models import File, Service, User
 
 class NixParserBase:
     """
-    Base class for *nix file and command parsers (Linux, VxWorks, etc.).
+    Base class for nix file and command parsers (Linux, VxWorks, etc.).
     """
 
     # file paths/names for file parsers

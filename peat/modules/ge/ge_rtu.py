@@ -625,7 +625,7 @@ def parse_errorlog_menu(data: str) -> dict:
     """
     Parse Error Log Menu.
     """
-    data_first_page = data.split(",~%meep%~,")[0]
+    data_first_page = data.split(",~%meep%~,", maxsplit=1)[0]
     data_second_page = data.split(",~%meep%~,")[1]
     errorlog = {}
 
@@ -660,7 +660,7 @@ def parse_userlog_menu(data: str) -> dict:
     """
     Parse User Log Menu.
     """
-    data_first_page = data.split(",~%meep%~,")[0]
+    data_first_page = data.split(",~%meep%~,", maxsplit=1)[0]
     data_second_page = data.split(",~%meep%~,")[1]
     userlog = {}
 
