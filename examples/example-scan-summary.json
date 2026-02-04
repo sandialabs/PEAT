@@ -1,0 +1,102 @@
+{
+    "peat_version": "2.2.0.20221220",
+    "peat_run_id": "168201502118",
+    "scan_duration": 0.6260044369846582,
+    "scan_modules": [
+        "ION"
+    ],
+    "scan_type": "unicast_ip",
+    "scan_targets": [
+        "192.0.2.55"
+    ],
+    "scan_original_targets": [
+        "192.0.2.55"
+    ],
+    "num_hosts_active": 1,
+    "num_hosts_online": 0,
+    "num_hosts_verified": 1,
+    "hosts_online": [],
+    "hosts_verified": [
+        {
+            "architecture": "ppc32",
+            "description": {
+                "brand": "PowerLogic ION",
+                "full": "Schneider Electric PowerLogic ION 8650",
+                "model": "8650",
+                "product": "PowerLogic ION 8650",
+                "vendor": {
+                    "id": "Schneider",
+                    "name": "Schneider Electric"
+                }
+            },
+            "id": "192.0.2.55",
+            "ip": "192.0.2.55",
+            "mac": "00:60:78:00:00:00",
+            "type": "Power Meter",
+            "os": {
+                "full": "KADAK AMX RTOS for Motorola PowerPC PPC32",
+                "name": "AMX",
+                "vendor": {
+                    "id": "KADAK",
+                    "name": "KADAK Products Ltd."
+                },
+                "version": "1.05a"
+            },
+            "interface": [
+                {
+                    "type": "ethernet",
+                    "mac": "00:60:78:00:00:00",
+                    "ip": "192.0.2.55",
+                    "services": [
+                        {
+                            "port": 23,
+                            "protocol": "telnet",
+                            "status": "open",
+                            "transport": "tcp"
+                        },
+                        {
+                            "port": 80,
+                            "protocol": "http",
+                            "status": "verified",
+                            "transport": "tcp"
+                        }
+                    ]
+                }
+            ],
+            "service": [
+                {
+                    "port": 23,
+                    "protocol": "telnet",
+                    "status": "open",
+                    "transport": "tcp"
+                },
+                {
+                    "port": 80,
+                    "protocol": "http",
+                    "status": "verified",
+                    "transport": "tcp"
+                }
+            ],
+            "related": {
+                "files": [
+                    "index.html"
+                ],
+                "ip": [
+                    "192.0.2.55"
+                ],
+                "mac": [
+                    "00:60:78:00:00:00"
+                ],
+                "ports": [
+                    23,
+                    80
+                ],
+                "protocols": [
+                    "http",
+                    "telnet"
+                ]
+            },
+            "peat_module": "ION"
+        }
+    ]
+}
