@@ -4,7 +4,6 @@ on:
   release:
   push:
   pull_request:
-  # Allow manual run from Actions tab
   workflow_dispatch:
 
 permissions:
@@ -54,8 +53,6 @@ jobs:
           packages: python3-dev python3-pip patchelf binutils scons libpq-dev libpq5
       - name: Install tool dependencies
         run: |
-          #sudo apt-get update
-          #sudo apt-get install -y python3-dev python3-pip patchelf binutils scons libpq-dev libpq5
           python3 --version
           python3 -m pip --version
           pip install -U pdm
@@ -135,6 +132,8 @@ jobs:
           Write-Host "CURRENT_PEAT_VERSION=$CURRENT_PEAT_VERSION"
           pdm run python .\distribution\update_file_version_info.py $CURRENT_PEAT_VERSION
           pdm run build-exe --dist ./peat_windows
+      - name: List executable contents
+        run: pdm run pyi-archive_viewer --list ./peat_windows/peat.exe
       - name: Check executable
         run: |
           ./peat_windows/peat.exe --version
