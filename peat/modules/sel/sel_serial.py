@@ -299,9 +299,9 @@ class SELSerial(SELAscii):
                 accepted by the ``file read`` command on the relay.
         """
         if "/" in file_id:
-            filename = file_id.split("/")[-1]
+            filename = file_id.rsplit("/", maxsplit=1)[-1]
         elif " " in file_id:
-            filename = file_id.split(" ")[-1]
+            filename = file_id.rsplit(" ", maxsplit=1)[-1]
         else:
             filename = file_id
 

@@ -202,7 +202,7 @@ class UmasExtractor(HeatProtocol):
 
                     # Set transfer type for the artifact (DOWNLOAD or UPLOAD)
                     if not artifact.direction:
-                        artifact.direction = func.split("_")[0]
+                        artifact.direction = func.split("_", maxsplit=1)[0]
 
                     # Prevent duplicate blocks.
                     block_id = int(block_id)
@@ -396,7 +396,7 @@ def _cleanup_oui(mac: str):
     # Older tshark (3.0.14) makes vendor names like "HewlettP_00:00:00"
     # Modern tshark (3.2.3) is like "Hewlett Packard"
     if mac.count("_") == 1 and mac.count(":") == 2:
-        return mac.split("_")[0]
+        return mac.split("_", maxsplit=1)[0]
     return mac
 
 
