@@ -1,0 +1,88 @@
+{
+    "peat_version": "2.0.1.20210930",
+    "peat_run_id": "164141725302",
+    "pull_duration": 14.823716692160815,
+    "pull_modules": [
+        "ION"
+    ],
+    "pull_targets": [
+        "192.0.2.55"
+    ],
+    "pull_original_targets": [
+        "192.0.2.55"
+    ],
+    "pull_devices": [
+        "192.0.2.55"
+    ],
+    "pull_comm_type": "unicast_ip",
+    "num_pull_results": 1,
+    "pull_results": [
+        {
+            "description": {
+                "brand": "PowerLogic ION",
+                "full": "Schneider Electric PowerLogic ION 8650",
+                "model": "8650",
+                "product": "PowerLogic ION 8650",
+                "vendor": {
+                    "id": "Schneider",
+                    "name": "Schneider Electric"
+                }
+            },
+            "firmware": {
+                "last_updated": "2018-05-23 16:19:59",
+                "version": "004.030.000"
+            },
+            "id": "192.0.2.55",
+            "ip": "192.0.2.55",
+            "mac": "00:60:78:00:00:00",
+            "type": "Power Meter",
+            "serial_number": "LW-1111A111-11",
+            "interface": [
+                {
+                    "type": "ethernet",
+                    "mac": "00:60:78:00:00:00",
+                    "ip": "192.0.2.55",
+                    "services": [
+                        {
+                            "port": 23,
+                            "protocol": "telnet",
+                            "status": "open",
+                            "transport": "tcp"
+                        },
+                        {
+                            "port": 80,
+                            "protocol": "http",
+                            "status": "verified",
+                            "transport": "tcp"
+                        }
+                    ]
+                }
+            ],
+            "service": [
+                {
+                    "port": 80,
+                    "protocol": "http",
+                    "status": "verified",
+                    "transport": "tcp"
+                },
+                {
+                    "port": 23,
+                    "protocol": "telnet",
+                    "status": "open",
+                    "transport": "tcp"
+                }
+            ],
+            "related": {
+                "ip": [
+                    "192.0.2.55"
+                ],
+                "mac": [
+                    "00:60:78:00:00:00"
+                ]
+            },
+            "extra": {
+                "note": "additional data removed from this example for conciseness"
+            }
+        }
+    ]
+}

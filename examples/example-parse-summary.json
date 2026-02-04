@@ -1,0 +1,78 @@
+{
+    "peat_version": "2.2.0.20221220",
+    "peat_run_id": "168201430248",
+    "parse_duration": 0.012006660108454525,
+    "parse_modules": [
+        "AwesomeTool"
+    ],
+    "input_paths": [
+        "./examples/example_peat_module/awesome_output.json"
+    ],
+    "files_parsed": [
+        "/home/cegoes/peat/examples/example_peat_module/awesome_output.json"
+    ],
+    "num_files_parsed": 1,
+    "num_parse_successes": 1,
+    "num_parse_failures": 0,
+    "parse_failures": [],
+    "parse_results": [
+        {
+            "name": "awesome_output.json",
+            "path": "/home/cegoes/peat/examples/example_peat_module/awesome_output.json",
+            "module": "AwesomeTool",
+            "results": {
+                "description": {
+                    "vendor": {
+                        "id": "ACME",
+                        "name": "ACME, Inc."
+                    }
+                },
+                "id": "192.0.2.20",
+                "ip": "192.0.2.20",
+                "name": "SomeDevice",
+                "type": "PLC",
+                "os": {
+                    "full": "Ubuntu 19.10",
+                    "name": "Ubuntu",
+                    "version": "19.10"
+                },
+                "interface": [
+                    {
+                        "type": "ethernet",
+                        "ip": "192.0.2.20",
+                        "subnet_mask": "255.255.255.0",
+                        "gateway": "192.0.2.1",
+                        "services": [
+                            {
+                                "enabled": true,
+                                "port": 21,
+                                "protocol": "telnet",
+                                "transport": "tcp"
+                            }
+                        ]
+                    }
+                ],
+                "service": [
+                    {
+                        "enabled": true,
+                        "port": 21,
+                        "protocol": "telnet",
+                        "transport": "tcp"
+                    }
+                ],
+                "related": {
+                    "ip": [
+                        "192.0.2.1",
+                        "192.0.2.20"
+                    ],
+                    "ports": [
+                        21
+                    ],
+                    "protocols": [
+                        "telnet"
+                    ]
+                }
+            }
+        }
+    ]
+}
