@@ -471,7 +471,7 @@ bash ./distribution/build-linux-package.sh sneakypeat
 # pdm run pyi-archive_viewer -l build/peat-pyinstaller-pre-staticx | awk 'NR>4{print $0}' | sort -t ',' -nk3 -r  > archive_contents.txt
 [tool.pdm.scripts.inspect-exe]
 help = "Inspect the PyInstaller-built exe (archive) using pyi-archive_viewer"
-cmd = "python -m pyi-archive_viewer --list build/peat-pyinstaller-pre-staticx"
+cmd = "pyi-archive_viewer --list build/peat-pyinstaller-pre-staticx"
 
 [tool.pdm.scripts.build-docker]
 help = "Build Docker image"
