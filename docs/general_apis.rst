@@ -161,8 +161,9 @@ cli_args
 .. automodule:: peat.cli_args
    :members:
 
-.. TODO: this is raising an exception when Sphinx tries to load it for some reason
-.. Command Parsers
-.. ---------------
-.. .. automodule:: peat.parsing.command_parsers
-..    :members:
+
+Command Parsers
+---------------
+
+.. automodule:: peat.parsing.command_parsers
+   :members:
