@@ -178,7 +178,7 @@ def parse_fg_ls(ls_output: list[str], ls_command: str) -> list[dict]:
     #   peat.parsing.command_parsers.LsRecursiveParser
     #   peat.protocols.ftp.FTP.dir()
 
-    dir_path = ls_command.split()[-1]
+    dir_path = ls_command.rsplit(maxsplit=1)[-1]
 
     # https://pubs.opengroup.org/onlinepubs/9699919799/utilities/ls.html
     # hard links: https://unix.stackexchange.com/a/43047
@@ -237,7 +237,7 @@ def process_fg_ls(ls_output: list[str], ls_command: str, dev: DeviceData) -> Non
     """
     parse_results = parse_fg_ls(ls_output, ls_command)
 
-    dir_name = ls_command.split()[-1].replace("/", "_").strip("_")
+    dir_name = ls_command.rsplit(maxsplit=1)[-1].replace("/", "_").strip("_")
     dev.write_file(parse_results, f"file_list_{dir_name}.json")
 
     for file in parse_results:

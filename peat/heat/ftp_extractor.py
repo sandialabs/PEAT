@@ -481,7 +481,7 @@ def _cleanup_oui(mac: str) -> str:
     # Older tshark (3.0.14) makes vendor names like "HewlettP_c0:b9:20"
     # Modern tshark (3.2.3) is like "Hewlett Packard"
     if mac.count("_") == 1 and mac.count(":") == 2:
-        return mac.split("_")[0]
+        return mac.split("_", maxsplit=1)[0]
     return mac
 
 
