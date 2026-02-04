@@ -25,7 +25,11 @@ jobs:
     name: Build HTML docs and manpage
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+            fetch-tags: true
+            fetch-depth: 0  # checkout full history
       - name: Install apt dependencies
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:

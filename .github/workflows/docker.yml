@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - main
-      - ci/add-ci-pipelines
   workflow_dispatch:
 
 jobs:
@@ -16,8 +15,10 @@ jobs:
       packages: write
       contents: read
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+          fetch-depth: 0  # checkout full history
 
       # TODO: not sure if this is needed, metadata-action will grab semver from tag
       - name: Set peat version

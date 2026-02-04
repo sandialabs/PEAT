@@ -14,8 +14,11 @@ jobs:
     name: Build Python package
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+          fetch-depth: 0  # checkout full history
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
@@ -45,8 +48,11 @@ jobs:
     # NOTE: ubuntu-24 needed for python3.12
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+          fetch-depth: 0  # checkout full history
       - name: Install apt dependencies
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:
@@ -113,8 +119,11 @@ jobs:
     name: Build Windows Executables
     runs-on: windows-latest
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          fetch-tags: true
+          fetch-depth: 0  # checkout full history
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
