@@ -517,6 +517,8 @@ rm -rf pillage_results/
 help = "Delete documentation build outputs and caches"
 shell = """
 rm -rf ./_built_docs/
+rm -rf ./_docs_man/
+rm -rf ./_docs_html/
 rm -rf ./docs/automodapi_tmp/
 rm -rf ./docs_doctree/
 find . -name ".doctrees" -exec rm -rf {} +
@@ -543,12 +545,12 @@ composite = [
 ]
 
 [tool.pdm.scripts.docs-html]
-help = "Build HTML docs"
-cmd = "sphinx-build -b html docs _built_docs"
+help = "Build HTML docs (output: _docs_html/)"
+cmd = "sphinx-build -b html docs _docs_html"
 
 [tool.pdm.scripts.docs-man]
-help = "Build man pages"
-cmd = "sphinx-build -b man docs _built_docs"
+help = "Build man pages (output: _docs_man/peat.1)"
+cmd = "sphinx-build -b man docs _docs_man"
 
 # TODO: PDF format (using rinohtype)
 [tool.pdm.scripts.docs]
@@ -566,7 +568,7 @@ composite = [
 # NOTE: ignore words for codespell must be lowercase
 check-filenames = ""
 ignore-words-list = "datas,bre,ser,mot,ot,aci,noe,optin,ro,inh,ardvark,hart,tru,nd,carmel"
-skip = "forked_telnetlib.py,manuf,data_files,htmlcov,.doctrees,built_docs,plc_open,mibs,enip,cip,clx_relay_ladder_parser.py,*.pyc,*.class,*.xsd,*.xml,*.ico,*.apx,*.dmk,*.out,*.stu,*.sta,*.ztx,*.PNG,*.inv,*.png,*.jpg,*.dot"
+skip = "forked_telnetlib.py,manuf,data_files,htmlcov,.doctrees,_docs_html,_docs_man,built_docs,plc_open,mibs,enip,cip,clx_relay_ladder_parser.py,*.pyc,*.class,*.xsd,*.xml,*.ico,*.apx,*.dmk,*.out,*.stu,*.sta,*.ztx,*.PNG,*.inv,*.png,*.jpg,*.dot"
 
 
 [tool.black]

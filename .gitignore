@@ -10,6 +10,8 @@ pdm.toml
 # Docs
 _build
 _built_docs
+_docs_html
+_docs_man
 _docs
 .doctrees
 
