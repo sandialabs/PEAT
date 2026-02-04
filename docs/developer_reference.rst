@@ -21,4 +21,3 @@ Documentation of PEAT's Python codebase and APIs.
    elastic_implementation
    database_schema
    exemplar_documents
-   mappings
