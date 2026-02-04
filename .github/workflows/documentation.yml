@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-      - "ci/add-ci-pipelines"
   pull_request:
     branches:
       - main

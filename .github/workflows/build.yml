@@ -58,18 +58,18 @@ jobs:
           pip install -U pdm
           pdm config check_update false
           pdm --version
+      # For some reason setup-pdm action isn't playing nice with PyInstaller
       # - name: Setup PDM
       #   uses: pdm-project/setup-pdm@v4
       #   with:
       #     # use ubuntu 24 runner's python
       #     python-version: "3.12"
       #     cache: false
-      # Pip is needed to manually reinstall psycopg2
+      # NOTE: Pip is needed to manually reinstall psycopg2
       - name: Install Python packages (venv)
         run: |
           pdm sync -G exe
           pdm run python -m ensurepip
-      # TODO: include manpage here?
       - name: Build executable
         run: |
           pdm run build-linux-exe
