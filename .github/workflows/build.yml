@@ -48,14 +48,14 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      # - name: Install apt dependencies
-      #   uses: awalsh128/cache-apt-pkgs-action@v1
-      #   with:
-      #     packages: python3-dev patchelf binutils scons libpq-dev libpq5
+      - name: Install apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: python3-dev python3-pip patchelf binutils scons libpq-dev libpq5
       - name: Install tool dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-dev python3-pip patchelf binutils scons libpq-dev libpq5
+          #sudo apt-get update
+          #sudo apt-get install -y python3-dev python3-pip patchelf binutils scons libpq-dev libpq5
           python3 --version
           python3 -m pip --version
           pip install -U pdm
@@ -98,7 +98,7 @@ jobs:
           mkdir -p sneakypeat_linux
           mv dist/sneakypeat sneakypeat_linux/
       - name: List Sneakypeat executable contents
-        run: pdm run inspect-exe
+        run: pdm run pyi-archive_viewer --list build/sneakypeat-pyinstaller-pre-staticx
       - name: Check Sneakypeat executable
         run: |
           sneakypeat_linux/sneakypeat --help
