@@ -41,17 +41,19 @@ jobs:
         run: pdm sync -d -G docs
       - name: Build docs
         run: pdm run docs
-      - uses: actions/upload-artifact@v6
+      - name: Upload HTML docs artifact
+        uses: actions/upload-artifact@v6
         with:
           name: html-docs
           path: _docs_html/*
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _docs_html/
-      - uses: actions/upload-artifact@v6
+      - name: Upload manpage
+        uses: actions/upload-artifact@v6
         with:
           name: manpage
-          path: _docs_man/getmac.1
+          path: _docs_man/peat.1
   deploy:
     name: Publish docs to GitHub Pages
     runs-on: ubuntu-latest

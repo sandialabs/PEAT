@@ -535,6 +535,7 @@ composite = [
     "clean-build",
     "clean-tests",
     "clean-output",
+    "clean-docs",
     "rm -rf .docenv/",
     "rm -rf *.egg-info",
     "rm -rf elastic_index_export/",
