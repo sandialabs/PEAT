@@ -42,21 +42,25 @@ Setting up a development environment
 .. note::
    These steps are the same for Windows, MacOS, and Linux.
 
-1. `Install PDM <https://pdm-project.org/en/stable/>`__
-2. Clone PEAT repo
+1. Ensure Python 3.11 or newer is installed. The versions of Python supported by PEAT are currently 3.11 - 3.13.
+   - Ubuntu 22.04: ``sudo apt install -y python3.11 python3.11-dev python3.11-pip``
+   - Ubuntu 24.04: ``sudo apt install -y python3 python3-dev python3-pip`` (this is Python 3.12)
+   - Windows: download from `python.org <https://www.python.org/downloads/windows/>`__
+2. `Install PDM <https://pdm-project.org/en/stable/>`__
+3. Clone PEAT repo
 
    .. code-block:: bash
 
       git clone https://github.com/sandialabs/peat.git
       cd peat
 
-3. Create environment and install dependencies
+4. Create environment and install dependencies
 
    .. code-block:: bash
 
       pdm install -d
 
-4. Ensure the install worked
+5. Ensure the install worked
 
    .. code-block:: bash
 

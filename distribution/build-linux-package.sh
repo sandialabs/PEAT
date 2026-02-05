@@ -13,7 +13,7 @@
 # Instead, use the desired Python version from the deadsnakes PPA on Ubuntu.
 #   sudo add-apt-repository -yu ppa:deadsnakes/ppa
 #   sudo apt update
-#   sudo apt install -y python3.9 python3.9-dev python3.9-venv
+#   sudo apt install -y python3.11 python3.11-dev python3.11-venv
 #
 # NOTE (cegoes, 12/22/2022): psycopg2 libraries don't seem to be included if psycopg2-binary package is used.
 # I'm not 100% sure this is the case, it's based on WARNINGS emitted by pyinstaller.
