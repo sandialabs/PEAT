@@ -21,10 +21,12 @@ Building the executable
    # Ensure PDM has initialized venv
    pdm install -d
 
-   # Some tools may be needed
+   # make sure you have the following dependencies if you run into build issues
    sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5
 
-   # Build
+   # Build Linux executable
+   # This runs staticx to include system libraries and be fully portable.
+   # This WILL NOT work on Windows, and probably won't work with Mac.
    pdm run build-linux-exe
 
    # Test
@@ -84,6 +86,45 @@ NOTE: the GitHub Actions CI pipeline automatically builds and pushes containers 
 
    bash distribution/build-docker.sh
    docker run -it ghcr.io/sandialabs/peat --help
+
+General build guidance
+----------------------
+
+.. code-block:: bash
+
+   # make sure you have the following dependencies (linux) if you run into build issues
+   sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5 graphviz
+
+   # Build Windows executable with PyInstaller
+   pdm run build-exe
+
+   # Build Linux executable
+   # This runs staticx to include system libraries and be fully portable.
+   # This WILL NOT work on Windows, and probably won't work with Mac.
+   # Also, you may need to install some tools:
+   # sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5
+   pdm run build-linux-exe
+
+   # Sneakypeat (Windows and Linux)
+   pdm run build-sneakypeat
+   pdm run build-linux-sneakypeat
+
+   # Build Python packages
+   pdm build
+   ls -lAht ./dist/
+   # View files in the package
+   pdm run wheel-files
+
+   # Build docker
+   pdm run build-docker
+
+   # Update dependencies, but don't bump as many versions (pdm.lock)
+   pdm lock --update-reuse -d
+   pdm sync -d
+
+   # Update dependencies and versions
+   pdm lock -d
+   pdm sync -d
 
 
 .. _test-docs:
