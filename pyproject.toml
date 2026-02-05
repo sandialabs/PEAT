@@ -28,7 +28,7 @@ name = "PEAT"
 dynamic = ["version"]
 description = "Process Extraction and Analysis Tool (PEAT)"
 readme = "README.md"
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.11,<3.14"
 license-files = [
     "LICENSE",
     "COPYRIGHT.md",
@@ -53,8 +53,6 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -701,7 +699,7 @@ ignore = [
 # Configuration for mypy
 # https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml-file
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.12"
 follow_imports = "skip"
 ignore_missing_imports = true
 files = "peat"
