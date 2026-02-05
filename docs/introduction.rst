@@ -34,10 +34,10 @@ CSV files for the tables that are listed in the sections that follow.
 
 Included devices
 ----------------
-Devices that are included with PEAT "out of the box" and are fully-integrated as PEAT modules.
+Devices that are included with PEAT "out of the box" and are fully-integrated as PEAT modules. The "Firmware Versions" column lists firmware versions that PEAT has been known to work with, and is *not* exhaustive or indicative of if PEAT will or will not work with a particular firmware version.
 
 .. warning::
-   The estimated Technology Readiness Levels (:term:`TRL`) for each module are **estimates only** and are only intended to provide insight into the maturity of a module's development level and reliability
+   The estimated Technology Readiness Levels (TRL) for each module are **estimates only** and are only intended to provide insight into the maturity of a module's development level and reliability
 
 .. csv-table::
    :escape: \
@@ -85,10 +85,10 @@ Why use PEAT instead of Vendor software or other tools?
 - Licensing costs/ability (there is vendor software that costs ~$11,000 USD for a SINGLE license).
 - Often can't run headless, need a heavy Windows VM, and it's a :term:`GUI` (and that Windows VM needs a license...).
 - Automating Windows :term:`GUI` is time consuming and brittle - This is typically just a one-off type of ability that's expensive to develop and maintain.
-- Vendor software usually only supports their latest and greatest, older devices require older software, now you have multiple :term:`VM`s...
+- Vendor software usually only supports their latest and greatest, older devices require older software, which results in multiple bespoke VMs that require upkeep.
 - Data is limited to what vendor has chosen to implement in this particular software, not what's possible to obtain. They do not (typically) pull down raw meter values, certain configuration values, running process, network states, raw files, file hashes, etc.
 - It isn't very portable, and system requirements are heavy (virtualization software, system with resources to run a :term:`VM`, can't do headless)
-- Doesn't scale, if you want to pull from 10 power meters at the same time, you'll need 10 :term:`VM`s.
+- Doesn't scale, if you want to pull from 10 power meters at the same time, you'll need 10 VMs.
 - Performance. PEAT is often faster.
 - System load. Few or no ways to limit what data is pulled, it could pull a little or a ton of data, depending on the software, causing undesirable load on the device. PEAT also causes load, but you can configure it to just pull what's needed.
 - Standardized output. PEAT standardizes the data so downstream tools and :term:`SIEM` platforms can ingest the data.
