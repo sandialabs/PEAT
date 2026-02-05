@@ -8,8 +8,8 @@ Authors
 """
 
 import zlib
-from typing import Final
 from collections.abc import Callable
+from typing import Final
 
 from peat import ParseError, log
 from peat.modules.rockwell.clx_const import LOGIC_LANGUAGE
@@ -126,7 +126,8 @@ def disassemble_string_process_logic(
     instruction_address = header["LOGIC START"]
     for header_field in routine_data["HEADER"]:
         out.append(
-            f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]  {header[header_field] & 0xFFFFFFFF:0>8x}  {header_field}\n"
+            f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]  "
+            f"{header[header_field] & 0xFFFFFFFF:0>8x}  {header_field}\n"
         )
         instruction_address += 4
 
@@ -138,7 +139,8 @@ def disassemble_string_process_logic(
 
     for footer_field in routine_data["FOOTER"]:
         out.append(
-            f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]  {footer[footer_field] & 0xFFFFFFFF:0>8x}  {footer_field}\n"
+            f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]  "
+            f"{footer[footer_field] & 0xFFFFFFFF:0>8x}  {footer_field}\n"
         )
         instruction_address += 4
     out = "".join(out)
@@ -233,7 +235,10 @@ def format_logic_string_fbd(logic_string_raw: bytes) -> bytes:
 
     logic_string_formatted = []
     for line in zip(
-        logic_string_raw[0::4], logic_string_raw[1::4], logic_string_raw[2::4]
+        logic_string_raw[0::4],
+        logic_string_raw[1::4],
+        logic_string_raw[2::4],
+        strict=False,
     ):
         logic_string_formatted.extend(line)
     logic_string_formatted.extend(
@@ -298,7 +303,10 @@ def format_logic_string_st(logic_string_raw: bytes) -> bytes:
 
     logic_string_formatted = []
     for line in zip(
-        logic_string_raw[0::4], logic_string_raw[1::4], logic_string_raw[2::4]
+        logic_string_raw[0::4],
+        logic_string_raw[1::4],
+        logic_string_raw[2::4],
+        strict=False,
     ):
         logic_string_formatted.extend(line)
     logic_string_formatted.extend(

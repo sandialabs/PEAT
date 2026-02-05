@@ -1,4 +1,3 @@
-
 from peat import utils
 from peat.protocols import SSH
 

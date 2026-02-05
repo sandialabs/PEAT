@@ -40,9 +40,7 @@ class WindowsCE(DeviceModule):
     module_aliases = ["wince", "TP700", "SiemensComfort"]
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         # Read the JSON config data from the file
         raw_data = file.read_text(encoding="utf-8")
 

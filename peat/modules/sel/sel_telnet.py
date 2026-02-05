@@ -143,9 +143,7 @@ class SELTelnet(SELAscii):
 
         return self.telnet_download_capable
 
-    def download_binary(
-        self, filename: str, save_to_file: bool = True
-    ) -> str | None:
+    def download_binary(self, filename: str, save_to_file: bool = True) -> str | None:
         """
         Download a file from the device.
 

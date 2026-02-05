@@ -302,9 +302,7 @@ class FTP:
 
         self.ftp.storlines(f"STOR {filename}", file_obj)
 
-    def upload_binary(
-        self, filename: str, content: bytes | BufferedReader
-    ) -> None:
+    def upload_binary(self, filename: str, content: bytes | BufferedReader) -> None:
         # We make a new variable to avoid over-writing the argument reference
         if isinstance(content, bytes):
             file_obj = BytesIO(content)
@@ -358,9 +356,7 @@ class FTP:
         """Rename a file on the server."""
         return self._do("rename", filename, new_name)
 
-    def dir(
-        self, directory: str | None = None
-    ) -> tuple[list[str], list[dict]] | None:
+    def dir(self, directory: str | None = None) -> tuple[list[str], list[dict]] | None:
         """
         List files on the FTP server, including file metadata (``dir`` command).
 

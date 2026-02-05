@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from datetime import timedelta
 from pathlib import PurePath
-from collections.abc import Callable
 
 from bs4 import BeautifulSoup
 
@@ -710,7 +710,9 @@ class TotusHTTP(HTTP):
                 mb_data.append(
                     {
                         h: str(td.string) if td.string else None
-                        for h, td in zip(mb_headers, tbl_entry.find_all("td"))
+                        for h, td in zip(
+                            mb_headers, tbl_entry.find_all("td"), strict=False
+                        )
                     }
                 )
 
@@ -759,6 +761,7 @@ class TotusHTTP(HTTP):
             for table_header, table in zip(
                 list(dnp3_soup.body.find_all("h2")),
                 list(dnp3_soup.body.find_all("table")),
+                strict=False,
             )
         }
         dnp3_data = {}
@@ -780,7 +783,9 @@ class TotusHTTP(HTTP):
                 parsed_section.append(
                     {
                         h: str(td.string) if td.string else None
-                        for h, td in zip(section_headers, tbl_entry.find_all("td"))
+                        for h, td in zip(
+                            section_headers, tbl_entry.find_all("td"), strict=False
+                        )
                     }
                 )
             dnp3_data[section_name] = parsed_section

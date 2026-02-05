@@ -12,6 +12,7 @@ References for /proc (aka, "procfs"):
 """
 
 import datetime
+import itertools
 import json
 import os.path
 import re
@@ -456,7 +457,9 @@ class ProcNetDevParser(NixParserBase):
                 continue
 
             iface, raw_data = line.split(":")
-            if_data = {t[0]: int(t[1]) for t in zip(cols, raw_data.split())}
+            if_data = {
+                t[0]: int(t[1]) for t in zip(cols, raw_data.split(), strict=False)
+            }
 
             results[iface] = if_data
 
@@ -763,7 +766,7 @@ class IfconfigParser(NixParserBase):
 
         all_interfaces = {}
 
-        for chunk_start, chunk_end in zip(positions, positions[1:]):
+        for chunk_start, chunk_end in itertools.pairwise(positions):
             chunk = to_parse[chunk_start:chunk_end]
             interface = {}
 

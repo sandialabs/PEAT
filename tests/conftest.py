@@ -10,11 +10,11 @@ import atexit
 import json
 import os
 import sys
-from datetime import datetime, UTC
+from collections.abc import Callable
+from datetime import UTC, datetime
 from pathlib import Path
 from platform import system, version
 from subprocess import PIPE, CompletedProcess, Popen, run
-from collections.abc import Callable
 
 import pytest
 from deepdiff import DeepDiff

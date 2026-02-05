@@ -9,14 +9,14 @@ import re
 import shutil
 import site
 import sys
+from collections.abc import Container, Iterable
 from contextlib import ExitStack
 from copy import deepcopy
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from ipaddress import ip_address
 from pathlib import Path
 from traceback import format_exc
 from typing import Any
-from collections.abc import Container, Iterable
 
 import pathvalidate
 from dateutil.parser import parse as date_parse
@@ -388,9 +388,7 @@ def copy_file(src_path: Path, dst_path: Path, overwrite: bool = False) -> None:
         state.written_files.add(dst_path.as_posix())
 
 
-def check_file(
-    file: Path | str, ext: list | str | None = None
-) -> str | Path | None:
+def check_file(file: Path | str, ext: list | str | None = None) -> str | Path | None:
     """
     Checks if a path exists and is valid, and returns the :class:`~pathlib.Path` to it.
 

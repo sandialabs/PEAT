@@ -5,7 +5,7 @@ import shutil
 import sys
 import warnings
 from base64 import b64encode
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from random import randint
 from typing import Any, Final, Literal
@@ -80,9 +80,7 @@ START_TIME: Final[str] = START_TIME_LOCAL.strftime(TIME_FMT)
 #: NOTE: previously, the Run ID was 10 digits (changed 02/20/2020)
 RUN_ID: Final[int] = int(f"{int(START_TIME_UTC.timestamp()):10}{randint(0, 99):02}")
 
-NO_COLOR_LOGO: Final[
-    str
-] = r"""
+NO_COLOR_LOGO: Final[str] = r"""
     ____  _________  ______
    / __ \/ ____/   |/_  __/
   / /_/ / __/ / /| | / /

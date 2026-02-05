@@ -7,7 +7,6 @@ Authors
 - Christopher Goes
 """
 
-
 from peat import log
 
 from .clx_cip import ClxCIP

@@ -220,7 +220,7 @@ def parse_ti_response(ti_response: str, tid_dict: dict[str, Any]) -> bool:
     ti_lines = _extract_lines(ti_response)
     column_names = ti_lines[0].split()
     vals = ti_lines[2].split()
-    for key, val in zip(column_names, vals):
+    for key, val in zip(column_names, vals, strict=False):
         if key not in tid_dict:
             tid_dict[key] = val
 
@@ -631,7 +631,7 @@ def parse_ipf(data: str) -> dict:
         except Exception:
             fw_stats[key] = {}
             parts = value.split(" ")
-            for k, v in zip(parts[0::2], parts[1::2]):
+            for k, v in zip(parts[0::2], parts[1::2], strict=False):
                 fw_stats[key][k] = int(v)
 
     return fw_stats

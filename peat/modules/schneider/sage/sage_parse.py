@@ -11,15 +11,15 @@ Authors
 
 import re
 import xml.etree.ElementTree as ET
+from collections.abc import Callable
 from datetime import datetime
 from pathlib import PurePath, PurePosixPath
-from typing import IO, Any, Final, Union
-from collections.abc import Callable
+from typing import IO, Any, Final
 
 from peat import DeviceData, log, utils
 from peat.data.models import Event, Interface, User
 
-ElasticType = Union[None, int, bool, str, float]
+ElasticType = None | int | bool | str | float
 
 
 def _convert_to_elastic(_input: str) -> ElasticType:
@@ -1306,7 +1306,7 @@ def parse_logfiles(f_handle: IO[bytes], device_info: dict) -> None:
 
     # SYSLOG.LOG has events across two separate lines
     if "DT=" not in data:
-        lines = ["\n".join(x) for x in zip(lines[0::2], lines[1::2])]
+        lines = ["\n".join(x) for x in zip(lines[0::2], lines[1::2], strict=False)]
 
     events = []
 

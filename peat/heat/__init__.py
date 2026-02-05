@@ -1,5 +1,3 @@
-from typing import Type
-
 from .ftp_extractor import FTPExtractor
 from .heat_classes import HeatProtocol
 from .telnet_extractor import TelnetExtractor

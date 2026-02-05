@@ -374,9 +374,7 @@ class SELRelay(DeviceModule):
         return False
 
     @classmethod
-    def _selascii_get_id(
-        cls, dev: DeviceData, comm: SELTelnet | SELSerial
-    ) -> bool:
+    def _selascii_get_id(cls, dev: DeviceData, comm: SELTelnet | SELSerial) -> bool:
         id_info = comm.get_id()
 
         if not id_info:
@@ -535,9 +533,7 @@ class SELRelay(DeviceModule):
         return True
 
     @classmethod
-    def pull_configs(
-        cls, dev: DeviceData, comms: FTP | SELTelnet | SELSerial
-    ) -> bool:
+    def pull_configs(cls, dev: DeviceData, comms: FTP | SELTelnet | SELSerial) -> bool:
         all_files = pull_files(dev, comms)
 
         if not all_files:
@@ -608,9 +604,7 @@ class SELRelay(DeviceModule):
         return successful
 
     @classmethod
-    def pull_more_commands(
-        cls, dev: DeviceData, comms: SELTelnet | SELSerial
-    ) -> bool:
+    def pull_more_commands(cls, dev: DeviceData, comms: SELTelnet | SELSerial) -> bool:
         """
         Attempt to get more info via terminal commands
         (get_sta, show_eth, show_status, etc.).
@@ -1464,9 +1458,7 @@ class SELRelay(DeviceModule):
         return False
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         # "file" can be one of the following:
         # - a SET_ALL.TXT file
         # - a *.rdb file

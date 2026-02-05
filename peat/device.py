@@ -374,9 +374,7 @@ class DeviceModule:
         return parse_dev
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         """
         Implemented by modules. Subclass :class:`~peat.device.DeviceModule`
         and override this method.

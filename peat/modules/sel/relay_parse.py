@@ -1783,7 +1783,7 @@ def parse_cser(lines: list[str]) -> tuple[list[dict], dict]:
     events = []
     last_key = list(rows[0].keys())[-1]  # "0A31"
 
-    for row, line in zip(rows, lines[3:]):
+    for row, line in zip(rows, lines[3:], strict=False):
         event = {
             "sequence": int(row["REC_NUM"]),
             "date": row["DATE"],
@@ -1814,7 +1814,7 @@ def parse_chistory(lines: list[str]) -> tuple[list[dict], dict]:
 
     events = []
 
-    for row, line in zip(rows, lines[3:]):
+    for row, line in zip(rows, lines[3:], strict=False):
         date = f"{row['MONTH']}/{row['DAY']}/{row['YEAR']}"
         time = f"{row['HOUR']}:{row['MIN']}:{row['SEC']}.{row['MSEC']}"
 

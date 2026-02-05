@@ -1,8 +1,6 @@
-from typing import Union
-
 from peat import config
 
-ConfigVal = Union[list, str, bool, float, int]
+ConfigVal = list | str | bool | float | int
 
 #: Global defaults used by all devices
 #: Refer to examples/peat-config.yaml for descriptions of the options

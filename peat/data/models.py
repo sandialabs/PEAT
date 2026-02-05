@@ -55,7 +55,6 @@ from .validators import (
     convert_arbitrary_path_to_purepath,
 )
 
-
 # NOTE:
 # - values added directly to sets/lists are not validated (e.g. related.*) (TODO: fix this somehow?)
 # - validation is done on assignment because validate_assignment is true
@@ -292,8 +291,8 @@ class Hash(BaseModel):
     )
     """SHA1 hash."""
 
-    sha256: constr(min_length=64, max_length=64, strip_whitespace=True) | None = (
-        Field(default=None, title="SHA256 hash")
+    sha256: constr(min_length=64, max_length=64, strip_whitespace=True) | None = Field(
+        default=None, title="SHA256 hash"
     )
     """SHA256 hash."""
 

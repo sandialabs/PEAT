@@ -1,11 +1,11 @@
 import timeit
 import traceback
+from collections.abc import Callable
 from concurrent import futures
 from ipaddress import IPv4Address, IPv4Network
 from operator import itemgetter
 from pprint import pformat
 from time import sleep
-from collections.abc import Callable
 
 from humanfriendly.tables import format_pretty_table
 from humanfriendly.terminal import ansi_strip

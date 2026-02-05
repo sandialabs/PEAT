@@ -127,7 +127,7 @@ class ClxHTTP(HTTP):
         ]
 
         return [
-            {label: str(val.string) for label, val in zip(labels, row)}
+            {label: str(val.string) for label, val in zip(labels, row, strict=False)}
             for row in rows[1:]
         ]
 

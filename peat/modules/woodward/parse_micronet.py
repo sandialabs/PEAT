@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 
 from elftools.common.utils import bytes2str

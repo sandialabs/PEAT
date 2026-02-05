@@ -1,6 +1,6 @@
 import struct
-from typing import Final
 from collections.abc import Callable
+from typing import Final
 
 # NOTE(cegoes): keep an eye on str/bytes conversion here
 

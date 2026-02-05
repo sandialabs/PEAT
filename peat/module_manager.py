@@ -2,9 +2,9 @@ import importlib
 import inspect
 import pkgutil
 import sys
+from collections.abc import Iterable
 from pathlib import Path
 from typing import Any
-from collections.abc import Iterable
 
 from peat import log, utils
 from peat.device import DeviceData, DeviceModule, IPMethod, SerialMethod

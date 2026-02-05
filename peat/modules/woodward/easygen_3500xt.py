@@ -429,9 +429,7 @@ class Easygen3500XT(DeviceModule):
         return svl_info
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         if file.suffix.lower() == ".tc":
             raise DeviceError(
                 f"*.tc files are not currently supported (filename: '{file.name}')"

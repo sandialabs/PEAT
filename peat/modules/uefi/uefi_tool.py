@@ -23,9 +23,7 @@ class UEFI(DeviceModule):
     module_aliases = ["UEFI", "uefi"]
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         if not dev:
             dev = datastore.get(f"uefi_{file.stem.lower()}", "id")
 

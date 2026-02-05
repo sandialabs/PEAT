@@ -12,7 +12,7 @@ Authors
 
 from __future__ import annotations
 
-from typing import Any, Union
+from typing import Any
 
 from peat import config, log
 from peat.protocols.cip import *
@@ -21,8 +21,8 @@ from peat.protocols.enip import EnipDriver, EnipSocket
 
 from .clx_const import *
 
-PathType = Union[tuple, tuple[int, Any]]
-TagData = Union[int, bytes]
+PathType = tuple | tuple[int, Any]
+TagData = int | bytes
 DataListType = tuple[TagData, int]
 FragListType = tuple[TagData, int, bytes]
 TemplateType = dict[str, str | dict]

@@ -26,6 +26,11 @@ IPV4_RE: Final[str] = r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})"
 MANUF_PATH = None
 MAC_PARSER = None
 
+# Vendor tuple
+# Manually define here instead of importing from manuf because manuf
+# might not always be present.
+Vendor = namedtuple("Vendor", ["manuf", "manuf_long", "comment"])
+
 
 def scapy_human_field(obj: Packet, field: str) -> str:
     """
@@ -35,7 +40,7 @@ def scapy_human_field(obj: Packet, field: str) -> str:
 
 
 @lru_cache(maxsize=1024)
-def mac_to_vendor(mac: str) -> namedtuple | None:
+def mac_to_vendor(mac: str) -> Vendor | None:
     """
     Lookup the vendor using the :term:`OUI` of a MAC address.
 

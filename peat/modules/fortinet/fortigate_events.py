@@ -29,7 +29,7 @@ other two locations have the same format.
 """
 
 import re
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
 from peat import DeviceData, Event, utils
 from peat.protocols.common import IPV4_RE

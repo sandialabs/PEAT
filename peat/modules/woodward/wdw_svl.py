@@ -517,9 +517,7 @@ def _svltcp_parse_rsp(rd_bytes: bytes | None) -> dict:
     return tcp_rsp
 
 
-def _svl_parse_data(
-    data_bytes: bytes, rfmt: type
-) -> str | int | bool | float | bytes:
+def _svl_parse_data(data_bytes: bytes, rfmt: type) -> str | int | bool | float | bytes:
     rlen = svl_data_types[rfmt]["len"]
 
     # Parse the data

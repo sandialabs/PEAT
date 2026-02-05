@@ -258,7 +258,7 @@ def _get_snmp_metadata(
                 # raw bytes and not text characters.
                 mac = binascii.b2a_hex(bytes(data, "utf-8")).decode().upper()
                 module_info["mac_address"] = ":".join(
-                    a + b for a, b in zip(mac[::2], mac[1::2])
+                    a + b for a, b in zip(mac[::2], mac[1::2], strict=False)
                 )
             elif "ipv4" in name:
                 # snmp.get() will generate a IP string

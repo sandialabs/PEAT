@@ -55,7 +55,6 @@ from pysnmp.smi.builder import DirMibSource, MibBuilder
 import peat
 from peat import consts, config, state, utils, exit_handler, log
 
-
 # https://www.iana.org/assignments/ianaiftype-mib/ianaiftype-mib
 INTERFACE_MAP: Final[dict[int, str]] = {
     1: "other",
@@ -342,9 +341,7 @@ class SNMP:
 
         return values
 
-    def verify(
-        self, identity: str | tuple, to_find: str | list[str]
-    ) -> bool:
+    def verify(self, identity: str | tuple, to_find: str | list[str]) -> bool:
         """
         Checks if a string is in the response data for an SNMP query.
 

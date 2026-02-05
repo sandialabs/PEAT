@@ -8,8 +8,8 @@ Authors
 - Greg Walkup
 """
 
-from typing import Final
 from collections.abc import Callable
+from typing import Final
 
 from peat import log
 from peat.protocols.data_packing import *
@@ -75,7 +75,7 @@ def disassemble_ladder_process_logic(
         for instruction in instruction_list:
             out.append(
                 f"[0x{starting_address:0>8x}]  "
-                 f"{instruction & 0xFFFFFFFF:0>8x}  "
+                f"{instruction & 0xFFFFFFFF:0>8x}  "
                 + disassemble_instruction(instruction)
             )
             starting_address += 0x4
@@ -132,7 +132,7 @@ def _decompile_OPERAND(
     # If second byte is "d8", it's an intermediate result
     if (operand & 0x00FF0000) == 0x00D80000:
         argument = operand & 0x0000FFFF
-        decompiled = "{0}[{1}] := INTERMED RESULT [0x{2:0>4x}]".format(
+        decompiled = "{}[{}] := INTERMED RESULT [0x{:0>4x}]".format(
             LOGIC_OPCODE[opcode]["name"], str(operand_index), argument
         )
         return decompiled, starting_address
@@ -140,7 +140,7 @@ def _decompile_OPERAND(
         if operand & 0x00800000:
             operand &= 0x007FFFFF
             operand += MODULE_SEGMENT_ADDRESS
-        decompiled = "{0}[{1}] := [@0x{2:0>8x}@]".format(
+        decompiled = "{}[{}] := [@0x{:0>8x}@]".format(
             LOGIC_OPCODE[opcode]["name"], str(operand_index), operand
         )
         return decompiled, starting_address
@@ -174,7 +174,7 @@ def _decompile_CONST(
     #    operand = operand & 0x007FFFFF
     #    val = operand + MODULE_SEGMENT_ADDRESS
     return (
-        "{0}[{1}] := [0x{2:0>8x}]".format(
+        "{}[{}] := [0x{:0>8x}]".format(
             LOGIC_OPCODE[opcode]["name"], operand_index, val
         ),
         starting_address,
@@ -201,7 +201,7 @@ def _decompile_LOADMEM(
     opcode = (instruction_list[0] & 0xFF000000) >> 24
     argument = operand >> 3
     return (
-        "{0} := 0x{1:0>8x}".format(LOGIC_OPCODE[opcode]["name"], argument),
+        "{} := 0x{:0>8x}".format(LOGIC_OPCODE[opcode]["name"], argument),
         starting_address,
     )
 
@@ -238,7 +238,7 @@ def _decompile_STR(
         operand_index = (operand & 0x001E0000) >> 17
         argument = operand & 0x0000FFFF
         return (
-            "{0}[{1}] := INTERMED RESULT [0x{2:0>4x}]".format(
+            "{}[{}] := INTERMED RESULT [0x{:0>4x}]".format(
                 LOGIC_OPCODE[opcode]["name"], str(operand_index), argument
             ),
             starting_address,
@@ -246,7 +246,7 @@ def _decompile_STR(
     else:
         argument = operand >> 3
         return (
-            "{0}    := [0x{1:0>8x}]".format(LOGIC_OPCODE[opcode]["name"], argument),
+            "{}    := [0x{:0>8x}]".format(LOGIC_OPCODE[opcode]["name"], argument),
             starting_address,
         )
 
@@ -330,14 +330,14 @@ def _decompile_PTR(
 
     if resolve_operand:
         return (
-            "{0}[{1}] := [@0x{2:0>8x}@]".format(
+            "{}[{}] := [@0x{:0>8x}@]".format(
                 LOGIC_OPCODE[opcode]["name"], str(operand_index), argument
             ),
             starting_address,
         )
     else:
         return (
-            "{0}[{1}] := [0x{2:0>8x}]".format(
+            "{}[{}] := [0x{:0>8x}]".format(
                 LOGIC_OPCODE[opcode]["name"], str(operand_index), argument
             ),
             starting_address,
@@ -373,7 +373,7 @@ def _decompile_BIT_OP(
     argument = f"@0x{argument_value & 0xFFFFFFFF:0>8x}@"
 
     return (
-        "{0}({1})[{2}]".format(
+        "{}({})[{}]".format(
             LOGIC_OPCODE[opcode]["name"], argument, str(operand_bit_index)
         ),
         starting_address,
@@ -1824,7 +1824,7 @@ def instruction_buffer_to_instruction_list(instruction_buffer: list) -> list:
         Instruction list as properly formatted list of 32-bit integers
     """
 
-    instruction_byte_list = list(zip(*(iter(instruction_buffer),) * 4))
+    instruction_byte_list = list(zip(*(iter(instruction_buffer),) * 4, strict=False))
     instruction_list = [
         unpack_dint(bytes(instruction)) & 0xFFFFFFFF
         for instruction in instruction_byte_list

@@ -9,7 +9,7 @@ Sources:
 - https://github.com/util-linux/util-linux/blob/master/sys-utils/lscpu-arm.c
 """
 
-from typing import Final  # Need Union on Python 3.9 due to syntax issue
+from typing import Final
 
 # dict key: Implementer ID, from "CPU implementer" field
 # dict value: name and part IDs

@@ -1,9 +1,8 @@
 """SEL RTAC parsing functions."""
 
 import xml.etree.ElementTree as ET
-from typing import Union
 
-ElasticType = Union[None, int, bool, str, float]
+ElasticType = None | int | bool | str | float
 
 
 def convert_to_elastic(_input: str) -> ElasticType:
@@ -368,7 +367,7 @@ def parse_tagprocessor(tag: ET, device_info: dict) -> None:
                         results[row.text] = {}
                     else:
                         # get name of setting from entry in row
-                        tag_val = "SolveOrder_%s" % tagname_from_ET(row, "SolveOrder")
+                        tag_val = f"SolveOrder_{tagname_from_ET(row, 'SolveOrder')}"
                         results[name][tag_val] = {}
 
                         for setting in row:

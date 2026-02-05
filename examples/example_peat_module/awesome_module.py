@@ -111,9 +111,7 @@ class AwesomeTool(DeviceModule):
         return http_successful
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         """
         Implementing DeviceModule._parse() tells PEAT how to parse
         files. The input to "peat parse" (e.g. a file or piped input)

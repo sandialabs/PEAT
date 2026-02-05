@@ -428,14 +428,12 @@ class SELRTAC(DeviceModule):
                 old_path = []
             else:
                 old_path = path[:]
-            old_path.append("%s" % k1)
+            old_path.append(f"{k1}")
             # Check if test path in transient keys
             if cls.chk_transient_path(old_path):
                 continue
             if k1 not in dict_2:
-                key_err.append(
-                    "Key %s%s not in %s\n" % (dict_2_name, old_path, dict_2_name)
-                )
+                key_err.append(f"Key {dict_2_name}{old_path} not in {dict_2_name}\n")
             else:
                 if isinstance(v1, dict) and isinstance(dict_2[k1], dict):
                     cls.compare_dictionaries(
@@ -444,15 +442,8 @@ class SELRTAC(DeviceModule):
                 else:
                     if v1 != dict_2[k1]:
                         value_err.append(
-                            "Value of %s%s (%s) not same as %s%s (%s)\n"
-                            % (
-                                dict_1_name,
-                                old_path,
-                                v1,
-                                dict_2_name,
-                                old_path,
-                                dict_2[k1],
-                            )
+                            f"Value of {dict_1_name}{old_path} ({v1}) not same "
+                            f"as {dict_2_name}{old_path} ({dict_2[k1]})\n"
                         )
 
         for k in dict_2.keys():
@@ -460,11 +451,9 @@ class SELRTAC(DeviceModule):
                 old_path = []
             else:
                 old_path = path[:]
-            old_path.append("%s" % k)
+            old_path.append(f"{k}")
             if k not in dict_1:
-                key_err.append(
-                    "Key %s%s not in %s\n" % (dict_2_name, old_path, dict_1_name)
-                )
+                key_err.append(f"Key {dict_2_name}{old_path} not in {dict_1_name}\n")
 
         return key_err, value_err, err
 
@@ -540,9 +529,7 @@ class SELRTAC(DeviceModule):
             raise web_exception from None
 
     @classmethod
-    def pull_web(
-        cls, dev: DeviceData, protocol: str | None = None
-    ) -> dict | None:
+    def pull_web(cls, dev: DeviceData, protocol: str | None = None) -> dict | None:
         cls.log.info(f"Pulling RTAC data via web interface from {dev.ip}")
 
         if not protocol:

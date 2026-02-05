@@ -320,9 +320,7 @@ def pull_files(
     return all_files
 
 
-def populate_file_listing(
-    dev: DeviceData, comms: FTP | SELTelnet | SELSerial
-) -> None:
+def populate_file_listing(dev: DeviceData, comms: FTP | SELTelnet | SELSerial) -> None:
     # ["DIAGNOSTICS", "EVENTS", "HMI", "REPORTS", "SER", "STATUS", "SETTINGS"]
     if not dev.extra.get("file_listing"):
         if isinstance(comms, FTP):

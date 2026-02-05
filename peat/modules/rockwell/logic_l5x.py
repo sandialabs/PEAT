@@ -44,9 +44,7 @@ class L5X(DeviceModule):
     default_options = {}
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         """
         Parser for consuming L5X files that have been exported by RSLogix.
 

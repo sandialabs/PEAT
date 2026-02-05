@@ -274,9 +274,7 @@ class SCEPTRE(DeviceModule):
         return data
 
     @classmethod
-    def _upload_ftp(
-        cls, dev: DeviceData, filename: str, content: str | bytes
-    ) -> bool:
+    def _upload_ftp(cls, dev: DeviceData, filename: str, content: str | bytes) -> bool:
         try:
             with FTP(
                 ip=dev.ip,

@@ -6,6 +6,7 @@ import json
 import pickle
 from base64 import b64encode
 from collections import defaultdict
+from collections.abc import Callable
 from ipaddress import (
     IPv4Address,
     IPv4Interface,
@@ -18,7 +19,6 @@ from pathlib import PurePath
 from pprint import pformat
 from random import randint
 from typing import Any, Literal
-from collections.abc import Callable
 
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ApiError, RequestError, TransportError

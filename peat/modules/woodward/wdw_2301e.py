@@ -134,9 +134,7 @@ class WDW2301E(DeviceModule):
         return serial_info
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         to_parse = file.read_bytes()
         # TODO: detect 2301E wset file
         try:

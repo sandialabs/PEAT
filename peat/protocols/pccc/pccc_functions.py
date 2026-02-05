@@ -1,5 +1,5 @@
-from typing import Final
 from collections.abc import Callable
+from typing import Final
 
 from scapy.fields import ByteField, IntField, LEIntField, ShortField
 from scapy.packet import Packet

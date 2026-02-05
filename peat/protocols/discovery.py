@@ -18,8 +18,8 @@ Further reading about getting raw socket permissions on Linux
 """
 
 import timeit
-from concurrent import futures
 from collections.abc import Iterable
+from concurrent import futures
 
 from scapy.all import RandShort, sr1
 from scapy.layers.inet import ICMP, IP

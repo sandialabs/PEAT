@@ -29,7 +29,6 @@ IEC 61131-3 is the standard defining the 5 PLC programming languages:
 - Sequential Function Chart (SFC)
 """
 
-
 from peat import log
 
 from .plc_open import PLCControler

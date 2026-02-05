@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import copy
 from collections import ChainMap
+from collections.abc import Callable
 from operator import attrgetter
 from typing import Any
-from collections.abc import Callable
 
 from peat import PeatError, config, log, utils
 

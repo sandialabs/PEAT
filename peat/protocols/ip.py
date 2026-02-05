@@ -2,9 +2,9 @@ import errno
 import os
 import socket
 import struct
+from collections.abc import Callable
 from pprint import pformat
 from socket import AF_INET, SOCK_DGRAM, SOCK_STREAM
-from collections.abc import Callable
 
 from peat import config, consts, log
 from peat.protocols.snmp import SNMP

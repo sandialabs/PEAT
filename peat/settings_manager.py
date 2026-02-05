@@ -2,6 +2,7 @@ import json
 import os
 from collections import ChainMap
 from pathlib import Path
+from types import UnionType  # NOTE: won't be needed once minimum python is 3.14
 from typing import Any, Union, get_args, get_origin, get_type_hints
 
 import yaml
@@ -416,7 +417,7 @@ class SettingsManager(dict):
         #   get_args(Optional[Union[Path, str]]) => (Path, str, None)
         args = get_args(typecast)
 
-        if og and og is Union:
+        if og and (og is Union or og is UnionType):
             if type(None) in args and value is None:
                 # Value is None, don't accidentally return the string "None"
                 return None

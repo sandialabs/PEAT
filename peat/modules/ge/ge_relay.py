@@ -162,9 +162,7 @@ class GERelay(DeviceModule):
         return True
 
     @classmethod
-    def _parse(
-        cls, file: Path, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         """
         This will parse a directory of scraped HTML files. It is intended to be
         used for testing and development of PEAT, such as generation of test
@@ -664,7 +662,8 @@ def parse_ge_html(text: str, key_value_pairs: bool = False) -> dict[str, list[di
                 if not tr_vals:
                     continue
                 row_values = {
-                    col: value.strip() for col, value in zip(tbl_header, tr_vals)
+                    col: value.strip()
+                    for col, value in zip(tbl_header, tr_vals, strict=False)
                 }  # type: dict[str, Union[str, int]]
                 table_values.append(row_values)
 

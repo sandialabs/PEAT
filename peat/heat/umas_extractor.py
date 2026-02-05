@@ -97,7 +97,9 @@ class UmasExtractor(HeatProtocol):
                     f"packets for {ip} ({len(group_pkts)} packets)."
                 )
                 continue
-            for start_loc, stop_loc in zip(start_locations, stop_locations):
+            for start_loc, stop_loc in zip(
+                start_locations, stop_locations, strict=False
+            ):
                 # bucket[0]: INITIALIZE_DOWNLOAD or INITIALIZE_UPLOAD
                 # bucket[-1]: END_DOWNLOAD or END_UPLOAD (hence 'stop_loc + 1')
                 bkt_iter = itertools.islice(group_pkts, start_loc, stop_loc + 1)
