@@ -9,11 +9,11 @@ Sources:
 - https://github.com/util-linux/util-linux/blob/master/sys-utils/lscpu-arm.c
 """
 
-from typing import Final, Union  # Need Union on Python 3.9 due to syntax issue
+from typing import Final  # Need Union on Python 3.9 due to syntax issue
 
 # dict key: Implementer ID, from "CPU implementer" field
 # dict value: name and part IDs
-ARM_CPU_IDS: Final[dict[str, dict[str, Union[str, dict[str, str]]]]] = {
+ARM_CPU_IDS: Final[dict[str, dict[str, str | dict[str, str]]]] = {
     "0x41": {
         "name": "ARM",
         # Key: Part ID, from "CPU part" field

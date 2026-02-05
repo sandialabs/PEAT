@@ -37,7 +37,7 @@ Authors:
 import os.path
 from copy import deepcopy
 from pathlib import Path
-from typing import Optional, Union, Final
+from typing import Final
 
 from pyasn1.codec.native.encoder import encode
 from pysnmp.hlapi import (
@@ -76,7 +76,7 @@ class SNMP:
         timeout: float = 1.0,
         community: str = "public",
         snmp_version: int = 1,
-        mib_paths: Optional[list[Union[str, Path]]] = None,
+        mib_paths: list[str | Path] | None = None,
     ) -> None:
         """
         Args:
@@ -158,7 +158,7 @@ class SNMP:
 
     def get(
         self,
-        identity: Union[str, tuple],
+        identity: str | tuple,
         single_query: bool = True,
         query_limit: int = 0,
         walk_whole_mib: bool = False,
@@ -343,7 +343,7 @@ class SNMP:
         return values
 
     def verify(
-        self, identity: Union[str, tuple], to_find: Union[str, list[str]]
+        self, identity: str | tuple, to_find: str | list[str]
     ) -> bool:
         """
         Checks if a string is in the response data for an SNMP query.
@@ -393,7 +393,7 @@ class SNMP:
 def snmp_walk(
     ip: str,
     mib_name: str,
-    mib_src: Union[str, Path],
+    mib_src: str | Path,
     community: str = "public",
     timeout: float = 0.5,
     port: int = 161,

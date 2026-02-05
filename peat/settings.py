@@ -4,7 +4,6 @@ import typing
 from collections import defaultdict
 from ipaddress import IPv4Interface, IPv4Network
 from pathlib import Path
-from typing import Optional, Union
 
 from .consts import RUN_ID, START_TIME, AllowedCommTypes, EntrypointType
 from .settings_manager import SettingsManager
@@ -32,7 +31,7 @@ class Configuration(SettingsManager):
     Metadata for the PEAT YAML configuration file.
     """
 
-    ADDITIONAL_MODULES: list[Union[str, Path]] = []
+    ADDITIONAL_MODULES: list[str | Path] = []
     """
     File paths to external/third-party PEAT device modules to import.
 
@@ -515,7 +514,7 @@ class Configuration(SettingsManager):
     Specify or override options for specific hosts.
     """
 
-    PCAPS: Optional[Path] = None
+    PCAPS: Path | None = None
     """
     Specify folder that contains PCAPS for processing by HEAT.
 
@@ -535,7 +534,7 @@ class Configuration(SettingsManager):
     NOTE: zeek_dir must be specified if no_run_zeek is true.
     """
 
-    ZEEK_DIR: Optional[Path] = None
+    ZEEK_DIR: Path | None = None
     """
     Directory with existing Zeek output to use as input.
 
@@ -560,7 +559,7 @@ class State(SettingsManager):
     ``RESOLVE_MAC`` is False.
     """
 
-    comm_type: Optional[AllowedCommTypes] = None
+    comm_type: AllowedCommTypes | None = None
     """
     Communication method being used for an active command (scan, pull, or push).
     This is a bit of a hack to allow leaking a bit of CLI-specific info
@@ -571,7 +570,7 @@ class State(SettingsManager):
     :meta hide-value:
     """
 
-    elastic: Optional["peat.Elastic"] = None
+    elastic: peat.Elastic | None = None
     """
     Elastic instance used to interact with a Elasticsearch database,
     such as the one used by Vedizar.
@@ -695,7 +694,7 @@ class State(SettingsManager):
     :meta hide-value:
     """
 
-    superuser_privs: Optional[bool] = None
+    superuser_privs: bool | None = None
     """
     Is PEAT running with permissions of ``root`` (POSIX)
     or ``Administrator`` (Windows).

@@ -27,7 +27,6 @@ Authors
 import binascii
 import itertools
 from collections import defaultdict
-from typing import Optional
 
 from peat import Interface, Service, config, datastore, log, state, utils
 from peat.protocols.common import mac_to_vendor
@@ -183,7 +182,7 @@ class UmasExtractor(HeatProtocol):
 
                 # Lookup to associate data in the download block from the response
                 for pkt in packets:
-                    block_id: Optional[int] = pkt["umas"].get("block_id")
+                    block_id: int | None = pkt["umas"].get("block_id")
                     func: str = pkt["umas"]["function_name"]
                     if func in self.END_FUNCS:
                         artifact.expected_blocks = int(

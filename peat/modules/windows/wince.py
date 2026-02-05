@@ -9,7 +9,6 @@ Authors
 
 import json
 from pathlib import Path
-from typing import Optional
 
 from peat import DeviceData, DeviceModule, Interface, Service, datastore
 from peat.protocols.enip import VENDOR_NAMES
@@ -42,8 +41,8 @@ class WindowsCE(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         # Read the JSON config data from the file
         raw_data = file.read_text(encoding="utf-8")
 

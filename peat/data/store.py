@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from peat import log
 
@@ -25,7 +25,7 @@ class Datastore:
     def __init__(self) -> None:
         self.objects = []
         self.global_options = {}
-        self._data_obj: Optional[DeviceData] = None
+        self._data_obj: DeviceData | None = None
 
     def create(self, ident: str, ident_type: str) -> DeviceData:
         """
@@ -77,7 +77,7 @@ class Datastore:
 
         return self.create(ident, ident_type)
 
-    def search(self, ident: str, ident_type: str) -> Optional[DeviceData]:
+    def search(self, ident: str, ident_type: str) -> DeviceData | None:
         """
         Search for the device with a given identifier.
 

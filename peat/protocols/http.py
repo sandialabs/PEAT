@@ -6,7 +6,7 @@ import ssl
 import tempfile
 import urllib.parse
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Literal
 
 from bs4 import BeautifulSoup
 from requests import Response, Session
@@ -28,7 +28,7 @@ class HTTP:
         ip: str,
         port: int = 80,
         timeout: float = 5.0,
-        dev: Optional["peat.data.models.DeviceData"] = None,
+        dev: peat.data.models.DeviceData | None = None,
         protocol: Literal["http", "https", ""] = "",
     ) -> None:
         """
@@ -55,10 +55,10 @@ class HTTP:
             target=f"{self.protocol}://{self.ip}:{self.port}",
         )
 
-        self._session: Optional[Session] = None
+        self._session: Session | None = None
 
         # default device object to use
-        self.dev: Optional["peat.data.models.DeviceData"] = dev
+        self.dev: peat.data.models.DeviceData | None = dev
 
         # WARNING: do NOT uncomment the code below UNLESS Elasticsearch
         # export is disabled, otherwise all Elasticsearch traffic will
@@ -98,7 +98,7 @@ class HTTP:
         if self._session is not None:
             self._session.close()
 
-    def __enter__(self) -> "HTTP":
+    def __enter__(self) -> HTTP:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
@@ -117,8 +117,8 @@ class HTTP:
         response: Response,
         page: str,
         url: str,
-        dev: Optional["peat.data.models.DeviceData"],
-    ) -> Optional[Path]:
+        dev: peat.data.models.DeviceData | None,
+    ) -> Path | None:
         """
         Save raw text data from response to disk, even if bad status code.
         """
@@ -176,13 +176,13 @@ class HTTP:
         protocol: Literal["http", "https", ""] = "",
         url: str = "",
         use_cache: bool = True,
-        params: Optional[dict] = None,
+        params: dict | None = None,
         auth=None,
         allow_errors: bool = False,
-        dev: Optional["peat.data.models.DeviceData"] = None,
-        timeout: Optional[float] = None,
+        dev: peat.data.models.DeviceData | None = None,
+        timeout: float | None = None,
         **kwargs,
-    ) -> Optional[Response]:
+    ) -> Response | None:
         """
         Perform a HTTP ``GET`` request and return the response.
 
@@ -279,11 +279,11 @@ class HTTP:
     def post(
         self,
         url: str,
-        timeout: Optional[float] = None,
-        dev: Optional["peat.data.models.DeviceData"] = None,
+        timeout: float | None = None,
+        dev: peat.data.models.DeviceData | None = None,
         use_cache: bool = False,
         **kwargs,
-    ) -> Optional[Response]:
+    ) -> Response | None:
         """
         Perform a HTTP ``POST`` request and return the response.
 
@@ -350,7 +350,7 @@ class HTTP:
         self.log.warning(f"Failed to POST '{url}': {err}")
         return None
 
-    def get_ssl_certificate(self) -> Optional[peat.data.models.X509]:
+    def get_ssl_certificate(self) -> peat.data.models.X509 | None:
         """
         Retrieve and parse the server's SSL certificate.
 
@@ -404,8 +404,8 @@ class HTTP:
         return self.parse_decoded_ssl_certificate(decoded[0], decoded[1])
 
     def decode_ssl_certificate(
-        self, source: Union[str, bytes, Path]
-    ) -> tuple[dict[str, Union[str, tuple, int]], str]:
+        self, source: str | bytes | Path
+    ) -> tuple[dict[str, str | tuple | int], str]:
         """
         Decode a raw SSL certificate retrieved from a server into
         a raw :class:`dict`.
@@ -444,7 +444,7 @@ class HTTP:
         return decoded, raw
 
     def parse_decoded_ssl_certificate(
-        self, decoded: dict[str, Union[str, tuple, int]], raw: str
+        self, decoded: dict[str, str | tuple | int], raw: str
     ) -> peat.data.models.X509:
         """
         Parse a decoded SSL certificate into Elastic Common Schema (:term:`ECS`)
@@ -515,7 +515,7 @@ class HTTP:
         return cert
 
     @staticmethod
-    def gen_soup(text: Union[str, bytes]) -> BeautifulSoup:
+    def gen_soup(text: str | bytes) -> BeautifulSoup:
         """
         Generate a BeautifulSoup instance from the text using the efficient
         ``lxml`` library if it's available or ``html.parser`` otherwise.

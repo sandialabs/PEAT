@@ -3,7 +3,7 @@ import re
 import traceback
 from io import BufferedReader, BytesIO, TextIOWrapper
 from pathlib import Path, PurePosixPath
-from typing import BinaryIO, Optional, Union
+from typing import BinaryIO, Optional
 
 import peat  # Avoid circular imports
 from peat import CommError, config, utils, log
@@ -23,8 +23,8 @@ class FTP:
             classname=self.__class__.__name__,
             target=f"{self.ip}:{self.port}",
         )
-        self.all_output: list[Union[tuple, str]] = []
-        self._ftp: Optional[ftplib.FTP] = None
+        self.all_output: list[tuple | str] = []
+        self._ftp: ftplib.FTP | None = None
 
         self.log.trace2(f"Initialized {repr(self)}")
 
@@ -153,7 +153,7 @@ class FTP:
         return True
 
     def download_binary(
-        self, filename: str, save_path: Optional[Path] = None, save_to_file: bool = True
+        self, filename: str, save_path: Path | None = None, save_to_file: bool = True
     ) -> bytes:
         """
         Download a binary file from the FTP server.
@@ -227,7 +227,7 @@ class FTP:
         return data
 
     def download_text(
-        self, filename: str, save_path: Optional[Path] = None, save_to_file: bool = True
+        self, filename: str, save_path: Path | None = None, save_to_file: bool = True
     ) -> str:
         """
         Download a text file from the FTP server.
@@ -278,8 +278,8 @@ class FTP:
         return text
 
     def find_file(
-        self, check_for: str, ext: str, directory: Optional[str] = None
-    ) -> Optional[str]:
+        self, check_for: str, ext: str, directory: str | None = None
+    ) -> str | None:
         for filename in self.nlst_files(directory):
             if check_for in filename and filename.endswith(ext):
                 return filename
@@ -290,7 +290,7 @@ class FTP:
         return None
 
     def upload_text(
-        self, filename: str, content: Union[str, bytes, TextIOWrapper, BinaryIO]
+        self, filename: str, content: str | bytes | TextIOWrapper | BinaryIO
     ) -> None:
         # We make a new variable to avoid over-writing the argument reference
         if isinstance(content, str):
@@ -303,7 +303,7 @@ class FTP:
         self.ftp.storlines(f"STOR {filename}", file_obj)
 
     def upload_binary(
-        self, filename: str, content: Union[bytes, BufferedReader]
+        self, filename: str, content: bytes | BufferedReader
     ) -> None:
         # We make a new variable to avoid over-writing the argument reference
         if isinstance(content, bytes):
@@ -313,7 +313,7 @@ class FTP:
 
         self.ftp.storbinary(f"STOR {filename}", file_obj)
 
-    def cmd(self, command: str) -> Optional[str]:
+    def cmd(self, command: str) -> str | None:
         """Execute a raw FTP command."""
         if isinstance(command, bytes):
             command = command.decode("utf-8")
@@ -334,7 +334,7 @@ class FTP:
     def cwd(self, directory: str) -> bool:
         return self.cd(directory)
 
-    def pwd(self) -> Optional[str]:
+    def pwd(self) -> str | None:
         """Get the current working directory on the server."""
         return self._do("pwd")
 
@@ -346,21 +346,21 @@ class FTP:
         """Remove a directory on the server."""
         return True if self._do("rmd", directory) is not None else False
 
-    def file_size(self, filename: str) -> Optional[int]:
+    def file_size(self, filename: str) -> int | None:
         """Get the size of a file on the server."""
         return self._do("size", filename)
 
-    def file_delete(self, filename: str) -> Optional[int]:
+    def file_delete(self, filename: str) -> int | None:
         """Remove a file from the server."""
         return self._do("delete", filename)
 
-    def file_rename(self, filename: str, new_name: str) -> Optional[int]:
+    def file_rename(self, filename: str, new_name: str) -> int | None:
         """Rename a file on the server."""
         return self._do("rename", filename, new_name)
 
     def dir(
-        self, directory: Optional[str] = None
-    ) -> Optional[tuple[list[str], list[dict]]]:
+        self, directory: str | None = None
+    ) -> tuple[list[str], list[dict]] | None:
         """
         List files on the FTP server, including file metadata (``dir`` command).
 
@@ -437,9 +437,9 @@ class FTP:
 
     def rdir(
         self,
-        directory: Optional[str] = None,
-        _paths_done: Optional[set] = None,
-    ) -> Optional[tuple[list[str], list[dict]]]:
+        directory: str | None = None,
+        _paths_done: set | None = None,
+    ) -> tuple[list[str], list[dict]] | None:
         """
         Recursively lists files on the server and parses metadata
         about those files (the ``dir`` command).
@@ -533,14 +533,14 @@ class FTP:
             f"{good} downloads were successful, {failed} downloads failed."
         )
 
-    def nlst(self, directory: Optional[str] = None) -> Optional[list[str]]:
+    def nlst(self, directory: str | None = None) -> list[str] | None:
         """``nlst`` command to list files on the server."""
         if directory is None:
             return self._do("nlst")
         else:
             return self._do("nlst", directory)
 
-    def nlst_files(self, directory: Optional[str] = None) -> list[str]:
+    def nlst_files(self, directory: str | None = None) -> list[str]:
         """
         List files in a directory on the device using NLST.
 
@@ -575,13 +575,13 @@ class FTP:
         self._do("retrlines", f"LIST {directory}", listings.append)
         return listings
 
-    def getwelcome(self) -> Optional[str]:
+    def getwelcome(self) -> str | None:
         """Return the welcome message sent by the server."""
         return self._do("getwelcome")
 
     def process_vxworks_ftp_welcome(
         self, welcome: str, dev: Optional["peat.data.models.DeviceData"] = None
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Extract the VxWorks version from the FTP welcome message.
 
@@ -628,7 +628,7 @@ class FTP:
             self.log.warning(f"Failed to parse FTP welcome '{welcome}' from {dev.ip}")
             return None
 
-    def _do(self, func: str, *args) -> Optional[Union[list, str]]:
+    def _do(self, func: str, *args) -> list | str | None:
         try:
             resp = getattr(self.ftp, func)(*args)
             self.all_output.append((func, resp))

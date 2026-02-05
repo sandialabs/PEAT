@@ -1,6 +1,5 @@
 import timeit
 from operator import itemgetter
-from typing import Optional, Union
 
 from peat import __version__, config, consts, datastore, log, module_api, state, utils
 
@@ -9,7 +8,7 @@ from .scan_api import scan
 
 def pull(
     targets: list[str], comm_type: consts.AllowedCommTypes, device_types: list[str]
-) -> Optional[dict[str, Union[dict, list, str, float, int]]]:
+) -> dict[str, dict | list | str | float | int] | None:
     """Pull from devices.
 
     Args:

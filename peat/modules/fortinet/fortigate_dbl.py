@@ -10,7 +10,6 @@ import functools
 import re
 from datetime import timedelta
 from pathlib import PurePosixPath
-from typing import Union
 
 import humanfriendly
 
@@ -292,7 +291,7 @@ def process_fg_ls(ls_output: list[str], ls_command: str, dev: DeviceData) -> Non
         dev.files.append(file_obj)
 
 
-def parse_fg_hardware_cpu(lines: list[str]) -> dict[str, Union[str, int, list[str]]]:
+def parse_fg_hardware_cpu(lines: list[str]) -> dict[str, str | int | list[str]]:
     """
     Parse hardware information from the "get hardware cpu" debug log section.
     """

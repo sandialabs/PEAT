@@ -29,7 +29,7 @@ other two locations have the same format.
 """
 
 import re
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 
 from peat import DeviceData, Event, utils
 from peat.protocols.common import IPV4_RE
@@ -71,7 +71,7 @@ def process_fg_events(events: list[dict[str, str]], dev: DeviceData) -> None:
         # "eventtime" is in Nanoseconds
         # Python's datetime library can handle microseconds.
         # To address this, divide the nanosecond number to microseconds
-        ts = datetime.fromtimestamp(int(evt["eventtime"]) / 1e9, tz=timezone.utc)
+        ts = datetime.fromtimestamp(int(evt["eventtime"]) / 1e9, tz=UTC)
 
         dataset = "memory"
         if evt.get("type"):

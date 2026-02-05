@@ -13,7 +13,6 @@ Authors
 
 import socket
 import struct
-from typing import Optional, Union
 
 from peat import log
 from peat.protocols import pretty_hex_bytes, serial_txn
@@ -63,8 +62,8 @@ def _svlser_sys_txn(address: str, sys_cmd_itm: dict) -> dict:
 def _svlser_dat_txn(
     address: str,
     dat_cmd_itm: dict,
-    type_bytes: Optional[bytes] = None,
-    delim: Optional[bytes] = None,
+    type_bytes: bytes | None = None,
+    delim: bytes | None = None,
 ) -> dict:
     raw_bytes = _svlser_seq_txn(
         address, _svlser_dat_fmt(dat_cmd_itm, type_bytes, delim)
@@ -72,7 +71,7 @@ def _svlser_dat_txn(
     return _svlser_parse_rsp(raw_bytes)
 
 
-def _svlser_seq_txn(address: str, wr_bytes: bytes) -> Optional[bytearray]:
+def _svlser_seq_txn(address: str, wr_bytes: bytes) -> bytearray | None:
     """
     Send a sequential Servlink serial message.
     Also track the Servlink sequence.
@@ -99,7 +98,7 @@ def _svlser_seq_txn(address: str, wr_bytes: bytes) -> Optional[bytearray]:
 
 def _svlser_raw_txn(
     address: str, wr_bytes: bytes, reset: bool = False
-) -> Optional[bytearray]:
+) -> bytearray | None:
     """
     Send a raw Servlink serial message.
     Optionally reset the Servlink sequence.
@@ -158,7 +157,7 @@ def _svlser_raw_fmt(wr_bytes: bytes) -> bytes:
 
 
 def _svlser_dat_fmt(
-    dat_cmd_itm: dict, type_bytes: Optional[bytes] = None, delim: Optional[bytes] = None
+    dat_cmd_itm: dict, type_bytes: bytes | None = None, delim: bytes | None = None
 ) -> bytes:
     # Start with command byte
     svl_bytes = svl_dat_cmds["read"]["cmd"]
@@ -183,7 +182,7 @@ def _svlser_dat_fmt(
     return svl_bytes
 
 
-def _svlser_parse_rsp(rd_bytes: Optional[bytes]) -> dict:
+def _svlser_parse_rsp(rd_bytes: bytes | None) -> dict:
     """Parse the Servlink response to transform it to the specified type.
     Multiple data fields are not yet implemented.
 
@@ -348,14 +347,14 @@ def _svltcp_sys_txn(ip: str, sys_cmd_itm: dict) -> dict:
 def _svltcp_dat_txn(
     ip: str,
     dat_cmd_itm: dict,
-    type_bytes: Optional[bytes] = None,
-    delim: Optional[bytes] = None,
+    type_bytes: bytes | None = None,
+    delim: bytes | None = None,
 ) -> dict:
     raw_bytes = _svltcp_raw_txn(ip, _svltcp_dat_fmt(dat_cmd_itm, type_bytes, delim))
     return _svltcp_parse_rsp(raw_bytes)
 
 
-def _svltcp_raw_txn(ip: str, wr_bytes: bytes) -> Optional[bytes]:
+def _svltcp_raw_txn(ip: str, wr_bytes: bytes) -> bytes | None:
     return svl_socket_txn(ip, _svltcp_raw_fmt(wr_bytes))
 
 
@@ -368,7 +367,7 @@ def _svltcp_init(ip: str, wr_bytes: bytes) -> bytes:
     return svl_socket_cxns[ip]["init"]
 
 
-def svl_socket_txn(ip: str, wr_bytes: bytes) -> Optional[bytes]:
+def svl_socket_txn(ip: str, wr_bytes: bytes) -> bytes | None:
     if not svl_socket_connected(ip):
         svl_socket_connect(ip)
 
@@ -407,11 +406,11 @@ def svl_socket_initialized(ip: str) -> bool:
 
 def svl_socket_connect(
     ip: str,
-    port: Optional[int] = None,
-    timeout: Optional[float] = None,
-    delim: Optional[bytes] = None,
-    bufsize: Optional[int] = None,
-) -> Optional[socket.socket]:
+    port: int | None = None,
+    timeout: float | None = None,
+    delim: bytes | None = None,
+    bufsize: int | None = None,
+) -> socket.socket | None:
     # Check whether already connected
     if svl_socket_connected(ip):
         log.error(f"Already connected to Servlink/TCP on {ip}")
@@ -458,7 +457,7 @@ def svl_socket_disconnect(ip: str) -> None:
 
 
 def _svltcp_dat_fmt(
-    dat_cmd_itm: dict, type_bytes: Optional[bytes] = None, delim: Optional[bytes] = None
+    dat_cmd_itm: dict, type_bytes: bytes | None = None, delim: bytes | None = None
 ) -> bytes:
     # Start with command byte
     svl_bytes = svl_dat_cmds["read"]["cmd"]
@@ -500,7 +499,7 @@ def _svltcp_raw_fmt(wr_bytes: bytes) -> bytes:
     return svl_bytes
 
 
-def _svltcp_parse_rsp(rd_bytes: Optional[bytes]) -> dict:
+def _svltcp_parse_rsp(rd_bytes: bytes | None) -> dict:
     tcp_rsp = {"hdr": None, "len": None, "rbytes": None}
 
     if rd_bytes is None:
@@ -520,7 +519,7 @@ def _svltcp_parse_rsp(rd_bytes: Optional[bytes]) -> dict:
 
 def _svl_parse_data(
     data_bytes: bytes, rfmt: type
-) -> Union[str, int, bool, float, bytes]:
+) -> str | int | bool | float | bytes:
     rlen = svl_data_types[rfmt]["len"]
 
     # Parse the data

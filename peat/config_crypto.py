@@ -15,7 +15,7 @@ from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from peat import log, utils
 
 # create header for encrypted PEAT config (this is a hex value of 504541545f4352595054)
-_encrypted_header = "PEAT_CRYPT".encode().hex()
+_encrypted_header = b"PEAT_CRYPT".hex()
 # salt used for file crypto
 salt = b"9001"
 

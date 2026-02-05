@@ -3,7 +3,7 @@ import timeit
 from fnmatch import fnmatchcase
 from operator import itemgetter
 from pathlib import Path
-from typing import Optional, TextIO, Type, Union
+from typing import TextIO
 
 from peat import (
     DeviceData,
@@ -20,10 +20,10 @@ from peat import (
 
 
 def parse(
-    filepaths: Union[str, Path, list[Union[str, Path]]],
-    device_types: Optional[list[Union[Type[DeviceModule], str]]] = None,
+    filepaths: str | Path | list[str | Path],
+    device_types: list[type[DeviceModule] | str] | None = None,
     sub_dirs: bool = True,
-) -> Optional[dict[str, Union[dict, list, str, float, int]]]:
+) -> dict[str, dict | list | str | float | int] | None:
     """
     Find and parse device and/or project files.
 
@@ -226,8 +226,8 @@ def parse(
 
 
 def parse_data(
-    source: Union[str, Path, TextIO], dev_cls: Type[DeviceModule]
-) -> Optional[DeviceData]:
+    source: str | Path | TextIO, dev_cls: type[DeviceModule]
+) -> DeviceData | None:
     log.info(f"Parsing {dev_cls.__name__} file '{source}'")
 
     # Read data as bytes from stdin (CLI input, e.g. pipes or redirection)
@@ -253,7 +253,7 @@ def parse_data(
     return parsed_dev
 
 
-def find_parsable_files(files: list[str], dev_cls: Type[DeviceModule]) -> list[Path]:
+def find_parsable_files(files: list[str], dev_cls: type[DeviceModule]) -> list[Path]:
     """Find files that are parsable by a device type."""
     parsable_files = set()  # Prevent conflicts
     log.debug(f"Searching {len(files)} files for {dev_cls.__name__} files")

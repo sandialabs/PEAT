@@ -3,7 +3,6 @@ import re
 import traceback
 from collections import defaultdict
 from datetime import timedelta
-from typing import Optional, Union
 from urllib.parse import parse_qs, urlparse
 
 from requests.auth import HTTPDigestAuth
@@ -274,7 +273,7 @@ class ClxHTTP(HTTP):
 
         dev.write_file(blobs, "memory-blobs.json")
 
-    def get_network(self) -> dict[str, Union[dict, list]]:
+    def get_network(self) -> dict[str, dict | list]:
         """
         Extracts and aggregates network information from several pages.
         """
@@ -575,7 +574,7 @@ class ClxHTTP(HTTP):
             del dev.extra["http_home_info"]
 
     @classmethod
-    def _parse_uptime(cls, uptime_string: str) -> Optional[timedelta]:
+    def _parse_uptime(cls, uptime_string: str) -> timedelta | None:
         """
         Parse a uptime string, e.g. ``28 days, 15h:43m:33.775s`` or
         ``28 days, 16h:53m:45s``.

@@ -33,7 +33,6 @@ from copy import copy
 from datetime import datetime
 from pathlib import Path, PureWindowsPath
 from pprint import pformat
-from typing import Optional
 from xml.etree.ElementTree import SubElement
 
 from peat import (
@@ -328,7 +327,7 @@ class M340(DeviceModule):
 
             try:
                 sock.connect((ip, port))
-            except IOError:
+            except OSError:
                 raise DeviceError(
                     f"failed to download project file: could not connect to {ip}:{port}"
                 ) from None
@@ -351,7 +350,7 @@ class M340(DeviceModule):
                     sock, start_pull_packet(cid), UMASResponse, packet_tracker
                 )
                 total_len = start_pull_data.dataLen
-            except IOError as err:
+            except OSError as err:
                 raise DeviceError(f"failed to pull project file from {ip}") from err
 
             recv_len = 0
@@ -429,7 +428,7 @@ class M340(DeviceModule):
         return byte_blob
 
     @classmethod
-    def _parse(cls, file: Path, dev: Optional[DeviceData] = None) -> DeviceData:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData:
         file_data = file.read_bytes()
 
         dev = cls._parse_blob(file_data, dev=dev, file=file)
@@ -442,8 +441,8 @@ class M340(DeviceModule):
     def _parse_blob(
         cls,
         raw_data: bytes,
-        dev: Optional[DeviceData] = None,
-        file: Optional[Path] = None,
+        dev: DeviceData | None = None,
+        file: Path | None = None,
     ) -> DeviceData:
         parsed_config = m340_parse.parse_config_to_dict(raw_data)
         metadata = parsed_config.get("project_file_metadata", {})  # type: dict
@@ -814,7 +813,7 @@ class M340(DeviceModule):
         return text.strip()
 
     @classmethod
-    def generate_openplc_project(cls, dev: DeviceData) -> Optional[Path]:
+    def generate_openplc_project(cls, dev: DeviceData) -> Path | None:
         """
         Generate a directory that can be opened with the OpenPLC editor.
 

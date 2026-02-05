@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 
 import pytest
@@ -111,7 +111,7 @@ def test_device_data_elastic():
     dev = DeviceData(id=dev_id, type="RTU", os=OS(name="linux"), geo=geo)
     service = Service(protocol="modbus", enabled=False, port=502)
     dev.store("service", service)
-    event = Event(sequence=0, ingested=datetime.now(timezone.utc))
+    event = Event(sequence=0, ingested=datetime.now(UTC))
     dev.store("event", event)
     assert dev.elastic() == {
         "id": dev_id,

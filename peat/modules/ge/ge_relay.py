@@ -1,7 +1,6 @@
 import copy
 import re
 from pathlib import Path
-from typing import Optional
 
 from bs4 import BeautifulSoup
 
@@ -164,8 +163,8 @@ class GERelay(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         """
         This will parse a directory of scraped HTML files. It is intended to be
         used for testing and development of PEAT, such as generation of test
@@ -249,7 +248,7 @@ class GERelay(DeviceModule):
         }
 
     @classmethod
-    def _process_pages(cls, dev: DeviceData, page_tables: dict) -> Optional[dict]:
+    def _process_pages(cls, dev: DeviceData, page_tables: dict) -> dict | None:
         relay_data = copy.deepcopy(page_tables)
 
         # Process header information from each page (IP, name, model, etc.)

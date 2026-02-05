@@ -16,7 +16,6 @@ Authors
 """
 
 from pathlib import Path
-from typing import Optional
 
 import l5x
 
@@ -46,8 +45,8 @@ class L5X(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         """
         Parser for consuming L5X files that have been exported by RSLogix.
 

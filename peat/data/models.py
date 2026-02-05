@@ -7,7 +7,7 @@ import mimetypes
 from copy import deepcopy
 from datetime import datetime, timedelta
 from pathlib import Path, PurePath
-from typing import Any, AnyStr, Optional, Union, Literal
+from typing import Any, AnyStr, Literal
 
 from pydantic import (
     Field,
@@ -197,17 +197,17 @@ class Hardware(BaseModel):
     Hardware ID of the device.
     """
 
-    storage_available: Optional[conint(ge=0)] = None
+    storage_available: conint(ge=0) | None = None
     """
     Amount of persistent storage currently available on the device, in bytes.
     """
 
-    storage_usage: Optional[conint(ge=0)] = None
+    storage_usage: conint(ge=0) | None = None
     """
     Amount of persistent storage currently in use on the device, in bytes.
     """
 
-    storage_total: Optional[conint(ge=0)] = None
+    storage_total: conint(ge=0) | None = None
     """
     Total amount of storage on the device, in bytes.
     """
@@ -225,17 +225,17 @@ class Hardware(BaseModel):
     - ``nvram``
     """
 
-    memory_available: Optional[conint(ge=0)] = None
+    memory_available: conint(ge=0) | None = None
     """
     Amount of volatile memory (e.g. :term:`RAM`) currently available, in bytes.
     """
 
-    memory_usage: Optional[conint(ge=0)] = None
+    memory_usage: conint(ge=0) | None = None
     """
     Amount of volatile memory (e.g. :term:`RAM`) currently in use, in bytes.
     """
 
-    memory_total: Optional[conint(ge=0)] = None
+    memory_total: conint(ge=0) | None = None
     """
     Total amount of volatile memory (e.g. :term:`RAM`) on the device, in bytes.
     """
@@ -265,7 +265,7 @@ class Hardware(BaseModel):
     The detailed meaning of the value in this field is device-dependant.
     """
 
-    def annotate(self, dev: Optional[DeviceData] = None):  # noqa: ARG002
+    def annotate(self, dev: DeviceData | None = None):  # noqa: ARG002
         # If available + usage are set, and total is not, auto-calculate total
         if not self.memory_total and self.memory_available and self.memory_usage:
             self.memory_total = self.memory_available + self.memory_usage
@@ -282,22 +282,22 @@ class Hash(BaseModel):
     """
 
     # NOTE: "Optional" is used here since a default of "" will fail validation checks
-    md5: Optional[constr(min_length=32, max_length=32, strip_whitespace=True)] = Field(
+    md5: constr(min_length=32, max_length=32, strip_whitespace=True) | None = Field(
         default=None, title="MD5 hash"
     )
     """MD5 hash."""
 
-    sha1: Optional[constr(min_length=40, max_length=40, strip_whitespace=True)] = Field(
+    sha1: constr(min_length=40, max_length=40, strip_whitespace=True) | None = Field(
         default=None, title="SHA1 hash"
     )
     """SHA1 hash."""
 
-    sha256: Optional[constr(min_length=64, max_length=64, strip_whitespace=True)] = (
+    sha256: constr(min_length=64, max_length=64, strip_whitespace=True) | None = (
         Field(default=None, title="SHA256 hash")
     )
     """SHA256 hash."""
 
-    sha512: Optional[constr(min_length=128, max_length=128, strip_whitespace=True)] = (
+    sha512: constr(min_length=128, max_length=128, strip_whitespace=True) | None = (
         Field(default=None, title="SHA512 hash")
     )
     """SHA512 hash."""
@@ -401,7 +401,7 @@ class User(BaseModel):
         default=("id", "name", "full_name", "description")
     )
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         if dev:
             if self.email:
                 dev.related.emails.add(self.email)
@@ -535,7 +535,7 @@ class File(BaseModel):
     PEAT doesn't have the ability to access.
     """
 
-    created: Optional[datetime] = None
+    created: datetime | None = None
     """
     File creation time.
     """
@@ -577,12 +577,12 @@ class File(BaseModel):
     Hashe(s) of the file's contents.
     """
 
-    local_path: Optional[Path] = None
+    local_path: Path | None = None
     """
     Concrete path of the file on the local system (the system running PEAT).
     """
 
-    path: Optional[PurePath] = None
+    path: PurePath | None = None
     """
     Path of the file, in it's original form. This may be either the
     path to the file on the device, or the path from the system it originated
@@ -623,7 +623,7 @@ class File(BaseModel):
     - ``0777``
     """
 
-    mtime: Optional[datetime] = None
+    mtime: datetime | None = None
     """
     Last time the file content was modified.
     """
@@ -643,14 +643,14 @@ class File(BaseModel):
     File owner's username.
     """
 
-    size: Optional[conint(ge=0)] = None
+    size: conint(ge=0) | None = None
     """
     Size of the file in bytes.
 
     Only relevant when ``file.type`` is ``"file"``.
     """
 
-    target_path: Optional[PurePath] = None
+    target_path: PurePath | None = None
     """
     Target path for symlinks.
 
@@ -698,7 +698,7 @@ class File(BaseModel):
         convert_arbitrary_path_to_purepath
     )
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         # Auto-populate many of the fields
         process_file(self)
 
@@ -725,7 +725,7 @@ class File(BaseModel):
 
             _add_hashes_to_related(dev, self.hash)
 
-    def gen_elastic_content(self, dev: Optional[DeviceData] = None) -> dict:
+    def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
 
         time_now = Elastic.time_now()
@@ -793,7 +793,7 @@ class Firmware(BaseModel):
     Firmware identification string, e.g. the "FID" or "BFID" strings in SEL devices.
     """
 
-    last_updated: Optional[datetime] = None
+    last_updated: datetime | None = None
     """
     The timestamp of when the firmware was last updated on the device.
     """
@@ -810,12 +810,12 @@ class Firmware(BaseModel):
     the canonical version string.
     """
 
-    release_date: Optional[datetime] = None
+    release_date: datetime | None = None
     """
     The release date of the firmware.
     """
 
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
     """
     Timestamp as extracted from the device or firmware, device-dependent meaning.
     Often represents when the firmware was compiled/built or released.
@@ -826,7 +826,7 @@ class Firmware(BaseModel):
     Version of the device's current firmware (or operating system).
     """
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         if self.original and not _all_hashes_set(self.hash):
             self.hash = Hash.parse_obj(utils.gen_hashes(self.original))
 
@@ -872,7 +872,7 @@ class Logic(BaseModel):
     Name of the person/organization/program that wrote the logic.
     """
 
-    created: Optional[datetime] = None
+    created: datetime | None = None
     """
     :term:`UTC` timestamp of when the logic was first created (when the source
     project file was created) or fist uploaded to the device.
@@ -888,7 +888,7 @@ class Logic(BaseModel):
     File or directory of the logic.
     """
 
-    formats: dict[str, Union[AnyStr, dict]] = Field(default={}, elastic_type="nested")
+    formats: dict[str, AnyStr | dict] = Field(default={}, elastic_type="nested")
     """
     Sub-formats the logic has been parsed into, such as
     ``"structured_text"`` or ``"tc6"``. Device dependent.
@@ -908,7 +908,7 @@ class Logic(BaseModel):
     e.g. a machine-generated :term:`UUID` for the logic stored by the device.
     """
 
-    last_updated: Optional[datetime] = None
+    last_updated: datetime | None = None
     """
     :term:`UTC` timestamp of when the logic was last updated on the device.
     """
@@ -941,7 +941,7 @@ class Logic(BaseModel):
         "author", "description", "name", "id", "parsed", allow_reuse=True
     )(strip_quotes)
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         if self.original and not _all_hashes_set(self.hash):
             self.hash = Hash.parse_obj(utils.gen_hashes(self.original))
         if dev:
@@ -993,10 +993,10 @@ class X509(BaseModel):
     issuer: CertEntity = CertEntity()
     """Issuing certificate authority."""
 
-    not_after: Optional[datetime] = None
+    not_after: datetime | None = None
     """Time at which the certificate is no longer considered valid."""
 
-    not_before: Optional[datetime] = None
+    not_before: datetime | None = None
     """Time at which the certificate is first considered valid."""
 
     original: str = ""
@@ -1008,10 +1008,10 @@ class X509(BaseModel):
     public_key_curve: constr(strip_whitespace=True) = ""
     """The curve used by the elliptic curve public key algorithm."""
 
-    public_key_exponent: Optional[conint(ge=0)] = None
+    public_key_exponent: conint(ge=0) | None = None
     """Exponent used to derive the public key."""
 
-    public_key_size: Optional[conint(ge=0)] = None
+    public_key_size: conint(ge=0) | None = None
     """The size of the public key space in bits."""
 
     serial_number: constr(strip_whitespace=True) = ""
@@ -1031,7 +1031,7 @@ class X509(BaseModel):
     version_number: constr(strip_whitespace=True) = ""
     """Version of x509 format."""
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         if self.original and not _all_hashes_set(self.hash):
             self.hash = Hash.parse_obj(utils.gen_hashes(self.original))
 
@@ -1070,7 +1070,7 @@ class UEFIHash(BaseModel):
         default=("file_system", "pathname", "hash")
     )
 
-    def gen_elastic_content(self, dev: Optional[DeviceData] = None) -> dict:
+    def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
         time_now = Elastic.time_now()
         content = {
@@ -1107,14 +1107,14 @@ class UEFIFile(BaseModel):
     base: str = ""
     size: str = ""
     crc32: str = ""
-    guid: Optional[str] = ""  # Only occasionally exists
+    guid: str | None = ""  # Only occasionally exists
     name: str = ""
     path: str = ""
-    created: Optional[datetime] = None
+    created: datetime | None = None
     _es_index_varname: str = PrivateAttr(default="ELASTIC_UEFI_FILES_INDEX")
     _sort_by_fields: tuple[str] = PrivateAttr(default=("name", "subtype", "type"))
 
-    def gen_elastic_content(self, dev: Optional[DeviceData] = None) -> dict:
+    def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
         time_now = Elastic.time_now()
         content = {
@@ -1139,7 +1139,7 @@ class Service(BaseModel):
     serial direct, cellular, serial bus, field bus, etc.
     """
 
-    configured_port: Optional[conint(ge=0, le=65535)] = None
+    configured_port: conint(ge=0, le=65535) | None = None
     """
     Port the service is *configured* to listen on (for TCP or UDP transports).
 
@@ -1162,7 +1162,7 @@ class Service(BaseModel):
     - ``502``
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool | None = None
     """
     If the service is enabled in the device configuration.
 
@@ -1191,13 +1191,13 @@ class Service(BaseModel):
     Name of the system process or task associated with the service.
     """
 
-    process_pid: Optional[conint(ge=0)] = None
+    process_pid: conint(ge=0) | None = None
     """
     Process ID associated with the service. This is the PID of the
     network service's process.
     """
 
-    port: Optional[conint(ge=1, le=65535)] = None
+    port: conint(ge=1, le=65535) | None = None
     """
     Port the service is listening on (for TCP or UDP transports).
 
@@ -1280,7 +1280,7 @@ class Service(BaseModel):
     _clean_protocol = validator("protocol", allow_reuse=True)(clean_protocol)
     _validate_ip = validator("listen_address", allow_reuse=True)(validate_ip)
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         # auto-populate "transport" field if it's unset and protocol is set
         if not self.transport and self.protocol:
             if self.protocol in [
@@ -1338,7 +1338,7 @@ class Interface(BaseModel):
     - ``sel``
     """
 
-    connected: Optional[bool] = None
+    connected: bool | None = None
     """
     If the interface is currently connected to something
     (e.g. carrier signal on Ethernet or connected to a
@@ -1363,7 +1363,7 @@ class Interface(BaseModel):
     - "" (empty string)
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool | None = None
     """
     If the interface is enabled in the device's configuration.
     """
@@ -1434,31 +1434,31 @@ class Interface(BaseModel):
     This field is auto-populated by PEAT if the ``mac`` field is set.
     """
 
-    mtu: Optional[PositiveInt] = Field(default=None, elastic_type="integer")
+    mtu: PositiveInt | None = Field(default=None, elastic_type="integer")
     """
     Maximum Transmission Unit (MTU) size configured for the interface.
     This generally only applies to Ethernet interfaces.
     """
 
-    physical: Optional[bool] = None
+    physical: bool | None = None
     """
     If the interface is a physical interface (e.g. is a port on the device).
     If false, then it's likely a virtual interface or software-defined.
     Use the "type" and "description" fields to store additional details.
     """
 
-    promiscuous_mode: Optional[bool] = None
+    promiscuous_mode: bool | None = None
     """
     If the interface is in Promiscuous Mode (passive capture).
     """
 
-    speed: Optional[conint(ge=0)] = Field(default=None, elastic_type="integer")
+    speed: conint(ge=0) | None = Field(default=None, elastic_type="integer")
     """
     Transmission rate of the interface, in Mbps (megabits per second).
     Example: for Gigabit Ethernet, this would be 1000.
     """
 
-    uptime: Optional[timedelta] = None
+    uptime: timedelta | None = None
     """
     How long the interface has been connected, in milliseconds or
     as a :class:`~datetime.timedelta` instance.
@@ -1529,7 +1529,7 @@ class Interface(BaseModel):
     - ``/dev/ttyUSB0``
     """
 
-    baudrate: Optional[PositiveInt] = Field(default=None, elastic_type="integer")
+    baudrate: PositiveInt | None = Field(default=None, elastic_type="integer")
     """
     Data rate for a serial link.
 
@@ -1538,7 +1538,7 @@ class Interface(BaseModel):
     - ``56700``
     """
 
-    data_bits: Optional[conint(ge=0)] = Field(default=None, elastic_type="byte")
+    data_bits: conint(ge=0) | None = Field(default=None, elastic_type="byte")
     """
     Number of data bits for a serial link.
 
@@ -1559,7 +1559,7 @@ class Interface(BaseModel):
     - "" (empty string)
     """
 
-    stop_bits: Optional[conint(ge=0)] = Field(default=None, elastic_type="byte")
+    stop_bits: conint(ge=0) | None = Field(default=None, elastic_type="byte")
     """
     Number of stop bits for a serial link.
 
@@ -1605,7 +1605,7 @@ class Interface(BaseModel):
     _validate_mac = validator("mac", "hardware_mac", allow_reuse=True)(validate_mac)
     _strip_quotes = validator("description", allow_reuse=True)(strip_quotes)
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         # Resolve host if not set OR if IP is changed and host is not
         if config.RESOLVE_HOSTNAME and (self.ip and not self.hostname):
             self.hostname = addresses.resolve_ip_to_hostname(self.ip)
@@ -1687,7 +1687,7 @@ class Register(BaseModel):
     - ``"Intake Fuel - Valve 1 - Second Boiler"``
     """
 
-    enabled: Optional[bool] = None
+    enabled: bool | None = None
     """
     If the register is considored to be "enabled", e.g. has a valid configuration
     or is otherwise enabled for use on the device.
@@ -1802,7 +1802,7 @@ class Register(BaseModel):
             other.tag,
         )
 
-    def gen_elastic_content(self, dev: Optional[DeviceData] = None) -> dict:
+    def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
 
         # Hacky way to make a nice fancy message describing the Register
@@ -1924,7 +1924,7 @@ class Tag(BaseModel):
             other.address,
         )
 
-    def gen_elastic_content(self, dev: Optional[DeviceData] = None) -> dict:
+    def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
         # Hacky way to make a nice fancy message describing the Tag
         message = ""
@@ -2063,7 +2063,7 @@ class IO(BaseModel):
             other.address,
         )
 
-    def gen_elastic_content(self, dev: Optional[DeviceData] = None) -> dict:
+    def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
         # Hacky way to make a nice fancy message describing the IO point
         message = ""
@@ -2114,14 +2114,14 @@ class LatLon(BaseModel):
     """
 
     # NOTE: floats in JSON schema are "number", so we define ES type here as "double"
-    lat: Optional[confloat(ge=-90.0, le=90.0)] = Field(
+    lat: confloat(ge=-90.0, le=90.0) | None = Field(
         default=None, title="Latitude", elastic_type="double"
     )
     """
     Latitude.
     """
 
-    lon: Optional[confloat(ge=-180.0, le=180.0)] = Field(
+    lon: confloat(ge=-180.0, le=180.0) | None = Field(
         default=None, title="Longitude", elastic_type="double"
     )
     """
@@ -2229,7 +2229,7 @@ class Event(BaseModel):
     - ``web``
     """
 
-    created: Optional[datetime] = None
+    created: datetime | None = None
     """
     When the event occurred.
     """
@@ -2260,7 +2260,7 @@ class Event(BaseModel):
     Unique identifier for the Event, if any.
     """
 
-    ingested: Optional[datetime] = None
+    ingested: datetime | None = None
     """
     When the event was generated by PEAT, e.g. when it was
     parsed or pulled from a device.
@@ -2324,7 +2324,7 @@ class Event(BaseModel):
     Source of the event. This is almost always the Device ID.
     """
 
-    sequence: Optional[int] = None
+    sequence: int | None = None
     """
     Sequence number of the event. The sequence number is a value
     published by some event sources, to make the exact ordering of
@@ -2403,7 +2403,7 @@ class Event(BaseModel):
         "category", "kind", "outcome", "type", each_item=True, allow_reuse=True
     )(validate_ecs)
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         if dev:
             # If provider isn't set, set it to the device's ID
             if not self.provider and dev.ip:
@@ -2431,7 +2431,7 @@ class Event(BaseModel):
         elif self.kind and "event" not in self.kind:
             self.kind.add("event")
 
-    def gen_elastic_content(self, dev: Optional[DeviceData] = None) -> dict:
+    def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
         time_now = Elastic.time_now()
         timestamp = time_now
@@ -2508,7 +2508,7 @@ class OS(BaseModel):
     - ``VxWorks``, ``Linux``
     """
 
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
     """
     Timestamp of the OS, as extracted from the device or firmware.
     Device-dependent meaning. Often represents when the OS
@@ -2544,7 +2544,7 @@ class Memory(BaseModel):
     - ``D3ADB33F``
     """
 
-    created: Optional[datetime] = None
+    created: datetime | None = None
     """
     When the read occurred. Represents when in time
     the memory address had the value.
@@ -2574,7 +2574,7 @@ class Memory(BaseModel):
     Name of the system process or task this memory read is associated with.
     """
 
-    size: Optional[int] = None
+    size: int | None = None
     """
     Size of the memory read, in bytes.
     """
@@ -2609,7 +2609,7 @@ class Memory(BaseModel):
     # Validators
     _validate_hexes = validator("address", "value", allow_reuse=True)(validate_hex)
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         if dev:
             # Automatically set the device field if it's not already
             if not self.device:
@@ -2617,7 +2617,7 @@ class Memory(BaseModel):
                 if "unknown-dev-" not in dev_id:
                     self.device = dev_id
 
-    def gen_elastic_content(self, dev: Optional[DeviceData] = None) -> dict:
+    def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
         # Hacky way to make a nice fancy message describing the Memory
         message = ""
@@ -2693,7 +2693,7 @@ class SSHKey(BaseModel):
         default=("host", "user", "type", "id", "description", "original")
     )
 
-    def annotate(self, dev: Optional[DeviceData] = None):
+    def annotate(self, dev: DeviceData | None = None):
         if not dev:
             return
         if self.file.path:
@@ -2881,7 +2881,7 @@ class DeviceData(BaseModel):
     the vendor and stored on the device.
     """
 
-    manufacturing_date: Optional[datetime] = None
+    manufacturing_date: datetime | None = None
     """
     When the device was manufactured (physically created).
     """
@@ -2901,7 +2901,7 @@ class DeviceData(BaseModel):
     or other identifier for the position (such as an internal bus address).
     """
 
-    start_time: Optional[datetime] = None
+    start_time: datetime | None = None
     """
     :term:`UTC` timestamp of when the device last powered on.
     """
@@ -2911,7 +2911,7 @@ class DeviceData(BaseModel):
     Status of the device. The meaning of this field is device-dependant.
     """
 
-    uptime: Optional[timedelta] = None
+    uptime: timedelta | None = None
     """
     Number of seconds the host has been up (powered on/online), as either a
     integer or :class:`~datetime.timedelta`.
@@ -3060,13 +3060,13 @@ class DeviceData(BaseModel):
         )
     )
 
-    _module: Optional[type] = PrivateAttr(default=None)
+    _module: type | None = PrivateAttr(default=None)
     """
     :class:`~peat.device.DeviceModule` class used for this device
     (generally set after identification).
     """
 
-    _out_dir: Optional[Path] = PrivateAttr(default=None)
+    _out_dir: Path | None = PrivateAttr(default=None)
     """
     Output directory for any file output and results associated with this device.
     Don't use this directly, instead use :func:`~peat.data.DeviceData.get_out_dir`,
@@ -3312,7 +3312,7 @@ class DeviceData(BaseModel):
                 pass
         return self._options
 
-    def get_id(self, attribute_precedence: Optional[list[str]] = None) -> str:
+    def get_id(self, attribute_precedence: list[str] | None = None) -> str:
         """
         Get a canonical device ID.
 
@@ -3400,8 +3400,8 @@ class DeviceData(BaseModel):
     def export(
         self,
         include_original: bool = False,
-        exclude_fields: Optional[list[str]] = None,
-        only_fields: Optional[Union[str, list[str]]] = None,
+        exclude_fields: list[str] | None = None,
+        only_fields: str | list[str] | None = None,
     ) -> dict:
         """
         Return device data as a normalized JSON-friendly :class:`dict`.
@@ -3464,7 +3464,7 @@ class DeviceData(BaseModel):
         # https://github.com/samuelcolvin/pydantic/issues/593#issuecomment-501735842
         return results
 
-    def export_summary(self, cached_export: Optional[dict] = None) -> dict:
+    def export_summary(self, cached_export: dict | None = None) -> dict:
         """
         Return a summarized version of the device data as a
         normalized JSON-friendly :class:`dict`, with certain
@@ -3549,7 +3549,7 @@ class DeviceData(BaseModel):
             state.error = True
             return False
 
-    def export_to_elastic(self, elastic: Optional[Elastic] = None) -> bool:
+    def export_to_elastic(self, elastic: Elastic | None = None) -> bool:
         """
         Save device data to an Elasticsearch database.
 
@@ -3642,7 +3642,7 @@ class DeviceData(BaseModel):
         return results
 
     def gen_elastic_content(
-        self, dev: Optional[DeviceData] = None  # noqa: ARG002
+        self, dev: DeviceData | None = None  # noqa: ARG002
     ) -> dict:
         self.populate_fields()
 
@@ -3704,7 +3704,7 @@ class DeviceData(BaseModel):
         data: Any,
         filename: str,
         overwrite_existing: bool = False,
-        out_dir: Optional[Path] = None,
+        out_dir: Path | None = None,
         merge_existing: bool = False,
     ) -> Path:
         """
@@ -3903,7 +3903,7 @@ class DeviceData(BaseModel):
 
     def retrieve(
         self, attr: str, search: dict[str, Any]
-    ) -> Optional[Union[BaseModel, list[BaseModel]]]:
+    ) -> BaseModel | list[BaseModel] | None:
         """
         Retrieve a complex device data value.
 
@@ -4004,8 +4004,8 @@ class DeviceData(BaseModel):
             "files",
         ],
         value: BaseModel,
-        lookup: Union[str, list, dict, None] = None,
-        interface_lookup: Optional[dict] = None,
+        lookup: str | list | dict | None = None,
+        interface_lookup: dict | None = None,
         append: bool = False,
     ) -> None:
         """
@@ -4242,7 +4242,7 @@ class DeviceData(BaseModel):
         self,
         container: list[BaseModel],
         value: BaseModel,
-        lookup: Union[str, list, dict, None],
+        lookup: str | list | dict | None,
     ) -> BaseModel:
         """
         Handle adding objects to lists.
@@ -4380,7 +4380,7 @@ class DeviceData(BaseModel):
 DeviceData.update_forward_refs()
 
 
-def process_file(file: Union[dict, File]) -> File:
+def process_file(file: dict | File) -> File:
     """
     Transform a :class:`dict` into a :class:`~peat.data.models.File` object
     and populate unfilled fields.
@@ -4518,7 +4518,7 @@ def process_file_extension(file: File) -> None:
 
 
 def annotate_obj_and_file(
-    obj: Union[Firmware, Logic], field_name: str, dev: DeviceData
+    obj: Firmware | Logic, field_name: str, dev: DeviceData
 ) -> None:
     """
     Populate original field if not set,
@@ -4586,7 +4586,7 @@ def _add_hashes_to_related(dev: DeviceData, hash_obj: Hash) -> None:
 
 
 def export_models_to_elastic(
-    models: list[BaseModel], dev: DeviceData, elastic: Optional[Elastic] = None
+    models: list[BaseModel], dev: DeviceData, elastic: Elastic | None = None
 ) -> bool:
     """
     Export model objects to an Elasticsearch database.
@@ -4674,7 +4674,7 @@ def export_models_to_elastic(
     return True
 
 
-def resolve_es_instance(elastic: Optional[Elastic], dev_id: str) -> Optional[Elastic]:
+def resolve_es_instance(elastic: Elastic | None, dev_id: str) -> Elastic | None:
     if not elastic:  # Use the global instance by default
         elastic = state.elastic
     if not elastic:

@@ -1,6 +1,5 @@
 from ipaddress import IPv4Address, IPv4Interface, IPv4Network
 from pathlib import Path
-from typing import Union
 
 import netifaces
 
@@ -8,7 +7,7 @@ from peat import consts, log, state
 
 
 def get_in_scope_interfaces(
-    targets: list[Union[IPv4Address, IPv4Network]],
+    targets: list[IPv4Address | IPv4Network],
 ) -> list[str]:
     """
     Determine what network interfaces are in scope given a list of targets.

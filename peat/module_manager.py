@@ -3,7 +3,8 @@ import inspect
 import pkgutil
 import sys
 from pathlib import Path
-from typing import Any, Iterable, Optional, Type, Union
+from typing import Any
+from collections.abc import Iterable
 
 from peat import log, utils
 from peat.device import DeviceData, DeviceModule, IPMethod, SerialMethod
@@ -24,7 +25,7 @@ class ModuleManager:
     def __init__(self) -> None:
         # Initialize with the modules included with PEAT
         self.modules: dict[str, Any] = self._get_static_modules()
-        self.module_aliases: dict[str, set[Type[DeviceModule]]] = {}
+        self.module_aliases: dict[str, set[type[DeviceModule]]] = {}
 
         for module in self.modules.values():
             self._update_aliases(module)
@@ -41,7 +42,7 @@ class ModuleManager:
         return self._mods_to_names(self.modules.values())
 
     @property
-    def classes(self) -> list[Type[DeviceModule]]:
+    def classes(self) -> list[type[DeviceModule]]:
         """
         Sorted list of classes of all imported modules.
         """
@@ -108,7 +109,7 @@ class ModuleManager:
         else:
             return self.import_module_cls(module, remove_aliases)
 
-    def _extract_members(self, module_path: str) -> list[Type[DeviceModule]]:
+    def _extract_members(self, module_path: str) -> list[type[DeviceModule]]:
         """
         Import a Python module e.g. ``module.path``.
 
@@ -179,7 +180,7 @@ class ModuleManager:
         return False
 
     def import_module_cls(
-        self, module: Type[DeviceModule], remove_aliases: bool = True
+        self, module: type[DeviceModule], remove_aliases: bool = True
     ) -> bool:
         """
         Adds the module object to the registered PEAT device modules.
@@ -217,7 +218,7 @@ class ModuleManager:
 
         return True
 
-    def get_module(self, name: str) -> Optional[Type[DeviceModule]]:
+    def get_module(self, name: str) -> type[DeviceModule] | None:
         """
         Get module by name.
 
@@ -231,8 +232,8 @@ class ModuleManager:
         return self.modules.get(self._norm_name(name))
 
     def get_modules(
-        self, name: str, filter_attr: Optional[str] = None
-    ) -> list[Type[DeviceModule]]:
+        self, name: str, filter_attr: str | None = None
+    ) -> list[type[DeviceModule]]:
         """
         Get PEAT device module classes.
 
@@ -243,7 +244,7 @@ class ModuleManager:
         Returns:
             List of module classes (subclasses of  :class:`~peat.device.DeviceModule`)
         """
-        mods: list[Type[DeviceModule]] = []
+        mods: list[type[DeviceModule]] = []
 
         if self._norm_name(name) in self.modules:
             mods.append(self.modules[self._norm_name(name)])
@@ -257,13 +258,11 @@ class ModuleManager:
 
     def lookup_types(
         self,
-        dev_types: Union[
-            Any, None, list[Union[str, Type[DeviceModule], DeviceModule]]
-        ] = None,
-        filter_attr: Optional[str] = None,
-        subclass_method: Optional[str] = None,
-        filter_values: Optional[dict] = None,
-    ) -> list[Type[DeviceModule]]:
+        dev_types: Any | None | list[str | type[DeviceModule] | DeviceModule] = None,
+        filter_attr: str | None = None,
+        subclass_method: str | None = None,
+        filter_values: dict | None = None,
+    ) -> list[type[DeviceModule]]:
         """
         Process strings and classes into a sorted :class:`list` of module classes.
 
@@ -287,7 +286,7 @@ class ModuleManager:
         if dev_types is None:
             dev_types = self.classes
 
-        mods: set[Type[DeviceModule]] = set()  # set to prevent duplicates
+        mods: set[type[DeviceModule]] = set()  # set to prevent duplicates
 
         if not isinstance(dev_types, list):
             dev_types = [dev_types]
@@ -306,10 +305,10 @@ class ModuleManager:
                 log.error(f"Invalid device type: {dev}")
 
         if filter_attr:  # Only include if the attribute is Truthy
-            mods: list[Type[DeviceModule]] = self._filter(mods, filter_attr)
+            mods: list[type[DeviceModule]] = self._filter(mods, filter_attr)
 
         if subclass_method:  # If the method has been overridden in the module
-            subl: list[Type[DeviceModule]] = []
+            subl: list[type[DeviceModule]] = []
 
             for m in mods:
                 if subclass_method in m.__dict__:
@@ -319,10 +318,10 @@ class ModuleManager:
                     if base is not DeviceModule and subclass_method in base.__dict__:
                         subl.append(m)
 
-            mods: list[Type[DeviceModule]] = subl
+            mods: list[type[DeviceModule]] = subl
 
         if filter_values:
-            val_filtered: list[Type[DeviceModule]] = []
+            val_filtered: list[type[DeviceModule]] = []
 
             for m in mods:
                 for key, value in filter_values.items():
@@ -330,16 +329,16 @@ class ModuleManager:
                         val_filtered.append(m)
                         break
 
-            mods: list[Type[DeviceModule]] = val_filtered
+            mods: list[type[DeviceModule]] = val_filtered
 
         return self._sort(mods)
 
     def lookup_names(
         self,
-        dev_types: Union[Any, None, list[Union[str, Type[DeviceModule], DeviceModule]]],
-        filter_attr: Optional[str] = None,
-        subclass_method: Optional[str] = None,
-        filter_values: Optional[dict] = None,
+        dev_types: Any | None | list[str | type[DeviceModule] | DeviceModule],
+        filter_attr: str | None = None,
+        subclass_method: str | None = None,
+        filter_values: dict | None = None,
     ) -> list[str]:
         """
         Process strings and classes into a sorted :class:`list` of module names.
@@ -388,7 +387,7 @@ class ModuleManager:
         return self._mods_to_names(self.module_aliases[alias])
 
     @staticmethod
-    def _sort(mods: Union[set, list]) -> list:
+    def _sort(mods: set | list) -> list:
         """
         Improve the determinism of repeated operations (e.g. scanning).
         """
@@ -410,15 +409,15 @@ class ModuleManager:
 
     @staticmethod
     def _filter(
-        mods: Iterable[Type[DeviceModule]], filter_attr: str
-    ) -> list[Type[DeviceModule]]:
+        mods: Iterable[type[DeviceModule]], filter_attr: str
+    ) -> list[type[DeviceModule]]:
         """
         Filter modules to those with a 'truthy' class attribute.
         """
         return [m for m in mods if bool(getattr(m, filter_attr, False))]
 
     @staticmethod
-    def _mods_to_names(mods: Iterable[Type[DeviceModule]]) -> list[str]:
+    def _mods_to_names(mods: Iterable[type[DeviceModule]]) -> list[str]:
         """
         Convert modules to a sorted list of string names.
         """
@@ -437,7 +436,7 @@ class ModuleManager:
 
         return {n.lower(): m for n, m in mods if ModuleManager.is_valid_module(m)}
 
-    def _update_aliases(self, module: Type[DeviceModule]) -> None:
+    def _update_aliases(self, module: type[DeviceModule]) -> None:
         """
         Make the module resolvable by any aliases that apply to it.
 

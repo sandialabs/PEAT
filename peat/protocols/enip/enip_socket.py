@@ -4,7 +4,6 @@ import io
 import socket
 import struct
 from pathlib import Path
-from typing import Optional
 
 from peat import config, exit_handler, log, state, utils
 
@@ -35,11 +34,11 @@ class EnipSocket:
         self.sock.settimeout(self.timeout)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
-        self.fmt_log_fp: Optional[io.FileIO] = None
-        self.raw_log_fp: Optional[io.FileIO] = None
+        self.fmt_log_fp: io.FileIO | None = None
+        self.raw_log_fp: io.FileIO | None = None
 
-        self.fmt_log_path: Optional[Path] = None
-        self.raw_log_path: Optional[Path] = None
+        self.fmt_log_path: Path | None = None
+        self.raw_log_path: Path | None = None
 
         self.log_to_file: bool = False
 
@@ -81,7 +80,7 @@ class EnipSocket:
         """
         try:
             self.sock.connect((self.ip, self.port))
-        except socket.timeout:
+        except TimeoutError:
             self.log.debug(
                 f"Socket timed out during connect (timeout: {self.timeout} seconds)"
             )
@@ -128,7 +127,7 @@ class EnipSocket:
                         f"socket connection broken during send to {str(self)}"
                     )
                 total_sent += sent
-            except socket.timeout:
+            except TimeoutError:
                 self.log.warning(
                     f"Socket timed out during send "
                     f"(timeout: {self.timeout} seconds)"
@@ -171,7 +170,7 @@ class EnipSocket:
                     one_shot = False
                 chunks.append(chunk)
                 bytes_received += len(chunk)
-            except socket.timeout:
+            except TimeoutError:
                 self.log.warning(
                     f"Socket timed out during receive "
                     f"(timeout: {self.timeout} seconds)"
@@ -251,9 +250,9 @@ class EnipSocket:
             if idx % 8 == 0:
                 out += " "
             if idx % 16 == 0:
-                out += "\n0x{:0>4x}  ".format(line * 0x10)
+                out += f"\n0x{line * 0x10:0>4x}  "
                 line += 1
-            out += "{:0>2x} ".format(ch)
+            out += f"{ch:0>2x} "
 
         return out
 

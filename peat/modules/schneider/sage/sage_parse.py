@@ -13,7 +13,8 @@ import re
 import xml.etree.ElementTree as ET
 from datetime import datetime
 from pathlib import PurePath, PurePosixPath
-from typing import IO, Any, Callable, Final, Union
+from typing import IO, Any, Final, Union
+from collections.abc import Callable
 
 from peat import DeviceData, log, utils
 from peat.data.models import Event, Interface, User
@@ -306,7 +307,7 @@ def parse_time(f_handle: IO[bytes], device_info: dict) -> None:
     parse_gps_elements(gps, device_info)
 
 
-def bootline_parse(bootline: Union[str, dict]) -> dict[str, str]:
+def bootline_parse(bootline: str | dict) -> dict[str, str]:
     """
     Parse useful information out of vxworks bootline string,
     which is embedded in ``bootline.xml``.

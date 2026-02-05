@@ -12,7 +12,7 @@ Authors
 
 import struct
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from peat import DeviceData, DeviceModule, Interface, SerialMethod, datastore, log
 from peat.protocols import open_serial_port, pretty_hex_bytes, serial_txn
@@ -135,8 +135,8 @@ class WDW2301E(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         to_parse = file.read_bytes()
         # TODO: detect 2301E wset file
         try:
@@ -256,7 +256,7 @@ def _servlink_rw_txn(
 
 # Not sure if this is 2301E-specific
 def _servlink_seq_txn(
-    cmd_bytes: bytes, address: str, fmt: "Optional[type]" = None, options: bool = False
+    cmd_bytes: bytes, address: str, fmt: "type | None" = None, options: bool = False
 ):
     """Send a sequential Servlink serial message. Also track the Servlink
     sequence.

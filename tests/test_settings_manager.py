@@ -8,7 +8,6 @@ in the config or state.
 import json
 import os
 from pathlib import Path
-from typing import Optional, Union
 
 import pytest
 import yaml
@@ -145,8 +144,8 @@ def test_typecast(tmp_path):
         TEST_OPTION: str = "default_value"
         ALPHA: bool = False
         PTH: Path = Path("somepath")
-        PATHS: list[Union[str, Path]] = []
-        OPTS: Optional[str] = None
+        PATHS: list[str | Path] = []
+        OPTS: str | None = None
 
     inst = TestTypecast(label="configuration", env_prefix="TEST_", init_env=False)
     assert inst.typecast("ALPHA", False) is False

@@ -10,11 +10,11 @@ import atexit
 import json
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from platform import system, version
 from subprocess import PIPE, CompletedProcess, Popen, run
-from typing import Callable, Optional, Union
+from collections.abc import Callable
 
 import pytest
 from deepdiff import DeepDiff
@@ -133,9 +133,9 @@ def pytest_assertrepr_compare(op, left, right):  # noqa: ARG001
 
 
 @pytest.fixture
-def deep_compare() -> Callable[[dict, dict, Union[list, str, None]], None]:
+def deep_compare() -> Callable[[dict, dict, list | str | None], None]:
     def _deep_compare(
-        first: dict, second: dict, exclude_regexes: Union[list, str, None] = None
+        first: dict, second: dict, exclude_regexes: list | str | None = None
     ) -> None:
         """
         Compare two objects and optionally exclude some elements from comparison.
@@ -164,7 +164,7 @@ def deep_compare() -> Callable[[dict, dict, Union[list, str, None]], None]:
 @pytest.fixture
 def dev_data_compare(deep_compare: Callable) -> Callable[..., None]:
     def _dev_data_compare(
-        expected: dict, actual: dict, additional_regexes: Union[str, list, None] = None
+        expected: dict, actual: dict, additional_regexes: str | list | None = None
     ) -> None:
         # TODO: method to check excluded keys exist even if values don't match
         # TODO: method to extract path for comparison,
@@ -233,7 +233,7 @@ def run_peat() -> Callable[..., tuple[str, str]]:
     """
 
     def _run_peat_wrapper(
-        args: Optional[list[str]] = None,
+        args: list[str] | None = None,
         shell: bool = False,
     ) -> tuple[str, str]:
         if not args:
@@ -265,9 +265,9 @@ def exec_peat() -> Callable[..., CompletedProcess]:
     """
 
     def _exec_peat_wrapper(
-        args: Optional[list[str]] = None,
+        args: list[str] | None = None,
         shell: bool = False,
-        pre_cmd: Optional[str] = None,
+        pre_cmd: str | None = None,
     ) -> CompletedProcess:
         if not args:
             args = []
@@ -279,7 +279,7 @@ def exec_peat() -> Callable[..., CompletedProcess]:
         if shell:  # In shell mode the command executed should be a string
             command = " ".join(command)
 
-        return run(command, shell=shell, stdout=PIPE, stderr=PIPE, check=False)
+        return run(command, shell=shell, capture_output=True, check=False)
 
     return _exec_peat_wrapper
 
@@ -287,7 +287,7 @@ def exec_peat() -> Callable[..., CompletedProcess]:
 @pytest.fixture
 def exec_command() -> Callable[[str, bool], CompletedProcess]:
     def _exec_command_wrapper(command: str, shell: bool = True) -> CompletedProcess:
-        return run(command, shell=shell, stdout=PIPE, stderr=PIPE, check=False)
+        return run(command, shell=shell, capture_output=True, check=False)
 
     return _exec_command_wrapper
 
@@ -384,12 +384,12 @@ def text_data(datadir: Path, read_text: Callable[[Path], str]):
 
 
 @pytest.fixture(scope="module")
-def json_data(datadir: Path) -> Callable[[str], Union[dict, list, str]]:
+def json_data(datadir: Path) -> Callable[[str], dict | list | str]:
     """
     Loads data from a JSON file in the test module's "data_files" directory.
     """
 
-    def _read_json(filename: str) -> Union[dict, list, str]:
+    def _read_json(filename: str) -> dict | list | str:
         # NOTE: json module doesn't care about line endings
         return json.loads(Path(datadir, filename).read_text(encoding="utf-8"))
 
@@ -430,7 +430,7 @@ def curr_ydm() -> str:
     WARNING: this may cause tests to fail if a test occurs near
     5PM MST (midnight UTC).
     """
-    return datetime.now(timezone.utc).strftime("%Y.%m.%d")
+    return datetime.now(UTC).strftime("%Y.%m.%d")
 
 
 @pytest.fixture

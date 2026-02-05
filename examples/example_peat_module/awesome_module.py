@@ -12,9 +12,8 @@ Authors
 """
 
 import json
-from datetime import timezone
+from datetime import UTC
 from pathlib import Path
-from typing import Optional
 
 from peat import (
     DeviceData,
@@ -113,8 +112,8 @@ class AwesomeTool(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         """
         Implementing DeviceModule._parse() tells PEAT how to parse
         files. The input to "peat parse" (e.g. a file or piped input)
@@ -256,7 +255,7 @@ class AwesomeTool(DeviceModule):
                 # to handle common tasks such as parsing timestamps. Use them!
                 # (Refer to the Internal API documentation for further details)
                 ts = utils.parse_date(data.pop("timeStarted"))
-                dev.start_time = ts.astimezone(tz=timezone.utc)
+                dev.start_time = ts.astimezone(tz=UTC)
 
                 # Set the "extra" field to leftover data
                 dev.extra = data

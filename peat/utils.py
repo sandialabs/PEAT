@@ -11,11 +11,12 @@ import site
 import sys
 from contextlib import ExitStack
 from copy import deepcopy
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 from ipaddress import ip_address
 from pathlib import Path
 from traceback import format_exc
-from typing import Any, Container, Iterable, Optional, Union
+from typing import Any
+from collections.abc import Container, Iterable
 
 import pathvalidate
 from dateutil.parser import parse as date_parse
@@ -63,7 +64,7 @@ def clean_empty_dirs(to_clean: Path) -> None:
         pass
 
 
-def fmt_duration(seconds: Union[int, float, timedelta]) -> str:
+def fmt_duration(seconds: int | float | timedelta) -> str:
     """
     Format a time duration into a human-readable string.
 
@@ -151,7 +152,7 @@ def move_file(src: Path, dest: Path) -> Path:
     return dest
 
 
-def merge(d1: Optional[dict], d2: Optional[dict], no_copy: bool = False) -> dict:
+def merge(d1: dict | None, d2: dict | None, no_copy: bool = False) -> dict:
     """
     Merges two dictionaries.
 
@@ -181,7 +182,7 @@ def merge(d1: Optional[dict], d2: Optional[dict], no_copy: bool = False) -> dict
     return final
 
 
-def parse_date(raw_time: str, year_first: Optional[bool] = None) -> Optional[datetime]:
+def parse_date(raw_time: str, year_first: bool | None = None) -> datetime | None:
     """
     Parse a raw string into a datetime object or ISO 8601 date string.
 
@@ -268,7 +269,7 @@ Output directories (full list in the state JSON dump)
     return runtime_info + environment_info + system_info + out_dirs
 
 
-def _pth_log_string(pth: Optional[Path]) -> str:
+def _pth_log_string(pth: Path | None) -> str:
     return pth.as_posix() if pth else "UNSET"
 
 
@@ -388,8 +389,8 @@ def copy_file(src_path: Path, dst_path: Path, overwrite: bool = False) -> None:
 
 
 def check_file(
-    file: Union[Path, str], ext: Optional[Union[list, str]] = None
-) -> Union[str, Path, None]:
+    file: Path | str, ext: list | str | None = None
+) -> str | Path | None:
     """
     Checks if a path exists and is valid, and returns the :class:`~pathlib.Path` to it.
 
@@ -514,7 +515,7 @@ def file_perms_to_octal(mode_string: str) -> str:
 
 
 def save_results_summary(
-    data: Union[str, bytes, bytearray, Container, Iterable],
+    data: str | bytes | bytearray | Container | Iterable,
     results_type: str,
     log_debug: bool = False,
 ) -> None:
@@ -539,9 +540,9 @@ def save_results_summary(
 
 
 def write_temp_file(
-    data: Union[str, bytes, bytearray, Container, Iterable],
+    data: str | bytes | bytearray | Container | Iterable,
     filename: str,
-) -> Optional[Path]:
+) -> Path | None:
     """
     Write arbitrary data to a file in the PEAT temporary directory.
 
@@ -579,7 +580,7 @@ def write_temp_file(
 
 
 def write_file(
-    data: Union[str, bytes, bytearray, Container, Iterable],
+    data: str | bytes | bytearray | Container | Iterable,
     file: Path,
     overwrite_existing: bool = False,
     format_json: bool = True,
@@ -780,7 +781,7 @@ def dup_path(file: Path) -> Path:
     return file.with_name(f"{file.name}.{ext_count}")
 
 
-def calc_hash(source: Union[str, bytes, Path], hash_type: str = "md5") -> str:
+def calc_hash(source: str | bytes | Path, hash_type: str = "md5") -> str:
     """
     Calculate the hash of a file, :class:`bytes`, or :class:`str`.
 
@@ -805,7 +806,7 @@ def calc_hash(source: Union[str, bytes, Path], hash_type: str = "md5") -> str:
 
 
 def gen_hashes(
-    source: Union[bytes, str, Path], hash_algorithms: Optional[list[str]] = None
+    source: bytes | str | Path, hash_algorithms: list[str] | None = None
 ) -> dict[str, str]:
     """
     Generate hashes of text, :class:`bytes`, or the contents of a file.
@@ -837,7 +838,7 @@ def utc_now() -> datetime:
 
     Further reading: https://blog.miguelgrinberg.com/post/it-s-time-for-a-change-datetime-utcnow-is-now-deprecated
     """
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 def time_now() -> str:

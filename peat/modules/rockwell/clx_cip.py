@@ -12,7 +12,7 @@ Authors
 
 from __future__ import annotations
 
-from typing import Any, Optional, Union
+from typing import Any, Union
 
 from peat import config, log
 from peat.protocols.cip import *
@@ -25,7 +25,7 @@ PathType = Union[tuple, tuple[int, Any]]
 TagData = Union[int, bytes]
 DataListType = tuple[TagData, int]
 FragListType = tuple[TagData, int, bytes]
-TemplateType = dict[str, Union[str, dict]]
+TemplateType = dict[str, str | dict]
 AttrTags = tuple[dict[int, dict], dict]
 AttrsType = dict[int, int]  # ??
 
@@ -151,7 +151,7 @@ class ClxCIP:
         return parse_get_instance_list(instance_list)
 
     def get_attributes(
-        self, instance_path: PathType, attribute_list: Optional[list[int]] = None
+        self, instance_path: PathType, attribute_list: list[int] | None = None
     ) -> dict:
         """
         Returns attributes for a single instance at a given instance path.
@@ -182,8 +182,8 @@ class ClxCIP:
     def get_attributes_multi(
         self,
         class_path: PathType,
-        attribute_list: Optional[list] = None,
-        instance_list: Optional[list] = None,
+        attribute_list: list | None = None,
+        instance_list: list | None = None,
     ) -> dict[int, dict]:
         """
         Returns attributes for multiple instances at a given class path.

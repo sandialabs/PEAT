@@ -53,7 +53,6 @@ Authors
 
 from pathlib import Path, PurePosixPath
 from random import randint
-from typing import Optional, Union
 from xml.etree.ElementTree import Element, fromstring
 
 from peat import (
@@ -174,7 +173,7 @@ class SCEPTRE(DeviceModule):
     @classmethod
     def _download_ftp(
         cls, dev: DeviceData, check_for: str, extension: str
-    ) -> tuple[Optional[bytes], Optional[Path]]:
+    ) -> tuple[bytes | None, Path | None]:
         try:
             with FTP(
                 ip=dev.ip,
@@ -276,7 +275,7 @@ class SCEPTRE(DeviceModule):
 
     @classmethod
     def _upload_ftp(
-        cls, dev: DeviceData, filename: str, content: Union[str, bytes]
+        cls, dev: DeviceData, filename: str, content: str | bytes
     ) -> bool:
         try:
             with FTP(
@@ -307,12 +306,12 @@ class SCEPTRE(DeviceModule):
         return True
 
     @classmethod
-    def _parse(cls, file: Path, dev: Optional[DeviceData] = None) -> DeviceData:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData:
         return cls.parse_config(file=file, dev=dev)
 
     @classmethod
     def parse_config(
-        cls, file: Union[Path, bytes, str], dev: Optional[DeviceData] = None
+        cls, file: Path | bytes | str, dev: DeviceData | None = None
     ) -> DeviceData:
         """
         Parse a SCEPTRE field device XML configuration file.
@@ -600,7 +599,7 @@ def _parse_endpoint(endpoint: str) -> dict:
     return data
 
 
-def _ele(root: Element, to_find: str) -> Optional[str]:
+def _ele(root: Element, to_find: str) -> str | None:
     found = root.find(to_find)
     if found is not None:
         return found.text.strip()

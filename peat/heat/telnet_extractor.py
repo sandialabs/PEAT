@@ -10,7 +10,6 @@ Authors
 """
 
 import re
-from typing import Union
 
 from peat import Interface, config, datastore, log, state, utils
 
@@ -388,7 +387,7 @@ class TelnetExtractor(HeatProtocol):
                     i += 1
         self.elastic_data = data
 
-    def get_list_text(self, data: Union[list, str]) -> bytearray:
+    def get_list_text(self, data: list | str) -> bytearray:
         text = bytearray()
         if isinstance(data, list):
             for string in data:

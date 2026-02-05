@@ -4,7 +4,6 @@ import tempfile
 from functools import cached_property
 from pathlib import Path
 from time import sleep
-from typing import Optional, Union
 
 import serial  # PySerial
 
@@ -43,7 +42,7 @@ class SELSerial(SELAscii):
         self,
         serial_port: str,
         baudrate: int = 9600,
-        timeout: Union[float, int] = 5.0,
+        timeout: float | int = 5.0,
         force_ymodem: bool = False,
     ):
         super().__init__(address=serial_port, timeout=timeout)
@@ -213,7 +212,7 @@ class SELSerial(SELAscii):
 
     def read(
         self,
-        delay: Optional[float] = None,
+        delay: float | None = None,
         strip_whitespace: bool = True,
     ) -> str:
         if delay is None:
@@ -229,7 +228,7 @@ class SELSerial(SELAscii):
 
     def read_until(
         self,
-        until: Union[bytes, str],
+        until: bytes | str,
         strip_whitespace: bool = True,
     ) -> str:
         if isinstance(until, str):
@@ -277,12 +276,12 @@ class SELSerial(SELAscii):
 
         return False
 
-    def write(self, command: Union[bytes, str, int]) -> None:
+    def write(self, command: bytes | str | int) -> None:
         self.comm.reset_input_buffer()
         self.log.trace2(f"Writing: {command}")
         super().write(command)
 
-    def ymodem_read_file(self, file_id: str) -> Optional[bytes]:
+    def ymodem_read_file(self, file_id: str) -> bytes | None:
         """
         Read a file from the relay over YMODEM.
 
@@ -458,7 +457,7 @@ class SELSerial(SELAscii):
     # TODO: rename from "download_binary"
     def download_binary(
         self, filename: str, save_to_file: bool = True  # noqa: ARG002
-    ) -> Optional[Union[str, bytes]]:
+    ) -> str | bytes | None:
         # TODO: change "filename" arg to "file_id", fix "SETTINGS SET_P1.TXT" being a thing here
         self.log.info(f"Reading file: {filename}")
 

@@ -12,7 +12,6 @@ from ipaddress import (
     ip_network,
 )
 from pathlib import Path
-from typing import Union
 
 from peat import ParseError, log, state
 
@@ -66,8 +65,8 @@ def resolve_ip_to_hostname(ip: str) -> str:
 
 
 def expand_commas_and_clean_strings(
-    host_list: list[Union[str, bytes, IPv4Address, IPv4Network, Path]],
-) -> list[Union[str, bytes, IPv4Address, IPv4Network, Path]]:
+    host_list: list[str | bytes | IPv4Address | IPv4Network | Path],
+) -> list[str | bytes | IPv4Address | IPv4Network | Path]:
     """
     Expand strings with ',' characters into separate items, convert bytes
     to str, and remove items that are only whitespace or empty strings.
@@ -98,8 +97,8 @@ def expand_commas_and_clean_strings(
 
 
 def expand_filenames_to_hosts(
-    host_list: list[Union[str, bytes, IPv4Address, IPv4Network, Path]],
-) -> list[Union[str, bytes, IPv4Address, IPv4Network]]:
+    host_list: list[str | bytes | IPv4Address | IPv4Network | Path],
+) -> list[str | bytes | IPv4Address | IPv4Network]:
     """
     Read host data from any hosts that are filenames, and remove them from the list.
     """
@@ -160,7 +159,7 @@ def expand_filenames_to_hosts(
 
 
 def hosts_to_ips(
-    host_list: list[Union[str, bytes, IPv4Address, IPv4Network]],
+    host_list: list[str | bytes | IPv4Address | IPv4Network],
 ) -> list[str]:
     """
     Converts a list of mixed host strings to a list of unique IPv4 addresses.
@@ -223,7 +222,7 @@ def hosts_to_ips(
 
 
 def hosts_to_objs(
-    host_list: list[Union[str, bytes, IPv4Address, IPv4Network]],
+    host_list: list[str | bytes | IPv4Address | IPv4Network],
 ) -> list[_BaseV4]:
     """
     Converts a list of mixed host strings into :mod:`ipaddress` objects.
@@ -275,8 +274,8 @@ def hosts_to_objs(
 
 
 def host_string_to_objs(
-    host_string: Union[str, bytes], strict_network: bool = True
-) -> Union[_BaseV4, set[IPv4Address]]:
+    host_string: str | bytes, strict_network: bool = True
+) -> _BaseV4 | set[IPv4Address]:
     """
     Converts a mixed host string into :mod:`ipaddress` object(s).
 
@@ -434,7 +433,7 @@ def ip_objs_to_ips(ip_obj_list: list[_BaseV4]) -> list[str]:
     return sort_ips(address_set)  # Convert set to list and sort before returning
 
 
-@lru_cache()
+@lru_cache
 def ip_is_local_interface(ip: str) -> bool:
     """
     Checks if a IP matches any of the local machine's :term:`NIC` IPs.
@@ -452,7 +451,7 @@ def ip_is_local_interface(ip: str) -> bool:
 
 
 @lru_cache(maxsize=1024)
-def ip_in_local_subnet(ip: Union[str, IPv4Address]) -> bool:
+def ip_in_local_subnet(ip: str | IPv4Address) -> bool:
     """
     Checks if a IP is in any of the locally connected subnets.
 
@@ -477,7 +476,7 @@ def ip_in_local_subnet(ip: Union[str, IPv4Address]) -> bool:
     return False
 
 
-@lru_cache()
+@lru_cache
 def network_is_local(net: IPv4Network) -> bool:
     """
     Checks if a network address space is a subset of a local subnet.
@@ -494,14 +493,14 @@ def network_is_local(net: IPv4Network) -> bool:
     return any(net.subnet_of(local) for local in state.local_networks)
 
 
-def sort_ips(ip_list: Union[list[str], set[str]]) -> list[str]:
+def sort_ips(ip_list: list[str] | set[str]) -> list[str]:
     """
     Sort IPv4 address strings in ascending order by integer IPs.
     """
     return sorted(ip_list, key=lambda x: socket.inet_pton(socket.AF_INET, x))
 
 
-@lru_cache()
+@lru_cache
 def split_ipv4_cidr(addr: str) -> tuple[str, str]:
     """
     Convert subnet mask from :term:`CIDR` bits to full dotted-decimal.

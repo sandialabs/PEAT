@@ -269,7 +269,7 @@ def _get_snmp_metadata(
                 module_info[name] = "enabled" if data == 2 else "disabled"
             elif name == "communication_services":
                 srvcs = {}
-                bits = [int(x) for x in "{0:07b}".format(int(data))]
+                bits = [int(x) for x in f"{int(data):07b}"]
                 srvcs["port_502_messaging"] = (
                     "supported" if bits[0] == 1 else "unsupported"
                 )
@@ -524,7 +524,7 @@ def _get_modbus_metadata(ip: str, timeout: float = 5.0, port: int = 502) -> dict
 
     try:
         sock.connect((ip, port))
-    except IOError as err:
+    except OSError as err:
         log.error(f"Failed to pull Modbus metadata from {ip}: {err}")
         sock.close()
         return {}

@@ -1,6 +1,5 @@
 import copy
 import io
-from typing import Optional, Union
 from xml.dom import minidom
 from xml.etree.ElementTree import Element, ElementTree, SubElement, tostring
 
@@ -136,7 +135,7 @@ class TC6:
         return pou
 
     @staticmethod
-    def add_st_content_to_pou(pou: Element, content: Union[bytes, str]):
+    def add_st_content_to_pou(pou: Element, content: bytes | str):
         """
         Add a Structured Text content section to a POU.
 
@@ -229,7 +228,7 @@ class TC6:
         return generated_xml
 
     def generate_st(
-        self, generated_xml: Optional[str] = None, sceptre: bool = False
+        self, generated_xml: str | None = None, sceptre: bool = False
     ) -> str:
         """
         Generates IEC 61131-3 compliant Structured Text logic.

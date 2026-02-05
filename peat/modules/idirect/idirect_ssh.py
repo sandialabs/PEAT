@@ -1,4 +1,3 @@
-from typing import Optional
 
 from peat import utils
 from peat.protocols import SSH
@@ -12,7 +11,7 @@ class IdirectSSH(SSH):
 
     def read(
         self,
-        delay: Optional[float] = None,
+        delay: float | None = None,
         strip_whitespace: bool = True,
         wait_until_ready: bool = True,
     ) -> str:

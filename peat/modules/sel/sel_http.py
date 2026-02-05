@@ -14,7 +14,7 @@ Authors
 
 import re
 from time import sleep
-from typing import Dict, Literal, Optional, Union
+from typing import Literal
 from urllib.parse import urljoin
 
 import humanfriendly
@@ -47,11 +47,11 @@ class SELHTTP(HTTP):
     def __init__(self, *args, **kwargs) -> None:
         self._rando: str = ""  # "rando" field from 'input' login page element
         self._session_url: str = ""
-        self._url_parts: Optional[tuple[str, str]] = None
+        self._url_parts: tuple[str, str] | None = None
         self._found_url: bool = False
-        self._port_args_len: Optional[int] = None
-        self._logic_page_style: Optional[str] = None
-        self.successful_creds: Optional[tuple[str, str]] = None
+        self._port_args_len: int | None = None
+        self._logic_page_style: str | None = None
+        self.successful_creds: tuple[str, str] | None = None
         self.rtac_l1_user: str = "acc"
         self.session_id: str = ""
         self.rtac_logged_in: bool = False
@@ -169,7 +169,7 @@ class SELHTTP(HTTP):
 
         return True
 
-    def read_page(self, cmd: str, param: Optional[str] = None) -> str:
+    def read_page(self, cmd: str, param: str | None = None) -> str:
         """
         Creates URL from given cmd and parameter and extracts text data from that page.
 
@@ -249,7 +249,7 @@ class SELHTTP(HTTP):
 
         return data
 
-    def _gen_url(self, cmd: str, parts: tuple[str, str], param: Optional[str]) -> str:
+    def _gen_url(self, cmd: str, parts: tuple[str, str], param: str | None) -> str:
         url = f"{self._session_url}{parts[0]}{cmd}{parts[1]}"
         if param:
             url += f"&param={param}"
@@ -2488,7 +2488,7 @@ def querystr() -> str:
 
 def parse_simple_table(table_start: str, table_end: str, page_data: str) -> dict:
     try:
-        regex = r"{}:\n([\s\S]+){}".format(table_start, table_end)
+        regex = rf"{table_start}:\n([\s\S]+){table_end}"
         data = re.findall(regex, page_data)[0].split("\n")
         table_data = [
             re.findall(r"\s+([^=|:]+)[=|:]\s+(.+)", line)[0] for line in data if line
@@ -2504,7 +2504,7 @@ def parse_simple_table(table_start: str, table_end: str, page_data: str) -> dict
 
 def parse_simple_list(list_start: str, list_end: str, page_data: str) -> list[str]:
     try:
-        regex = r"{}:\n([\s\S]+){}".format(list_start, list_end)
+        regex = rf"{list_start}:\n([\s\S]+){list_end}"
         data = re.findall(regex, page_data)[0].split("\n")
         return [line.strip() for line in data if line]
     except IndexError:
@@ -2535,7 +2535,7 @@ def parse_simple_line(param_name: str, page_data: str) -> str:
         log.warning(f"Failed parse_simple_line: param '{param_name}' not in page")
         return ""
     try:
-        return re.findall(r"\n\s*{}[=|:]\s*(\S+)".format(param_name), page_data)[0]
+        return re.findall(rf"\n\s*{param_name}[=|:]\s*(\S+)", page_data)[0]
     except IndexError:
         log.warning(
             f"Failed parse_simple_line\nParam name: '{param_name}'\n"
@@ -2567,7 +2567,7 @@ def parse_comments(obj: dict) -> dict:
     return results
 
 
-def read_html(content: Union[str, bytes]) -> Dict[str, str]:
+def read_html(content: str | bytes) -> dict[str, str]:
     """
     Replace functionality of the Pandas HTML parser.
     """

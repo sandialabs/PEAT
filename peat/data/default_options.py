@@ -6,7 +6,7 @@ ConfigVal = Union[list, str, bool, float, int]
 
 #: Global defaults used by all devices
 #: Refer to examples/peat-config.yaml for descriptions of the options
-DEFAULT_OPTIONS: dict[str, Union[dict[str, ConfigVal], ConfigVal]] = {
+DEFAULT_OPTIONS: dict[str, dict[str, ConfigVal] | ConfigVal] = {
     "baudrates": [],
     "timeout": config.DEFAULT_TIMEOUT,
     "sceptre_plc_compatible_st_logic": False,

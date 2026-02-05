@@ -17,7 +17,6 @@ import os.path
 import re
 from collections import defaultdict
 from pathlib import PurePosixPath
-from typing import Optional, Union
 
 import humanfriendly
 from humanfriendly.text import split_paragraphs
@@ -32,7 +31,7 @@ class NixParserBase:
     """
 
     # file paths/names for file parsers
-    file: Optional[PurePosixPath] = None
+    file: PurePosixPath | None = None
     paths: list[PurePosixPath] = []
 
     # list of commands with arguments
@@ -262,7 +261,7 @@ class ProcCmdlineParser(NixParserBase):
     file = PurePosixPath("/proc/cmdline")
 
     @classmethod
-    def parse(cls, to_parse: str) -> dict[str, Union[bool, str]]:
+    def parse(cls, to_parse: str) -> dict[str, bool | str]:
         results = {}
 
         for arg in to_parse.strip().split():
@@ -277,7 +276,7 @@ class ProcCmdlineParser(NixParserBase):
         return results
 
     @classmethod
-    def process(cls, to_process: dict[str, Union[bool, str]], dev: DeviceData) -> None:
+    def process(cls, to_process: dict[str, bool | str], dev: DeviceData) -> None:
         # TODO: do more with this data?
         dev.extra[str(cls.file)] = to_process
 
@@ -291,7 +290,7 @@ class ProcCpuinfoParser(NixParserBase):
     file = PurePosixPath("/proc/cpuinfo")
 
     @classmethod
-    def parse(cls, to_parse: str) -> dict[str, Union[list, str]]:
+    def parse(cls, to_parse: str) -> dict[str, list | str]:
         results = {}
 
         proc_cpuinfo = to_parse.replace("\r\n", "\n")
@@ -319,7 +318,7 @@ class ProcCpuinfoParser(NixParserBase):
         return results
 
     @classmethod
-    def process(cls, to_process: dict[str, Union[list, str]], dev: DeviceData) -> None:
+    def process(cls, to_process: dict[str, list | str], dev: DeviceData) -> None:
         cpu_model = ""
         cpu_full = ""
         cpu_description = ""
@@ -562,7 +561,7 @@ class DateParser(NixParserBase):
     command = "date"
 
     @classmethod
-    def parse(cls, to_parse: str) -> Optional[datetime.datetime]:
+    def parse(cls, to_parse: str) -> datetime.datetime | None:
         if not to_parse:
             return None
 

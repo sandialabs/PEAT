@@ -10,7 +10,7 @@ Authors
 import re
 import zlib
 from pprint import pformat
-from typing import Final, Union
+from typing import Final
 from xml.etree import ElementTree
 from xml.etree.ElementTree import SubElement
 
@@ -18,7 +18,7 @@ from peat import log, utils
 from peat.parsing.plc_open.core_modules.definitions import TypeHierarchy_list
 from peat.parsing.tc6 import TC6
 
-ChunksType = dict[int, dict[str, Union[int, str, bytes]]]
+ChunksType = dict[int, dict[str, int | str | bytes]]
 # IEC 61131-3 types
 ALLOWED_TYPES: Final[set[str]] = {type_pair[0] for type_pair in TypeHierarchy_list}
 
@@ -26,7 +26,7 @@ ALLOWED_TYPES: Final[set[str]] = {type_pair[0] for type_pair in TypeHierarchy_li
 # TODO: process LD blocks to TC6
 
 
-def extract_logic_blocks(logic_blob: bytes) -> dict[str, Union[dict, list]]:
+def extract_logic_blocks(logic_blob: bytes) -> dict[str, dict | list]:
     """
     Extracts the process logic blocks from a Schneider M340 APX project file blob.
 
@@ -223,7 +223,7 @@ def extract_chunk(data: bytes) -> bytes:
     return bytes(extracted)  # bytearray -> bytes
 
 
-def extract_variables(chunk: bytes) -> dict[str, dict[str, Union[int, str, bytes]]]:
+def extract_variables(chunk: bytes) -> dict[str, dict[str, int | str | bytes]]:
     """
     Extracts variables and their metadata from a chunk.
     """
@@ -325,7 +325,7 @@ def set_init_vals(var: dict[str, dict], init: dict) -> dict[str, dict]:
     return var
 
 
-def parse_config_to_dict(config_blob: bytes) -> dict[str, Union[str, dict]]:
+def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
     """
     Extracts configuration information from a M340 APX project file blob.
 

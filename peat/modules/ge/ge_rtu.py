@@ -4,7 +4,6 @@ import re
 import socket
 import time
 from pathlib import Path
-from typing import Optional, Union
 
 from peat import (
     IO,
@@ -34,14 +33,14 @@ class D25Telnet:
         port: int = 23,
         timeout: float = 5.0,
         menu_sleep_seconds: float = 5.0,
-        raw_dir: Optional[Path] = None,
+        raw_dir: Path | None = None,
     ):
         self.ip: str = ip
         self.port: int = port
         self.timeout: float = timeout
         self.menu_sleep_seconds: float = menu_sleep_seconds
 
-        self.raw_dir: Optional[Path] = raw_dir
+        self.raw_dir: Path | None = raw_dir
         if self.raw_dir:
             self.raw_dir.mkdir(parents=True, exist_ok=True)
 
@@ -78,7 +77,7 @@ class D25Telnet:
     def connect(self) -> bool:
         try:
             self.sock.connect((self.ip, self.port))
-        except socket.timeout:
+        except TimeoutError:
             self.log.debug(
                 f"Socket timed out during connect (timeout: {self.timeout} seconds)"
             )
@@ -130,7 +129,7 @@ class D25Telnet:
             return True
         return False
 
-    def select_menu_option(self, option: Union[bytes, str, int]) -> None:
+    def select_menu_option(self, option: bytes | str | int) -> None:
         """
         Sends a number, letter, or command corresponding to a menu option.
         """
@@ -288,7 +287,7 @@ class GERTU(DeviceModule):
     ]
 
     @classmethod
-    def _setup_tn(cls, dev: DeviceData) -> Optional[D25Telnet]:
+    def _setup_tn(cls, dev: DeviceData) -> D25Telnet | None:
         # TODO: register exit handler to properly disconnect
         # from telnet with peat.exit_handler.register().
         if not dev._cache.get("d25telnet_object"):

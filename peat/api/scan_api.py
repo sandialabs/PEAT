@@ -5,7 +5,7 @@ from ipaddress import IPv4Address, IPv4Network
 from operator import itemgetter
 from pprint import pformat
 from time import sleep
-from typing import Callable, Optional, Type, Union
+from collections.abc import Callable
 
 from humanfriendly.tables import format_pretty_table
 from humanfriendly.terminal import ansi_strip
@@ -45,7 +45,7 @@ from peat.protocols.addresses import expand_filenames_to_hosts
 
 def portscan(
     dev: DeviceData,
-    methods: list[tuple[IPMethod, Type[DeviceModule]]],
+    methods: list[tuple[IPMethod, type[DeviceModule]]],
     finish_on_first_success: bool = False,
     full_check_snmp: bool = False,
 ) -> None:
@@ -138,8 +138,8 @@ def _determine_port(dev: DeviceData, method: IPMethod) -> int:
 
 
 def _methods_table(
-    meth_mods: list[tuple[IdentifyMethod, Type[DeviceModule]]],
-    dev: Optional[DeviceData] = None,
+    meth_mods: list[tuple[IdentifyMethod, type[DeviceModule]]],
+    dev: DeviceData | None = None,
 ) -> str:
     if isinstance(meth_mods[0][0], IPMethod) and "unicast" in meth_mods[0][0].type:
         cols = ["Protocol", "Port", "Reliability", "Method Name", "PEAT Module"]
@@ -182,8 +182,8 @@ def _methods_table(
 
 def unicast_ip_scan(
     hosts: list[str],
-    device_types: Optional[list[Union[str, Type[DeviceModule]]]] = None,
-) -> Optional[tuple[dict[str, bool], list[Type[DeviceModule]], list[str]]]:
+    device_types: list[str | type[DeviceModule]] | None = None,
+) -> tuple[dict[str, bool], list[type[DeviceModule]], list[str]] | None:
     """
     Scan a single host directly ("unicast" messages).
 
@@ -282,7 +282,7 @@ def unicast_ip_scan(
     return results, modules, addrs
 
 
-def check_host_unicast_ip(ip: str, modules: list[Type[DeviceModule]]) -> bool:
+def check_host_unicast_ip(ip: str, modules: list[type[DeviceModule]]) -> bool:
     """
     Identifies an unknown device using unicast IP communication.
 
@@ -533,8 +533,8 @@ def check_host_unicast_ip(ip: str, modules: list[Type[DeviceModule]]) -> bool:
 
 def broadcast_scan(
     targets: list[str],
-    device_types: Optional[list[Union[str, Type[DeviceModule]]]] = None,
-) -> Optional[tuple[dict[str, bool], list[Type[DeviceModule]], list[str]]]:
+    device_types: list[str | type[DeviceModule]] | None = None,
+) -> tuple[dict[str, bool], list[type[DeviceModule]], list[str]] | None:
     """
     Discover devices via network broadcasts.
 
@@ -763,8 +763,8 @@ def broadcast_scan(
 
 def serial_scan(
     serial_ports: list[str],
-    device_types: Optional[list[Union[str, Type[DeviceModule]]]] = None,
-) -> Optional[tuple[dict[str, bool], list[Type[DeviceModule]], list[str]]]:
+    device_types: list[str | type[DeviceModule]] | None = None,
+) -> tuple[dict[str, bool], list[type[DeviceModule]], list[str]] | None:
     """
     Scan serial ports for devices.
 
@@ -833,7 +833,7 @@ def serial_scan(
     return results, modules, serial_port_addresses
 
 
-def check_host_serial(port: str, modules: list[Type[DeviceModule]]) -> bool:
+def check_host_serial(port: str, modules: list[type[DeviceModule]]) -> bool:
     """
     Identifies an unknown device using serial communication.
 
@@ -902,7 +902,7 @@ def check_host_serial(port: str, modules: list[Type[DeviceModule]]) -> bool:
 
 
 def run_identify(
-    scanning_function: Callable, addresses: list[str], modules: list[Type[DeviceModule]]
+    scanning_function: Callable, addresses: list[str], modules: list[type[DeviceModule]]
 ) -> dict[str, bool]:
     """
     Generic function to execute scanning functions in parallel.
@@ -958,8 +958,8 @@ def run_identify(
 def scan(
     scan_targets: list[str],
     scan_type: consts.AllowedCommTypes,
-    device_types: Optional[list[Union[str, Type[DeviceModule]]]] = None,
-) -> Optional[dict[str, Union[dict, list, str, float, int]]]:
+    device_types: list[str | type[DeviceModule]] | None = None,
+) -> dict[str, dict | list | str | float | int] | None:
     """
     Scan IP networks and hosts and/or serial ports for :term:`OT` devices.
 

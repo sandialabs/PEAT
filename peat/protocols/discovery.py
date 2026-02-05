@@ -19,7 +19,7 @@ Further reading about getting raw socket permissions on Linux
 
 import timeit
 from concurrent import futures
-from typing import Iterable, Optional
+from collections.abc import Iterable
 
 from scapy.all import RandShort, sr1
 from scapy.layers.inet import ICMP, IP
@@ -32,7 +32,7 @@ from .ip import check_tcp_port
 
 
 def check_host(
-    ip: str, timeout: float = 1.0, icmp_fallback_tcp_syn: Optional[bool] = None
+    ip: str, timeout: float = 1.0, icmp_fallback_tcp_syn: bool | None = None
 ) -> bool:
     """
     Checks if a network host is online.
@@ -216,7 +216,7 @@ def check_host_syn_sweep(ip: str, ports: list[int], timeout: float = 1.0) -> boo
 
 
 def get_reachable_hosts(
-    ip_list: list[str], ports: Optional[Iterable[int]] = None
+    ip_list: list[str], ports: Iterable[int] | None = None
 ) -> list[str]:
     """
     Checks for online hosts.

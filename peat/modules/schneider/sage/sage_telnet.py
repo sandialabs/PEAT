@@ -8,7 +8,6 @@ Authors
 """
 
 from pathlib import Path
-from typing import Optional
 
 from peat import DeviceData, utils
 from peat.protocols import Telnet
@@ -26,11 +25,11 @@ class SageTelnet(Telnet, SageCommands):
         ip: str,
         port: int = 23,
         timeout: float = 5,
-        dev: Optional[DeviceData] = None,
+        dev: DeviceData | None = None,
     ) -> None:
         super().__init__(ip, port, timeout)
-        self.dev: Optional[DeviceData] = dev
-        self.resp_dir: Optional[Path] = None
+        self.dev: DeviceData | None = dev
+        self.resp_dir: Path | None = None
 
     def login(self, user: str = "Admin", passwd: str = "Telvent1!") -> bool:
         """

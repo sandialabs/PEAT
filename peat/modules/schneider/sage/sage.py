@@ -27,7 +27,7 @@ import os
 import tarfile
 from datetime import datetime
 from pathlib import Path, PurePath, PurePosixPath
-from typing import Literal, Optional
+from typing import Literal
 
 from peat import (
     DeviceData,
@@ -889,7 +889,7 @@ class Sage(DeviceModule):
         return tasks
 
     @classmethod
-    def _parse(cls, file: Path, dev: Optional[DeviceData] = None) -> DeviceData:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData:
         device_info = {}
 
         is_tar_file = False

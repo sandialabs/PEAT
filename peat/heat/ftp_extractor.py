@@ -14,7 +14,6 @@ import shutil
 import subprocess
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from peat import Elastic, Interface, config, datastore, log, state, utils
 from peat.modules.sel.relay_parse import (
@@ -174,14 +173,14 @@ class FTPExtractor(HeatProtocol):
             n -= 1
         return start
 
-    def make_json(self, file) -> Optional[list]:
+    def make_json(self, file) -> list | None:
         # read a zeek json file into a python array of dicts
         if not os.path.exists(file):
             log.error("Path does not exist")
             return None
 
         log_json = []
-        with open(file, "r") as log_fp:
+        with open(file) as log_fp:
             for line in log_fp.readlines():
                 log_json.insert(0, json.loads(line))
 
@@ -337,7 +336,7 @@ class FTPExtractor(HeatProtocol):
 
             # if the file is a text file, use the utils to write the file
             if txtRegex.search(artifact.artifact_name):
-                with open(artifact.zeek_name, "r") as zeek_file:
+                with open(artifact.zeek_name) as zeek_file:
                     content = zeek_file.read()
                     utils.write_file(
                         content, artifact.file_path, overwrite_existing=False

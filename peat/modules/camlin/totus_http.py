@@ -1,6 +1,6 @@
 from datetime import timedelta
 from pathlib import PurePath
-from typing import Callable, Union
+from collections.abc import Callable
 
 from bs4 import BeautifulSoup
 
@@ -27,7 +27,7 @@ class TotusHTTP(HTTP):
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.methods: dict[str, dict[str, Union[str, Callable]]] = {
+        self.methods: dict[str, dict[str, str | Callable]] = {
             "hardware_info": {
                 "page": "system/api/1/hardware-info",
                 "process_method": self.process_hardware_info,
@@ -430,7 +430,7 @@ class TotusHTTP(HTTP):
 
     @staticmethod
     def process_users(
-        dev: DeviceData, users: dict[str, list[dict[str, Union[str, int]]]]
+        dev: DeviceData, users: dict[str, list[dict[str, str | int]]]
     ) -> None:
         for user_dict in users["items"]:
             dev.related.user.add(user_dict.get("sub", ""))

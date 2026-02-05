@@ -3,7 +3,7 @@ import csv
 import re
 import zlib
 from pathlib import PurePath, PurePosixPath
-from typing import Any, Literal, Optional, Union
+from typing import Any, Literal
 
 import olefile
 from dateutil.parser import parse as date_parse
@@ -17,7 +17,7 @@ from peat.protocols import clean_ipv4, split_ipv4_cidr
 
 from .sel_consts import ANSI_CODES, LOGIC_KEYS
 
-ConfigSectionType = Union[list[str], dict[str, str]]
+ConfigSectionType = list[str] | dict[str, str]
 ConfigsType = dict[str, ConfigSectionType]
 
 
@@ -239,7 +239,7 @@ def parse_sections(raw_sections: dict[str, list[str]]) -> dict[str, ConfigSectio
     return configs
 
 
-def parse_config_data(config_text: Union[bytes, str]) -> dict[str, ConfigSectionType]:
+def parse_config_data(config_text: bytes | str) -> dict[str, ConfigSectionType]:
     """
     Convert config file sections into a Python :class:`dict` structure.
 
@@ -294,7 +294,7 @@ def parse_config_data(config_text: Union[bytes, str]) -> dict[str, ConfigSection
         return {}
 
 
-def parse_cfg_txt(cfg_txt: Union[bytes, str], dev: DeviceData) -> ConfigsType:
+def parse_cfg_txt(cfg_txt: bytes | str, dev: DeviceData) -> ConfigsType:
     """
     Parse contents of CFG.TXT, including the [INFO] and [CLASSES] sections.
 
@@ -322,7 +322,7 @@ def parse_cfg_txt(cfg_txt: Union[bytes, str], dev: DeviceData) -> ConfigsType:
 
 
 def parse_set_all(
-    set_all_data: Union[bytes, str], dev: Optional[DeviceData] = None
+    set_all_data: bytes | str, dev: DeviceData | None = None
 ) -> tuple[dict[str, dict], DeviceData]:
     """
     Parse the data contained in SET_ALL.TXT.
@@ -587,7 +587,7 @@ def parse_ipaddr(settings: dict) -> Interface:
 
 def process_port_settings(
     port_id: Literal["1", "2", "3", "4", "5", "F"],
-    settings: dict[str, Union[dict, str]],
+    settings: dict[str, dict | str],
     dev: DeviceData,
 ) -> None:
     """
@@ -945,7 +945,7 @@ def process_network_configuration(configs: dict[str, dict], dev: DeviceData) -> 
         process_port_settings(port_id, settings, dev)
 
 
-def parse_ids(configs: dict[str, dict]) -> dict[str, Union[str, dict[str, str]]]:
+def parse_ids(configs: dict[str, dict]) -> dict[str, str | dict[str, str]]:
     """
     Extract and parse various relay IDs from a set of configs.
 
@@ -1201,7 +1201,7 @@ def parse_and_process_dnp3(configs: dict[str, dict], dev: DeviceData) -> None:
 
 def parse_protection_schemes(
     configs: dict[str, dict], device_type: str = ""
-) -> dict[str, Union[str, list]]:
+) -> dict[str, str | list]:
     protection_schemes = {}  # type: dict[str, Union[str, list]]
 
     for section, settings in configs.items():
@@ -1272,37 +1272,37 @@ def parse_logic_section(
     return logic
 
 
-def extract_fid(data: Union[bytes, str]) -> str:
+def extract_fid(data: bytes | str) -> str:
     return extract_string(data, r"FID\s?=\s?(SEL[\w\-]+)\s")
 
 
-def extract_bfid(data: Union[bytes, str]) -> str:
+def extract_bfid(data: bytes | str) -> str:
     return extract_string(data, r"BFID\s?=\s?([\w\-]+)\s")
 
 
-def extract_cid(data: Union[bytes, str]) -> str:
+def extract_cid(data: bytes | str) -> str:
     return extract_string(data, r"CID\s?=\s?(\w+)\s")
 
 
-def extract_part_number(data: Union[bytes, str]) -> str:
+def extract_part_number(data: bytes | str) -> str:
     return extract_string(
         data, r"part\s?(?:number|num):?\s+(\w+)\s", flags=re.IGNORECASE
     )
 
 
-def extract_serial_number(data: Union[bytes, str]) -> str:
+def extract_serial_number(data: bytes | str) -> str:
     return extract_string(
         data, r"serial\s?(?:number|num):?\s+(\w+)\s", flags=re.IGNORECASE
     )
 
 
-def extract_selboot_checksum(data: Union[bytes, str]) -> str:
+def extract_selboot_checksum(data: bytes | str) -> str:
     return extract_string(
         data, r"selboot:?\s.*checksum:?\s+(\d+)\s", flags=re.IGNORECASE | re.DOTALL
     )
 
 
-def extract_string(data: Union[bytes, str], regex: str, flags=None) -> str:
+def extract_string(data: bytes | str, regex: str, flags=None) -> str:
     """
     Extract a string from arbitrary data.
     """
@@ -1532,7 +1532,7 @@ def parse_ver_output(data: str) -> dict[str, str]:
     return results
 
 
-def event_data_present(data: Union[bytes, str]) -> bool:
+def event_data_present(data: bytes | str) -> bool:
     if isinstance(data, bytes):
         data = data.decode("ascii")
 
@@ -1545,7 +1545,7 @@ def event_data_present(data: Union[bytes, str]) -> bool:
 
 
 def parse_and_process_events(
-    data: Union[bytes, str], dataset: str, dev: DeviceData
+    data: bytes | str, dataset: str, dev: DeviceData
 ) -> tuple[list[dict], dict]:
     log.info(f"Parsing events in {dataset} from {dev.get_id()}")
 
@@ -1976,7 +1976,7 @@ def process_cid_file(data: bytes, filepath: PurePath, dev: DeviceData) -> str:
         return ""
 
 
-def _getv(val: Union[dict, Any]) -> Any:
+def _getv(val: dict | Any) -> Any:
     """
     Helper function to handle if a value is either
     in a dict or the value itself.
@@ -1999,7 +1999,7 @@ def clean_id(id_str: str) -> str:
     return re.sub("_{2,}", "_", cleaned).strip("_")
 
 
-def split_lines(val: Union[bytes, str]) -> list[str]:
+def split_lines(val: bytes | str) -> list[str]:
     if isinstance(val, bytes):
         val = val.decode("ascii")
     return [x.strip() for x in val.strip().splitlines() if x]

@@ -50,7 +50,7 @@ warnings.showwarning = showwarning
 class InterceptHandler(logging.Handler):
     def emit(self, record: logging.LogRecord) -> None:
         # Get corresponding Loguru level if it exists.
-        level: Union[str, int]
+        level: str | int
         try:
             level = log.level(record.levelname).name
         except ValueError:

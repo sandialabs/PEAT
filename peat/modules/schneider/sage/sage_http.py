@@ -11,7 +11,6 @@ import socket
 import ssl
 import warnings
 from time import sleep
-from typing import Optional
 
 import requests
 import urllib3
@@ -73,7 +72,7 @@ class SageHTTP(HTTP):
 
         return session
 
-    def create_socket(self) -> Optional[socket.socket]:
+    def create_socket(self) -> socket.socket | None:
         try:
             if self.protocol == "https":
                 context = ssl._create_unverified_context()
@@ -104,7 +103,7 @@ class SageHTTP(HTTP):
                 if not chunk:
                     break
                 response_data += chunk
-            except socket.timeout:
+            except TimeoutError:
                 self.log.error("Socket timed out while waiting for additional data")
                 break
             except Exception as ex:
@@ -159,7 +158,7 @@ class SageHTTP(HTTP):
                 self.cookies["KEY"] = key_cookie
             else:
                 self.log.error("KEY cookie not found in the HTTP response")
-        except socket.timeout:
+        except TimeoutError:
             self.log.error("Socket timed out when attempting to log in")
         finally:
             if sock:

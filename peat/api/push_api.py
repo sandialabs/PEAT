@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, Union, get_args
+from typing import Literal, get_args
 
 from peat import PeatError, consts, datastore, log, module_api, utils
 from peat.protocols import hosts_to_ips, sort_ips
@@ -11,7 +11,7 @@ def push(
     targets: list[str],
     comm_type: consts.AllowedCommTypes,
     device_types: list[str],
-    input_source: Union[Path, str],
+    input_source: Path | str,
     push_type: Literal["config", "firmware"],
     skip_scan: bool = False,
 ) -> bool:

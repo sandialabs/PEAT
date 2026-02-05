@@ -1,7 +1,7 @@
 import io
 import shutil
 from pathlib import Path
-from typing import Any, Optional, Union, get_args
+from typing import Any, get_args
 
 from peat import (
     DeviceData,
@@ -165,7 +165,7 @@ class DeviceModule:
     def push(
         cls,
         dev: DeviceData,
-        to_push: Union[str, bytes, Path],
+        to_push: str | bytes | Path,
         push_type: consts.PushType,
     ) -> bool:
         """
@@ -224,7 +224,7 @@ class DeviceModule:
     def _push(
         cls,
         dev: DeviceData,
-        to_push: Union[str, bytes, Path],
+        to_push: str | bytes | Path,
         push_type: consts.PushType,
     ) -> bool:
         """
@@ -236,9 +236,9 @@ class DeviceModule:
     @classmethod
     def parse(
         cls,
-        to_parse: Union[str, bytes, Path, io.IOBase],
-        dev: Optional[DeviceData] = None,
-    ) -> Optional[DeviceData]:
+        to_parse: str | bytes | Path | io.IOBase,
+        dev: DeviceData | None = None,
+    ) -> DeviceData | None:
         """
         Parse device information from collected data or file artifacts.
 
@@ -375,8 +375,8 @@ class DeviceModule:
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         """
         Implemented by modules. Subclass :class:`~peat.device.DeviceModule`
         and override this method.

@@ -16,7 +16,6 @@ Authors
 """
 
 from pathlib import Path
-from typing import Optional
 
 from scp import SCPClient
 
@@ -65,8 +64,8 @@ class Fortigate(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         # Ideally, the user would pass a directory of files. Recurse the tree and parse
         # all the fortigate files there, including log files. Use the .conf file to
         # annotate info such as device name, etc.

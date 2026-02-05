@@ -29,14 +29,13 @@ IEC 61131-3 is the standard defining the 5 PLC programming languages:
 - Sequential Function Chart (SFC)
 """
 
-from typing import Optional
 
 from peat import log
 
 from .plc_open import PLCControler
 
 
-def tc6_to_st(tc6_xml: bytes, output_filepath: Optional[str] = None) -> str:
+def tc6_to_st(tc6_xml: bytes, output_filepath: str | None = None) -> str:
     """
     Converts TC6 XML into IEC 61131-3 compliant Structured Text.
 

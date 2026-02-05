@@ -4,7 +4,6 @@ import traceback
 from abc import ABC, abstractmethod
 from datetime import datetime
 from time import sleep
-from typing import Optional, Union
 
 from dateutil.parser import parse as date_parse
 
@@ -33,9 +32,9 @@ class SELAscii(ABC):
         "cal": "CLARKE",  # Access level C
     }
 
-    def __init__(self, address: str, timeout: Union[int, float] = 5.0) -> None:
+    def __init__(self, address: str, timeout: int | float = 5.0) -> None:
         self.address: str = address
-        self.timeout: Union[int, float] = timeout
+        self.timeout: int | float = timeout
 
         self.log = log.bind(classname=self.__class__.__name__, target=self.address)
 
@@ -158,10 +157,10 @@ class SELAscii(ABC):
         pass
 
     @abstractmethod
-    def read(self, delay: Optional[float] = None, strip_whitespace: bool = True) -> str:
+    def read(self, delay: float | None = None, strip_whitespace: bool = True) -> str:
         pass
 
-    def write(self, command: Union[bytes, str, int]) -> None:
+    def write(self, command: bytes | str | int) -> None:
         """
         Send a command to the device.
 
@@ -232,9 +231,9 @@ class SELAscii(ABC):
         self,
         command: str,
         return_lines: bool = True,
-        added_delay: Optional[float] = None,
+        added_delay: float | None = None,
         read_until_prompt: bool = False,
-    ) -> Union[str, list[str]]:
+    ) -> str | list[str]:
         """
         Execute a command and return the results.
 
@@ -291,7 +290,7 @@ class SELAscii(ABC):
                     f"failed to auto-elevate privilege level on {self.address}"
                 )
 
-    def elevate(self, level: int, creds: Optional[dict] = None) -> bool:
+    def elevate(self, level: int, creds: dict | None = None) -> bool:
         """
         Elevates user privileges on the device.
 
@@ -465,7 +464,7 @@ class SELAscii(ABC):
         self.log.info("Successfully initiated relay restart!")
         return True
 
-    def get_sta(self) -> dict[str, Union[datetime, str]]:
+    def get_sta(self) -> dict[str, datetime | str]:
         """
         ``sta`` command (basic device information and status).
 
@@ -536,7 +535,7 @@ class SELAscii(ABC):
         self.log.trace2(f"** get_id() => 'info' **\n{info}")
         return info
 
-    def parse_exit_info(self, raw: str) -> dict[str, Union[datetime, str]]:
+    def parse_exit_info(self, raw: str) -> dict[str, datetime | str]:
         """
         Extract info returned when we disconnect cleanly (run ``exit``).
 
@@ -577,7 +576,7 @@ class SELAscii(ABC):
 
         return info
 
-    def list_files(self, directory: Optional[str] = None) -> list[str]:
+    def list_files(self, directory: str | None = None) -> list[str]:
         """
         List files in a directory on the device.
 
@@ -675,7 +674,7 @@ class SELAscii(ABC):
         """
         return self.exec_read("eth", added_delay=2.0)
 
-    def get_device_time(self) -> Optional[datetime]:
+    def get_device_time(self) -> datetime | None:
         """
         Combines output of ``date`` and ``time`` commands.
 

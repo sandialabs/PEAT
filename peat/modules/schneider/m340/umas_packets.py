@@ -11,7 +11,6 @@ Authors
 
 import binascii
 import socket
-from typing import Optional, Type, Union
 
 from scapy.all import (
     ByteField,
@@ -133,9 +132,9 @@ def connect_packet() -> Modbus:
 
 def send_umas_packet(
     sock: socket.socket,
-    packet: Union[Packet, bytes],
-    response_class: Type[Packet],
-    tracker: Optional[list] = None,
+    packet: Packet | bytes,
+    response_class: type[Packet],
+    tracker: list | None = None,
 ) -> Packet:
     """
     Send a packet and receive the response from a UMAS device.
@@ -173,7 +172,7 @@ def send_umas_packet(
                 f"Only {bytes_sent} bytes were sent "
                 f"out of {len(payload)} total bytes"
             )
-    except IOError as err:
+    except OSError as err:
         log.exception("Could not send UMAS packet")
         raise err
 
@@ -211,7 +210,7 @@ def update_tracker(
     packet: Packet,
     payload: bytes,
     sock: socket.socket,
-    tracker: Optional[list],
+    tracker: list | None,
 ):
     # TODO: expand this technique globally to PEAT for traffic capturing/logging
     if tracker is not None:

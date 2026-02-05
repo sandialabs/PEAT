@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import random
-from typing import Optional
 
 from peat import log
 from peat.protocols.cip.cip_const import (
@@ -192,7 +191,7 @@ class EnipDriver:
         message_type: bytes,
         message: bytes,
         addr_type: bytes,
-        addr_data: Optional[bytes] = None,
+        addr_data: bytes | None = None,
         timeout: int = 10,
     ) -> bytes:
         """

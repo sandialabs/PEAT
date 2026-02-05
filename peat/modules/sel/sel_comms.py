@@ -1,7 +1,6 @@
 import timeit
 from fnmatch import fnmatch
 from pathlib import Path, PurePosixPath
-from typing import Optional, Union
 
 from peat import DeviceData, DeviceError, config, log, utils
 from peat.protocols import FTP
@@ -10,7 +9,7 @@ from .sel_serial import SELSerial
 from .sel_telnet import SELTelnet
 
 
-def clean_filenames(filenames: list[Union[bytes, str]]) -> list[str]:
+def clean_filenames(filenames: list[bytes | str]) -> list[str]:
     """
     Some file listings contain embedded null bytes.
     """
@@ -24,7 +23,7 @@ def clean_filenames(filenames: list[Union[bytes, str]]) -> list[str]:
     return clean
 
 
-def _method_name(comms: Union[FTP, SELTelnet, SELSerial]) -> str:
+def _method_name(comms: FTP | SELTelnet | SELSerial) -> str:
     if isinstance(comms, FTP):
         return "FTP"
     elif isinstance(comms, SELTelnet):
@@ -37,10 +36,10 @@ def _method_name(comms: Union[FTP, SELTelnet, SELSerial]) -> str:
 
 def download_files(
     files: list[str],
-    comms: Union[FTP, SELTelnet, SELSerial],
-    save_dir: Optional[Path],
+    comms: FTP | SELTelnet | SELSerial,
+    save_dir: Path | None,
     handle_download_errors: bool = True,
-) -> dict[str, dict[str, Union[bytes, str, Path]]]:
+) -> dict[str, dict[str, bytes | str | Path]]:
     """
     Download a selected list of files from a relay in a comms-agnostic manner.
 
@@ -152,8 +151,8 @@ def download_files(
 
 def filter_names(
     paths: list[str],
-    only: Optional[list[str]] = None,
-    never: Optional[list[str]] = None,
+    only: list[str] | None = None,
+    never: list[str] | None = None,
 ) -> list[str]:
     if not only and not never:  # short-circuit common case
         return sorted(paths)
@@ -195,8 +194,8 @@ def filter_names(
 
 
 def pull_files(
-    dev: DeviceData, comms: Union[FTP, SELTelnet, SELSerial]
-) -> dict[str, dict[str, Union[bytes, str]]]:
+    dev: DeviceData, comms: FTP | SELTelnet | SELSerial
+) -> dict[str, dict[str, bytes | str]]:
     """
     Recursively download all files from a relay in a comms-agnostic manner.
 
@@ -322,7 +321,7 @@ def pull_files(
 
 
 def populate_file_listing(
-    dev: DeviceData, comms: Union[FTP, SELTelnet, SELSerial]
+    dev: DeviceData, comms: FTP | SELTelnet | SELSerial
 ) -> None:
     # ["DIAGNOSTICS", "EVENTS", "HMI", "REPORTS", "SER", "STATUS", "SETTINGS"]
     if not dev.extra.get("file_listing"):

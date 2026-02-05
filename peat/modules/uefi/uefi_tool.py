@@ -9,7 +9,6 @@ Authors
 """
 
 from pathlib import Path
-from typing import Optional
 
 from peat import DeviceData, DeviceModule, datastore
 from peat.modules.uefi.uefi_hash_parse import parse_hash
@@ -25,8 +24,8 @@ class UEFI(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         if not dev:
             dev = datastore.get(f"uefi_{file.stem.lower()}", "id")
 

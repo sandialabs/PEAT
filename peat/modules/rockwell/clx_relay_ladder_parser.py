@@ -8,7 +8,8 @@ Authors
 - Greg Walkup
 """
 
-from typing import Callable, Final, Union
+from typing import Final
+from collections.abc import Callable
 
 from peat import log
 from peat.protocols.data_packing import *
@@ -73,8 +74,8 @@ def disassemble_ladder_process_logic(
         out.append("Relay Ladder")
         for instruction in instruction_list:
             out.append(
-                "[0x{:0>8x}]  ".format(starting_address)
-                + "{:0>8x}  ".format(instruction & 0xFFFFFFFF)
+                f"[0x{starting_address:0>8x}]  "
+                 f"{instruction & 0xFFFFFFFF:0>8x}  "
                 + disassemble_instruction(instruction)
             )
             starting_address += 0x4
@@ -99,7 +100,7 @@ def _get_line_prefix(address: int, instruction: int, indent_level: int = 0) -> s
     if address == 0x00 and instruction == 0x00:
         out.append(" " * 24)
     else:
-        out.append("[0x{0:0>8x}]  {1:0>8x}  ".format(address, instruction & 0xFFFFFFFF))
+        out.append(f"[0x{address:0>8x}]  {instruction & 0xFFFFFFFF:0>8x}  ")
     out.append("  " * indent_level)
 
     return "".join(out)
@@ -369,7 +370,7 @@ def _decompile_BIT_OP(
     # Still don"t really know the purpose of MODULE_SEGMENT_ADDRESS
     if argument_segment == 1:
         argument_value += MODULE_SEGMENT_ADDRESS
-    argument = "@0x{0:0>8x}@".format(argument_value & 0xFFFFFFFF)
+    argument = f"@0x{argument_value & 0xFFFFFFFF:0>8x}@"
 
     return (
         "{0}({1})[{2}]".format(
@@ -880,7 +881,7 @@ STRUCTURE_TYPES: Final[dict[int, str]] = {
 # Operation codes
 # These appear as the lower two bytes of certain SPC instructions, and denote
 # multi-instruction operations
-OPERATION_STRUCT: Final[dict[int, dict[str, Union[str, int]]]] = {
+OPERATION_STRUCT: Final[dict[int, dict[str, str | int]]] = {
     0x8000: {
         "name": "ADD (DINT)",
         "header_len": 0,
@@ -1381,7 +1382,7 @@ OPERATION_STRUCT: Final[dict[int, dict[str, Union[str, int]]]] = {
 
 # "Opcodes" that are in the second byte of the 0x00 "SPC" instruction
 # These usually modify the meaning of the instructions following them
-EXTENDED_OPCODE: Final[dict[int, dict[str, Union[str, Callable]]]] = {
+EXTENDED_OPCODE: Final[dict[int, dict[str, str | Callable]]] = {
     0x10: {"name": "???", "dec": _decompile_SPC_default},
     # Gives the type of next operand
     0x20: {"name": "STRUCTURE TYPE", "dec": _decompile_SPC_structure_type},
@@ -1430,7 +1431,7 @@ EXTENDED_OPCODE: Final[dict[int, dict[str, Union[str, Callable]]]] = {
     0xB0: {"name": "???", "dec": _decompile_SPC_default},
 }
 
-LOGIC_OPCODE: Final[dict[int, dict[str, Union[str, Callable]]]] = {
+LOGIC_OPCODE: Final[dict[int, dict[str, str | Callable]]] = {
     # Represents a "special" operation
     0x00: {
         "name": "SPC",
@@ -1851,14 +1852,14 @@ def _resolve_token_name(
     symbol_list.append((0, None))
     symbol = max(symbol for symbol in symbol_list if symbol[0] <= token_address)[1]
     if symbol is None:
-        return "0x{0:0>8x}".format(token_address)
+        return f"0x{token_address:0>8x}"
 
     token_offset = token_address - symbol[3]
 
     if token_offset == 0:  # Don"t print the offset if it's zero
         token_name = symbol[1]
     else:
-        token_name = "{0}+0x{1:0>8x}".format(symbol[1], (token_offset & 0xFFFFFFFF))
+        token_name = f"{symbol[1]}+0x{token_offset & 0xFFFFFFFF:0>8x}"
 
     symbol_type = symbol[2]
     token_type = symbol_type & 0x0FFF
@@ -1869,7 +1870,7 @@ def _resolve_token_name(
         token_template = template_data[token_type]
         if token_offset in token_template["Structure"]:
             field_name = token_template["Structure"][token_offset]["Name"]
-            token_name = "{0}.{1}".format(symbol[1], field_name)
+            token_name = f"{symbol[1]}.{field_name}"
 
     return token_name
 

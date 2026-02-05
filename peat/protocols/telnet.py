@@ -1,6 +1,6 @@
 import traceback
 from time import sleep
-from typing import Any, Optional, Union
+from typing import Any
 
 import peat
 from peat import CommError, log
@@ -43,7 +43,7 @@ class Telnet:
         self.raw_output: list[bytes] = []
         self.info: dict[str, Any] = {}
 
-        self.successful_creds: Optional[tuple[str, str]] = None
+        self.successful_creds: tuple[str, str] | None = None
         self._comm: telnetlib.Telnet = telnetlib.Telnet()
 
         self.log.trace2(f"Initialized {repr(self)}")
@@ -121,7 +121,7 @@ class Telnet:
                 except Exception as ex:
                     self.log.warning(f"Failed to write raw output to file: {ex}")
 
-    def write(self, command: Union[bytes, str, int], flush: bool = False) -> None:
+    def write(self, command: bytes | str | int, flush: bool = False) -> None:
         """
         Send a Telnet command to the device.
 
@@ -153,13 +153,13 @@ class Telnet:
         if flush:
             self.comm.read_very_eager()
 
-    def login(self, user: str, passwd: str) -> Optional[dict]:
+    def login(self, user: str, passwd: str) -> dict | None:
         """
         Login to the telnet device.
         """
         pass
 
-    def read(self, delay: Optional[float] = None, strip_whitespace: bool = True) -> str:
+    def read(self, delay: float | None = None, strip_whitespace: bool = True) -> str:
         """
         Read all data currently in the telnet response buffer.
 
@@ -183,9 +183,9 @@ class Telnet:
 
     def read_until(
         self,
-        until: Union[bytes, str],
+        until: bytes | str,
         delay: float = 0.15,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         strip_whitespace: bool = True,
     ) -> str:
         """

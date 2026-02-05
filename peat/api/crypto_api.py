@@ -1,12 +1,11 @@
 from pathlib import Path
-from typing import Optional
 
 import yaml
 
 from peat import config_crypto, log
 
 
-def encrypt(config_path: str, user_password: Optional[str] = None) -> bool:
+def encrypt(config_path: str, user_password: str | None = None) -> bool:
     """
     PEAT CLI functionality to encrypt a file
 
@@ -26,9 +25,9 @@ def encrypt(config_path: str, user_password: Optional[str] = None) -> bool:
 
 def decrypt(
     config_path: str,
-    output_path: Optional[str] = None,
-    new_filename: Optional[str] = "decrypted_config.yaml",
-    user_password: Optional[str] = None,
+    output_path: str | None = None,
+    new_filename: str | None = "decrypted_config.yaml",
+    user_password: str | None = None,
 ) -> bool:
     """
     PEAT CLI functionality to decrypt a file

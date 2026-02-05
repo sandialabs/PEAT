@@ -7,7 +7,6 @@ Authors
 - Christopher Goes
 """
 
-from typing import Optional, Union
 
 from peat import log
 
@@ -22,10 +21,10 @@ from .clx_string_logic_parser import (
 
 LayoutType = list[tuple[int, str]]
 AttrsType = dict[int, dict]
-MapAttrsType = dict[int, dict[int, Union[int, bytes]]]
+MapAttrsType = dict[int, dict[int, int | bytes]]
 
 
-def parse_logic(logic_dict: dict[str, dict], driver: Optional[ClxCIP] = None) -> str:
+def parse_logic(logic_dict: dict[str, dict], driver: ClxCIP | None = None) -> str:
     """
     Parse memory layout, symbol list, and logic from a attributes :class:`dict`.
 
@@ -171,7 +170,7 @@ def memory_layout_to_str(memory_list: LayoutType) -> str:
 
     layout_str = "Memory Layout:"
     for sym_val, sym_str in sorted(memory_list):
-        layout_str += "\n[0x{:0>8x}]  ".format(sym_val & 0xFFFFFFFF)
+        layout_str += f"\n[0x{sym_val & 0xFFFFFFFF:0>8x}]  "
         layout_str += sym_str
         if isinstance(sym_str, bytes):
             log.warning("memory_layout_to_str: unexpected bytes!")
@@ -216,7 +215,7 @@ def parse_process_logic(
     program_routine_attributes: AttrsType,
     symbol_list: LayoutType,
     template_tags: AttrsType,
-    driver: Optional[ClxCIP] = None,
+    driver: ClxCIP | None = None,
 ) -> str:
     # TODO: docstring
     log.info("Decompiling Process Logic...")

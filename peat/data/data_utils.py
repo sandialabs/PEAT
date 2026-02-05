@@ -3,7 +3,8 @@ from __future__ import annotations
 import copy
 from collections import ChainMap
 from operator import attrgetter
-from typing import Any, Callable, Optional, Union
+from typing import Any
+from collections.abc import Callable
 
 from peat import PeatError, config, log, utils
 
@@ -67,7 +68,7 @@ class DeepChainMap(ChainMap):
                 rv = self.__class__(*values)
         return rv
 
-    def to_dict(self, to_convert: Optional[DeepChainMap] = None) -> dict:
+    def to_dict(self, to_convert: DeepChainMap | None = None) -> dict:
         """Create a copy of the object as a normal :class:`dict`."""
         if to_convert is None:
             to_convert = self
@@ -85,7 +86,7 @@ class DeepChainMap(ChainMap):
 
 def lookup_by_str(
     container: list[BaseModel], value: BaseModel, lookup: str
-) -> Optional[int]:
+) -> int | None:
     """
     String of attribute to search for, e.g. ``"ip"`` to lookup interfaces
     using ``Interface.ip`` attribute on the value.
@@ -101,7 +102,7 @@ def lookup_by_str(
     return None
 
 
-def find_position(obj: list[BaseModel], key: str, value: Any) -> Optional[int]:
+def find_position(obj: list[BaseModel], key: str, value: Any) -> int | None:
     """Find if and where an object with a given value is in a :class:`list`."""
     for index, item in enumerate(obj):
         if getattr(item, key, None) == value:
@@ -110,7 +111,7 @@ def find_position(obj: list[BaseModel], key: str, value: Any) -> Optional[int]:
     return None
 
 
-def match_all(obj_list: list[BaseModel], value: dict[str, Any]) -> Optional[int]:
+def match_all(obj_list: list[BaseModel], value: dict[str, Any]) -> int | None:
     """Search the list for objects where all values in value match."""
     if not value:
         return None
@@ -172,7 +173,7 @@ def strip_empty_and_private(
     return new
 
 
-def _is_empty(v: Optional[Any]) -> bool:
+def _is_empty(v: Any | None) -> bool:
     return bool(v is None or (isinstance(v, (str, bytes, dict, list, set)) and not v))
 
 
@@ -199,7 +200,7 @@ def strip_key(obj: dict, bad_key: str) -> dict:
     return new
 
 
-def only_include_keys(obj: dict, allowed_keys: Union[str, list[str]]) -> dict:
+def only_include_keys(obj: dict, allowed_keys: str | list[str]) -> dict:
     """
     Filters any keys that don't match the allowed list of keys.
     """
@@ -214,7 +215,7 @@ def only_include_keys(obj: dict, allowed_keys: Union[str, list[str]]) -> dict:
     return new
 
 
-def compare_dicts(d1: Optional[dict], d2: Optional[dict], keys: list[str]) -> bool:
+def compare_dicts(d1: dict | None, d2: dict | None, keys: list[str]) -> bool:
     if not d1 or not d2 or not keys:
         raise PeatError("bad compare_dicts args")
 

@@ -1,4 +1,5 @@
-from typing import Callable, Literal, Optional
+from typing import Literal
+from collections.abc import Callable
 
 from pydantic import conint, constr
 
@@ -12,7 +13,7 @@ class IdentifyMethod(BaseModel):
     description: str
     """Human-friendly description of the method."""
 
-    identify_function: Optional[Callable]
+    identify_function: Callable | None
     """
     Python function used to perform the verification.
 
@@ -75,7 +76,7 @@ class IPMethod(IdentifyMethod):
     Note that a different port may be used if configured at runtime.
     """
 
-    port_function: Optional[Callable] = None
+    port_function: Callable | None = None
     """
     Python function used to check if the port is open.
     Defaults to standard TCP/UDP check based on the value of

@@ -5,10 +5,10 @@ import shutil
 import sys
 import warnings
 from base64 import b64encode
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path
 from random import randint
-from typing import Any, Final, Literal, Union
+from typing import Any, Final, Literal
 
 import pathvalidate
 
@@ -37,7 +37,7 @@ try:  # tzlocal can be problematic sometimes (Macs, Docker containers, etc.)
     #: str: Timezone of the local system
     TIMEZONE: str = str(tzlocal.get_localzone())
 except Exception:
-    TIMEZONE = str(datetime.now(timezone.utc).astimezone().tzinfo)
+    TIMEZONE = str(datetime.now(UTC).astimezone().tzinfo)
 
 # Determine the beautifulsoup4 parser to use based on the availability of lxml
 try:
@@ -67,7 +67,7 @@ TIME_FMT: Final[str] = "%Y-%m-%d_%H-%M-%S"
 LOG_TIME_FMT: Final[str] = "%Y-%m-%d %H:%M:%S"
 
 #: datetime: UTC time of when PEAT was imported that can be used for time stamping
-START_TIME_UTC: Final[datetime] = datetime.now(timezone.utc)
+START_TIME_UTC: Final[datetime] = datetime.now(UTC)
 
 #: datetime: Local time of when PEAT was imported that can be used for time stamping
 START_TIME_LOCAL: Final[datetime] = START_TIME_UTC.astimezone()
@@ -157,7 +157,7 @@ class DeviceError(PeatError):
     """
 
 
-def convert(value: Any) -> Union[str, bool, int, float, list, dict, None]:
+def convert(value: Any) -> str | bool | int | float | list | dict | None:
     """
     Recursively convert values into JSON-friendly standard Python types.
 
@@ -202,11 +202,11 @@ def convert(value: Any) -> Union[str, bool, int, float, list, dict, None]:
         return str(value)
 
 
-def get_platform_info() -> dict[str, Union[str, int, bool]]:
+def get_platform_info() -> dict[str, str | int | bool]:
     """
     Collect information about the system PEAT is running on.
     """
-    info: dict[str, Union[str, int, bool]] = {
+    info: dict[str, str | int | bool] = {
         "start_time": START_TIME_LOCAL.strftime(LOG_TIME_FMT),
         "timezone": TIMEZONE,
         "run_id": RUN_ID,
@@ -353,4 +353,4 @@ def str_to_bool(val: str) -> bool:
 
 #: dict: Information about the system PEAT is running on from
 #: :func:`~peat.consts.get_platform_info`
-SYSINFO: Final[dict[str, Union[str, int, bool]]] = get_platform_info()
+SYSINFO: Final[dict[str, str | int | bool]] = get_platform_info()

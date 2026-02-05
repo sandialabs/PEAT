@@ -15,7 +15,6 @@ import tempfile
 import zipfile
 from pathlib import Path
 from time import sleep
-from typing import Optional
 
 from peat import log, utils
 from peat.protocols.cip import CCM, CIP, CIP_ERROR_CODES
@@ -33,7 +32,7 @@ def send_enip_pkt(sock: socket.socket, s_pkt: bytes) -> ENIP:
 
 
 # GetAttributeAll
-def query_device(sock: socket.socket, session: int) -> tuple[int, Optional[dict]]:
+def query_device(sock: socket.socket, session: int) -> tuple[int, dict | None]:
     ccm_fields = {
         "timeoutTicks": 0x9B07,
         "messageSize": 6,
@@ -222,7 +221,7 @@ def push_firmware(firmware: bytes, ip: str, port: int = 44818) -> bool:
         _log.debug(f"Device info: {device_info}")
 
         # TODO: does session need to be unregistered after reboot?
-    except socket.error as ex:
+    except OSError as ex:
         _log.error(
             f"Network error occurred while pushing firmware to {ip}:{port}: {ex}"
         )

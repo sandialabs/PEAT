@@ -4,7 +4,7 @@ import socket
 import struct
 from pprint import pformat
 from socket import AF_INET, SOCK_DGRAM, SOCK_STREAM
-from typing import Callable, Optional
+from collections.abc import Callable
 
 from peat import config, consts, log
 from peat.protocols.snmp import SNMP
@@ -13,7 +13,7 @@ from peat.protocols.snmp import SNMP
 def check_tcp_port(
     ip: str,
     port: int,
-    timeout: Optional[float] = None,
+    timeout: float | None = None,
     reset: bool = False,
     syn_sweep: bool = False,
 ) -> bool:
@@ -88,7 +88,7 @@ def check_tcp_port(
 
         try:
             result = sock.connect_ex((ip, port))
-        except socket.timeout:  # Port is filtered
+        except TimeoutError:  # Port is filtered
             log.log(
                 "TRACE4" if syn_sweep else "TRACE2",
                 f"TCP port check timed out to {ip}:{port} (timeout: {timeout:.2f})",
@@ -116,7 +116,7 @@ def check_tcp_port(
 
 
 def check_udp_service(
-    ip: str, service: str, port: Optional[int] = None, timeout: float = 1.0
+    ip: str, service: str, port: int | None = None, timeout: float = 1.0
 ) -> bool:
     """
     Check if a specific UDP service is listening.
@@ -157,7 +157,7 @@ def check_udp_service(
 
 def fingerprint(
     ip: str, port: int, timeout: float, payload: bytes, finger_func: Callable
-) -> Optional[dict]:
+) -> dict | None:
     """
     Fingerprints (verifies) a UDP device.
 
@@ -187,7 +187,7 @@ def fingerprint(
         if send_discovery_packet(sock, ip, port, payload):
             try:
                 return finger_func(sock)
-            except socket.timeout:
+            except TimeoutError:
                 log.trace2(
                     f"Discovery packet succeeded, but fingerprint "
                     f"function timed out to device {ip}:{port}"
@@ -202,8 +202,8 @@ def fingerprint(
 
 
 def make_udp_socket(
-    timeout: Optional[float] = None, broadcast: bool = False
-) -> Optional[socket.socket]:
+    timeout: float | None = None, broadcast: bool = False
+) -> socket.socket | None:
     """
     Creates and binds a IPv4 UDP :class:`~socket.socket`.
 

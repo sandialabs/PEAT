@@ -1,7 +1,6 @@
 import re
-from datetime import datetime, timezone
+from datetime import datetime, UTC
 from pathlib import Path, PurePosixPath
-from typing import Optional
 
 from elftools.common.utils import bytes2str
 from elftools.elf.elffile import ELFFile
@@ -13,7 +12,7 @@ from peat.data.models import Event
 def get_info_firmware(
     dev: DeviceData,
     filepath: Path,
-    timestamp: Optional[datetime] = None,
+    timestamp: datetime | None = None,
 ) -> bool:
     """
     Extract general info from firmware file.
@@ -34,7 +33,7 @@ def get_info_firmware(
             # NOTE: this assumes PEAT is not being run from a FAT-formatted filesystem
             # FAT formatted filesystems Windows uses local times for file timestamps
             # Unix filesystems and NTFS use UTC.
-            timestamp = datetime.fromtimestamp(fstat.st_mtime, tz=timezone.utc)
+            timestamp = datetime.fromtimestamp(fstat.st_mtime, tz=UTC)
 
         with filepath.open("rb") as file:
             original_img = file.read()  # get original file as bytes
@@ -110,7 +109,7 @@ def get_info_firmware(
 
 
 def get_info_bootrom(
-    dev: DeviceData, filepath: Path, timestamp: Optional[datetime] = None
+    dev: DeviceData, filepath: Path, timestamp: datetime | None = None
 ) -> bool:
     """
     Extract general info from bootrom file.
@@ -130,7 +129,7 @@ def get_info_bootrom(
         # NOTE: this assumes PEAT is not being run from a FAT-formatted filesystem
         # FAT formatted filesystems Windows uses local times for file timestamps
         # Unix filesystems and NTFS use UTC.
-        timestamp = datetime.fromtimestamp(fstat.st_mtime, tz=timezone.utc)
+        timestamp = datetime.fromtimestamp(fstat.st_mtime, tz=UTC)
 
     remote_path = filepath.as_posix().replace(dev.get_out_dir().as_posix(), "")
     remote_path = PurePosixPath(remote_path)

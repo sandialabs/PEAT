@@ -8,7 +8,8 @@ Authors
 """
 
 import zlib
-from typing import Callable, Final, Optional, Union
+from typing import Final
+from collections.abc import Callable
 
 from peat import ParseError, log
 from peat.modules.rockwell.clx_const import LOGIC_LANGUAGE
@@ -28,8 +29,8 @@ class DisassembleStringLogicError(ParseError):
 
 def decompile_string_process_logic(
     logic_string: str,
-    template_tags: Optional[dict] = None,
-    driver: Optional[ClxCIP] = None,
+    template_tags: dict | None = None,
+    driver: ClxCIP | None = None,
 ) -> str:
     """
     Returns the original source code of the structured text logic from
@@ -125,29 +126,19 @@ def disassemble_string_process_logic(
     instruction_address = header["LOGIC START"]
     for header_field in routine_data["HEADER"]:
         out.append(
-            "[0x{0:0>8x}]  {1:0>8x}  {2}\n".format(
-                instruction_address & 0xFFFFFFFF,
-                header[header_field] & 0xFFFFFFFF,
-                header_field,
-            )
+            f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]  {header[header_field] & 0xFFFFFFFF:0>8x}  {header_field}\n"
         )
         instruction_address += 4
 
     out.append(
-        "[0x{0:0>8x}]            LOGIC STRING:\n".format(
-            instruction_address & 0xFFFFFFFF
-        )
+        f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]            LOGIC STRING:\n"
     )
     out.append(logic_string)
     instruction_address += logic_string_raw_length
 
     for footer_field in routine_data["FOOTER"]:
         out.append(
-            "[0x{0:0>8x}]  {1:0>8x}  {2}\n".format(
-                instruction_address & 0xFFFFFFFF,
-                footer[footer_field] & 0xFFFFFFFF,
-                footer_field,
-            )
+            f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]  {footer[footer_field] & 0xFFFFFFFF:0>8x}  {footer_field}\n"
         )
         instruction_address += 4
     out = "".join(out)
@@ -159,7 +150,7 @@ def disassemble_string_process_logic(
 
 
 def _resolve_token_name(
-    token: list[int], template_tags: dict, driver: Optional[ClxCIP] = None
+    token: list[int], template_tags: dict, driver: ClxCIP | None = None
 ) -> str:
     """
     Returns a string representing the name of the token.
@@ -329,7 +320,7 @@ def format_logic_string_st(logic_string_raw: bytes) -> bytes:
     return logic_string
 
 
-ROUTINE_DATA: Final[dict[int, dict[str, Union[list[str], Callable]]]] = {
+ROUTINE_DATA: Final[dict[int, dict[str, list[str] | Callable]]] = {
     LOGIC_LANGUAGE["Structured Text"]: {
         "HEADER": [
             "LOGIC START",

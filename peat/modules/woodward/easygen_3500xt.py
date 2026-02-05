@@ -13,7 +13,6 @@ Authors
 
 import functools
 from pathlib import Path
-from typing import Optional
 
 from peat import (
     DeviceData,
@@ -431,8 +430,8 @@ class Easygen3500XT(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         if file.suffix.lower() == ".tc":
             raise DeviceError(
                 f"*.tc files are not currently supported (filename: '{file.name}')"

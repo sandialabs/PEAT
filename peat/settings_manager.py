@@ -2,7 +2,7 @@ import json
 import os
 from collections import ChainMap
 from pathlib import Path
-from typing import Any, Optional, Union, get_args, get_origin, get_type_hints
+from typing import Any, Union, get_args, get_origin, get_type_hints
 
 import yaml
 from loguru import logger as log
@@ -177,7 +177,7 @@ class SettingsManager(dict):
         """
         self._load_values(conf=conf, load_to="runtime_configs")
 
-    def load_from_environment(self, env_prefix: Optional[str] = None) -> None:
+    def load_from_environment(self, env_prefix: str | None = None) -> None:
         """
         Update configuration values from environment variables.
 
@@ -402,8 +402,8 @@ class SettingsManager(dict):
         Raises:
             KeyError: If the attribute named by ``key`` doesn't exist
         """
-        fallback: "type" = type(self["default_configs"][key])
-        typecast: "type" = get_type_hints(self.__class__).get(key, fallback)
+        fallback: type = type(self["default_configs"][key])
+        typecast: type = get_type_hints(self.__class__).get(key, fallback)
 
         # Handle complex types, e.g. typing.Union, typing.List, typing.Set, etc.
         # Resolves the type to it's container class, e.g:
@@ -487,7 +487,7 @@ class SettingsManager(dict):
 
     def fixup_dirs(
         self,
-        new_parent: Union[str, Path, None],
+        new_parent: str | Path | None,
         dir_name: str,
         override_all: bool = False,
     ) -> None:

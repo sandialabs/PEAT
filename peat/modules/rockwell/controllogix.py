@@ -26,7 +26,6 @@ Authors
 import json
 from datetime import timedelta
 from pathlib import Path
-from typing import Union
 
 from peat import (
     DeviceData,
@@ -742,7 +741,7 @@ class ControlLogix(DeviceModule):
     def _push(
         cls,
         dev: DeviceData,
-        to_push: Union[str, bytes, Path],
+        to_push: str | bytes | Path,
         push_type: consts.PushType,
     ) -> bool:
         """

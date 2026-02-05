@@ -10,9 +10,8 @@ Authors
 """
 
 from copy import deepcopy
-import socket
 from time import sleep
-from typing import Any, Optional, Union
+from typing import Any
 from pathlib import Path
 
 import paramiko
@@ -67,9 +66,9 @@ class SSH:
         ip: str,
         port: int = 22,
         timeout: float = 5.0,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        kwargs: Optional[dict[str, Any]] = None,  # Additional Paramiko input
+        username: str | None = None,
+        password: str | None = None,
+        kwargs: dict[str, Any] | None = None,  # Additional Paramiko input
     ) -> None:
         self.ip: str = ip
         self.port: int = port
@@ -77,14 +76,14 @@ class SSH:
         self.connected: bool = False
         self.raw_output: list[bytes] = []
         self.info: dict[str, Any] = {}
-        self.successful_creds: Optional[tuple[str, str]] = None
+        self.successful_creds: tuple[str, str] | None = None
         self.log = log.bind(
             classname=self.__class__.__name__,
             target=f"{self.ip}:{self.port}",
         )
         self.all_output: list[str] = []
-        self.username: Optional[str] = username
-        self.password: Optional[str] = password
+        self.username: str | None = username
+        self.password: str | None = password
 
         if kwargs is None:
             kwargs = {}
@@ -92,8 +91,8 @@ class SSH:
         self.kwargs = kwargs  # type: dict[str, Any]
 
         self._comm: paramiko.SSHClient = paramiko.SSHClient()
-        self._channel: Optional[paramiko.Channel] = None
-        self.sftp_conn: Optional[paramiko.SFTPClient] = None
+        self._channel: paramiko.Channel | None = None
+        self.sftp_conn: paramiko.SFTPClient | None = None
         self.log.trace2(f"Initialized {repr(self)}")
 
     def __enter__(self) -> "SSH":
@@ -193,7 +192,7 @@ class SSH:
             self.sftp_conn = self._comm.open_sftp()
 
     def sftp_recursive_file_walk(
-        self, directory: str, _paths_done: Optional[set] = None
+        self, directory: str, _paths_done: set | None = None
     ) -> dict:
         if not self.sftp_conn:
             self.log.warning(
@@ -305,7 +304,7 @@ class SSH:
                 except Exception as ex:
                     self.log.warning(f"Failed to write raw SSH output to file: {ex}")
 
-    def write_read(self, command: Union[bytes, str, int]) -> str:
+    def write_read(self, command: bytes | str | int) -> str:
         """
         Send a command, then perform a read and return the response.
 
@@ -316,7 +315,7 @@ class SSH:
 
     def write(
         self,
-        command: Union[bytes, str, int],
+        command: bytes | str | int,
         flush: bool = False,  # noqa: ARG002
     ) -> None:
         """
@@ -347,7 +346,7 @@ class SSH:
 
     def read(
         self,
-        delay: Optional[float] = None,
+        delay: float | None = None,
         strip_whitespace: bool = True,
         wait_until_ready: bool = True,
         sleep_between_recvs: bool = True,
@@ -389,9 +388,9 @@ class SSH:
 
     def read_until(
         self,
-        until: Union[bytes, str],
+        until: bytes | str,
         delay: float = 0.15,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
         strip_whitespace: bool = True,
     ) -> str:
         """
@@ -432,7 +431,7 @@ class SSH:
                 output += part
                 if until in output:
                     break
-            except socket.timeout:
+            except TimeoutError:
                 break
 
         return self._add_data(output, strip_whitespace)
@@ -457,7 +456,7 @@ class SSH:
 
         return data
 
-    def login(self, user: str, passwd: str) -> Optional[dict]:
+    def login(self, user: str, passwd: str) -> dict | None:
         """
         Login to the device via ssh.
 

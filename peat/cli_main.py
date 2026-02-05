@@ -5,7 +5,7 @@ import sys
 import timeit
 from pathlib import Path
 from pprint import pformat
-from typing import Any, Optional, Union, get_args
+from typing import Any, get_args
 
 from humanfriendly.text import pluralize
 
@@ -524,7 +524,7 @@ def parse_scan_summary(summary: dict[str, Any]) -> TargetsType:
     return targets, comm_type, module_names
 
 
-def read_host_file(host_file: Union[Path, str]) -> Optional[dict[str, Any]]:
+def read_host_file(host_file: Path | str) -> dict[str, Any] | None:
     """
     Parse a scan summary from a file or STDIN into a scan summary dict.
     """

@@ -4,7 +4,7 @@ import socket
 import subprocess
 from collections import namedtuple
 from functools import lru_cache
-from typing import Final, Optional, Union
+from typing import Final
 
 # NOTE: the reason we use the manuf package instead of Scapy's conf.manufdb
 #   is the manuf package bundles the manuf file in the package itself instead
@@ -35,7 +35,7 @@ def scapy_human_field(obj: Packet, field: str) -> str:
 
 
 @lru_cache(maxsize=1024)
-def mac_to_vendor(mac: str) -> Optional[namedtuple]:
+def mac_to_vendor(mac: str) -> namedtuple | None:
     """
     Lookup the vendor using the :term:`OUI` of a MAC address.
 
@@ -145,7 +145,7 @@ def mac_to_vendor_string(mac: str) -> str:
     return ""
 
 
-@lru_cache()
+@lru_cache
 def mac_to_ip(mac: str) -> str:
     """
     Lookup the IPv4 address for a MAC address.
@@ -189,7 +189,7 @@ def mac_to_ip(mac: str) -> str:
     return ip
 
 
-@lru_cache()
+@lru_cache
 def ip_to_mac(ip: str) -> str:
     """
     Resolve the MAC address for a IPv4 address.
@@ -245,11 +245,11 @@ def ip_to_mac(ip: str) -> str:
                 # import here to avoid triggering a scapy import unless it's needed (slow)
                 from scapy.layers.l2 import getmacbyip
 
-                res: Union[str, tuple[str, float]] = getmacbyip(ip)
+                res: str | tuple[str, float] = getmacbyip(ip)
 
                 # Handle weird edge case where Scapy will sometimes return
                 # a tuple when running as Administrator on Windows.
-                mac_address: Optional[str] = res[0] if isinstance(res, tuple) else res
+                mac_address: str | None = res[0] if isinstance(res, tuple) else res
                 if mac_address is None:
                     mac_address = ""
 

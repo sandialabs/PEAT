@@ -17,7 +17,8 @@ from ipaddress import (
 from pathlib import PurePath
 from pprint import pformat
 from random import randint
-from typing import Any, Callable, Literal, Optional, Union
+from typing import Any, Literal
+from collections.abc import Callable
 
 from elasticsearch import Elasticsearch
 from elasticsearch.exceptions import ApiError, RequestError, TransportError
@@ -76,12 +77,12 @@ def _serialize_value(data, default_func: Callable):
 
 
 class PeatElasticSerializer(ESJsonSerializer):
-    def default(self, data: Any) -> Union[bool, str, float, int, list, None]:
+    def default(self, data: Any) -> bool | str | float | int | list | None:
         return _serialize_value(data, functools.partial(ESJsonSerializer.default, self))
 
 
 class PeatOpenSearchSerializer(OSJSONSerializer):
-    def default(self, data: Any) -> Union[bool, str, float, int, list, None]:
+    def default(self, data: Any) -> bool | str | float | int | list | None:
         return _serialize_value(data, functools.partial(OSJSONSerializer.default, self))
 
 
@@ -96,7 +97,7 @@ class Elastic:
     """
 
     def __init__(self, server_url: str = "http://localhost:9200/") -> None:
-        self._es: Optional[Elasticsearch | OpenSearch] = None
+        self._es: Elasticsearch | OpenSearch | None = None
         self._index_cache: set[str] = set()
         self._doc_id_cache: set[str] = set()
 
@@ -421,8 +422,8 @@ class Elastic:
     def search(
         self,
         index: str,
-        query: Optional[Union[str, dict]] = None,
-        body: Optional[dict] = None,
+        query: str | dict | None = None,
+        body: dict | None = None,
     ) -> list[dict]:
         """
         Query for values from an index.
@@ -509,7 +510,7 @@ class Elastic:
 
         return results
 
-    def raw_search(self, search_args: dict) -> Optional[dict]:
+    def raw_search(self, search_args: dict) -> dict | None:
         """
         Query for data in Elasticsearch.
 
@@ -651,7 +652,7 @@ class Elastic:
         self,
         index: str,
         content: dict,
-        doc_id: Optional[str] = None,
+        doc_id: str | None = None,
         no_date: bool = False,
     ) -> bool:
         """
@@ -760,7 +761,7 @@ class Elastic:
         return Elastic.bencode(pickle.dumps(obj, protocol=4))
 
     @classmethod
-    def convert_tstamp(cls, tstamp: Union[str, datetime.datetime]) -> Optional[str]:
+    def convert_tstamp(cls, tstamp: str | datetime.datetime) -> str | None:
         """
         Converts a timestamp into a format compatible with Elasticsearch.
         """
@@ -789,7 +790,7 @@ class Elastic:
         return converted
 
     @classmethod
-    def time_now(cls) -> Optional[str]:
+    def time_now(cls) -> str | None:
         return cls.convert_tstamp(utils.utc_now())
 
     @staticmethod

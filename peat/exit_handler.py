@@ -10,7 +10,8 @@ is run and in what order.
 """
 
 import atexit
-from typing import Callable, Literal
+from typing import Literal
+from collections.abc import Callable
 
 REGISTRY = {
     "CONNECTION": [],

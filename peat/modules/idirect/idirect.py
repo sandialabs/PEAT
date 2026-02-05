@@ -10,7 +10,7 @@ import functools
 import json
 from configparser import ConfigParser
 from pathlib import PurePosixPath
-from typing import Literal, Optional, Type
+from typing import Literal
 
 from paramiko.ssh_exception import AuthenticationException
 
@@ -39,7 +39,7 @@ from peat.protocols import HTTP
 
 from .idirect_ssh import IdirectSSH
 
-IDIRECT_PARSERS: list[Type[NixParserBase]] = [
+IDIRECT_PARSERS: list[type[NixParserBase]] = [
     # NOTE: DateParser needs to run before VarLogMessagesParser
     DateParser,
     VarLogMessagesParser,
@@ -96,7 +96,7 @@ class Idirect(DeviceModule):
     }
 
     @classmethod
-    def _login_ssh(cls, dev: DeviceData) -> Optional[IdirectSSH]:
+    def _login_ssh(cls, dev: DeviceData) -> IdirectSSH | None:
         if dev.options["ssh"]["user"] and dev.options["ssh"]["pass"]:
             creds = [(dev.options["ssh"]["user"], dev.options["ssh"]["pass"])]
         else:

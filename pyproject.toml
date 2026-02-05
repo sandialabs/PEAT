@@ -650,6 +650,7 @@ select = [
     "PLW",  # Pylint Warnings
     "RUF",  # Ruff-specific rules
     "Q",    # flake8-quotes
+    "UP",   # pyupgrade
 
     # ** Things to potentially enable in the future **
     # DTZ requires all usage of datetime module to have timezone-aware

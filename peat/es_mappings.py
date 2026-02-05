@@ -24,11 +24,11 @@ Official Elasticsearch documentation and references
 
 """
 
-from typing import Final, Union
+from typing import Final
 
-EsTypeType = dict[str, Union[str, int]]
+EsTypeType = dict[str, str | int]
 MappingType = dict[str, EsTypeType]
-NestedMappingType = dict[str, Union[str, dict]]
+NestedMappingType = dict[str, str | dict]
 
 # -- Elasticsearch types --
 BOOL: Final[EsTypeType] = {"type": "boolean"}

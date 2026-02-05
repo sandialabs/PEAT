@@ -11,7 +11,6 @@ Authors
 import copy
 import socket
 from pprint import pformat
-from typing import Optional, Union
 
 from peat import config
 from peat import log as peat_logger
@@ -26,7 +25,7 @@ from peat.protocols.enip.enip_packets import (
 )
 from peat.protocols.ip import make_udp_socket, send_discovery_packet
 
-DevDescType = dict[str, Union[dict, int, str]]
+DevDescType = dict[str, dict | int | str]
 
 # TODO: use EnipDriver here
 
@@ -64,7 +63,7 @@ def broadcast_scan(
                 if dev_desc:
                     # Add the collected info to list of devices
                     descriptions.append(dev_desc)
-            except socket.timeout:
+            except TimeoutError:
                 break
             except Exception as err:
                 log.warning(
@@ -80,7 +79,7 @@ def broadcast_scan(
     return descriptions
 
 
-def fingerprint_device(sock: socket.socket) -> Optional[DevDescType]:
+def fingerprint_device(sock: socket.socket) -> DevDescType | None:
     """
     Listen for response from a device, verify it is a Allen-Bradley,
     then determine basic metadata about it.
@@ -150,7 +149,7 @@ def fingerprint_device(sock: socket.socket) -> Optional[DevDescType]:
 
 def enumerate_device_modules(
     ip: str, port: int = 44818, chassis_size: int = 8, timeout: float = 5.0
-) -> dict[int, dict[str, Union[int, str]]]:
+) -> dict[int, dict[str, int | str]]:
     """
     Enumerate ControlLogix device modules.
 
@@ -231,8 +230,8 @@ def enumerate_device_modules(
 
 
 def extract_info_response(
-    info: Union[ENIPListIdentityResponse, GetAttributesAllResponse],
-) -> dict[str, Union[int, str]]:
+    info: ENIPListIdentityResponse | GetAttributesAllResponse,
+) -> dict[str, int | str]:
     """
     Extract metadata from response to ``ListIdentity`` or ``GetAttributesAll``.
     """

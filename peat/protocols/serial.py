@@ -1,6 +1,6 @@
 import bisect
 import time
-from typing import Final, Optional, Union
+from typing import Final
 
 import serial
 from serial.tools import list_ports
@@ -32,7 +32,7 @@ std_b: Final[list[int]] = [
 ]
 
 
-def find_serial_ports(filter_list: Optional[list[str]] = None) -> list[str]:
+def find_serial_ports(filter_list: list[str] | None = None) -> list[str]:
     """
     Find host serial ports enumerated by the operating system.
     Filter by specified list, if any.
@@ -303,7 +303,7 @@ def std_b_idx(baudrate: int) -> int:
     return bisect.bisect_right(std_b, baudrate) - 1
 
 
-def serial_txn(wr_bytes: bytes, address: str) -> Optional[bytearray]:
+def serial_txn(wr_bytes: bytes, address: str) -> bytearray | None:
     """
     Performs a serial transaction (writes and then reads).
 
@@ -367,7 +367,7 @@ def serial_write(wr_bytes: bytes, address: str) -> int:
     return -1
 
 
-def serial_read(address: str) -> Optional[bytearray]:
+def serial_read(address: str) -> bytearray | None:
     """
     Reads bytes from an open serial port.
 
@@ -401,10 +401,10 @@ def serial_read(address: str) -> Optional[bytearray]:
         log.error(f"Error reading from serial port {address}: {ex}")
 
 
-def pretty_hex_bytes(b: Union[bytearray, bytes]) -> str:
+def pretty_hex_bytes(b: bytearray | bytes) -> str:
     if not b:
         return "0x None"
-    return "0x " + " ".join(["{:02X}".format(x) for x in bytes(b)])
+    return "0x " + " ".join([f"{x:02X}" for x in bytes(b)])
 
 
 def handle_scan_serial_exception(port: str, ex: Exception) -> bool:

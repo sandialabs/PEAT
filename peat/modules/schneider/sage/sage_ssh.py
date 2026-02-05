@@ -59,7 +59,7 @@ Authors
 """
 
 from copy import deepcopy
-from typing import Any, Optional
+from typing import Any
 
 from peat import DeviceData, utils
 from peat.protocols import SSH
@@ -93,10 +93,10 @@ class SageSSH(SSH, SageCommands):
         ip: str,
         port: int = 22,
         timeout: float = 5.0,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        dev: Optional[DeviceData] = None,
-        kwargs: Optional[dict[str, Any]] = None,  # Additional Paramiko input
+        username: str | None = None,
+        password: str | None = None,
+        dev: DeviceData | None = None,
+        kwargs: dict[str, Any] | None = None,  # Additional Paramiko input
     ) -> None:
         # Default value outside of initializer. This is for security purposes.
         if kwargs is None:
@@ -143,7 +143,7 @@ class SageSSH(SSH, SageCommands):
         self.resp_dir = None  # type: Optional[Path]
 
     def login(
-        self, user: Optional[str] = "Admin", passwd: Optional[str] = "Telvent1!"
+        self, user: str | None = "Admin", passwd: str | None = "Telvent1!"
     ) -> bool:
         """
         Login to the device's ssh interface.

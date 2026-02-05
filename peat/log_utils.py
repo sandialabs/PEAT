@@ -4,11 +4,10 @@ import json
 import logging
 import os
 import sys
-from datetime import timezone
+from datetime import UTC
 from pathlib import Path
 from pprint import pformat
 from traceback import format_tb
-from typing import Optional, Union
 
 import loguru
 from loguru import logger
@@ -61,7 +60,7 @@ class ElasticLogSink:
         )
 
 
-def generate_log_dict(record: loguru.Record) -> dict[str, Union[dict, str, None]]:
+def generate_log_dict(record: loguru.Record) -> dict[str, dict | str | None]:
     """
     Generate a dict with detailed metadata about the log event, for use in
     Elasticsearch and in JSON-formatted logs.
@@ -75,7 +74,7 @@ def generate_log_dict(record: loguru.Record) -> dict[str, Union[dict, str, None]
         message_field = f"{record['message'][:77]}..."
 
     content = {
-        "@timestamp": Elastic.convert_tstamp(record["time"].astimezone(timezone.utc)),
+        "@timestamp": Elastic.convert_tstamp(record["time"].astimezone(UTC)),
         "message": message_field,
         "event": {
             "dataset": "vedizar.peat",
@@ -242,9 +241,9 @@ def patch_json_string(record: loguru.Record) -> None:
 
 
 def setup_logging(
-    file: Optional[Path] = None,
-    json_file: Optional[Path] = None,
-    debug_info_file: Optional[Path] = None,
+    file: Path | None = None,
+    json_file: Path | None = None,
+    debug_info_file: Path | None = None,
 ) -> None:
     """
     Configures the logging interface used by everything for output.

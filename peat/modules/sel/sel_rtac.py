@@ -46,7 +46,7 @@ import xml.etree.ElementTree as ET
 from copy import deepcopy
 from pathlib import Path
 from time import sleep
-from typing import Literal, Optional
+from typing import Literal
 
 import psycopg2
 
@@ -411,10 +411,10 @@ class SELRTAC(DeviceModule):
         dict_2: dict,
         dict_1_name: str,
         dict_2_name: str,
-        path: Optional[list[str]] = None,
-        err: Optional[list[str]] = None,
-        key_err: Optional[list[str]] = None,
-        value_err: Optional[list[str]] = None,
+        path: list[str] | None = None,
+        err: list[str] | None = None,
+        key_err: list[str] | None = None,
+        value_err: list[str] | None = None,
     ) -> tuple[list[str], list[str], list[str]]:
         if err is None:
             err = []
@@ -541,8 +541,8 @@ class SELRTAC(DeviceModule):
 
     @classmethod
     def pull_web(
-        cls, dev: DeviceData, protocol: Optional[str] = None
-    ) -> Optional[dict]:
+        cls, dev: DeviceData, protocol: str | None = None
+    ) -> dict | None:
         cls.log.info(f"Pulling RTAC data via web interface from {dev.ip}")
 
         if not protocol:
@@ -643,7 +643,7 @@ class SELRTAC(DeviceModule):
         return pulled_config
 
     @classmethod
-    def pull_postgres(cls, dev: DeviceData) -> Optional[dict]:
+    def pull_postgres(cls, dev: DeviceData) -> dict | None:
         cls.log.info(f"Pulling postgres data from {dev.ip}")
 
         if not dev._cache.get("pg_conn"):  # TODO: check if connected
@@ -960,7 +960,7 @@ class SELRTAC(DeviceModule):
         return config
 
     @classmethod
-    def execute(cls, cursor, statement: str, args: Optional[tuple] = None) -> None:
+    def execute(cls, cursor, statement: str, args: tuple | None = None) -> None:
         """Wrapper code for database execute."""
         if args is None:
             args = ()
@@ -984,7 +984,7 @@ class SELRTAC(DeviceModule):
             cls.log.debug(f"Skipping unknown XML file '{filename}' with tag '{tag}'")
 
     @classmethod
-    def _parse(cls, file: Path, dev: Optional[DeviceData] = None) -> DeviceData:
+    def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData:
         if not dev:
             dev = datastore.get(file.name.partition(".")[0], "id")
 

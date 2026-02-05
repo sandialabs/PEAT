@@ -1,7 +1,7 @@
 import inspect
 from datetime import date
 from pathlib import Path
-from typing import Any, Union
+from typing import Any
 
 import yaml
 
@@ -29,8 +29,8 @@ def get_default_options(module: str) -> dict[str, Any]:
 
 
 def convert_tuples_to_dict(
-    data: Union[list, tuple, dict, Any, None],
-) -> Union[list, dict, Any, None]:
+    data: list | tuple | dict | Any | None,
+) -> list | dict | Any | None:
     """Converts python tuples to dicts because YAML doesn't understand what that is."""
     if isinstance(data, list):
         # If the data is a list, iterate through its elements

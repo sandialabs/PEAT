@@ -91,7 +91,7 @@ import timeit
 from copy import deepcopy
 from pathlib import Path
 from pprint import pformat
-from typing import Literal, Optional, Union
+from typing import Literal
 
 import olefile
 import serial
@@ -375,7 +375,7 @@ class SELRelay(DeviceModule):
 
     @classmethod
     def _selascii_get_id(
-        cls, dev: DeviceData, comm: Union[SELTelnet, SELSerial]
+        cls, dev: DeviceData, comm: SELTelnet | SELSerial
     ) -> bool:
         id_info = comm.get_id()
 
@@ -399,7 +399,7 @@ class SELRelay(DeviceModule):
 
     @classmethod
     def _selascii_verify_post_process(
-        cls, dev: DeviceData, comm: Union[SELTelnet, SELSerial]
+        cls, dev: DeviceData, comm: SELTelnet | SELSerial
     ) -> bool:
         # Close the connection cleanly
         try:
@@ -536,7 +536,7 @@ class SELRelay(DeviceModule):
 
     @classmethod
     def pull_configs(
-        cls, dev: DeviceData, comms: Union[FTP, SELTelnet, SELSerial]
+        cls, dev: DeviceData, comms: FTP | SELTelnet | SELSerial
     ) -> bool:
         all_files = pull_files(dev, comms)
 
@@ -609,7 +609,7 @@ class SELRelay(DeviceModule):
 
     @classmethod
     def pull_more_commands(
-        cls, dev: DeviceData, comms: Union[SELTelnet, SELSerial]
+        cls, dev: DeviceData, comms: SELTelnet | SELSerial
     ) -> bool:
         """
         Attempt to get more info via terminal commands
@@ -1113,7 +1113,7 @@ class SELRelay(DeviceModule):
     def _push(
         cls,
         dev: DeviceData,
-        to_push: Union[str, bytes, Path],
+        to_push: str | bytes | Path,
         push_type: consts.PushType,
     ) -> bool:
         """
@@ -1465,8 +1465,8 @@ class SELRelay(DeviceModule):
 
     @classmethod
     def _parse(
-        cls, file: Path, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, file: Path, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         # "file" can be one of the following:
         # - a SET_ALL.TXT file
         # - a *.rdb file
@@ -1549,8 +1549,8 @@ class SELRelay(DeviceModule):
 
     @classmethod
     def parse_config(
-        cls, set_all: str, dev: Optional[DeviceData] = None
-    ) -> Optional[DeviceData]:
+        cls, set_all: str, dev: DeviceData | None = None
+    ) -> DeviceData | None:
         try:
             parsed, dev = parse_set_all(set_all_data=set_all, dev=dev)
         except Exception:

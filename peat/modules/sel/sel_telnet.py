@@ -1,5 +1,4 @@
 from time import sleep
-from typing import Optional, Union
 
 from peat import datastore
 from peat.protocols import Telnet
@@ -32,8 +31,8 @@ class SELTelnet(SELAscii):
 
         self.ip: str = ip  # hack to allow agnostic use between SELTelnet and FTP
         self.port: int = port
-        self.telnet_download_capable: Optional[bool] = None
-        self._comm: Optional[Telnet] = None
+        self.telnet_download_capable: bool | None = None
+        self._comm: Telnet | None = None
 
         self.log.trace(f"Initialized {repr(self)}")
 
@@ -79,7 +78,7 @@ class SELTelnet(SELAscii):
             self._comm.disconnect()
             self._comm = None
 
-    def read(self, delay: Optional[float] = None, strip_whitespace: bool = True) -> str:
+    def read(self, delay: float | None = None, strip_whitespace: bool = True) -> str:
         data = self.comm.read(delay, strip_whitespace=False)
 
         self.all_output.append(data)
@@ -94,7 +93,7 @@ class SELTelnet(SELAscii):
 
     def read_until(
         self,
-        until: Union[bytes, str],
+        until: bytes | str,
         strip_whitespace: bool = True,
     ) -> str:
         data = self.comm.read_until(until)
@@ -146,7 +145,7 @@ class SELTelnet(SELAscii):
 
     def download_binary(
         self, filename: str, save_to_file: bool = True
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Download a file from the device.
 
