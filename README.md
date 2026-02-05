@@ -5,66 +5,35 @@
 
 PEAT is a Operational Technology (OT) device interrogator, including pulling, parsing and uploading artifacts (configuration, firmware, process logic, etc.) and network discovery ("scanning"). It runs on most systems, including Linux, Windows, and as a Docker container.
 
-Documentation about installation, usage, development, and other information is in the PEAT documentation.
+Documentation about installation, usage, development, and other information is in the [PEAT documentation](https://sandialabs.github.io/PEAT/).
+
+## Quickstart
+
+1. Download the [latest release](https://github.com/sandialabs/PEAT/releases) for your platform
+1. Open a terminal in the folder you downloaded PEAT to
+1. Run help to list subcommands
+    - Windows: `.\peat.exe --help`
+    - Linux: `./peat --help`
+1. Get help for a subcommand, e.g. `scan`
+    - Windows: `.\peat.exe scan --help`
+    - Linux: `./peat scan --help`
+1. Run a basic scan:
+    - Windows: `.\peat.exe scan -i 192.0.2.0/24`
+    - Linux: `./peat scan -i 192.0.2.0/24`
 
 ## Basic install
 
-Notes
+PEAT is distributed in several formats, including executable files for Linux and Windows and a Docker Container. The format you want to install depends on your use case. Typically, you'll want the executable format, which is `peat` on Linux and `peat.exe` on Windows. These can be downloaded from the [releases page](https://github.com/sandialabs/PEAT/releases) or from [CI/CD builds](https://github.com/sandialabs/PEAT/actions).
 
-- These steps make a lot of assumptions, and are meant if you find/clone/whatever the repo without context or SRN access. Refer to the documentation for complete information about installation and setup.
-- If you're on Windows, make sure you're using PowerShell.
-- Edits to the code (`.py` files) don't necessitate a reinstall. You only need to install on first setup, or if the dependencies change (these are defined in `pyproject.toml`).
-- [PDM](https://pdm-project.org) is used for tooling and dependency management
-- Tests are run using `pytest`
+Python is NOT required to run PEAT if using the executable or container. PEAT is designed to be portable and brings it's own dependencies for the most part, requiring minimal or no configuring on the target system. Refer to the [system requirements page](https://sandialabs.github.io/PEAT/system_requirements.html) for further details.
 
-### Install PDM
+NOTE: Refer to the [installation guide](https://sandialabs.github.io/PEAT/install.html) for installation instructions and [operation docs](https://sandialabs.github.io/PEAT/operate.html) for usage. The commands in the [quickstart](#quickstart) section are intended to get you going quickly, and are not comprehensive.
 
-Full instructions: https://pdm-project.org/en/stable/
+## Development
 
-#### Linux
+Refer to the [contributing guide](https://sandialabs.github.io/PEAT/contributing.html) and [development infrastructure](https://sandialabs.github.io/PEAT/development_infrastructure.html) documentation for details, including setting up a development environment, testing, and building on your local system.
 
-Installer method:
-
-```bash
-curl -sSL https://pdm-project.org/install-pdm.py | python3 -
-```
-
-[pipx](https://pipx.pypa.io/stable/) method:
-
-```bash
-pipx install pdm
-```
-
-#### Windows
-
-Installer method:
-
-```powershell
-[System.Text.Encoding]::UTF8.GetString((Invoke-WebRequest -Uri https://pdm-project.org/install-pdm.py).Content) | python -
-```
-
-[Scoop](https://scoop.sh/) method:
-
-```shell
-scoop bucket add frostming https://github.com/frostming/scoop-frostming.git
-scoop install pdm
-```
-
-#### Mac
-
-Installer method:
-
-```bash
-curl -sSL https://pdm-project.org/install-pdm.py | python3 -
-```
-
-Homebrew method:
-
-```bash
-brew install pdm
-```
-
-### Setup development environment
+The commands below are a basic "quick start" for development. Ensure [PDM is installed](https://pdm-project.org/en/stable/#installation) before proceeding.
 
 ```bash
 # Ensure PDM is installed
@@ -118,44 +87,6 @@ pdm run test-full
 pdm use -f 3.12
 pdm install -d
 pdm run test
-```
-
-## Building distributions
-
-```bash
-# make sure you have the following dependencies (linux) if you run into build issues
-sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5 graphviz
-
-# Build Windows executable with PyInstaller
-pdm run build-exe
-
-# Build Linux executable
-# This runs staticx to include system libraries and be fully portable.
-# This WILL NOT work on Windows, and probably won't work with Mac.
-# Also, you may need to install some tools:
-# sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5
-pdm run build-linux-exe
-
-# Sneakypeat (Windows and Linux)
-pdm run build-sneakypeat
-pdm run build-linux-sneakypeat
-
-# Build Python packages
-pdm build
-ls -lAht ./dist/
-# View files in the package
-pdm run wheel-files
-
-# Build docker
-pdm run build-docker
-
-# Update dependencies, but don't bump as many versions (pdm.lock)
-pdm lock --update-reuse -d
-pdm sync -d
-
-# Update dependencies and versions
-pdm lock -d
-pdm sync -d
 ```
 
 ## License
