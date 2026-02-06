@@ -182,7 +182,7 @@ Guidelines and policies
 Code style
 ^^^^^^^^^^
 - `PEP8 <https://www.python.org/dev/peps/pep-0008/>`__ should be adhered to, with the exception of line length can go up to 88 characters, and certain lines can be excluded with ``# noqa: E501``.
-- Run ``pdm run format`` to format your code before pushing. There's no longer a need to worry about formatting, it's all handled for you. Under the hood, `black <https://github.com/psf/black>`__ is used for formatting and `isort <https://pycqa.github.io/isort/index.html>`__ is used for import sorting.
+- Run ``pdm run format`` to format your code before pushing. There's no longer a need to worry about formatting, it's all handled for you. Under the hood, `the Ruff formatter <https://docs.astral.sh/ruff/formatter/>`__ is used for formatting and `Ruff's isort check <https://docs.astral.sh/ruff/formatter/#sorting-imports>`__ is used for import sorting.
 - Docstrings should follow `PEP-257 <https://www.python.org/dev/peps/pep-0257/>`__.
 - Argument and Returns in function docstrings should follow the `Googleformat <http://google.github.io/styleguide/pyguide.html>`_ (`Examples <https://www.sphinx-doc.org/en/1.8/usage/extensions/example_google.html>`_).
 - ``TODO`` comments are permitted. However, if the ``TODO`` is significant you should discuss it with the team or open a issue on GitHub.
@@ -252,7 +252,7 @@ Project structure
 - ``Dockerfile``      Used to build a Docker image for the PEAT CLI
 - ``LICENSE``         Licensing
 - ``pdm.lock``        Used by PDM to pin the versions of dependencies based on what's defined in ``pyproject.toml``, and ensure their SHA256 hashes match when installing.
-- ``pyproject.toml``  Configuration for the project, including Python packaging metadata, configurations for tools such as ``pytest``, ``ruff``, ``black``, ``isort``, and ``mypy``, and dependencies. It also controls how the PEAT python package is built and installed. This is what ``pip`` uses when you run ``pip install .``.
+- ``pyproject.toml``  Configuration for the project, including Python packaging metadata, configurations for tools such as ``pytest``, ``ruff``, and ``mypy``, and dependencies. It also controls how the PEAT python package is built and installed. This is what ``pip`` uses when you run ``pip install .``.
 - ``README.md``       Basic documentation that shows up on GitHub project homepage
 
 distribution
