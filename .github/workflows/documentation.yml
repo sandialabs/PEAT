@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   docs:
-    name: Build HTML docs and manpage
+    name: Build documentation (HTML)
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
@@ -40,20 +40,10 @@ jobs:
       - name: Install dependencies
         run: pdm sync -d -G docs
       - name: Build docs
-        run: pdm run docs
-      - name: Upload HTML docs artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: html-docs
-          path: _docs_html/*
+        run: pdm run docs-html
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _docs_html/
-      - name: Upload manpage
-        uses: actions/upload-artifact@v6
-        with:
-          name: manpage
-          path: _docs_man/peat.1
   deploy:
     name: Publish docs to GitHub Pages
     runs-on: ubuntu-latest

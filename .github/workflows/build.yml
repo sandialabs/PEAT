@@ -10,6 +10,39 @@ permissions:
   contents: read
 
 jobs:
+  docs:
+    name: Build Documentation (HTML and manpage)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+            fetch-tags: true
+            fetch-depth: 0  # checkout full history
+      - name: Install apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: graphviz
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: "3.12"
+          cache: true
+      - name: Install dependencies
+        run: pdm sync -d -G docs
+      - name: Build docs (HTML and manpage)
+        run: pdm run docs
+      - name: Upload HTML docs artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: html-docs
+          path: _docs_html/*
+      - name: Upload manpage artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: manpage
+          path: _docs_man/peat.1
+
   python-build:
     name: Build Python package
     runs-on: ubuntu-latest
@@ -57,6 +90,8 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:
           packages: python3-dev python3-pip patchelf binutils scons libpq-dev libpq5
+      # For some reason setup-pdm action isn't playing nice with PyInstaller,
+      # have to manually do the install here
       - name: Install tool dependencies
         run: |
           python3 --version
@@ -64,13 +99,6 @@ jobs:
           pip install -U pdm
           pdm config check_update false
           pdm --version
-      # For some reason setup-pdm action isn't playing nice with PyInstaller
-      # - name: Setup PDM
-      #   uses: pdm-project/setup-pdm@v4
-      #   with:
-      #     # use ubuntu 24 runner's python
-      #     python-version: "3.12"
-      #     cache: false
       # NOTE: Pip is needed to manually reinstall psycopg2
       - name: Install Python packages (venv)
         run: |
