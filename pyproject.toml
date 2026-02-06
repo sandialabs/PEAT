@@ -239,8 +239,6 @@ peat = "peat.__main__:main"
 lint = [
     # checks for spelling mistakes
     "codespell>=2.2.6",
-    # required for codespell to parse pyproject.toml
-    "tomli",
 
     # Ruff checks for quality issues and potential bugs
     "ruff",
@@ -268,7 +266,6 @@ test = [
     # "Coverage" is how much of the code is actually run (it's "coverage")
     # Generates coverage reports from test suite runs
     "pytest-cov",
-    "tomli",
 
     # pytest wrapper around the "mock" library
     "pytest-mock",
@@ -299,7 +296,6 @@ test = [
     "pytest-sugar",
 ]
 exe = [
-    "tomli",
     "pyinstaller==6.15.0",
     "staticx==0.14.1;platform_system=='Linux'",
     "setuptools<70.0.0",  # Fix various issues with setuptools lately
@@ -562,7 +558,6 @@ composite = [
 
 [tool.codespell]
 # codespell supports pyproject.toml since version 2.2.2
-# NOTE: the "tomli" package must be installed for this to work
 # https://github.com/codespell-project/codespell#using-a-config-file
 # NOTE: ignore words for codespell must be lowercase
 check-filenames = ""
