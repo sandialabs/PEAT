@@ -427,17 +427,15 @@ class SELRTAC(DeviceModule):
                 continue
             if k1 not in dict_2:
                 key_err.append(f"Key {dict_2_name}{old_path} not in {dict_2_name}\n")
-            else:
-                if isinstance(v1, dict) and isinstance(dict_2[k1], dict):
-                    cls.compare_dictionaries(
-                        v1, dict_2[k1], "d1", "d2", old_path[:], err, key_err, value_err
-                    )
-                else:
-                    if v1 != dict_2[k1]:
-                        value_err.append(
-                            f"Value of {dict_1_name}{old_path} ({v1}) not same "
-                            f"as {dict_2_name}{old_path} ({dict_2[k1]})\n"
-                        )
+            elif isinstance(v1, dict) and isinstance(dict_2[k1], dict):
+                cls.compare_dictionaries(
+                    v1, dict_2[k1], "d1", "d2", old_path[:], err, key_err, value_err
+                )
+            elif v1 != dict_2[k1]:
+                value_err.append(
+                    f"Value of {dict_1_name}{old_path} ({v1}) not same "
+                    f"as {dict_2_name}{old_path} ({dict_2[k1]})\n"
+                )
 
         for k in dict_2.keys():
             if path is None:

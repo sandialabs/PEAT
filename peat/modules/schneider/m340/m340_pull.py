@@ -88,20 +88,20 @@ def pull_network_config(ip: str, timeout: float = 1.0, snmp_community: str = "pu
                         ):
                             # Check if MAC address found via FTP differs
                             if (
-                                "mac_address" in device_info[j]
-                                and "mac_address" in ftp_info[index]
-                                and device_info[j]["mac_address"] != ftp_info[index]["mac_address"]
+                                "mac_address" in info_value
+                                and "mac_address" in ftp_value
+                                and info_value["mac_address"] != ftp_value["mac_address"]
                             ):
                                 log.warning(
                                     f"Conflicting MAC addresses found for "
                                     f"module {j!s} in device {ip}"
                                 )
-                                device_info[j]["conflicted_mac_address"] = device_info[j][
+                                device_info[j]["conflicted_mac_address"] = info_value[
                                     "mac_address"
                                 ]
 
                             # Merge the module dicts
-                            device_info[j].update(ftp_info[index])
+                            info_value.update(ftp_value)
                             found_device = True
                             break
 

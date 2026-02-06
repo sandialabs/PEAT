@@ -1196,34 +1196,33 @@ def parse_protection_schemes(
                     proto.append(fields["value"])
             if proto:
                 protection_schemes[section] = proto
-        else:
-            if re.match(r"^S?\d$", section):
-                for setting, fields in settings.items():
-                    # TODO: set flag if scheme is enabled based on global
-                    #       flag configuring if setting is enabled.
-                    if re.match(r"^E\d", setting) and re.match(r"Y|YES|ON|[1-9]", fields["value"]):
-                        if setting[1:] in ANSI_CODES:
-                            code = setting[1:]
-                            protection_schemes[code] = ANSI_CODES[code]
-                    elif re.match(r"^\d", setting):
-                        voltage_elements = (
-                            r"^(27TN.59N|27TN|27AUX|27X|27.50|27P|27S|"
-                            r"36|59NU|59N|59B|59P|59X|59Q|87V|91)"
-                        )
-                        try:
-                            if (
-                                re.match(voltage_elements, setting)
-                                and fields["value"] not in ("N", "0.00", "OFF")
-                                and settings["EVOLT"]["value"] == "Y"
-                            ):
-                                code = re.match(voltage_elements, setting).group(1)
-                                if code in ANSI_CODES:
-                                    scheme = ANSI_CODES[code]
-                                else:
-                                    scheme = "UNKNOWN"
-                                protection_schemes[code] = scheme
-                        except Exception:
-                            pass
+        elif re.match(r"^S?\d$", section):
+            for setting, fields in settings.items():
+                # TODO: set flag if scheme is enabled based on global
+                #       flag configuring if setting is enabled.
+                if re.match(r"^E\d", setting) and re.match(r"Y|YES|ON|[1-9]", fields["value"]):
+                    if setting[1:] in ANSI_CODES:
+                        code = setting[1:]
+                        protection_schemes[code] = ANSI_CODES[code]
+                elif re.match(r"^\d", setting):
+                    voltage_elements = (
+                        r"^(27TN.59N|27TN|27AUX|27X|27.50|27P|27S|"
+                        r"36|59NU|59N|59B|59P|59X|59Q|87V|91)"
+                    )
+                    try:
+                        if (
+                            re.match(voltage_elements, setting)
+                            and fields["value"] not in ("N", "0.00", "OFF")
+                            and settings["EVOLT"]["value"] == "Y"
+                        ):
+                            code = re.match(voltage_elements, setting).group(1)
+                            if code in ANSI_CODES:
+                                scheme = ANSI_CODES[code]
+                            else:
+                                scheme = "UNKNOWN"
+                            protection_schemes[code] = scheme
+                    except Exception:
+                        pass
 
     return protection_schemes
 

@@ -13,11 +13,11 @@ def convert_to_elastic(_input: str) -> ElasticType:
         try:
             return float(_input)
         except Exception:
-            if _input == "N" or _input == "False":
+            if _input in {"N", "False"}:
                 return False
-            elif _input == "Y" or _input == "True":
+            elif _input in {"Y", "True"}:
                 return True
-            elif _input == "None" or _input == "NONE":
+            elif _input in {"None", "NONE"}:
                 return None
             else:
                 if (

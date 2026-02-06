@@ -512,10 +512,9 @@ def merge_models(dest: BaseModel, source: BaseModel) -> None:
 
             setattr(dest, attr, new_value)
 
-        else:
-            if config.DEBUG >= 4:
-                log.warning(
-                    f"Skipping merge of existing non-default attribute '{attr}' for "
-                    f"'{dest.__class__.__name__}' model (new_value={new_value} "
-                    f"current_value={current_value})"
-                )
+        elif config.DEBUG >= 4:
+            log.warning(
+                f"Skipping merge of existing non-default attribute '{attr}' for "
+                f"'{dest.__class__.__name__}' model (new_value={new_value} "
+                f"current_value={current_value})"
+            )

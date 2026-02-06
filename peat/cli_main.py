@@ -486,31 +486,30 @@ def parse_scan_summary(summary: dict[str, Any]) -> TargetsType:
 
     if comm_type == "broadcast_ip" and not summary.get("hosts_verified"):
         targets = summary["scan_targets"]
+    elif summary.get("hosts_verified"):
+        # If there were results from a broadcast IP scan, then use unicast IP
+        # to the verified devices, since we now know their addresses.
+        if comm_type == "broadcast_ip":
+            comm_type = "unicast_ip"
+
+        module_names = set()  # Use a set to prevent duplicates
+        targets = []
+
+        # Note: "hosts_verified" is a list of dict
+        for dev in summary["hosts_verified"]:
+            if dev.get("peat_module"):
+                module_names.add(dev["peat_module"])
+
+            for comm_id in ["ip", "serial_port", "mac", "hostname"]:
+                if dev.get(comm_id):
+                    targets.append(dev[comm_id])
+                    break
+
+        module_names = list(module_names)
+    elif summary.get("hosts_online"):
+        targets = summary["hosts_online"]
     else:
-        if summary.get("hosts_verified"):
-            # If there were results from a broadcast IP scan, then use unicast IP
-            # to the verified devices, since we now know their addresses.
-            if comm_type == "broadcast_ip":
-                comm_type = "unicast_ip"
-
-            module_names = set()  # Use a set to prevent duplicates
-            targets = []
-
-            # Note: "hosts_verified" is a list of dict
-            for dev in summary["hosts_verified"]:
-                if dev.get("peat_module"):
-                    module_names.add(dev["peat_module"])
-
-                for comm_id in ["ip", "serial_port", "mac", "hostname"]:
-                    if dev.get(comm_id):
-                        targets.append(dev[comm_id])
-                        break
-
-            module_names = list(module_names)
-        elif summary.get("hosts_online"):
-            targets = summary["hosts_online"]
-        else:
-            targets = summary.get("scan_targets", [])
+        targets = summary.get("scan_targets", [])
 
     return targets, comm_type, module_names
 

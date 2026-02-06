@@ -635,7 +635,7 @@ class TelnetExtractor(HeatProtocol):
                     # but <STX>=b'\x02' for 1024 bytes
                     # this is hypothesized since it is nonstandard
                     blockLength = bytes([stream[i]])
-                    if blockLength != b"\x01" and blockLength != b"\x02":
+                    if blockLength not in {b"\x01", b"\x02"}:
                         log.warning(
                             f"Block header does not match spec - "
                             f"skipping file with command {selcommand}"

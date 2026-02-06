@@ -102,9 +102,8 @@ class AwesomeTool(DeviceModule):
         # NOTE: dev._is_verified is set by PEAT during scanning
         elif not dev._is_verified and not cls._verify_http_unicast(dev):
             cls.log.warning(f"Failed to pull HTTP on {dev.ip}: HTTP verification method failed")
-        else:
-            if cls.pull_http(dev):
-                http_successful = True
+        elif cls.pull_http(dev):
+            http_successful = True
 
         return http_successful
 

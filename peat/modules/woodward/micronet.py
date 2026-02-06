@@ -129,7 +129,7 @@ class MicroNet(DeviceModule):
                 which will be added on to each function call
         """
         # skip these special directories
-        if directory and directory != "." and directory != "..":
+        if directory and directory not in {".", ".."}:
             path = ""
             curr_dir = ftp.cmd("PWD").split('"')[1]
             # We want to mirror the directory structure of the target

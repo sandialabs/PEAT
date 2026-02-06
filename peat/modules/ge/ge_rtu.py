@@ -669,37 +669,36 @@ def parse_userlog_menu(data: str) -> dict:
             logout_val = entry
         elif position == 2:
             channel_val = entry
-        else:
-            if re.search(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", entry):
-                userid_val = re.split(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", entry)[0]
-                if counter == 1:
-                    userlog[counter] = {
-                        "Login": login_val,
-                        "Logout": logout_val,
-                        "Channel": channel_val,
-                        "UserId": userid_val,
-                    }
-                else:
-                    userlog[counter] = {
-                        "Login": next_login_val,
-                        "Logout": logout_val,
-                        "Channel": channel_val,
-                        "UserId": userid_val,
-                    }
-                next_login_val = entry.replace(userid_val, "", 1)
-                counter += 1
-                position = 0
-            # TODO: fix userid getting merged with channel with all logs newer than 14
-            elif counter == 14:
-                userid_val = entry
+        elif re.search(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", entry):
+            userid_val = re.split(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", entry)[0]
+            if counter == 1:
+                userlog[counter] = {
+                    "Login": login_val,
+                    "Logout": logout_val,
+                    "Channel": channel_val,
+                    "UserId": userid_val,
+                }
+            else:
                 userlog[counter] = {
                     "Login": next_login_val,
                     "Logout": logout_val,
                     "Channel": channel_val,
                     "UserId": userid_val,
                 }
-                counter += 1
-                position = 0
+            next_login_val = entry.replace(userid_val, "", 1)
+            counter += 1
+            position = 0
+        # TODO: fix userid getting merged with channel with all logs newer than 14
+        elif counter == 14:
+            userid_val = entry
+            userlog[counter] = {
+                "Login": next_login_val,
+                "Logout": logout_val,
+                "Channel": channel_val,
+                "UserId": userid_val,
+            }
+            counter += 1
+            position = 0
 
         if login_val:
             position += 1
@@ -722,29 +721,28 @@ def parse_userlog_menu(data: str) -> dict:
             logout_val = entry
         elif position == 2:
             channel_val = entry
-        else:
-            if re.search(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", entry):
-                userid_val = re.split(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", entry)[0]
-                if counter > 14:
-                    userlog[counter] = {
-                        "Login": next_login_val,
-                        "Logout": logout_val,
-                        "Channel": channel_val,
-                        "UserId": userid_val,
-                    }
-                next_login_val = entry.replace(userid_val, "", 1)
-                counter += 1
-                position = 0
-            elif counter == 20:
-                userid_val = entry
+        elif re.search(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", entry):
+            userid_val = re.split(r"[0-9]{2}/[0-9]{2}/[0-9]{2}", entry)[0]
+            if counter > 14:
                 userlog[counter] = {
                     "Login": next_login_val,
                     "Logout": logout_val,
                     "Channel": channel_val,
                     "UserId": userid_val,
                 }
-                counter += 1
-                position = 0
+            next_login_val = entry.replace(userid_val, "", 1)
+            counter += 1
+            position = 0
+        elif counter == 20:
+            userid_val = entry
+            userlog[counter] = {
+                "Login": next_login_val,
+                "Logout": logout_val,
+                "Channel": channel_val,
+                "UserId": userid_val,
+            }
+            counter += 1
+            position = 0
 
         if login_val:
             position += 1

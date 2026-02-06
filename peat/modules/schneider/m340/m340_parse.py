@@ -347,7 +347,7 @@ def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
     }
 
     project_blocks = chunkify(config_blob)
-    if project_blocks == {} or project_blocks == {0: {}}:
+    if project_blocks in ({}, {0: {}}):
         log.error("No chunks were returned from chunkify. Config was not parsed.")
         return device_info
 

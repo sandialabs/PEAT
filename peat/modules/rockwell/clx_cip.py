@@ -654,14 +654,13 @@ def get_size_of_type(
         else:
             log.warning(f"Something went wrong. Unseen type: {type_bits}")
             return 0
+    elif type_bits in template_attributes:  # Structure data
+        # TODO: rewrite the 0x5 to remove this comment block
+        # template structure size
+        type_size = template_attributes[type_bits][0x05]
     else:
-        if type_bits in template_attributes:  # Structure data
-            # TODO: rewrite the 0x5 to remove this comment block
-            # template structure size
-            type_size = template_attributes[type_bits][0x05]
-        else:
-            log.warning(f"Something went wrong. Unseen type: {type_bits}")
-            return 0
+        log.warning(f"Something went wrong. Unseen type: {type_bits}")
+        return 0
 
     # TODO: Figure out why the below checks exist
     #   (they are all true if array_bits > 2)

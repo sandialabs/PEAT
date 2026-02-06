@@ -200,33 +200,32 @@ def parse_log(dev: DeviceData, filepath: Path) -> bool:
     for line in file_lines:
         if "VxWorks:Started" in line:  # if this event is a start time, log separately
             start_times.append(line)
-        else:
-            if line != "":
-                line_split = line.split(" - ")
-                action_message = line_split[0].split(":")
-                time = datetime.strptime(line_split[-1][:-1], "%Y/%m/%d %H:%M:%S")
+        elif line != "":
+            line_split = line.split(" - ")
+            action_message = line_split[0].split(":")
+            time = datetime.strptime(line_split[-1][:-1], "%Y/%m/%d %H:%M:%S")
 
-                # some events don't contain a message,
-                # this check accounts for that
-                if action_message[1] != "":
-                    # create a new event for each line in log
-                    new_event = Event(
-                        action=action_message[0],
-                        dataset=filepath.name,
-                        message=action_message[1],
-                        original=line,
-                        created=time,
-                    )
-                    events.append(new_event)
-                else:
-                    new_event = Event(
-                        action=line_split[0],
-                        dataset=filepath.name,
-                        message="none",
-                        original=line,
-                        created=time,
-                    )
-                    events.append(new_event)
+            # some events don't contain a message,
+            # this check accounts for that
+            if action_message[1] != "":
+                # create a new event for each line in log
+                new_event = Event(
+                    action=action_message[0],
+                    dataset=filepath.name,
+                    message=action_message[1],
+                    original=line,
+                    created=time,
+                )
+                events.append(new_event)
+            else:
+                new_event = Event(
+                    action=line_split[0],
+                    dataset=filepath.name,
+                    message="none",
+                    original=line,
+                    created=time,
+                )
+                events.append(new_event)
 
     for event in events:
         dev.event.append(event)

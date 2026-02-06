@@ -609,6 +609,7 @@ select = [
     "PGH",  # pygrep-hooks
     "PLC",  # Pylint Convention
     "PLE",  # Pylint Errors
+    "PLR",  # Pylint Refactor
     "PLW",  # Pylint Warnings
     "RUF",  # Ruff-specific rules
     "Q",    # flake8-quotes
@@ -621,6 +622,9 @@ select = [
     # "DTZ",  # flake8-datetimez
     # "PTH",  # flake8-use-pathlib
     # "SIM",  # flake8-simplify
+    # "ANN",  # flake8-annotations
+    # "S",    # flake8-bandit
+
 ]
 
 # Linting error codes to ignore
@@ -645,6 +649,11 @@ ignore = [
     "PLC0415", # 'import' should be at the top-level of a file
     # "PLC1901", # compare-to-empty-string
     # "E203",    # Whitespace before ':'
+    "PLR2004",  # Magic value used in comparison
+    "PLR0911",
+    "PLR0912",
+    "PLR0913",
+    "PLR0915",
 ]
 
 # Linting error codes to ignore on a per-file basis

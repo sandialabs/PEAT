@@ -36,7 +36,7 @@ def _convert_to_elastic(_input: str) -> ElasticType:
                 return False
             elif _input == "Y":
                 return True
-            elif _input == "None" or _input == "NONE":
+            elif _input.upper() == "NONE":
                 return None
             else:
                 return _input
