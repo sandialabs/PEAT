@@ -173,10 +173,7 @@ class HeatProtocol(ABC):
         if config.HEAT_ARTIFACTS_DIR:
             self.export_artifacts()
         else:
-            log.warning(
-                "HEAT_ARTIFACTS_DIR is disabled, artifacts "
-                "will not be exported to files"
-            )
+            log.warning("HEAT_ARTIFACTS_DIR is disabled, artifacts will not be exported to files")
         if not config.HEAT_FILE_ONLY:
             self.parse_artifacts()
         return True

@@ -13,9 +13,7 @@ def test_http_class():
     assert obj.gen_session()
 
 
-def test_http_decode_ssl_certificate(
-    mocker, datapath, deep_compare, tmp_path, read_text
-):
+def test_http_decode_ssl_certificate(mocker, datapath, deep_compare, tmp_path, read_text):
     mocker.patch.dict(config["CONFIG"], {"TEMP_DIR": None})
 
     cert_path = datapath("sage_certificate.cert")
@@ -47,9 +45,7 @@ def test_http_decode_ssl_certificate(
 
 
 @pytest.mark.parametrize("device_name", ["sage", "sel_2730m", "sel_3530"])
-def test_http_parse_decoded_ssl_certificate(
-    mocker, json_data, datapath, tmp_path, device_name
-):
+def test_http_parse_decoded_ssl_certificate(mocker, json_data, datapath, tmp_path, device_name):
     mocker.patch.dict(config["CONFIG"], {"TEMP_DIR": tmp_path})
 
     expected = json_data(f"expected_parsed_{device_name}_certificate.json")

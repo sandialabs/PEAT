@@ -77,9 +77,7 @@ def portscan(
             success = meth.port_function(dev)
         # If the transport is TCP, use a traditional TCP SYN connect
         elif meth.transport == "tcp":
-            success = check_tcp_port(
-                dev.ip, options["port"], options["timeout"], reset=True
-            )
+            success = check_tcp_port(dev.ip, options["port"], options["timeout"], reset=True)
         # TODO: Generic way to check UDP services (right now it's just SNMP)
         #   UDP services: CIP ('identify-type'), HAP, SNMP
         #   Maybe just require port_function be implemented for UDP?
@@ -89,14 +87,10 @@ def portscan(
                 # Minor hack to prevent SNMP from bogging down scans
                 if config.is_default_value("DEFAULT_TIMEOUT"):
                     timeout = 2.0
-                success = check_udp_service(
-                    dev.ip, meth.protocol, options["port"], timeout
-                )
+                success = check_udp_service(dev.ip, meth.protocol, options["port"], timeout)
             else:
                 # TODO: hack by checking UDP services using TCP SYN-RSTs
-                success = check_tcp_port(
-                    dev.ip, options["port"], options["timeout"], reset=True
-                )
+                success = check_tcp_port(dev.ip, options["port"], options["timeout"], reset=True)
         else:
             raise DeviceError(f"No port check function for service '{meth.protocol}'")
 
@@ -260,10 +254,7 @@ def unicast_ip_scan(
         return sweep_results, [], []  # no modules are used for sweep
 
     if not active_hosts:
-        log.warning(
-            "Failed unicast_ip_scan: no hosts are active "
-            "(lightweight checks or sweep)"
-        )
+        log.warning("Failed unicast_ip_scan: no hosts are active (lightweight checks or sweep)")
         return None
 
     # * Filter device types to only those with unicast IP methods *
@@ -404,9 +395,7 @@ def check_host_unicast_ip(ip: str, modules: list[type[DeviceModule]]) -> bool:
         portscan(dev, methods, full_check_snmp=True)
 
     # If no ports are open, then the scan failed
-    if not any(
-        s.status in {"open", "verified"} for s in dev.service if s.protocol in protos
-    ):
+    if not any(s.status in {"open", "verified"} for s in dev.service if s.protocol in protos):
         _log.info(f"No services found for {dev.ip}")
         return False
 
@@ -444,22 +433,16 @@ def check_host_unicast_ip(ip: str, modules: list[type[DeviceModule]]) -> bool:
 
     id_tbl = _methods_table(methods, dev)
     _log.info(
-        f"Fingerprinting {dev.ip} using "
-        f"{pluralize(len(methods), 'matching method')}\n{id_tbl}"
+        f"Fingerprinting {dev.ip} using {pluralize(len(methods), 'matching method')}\n{id_tbl}"
     )
 
     # Try each method
     for method, module in methods:
         if not method.identify_function:
-            raise consts.PeatError(
-                f"No identify_function defined for method!\n{repr(method)}"
-            )
+            raise consts.PeatError(f"No identify_function defined for method!\n{repr(method)}")
 
         try:
-            _log.debug(
-                f"Identifying {dev.ip} using {module.__name__} "
-                f"{method.protocol} method"
-            )
+            _log.debug(f"Identifying {dev.ip} using {module.__name__} {method.protocol} method")
             successful = bool(method.identify_function(dev))
         except Exception as ex:
             _log.warning(
@@ -577,12 +560,8 @@ def broadcast_scan(
 
     # Expand any filenames into targets
     log.trace(f"Raw broadcast targets (including any file paths): {targets}")
-    expanded_targets = {
-        str(x) for x in expand_filenames_to_hosts(targets)
-    }  # type: set[str]
-    log.trace(
-        f"Raw broadcast targets (file paths removed/read from): {expanded_targets}"
-    )
+    expanded_targets = {str(x) for x in expand_filenames_to_hosts(targets)}  # type: set[str]
+    log.trace(f"Raw broadcast targets (file paths removed/read from): {expanded_targets}")
     log.debug(f"{pluralize(len(expanded_targets), 'broadcast target')} provided")
 
     # interfaces are simply the local host interfaces
@@ -664,9 +643,7 @@ def broadcast_scan(
     # Filter device types to only those with ip_methods defined, and at least
     # one of their methods is of type "broadcast_ip".
     modules = module_api.lookup_types(device_types, filter_attr="ip_methods")
-    modules = [
-        m for m in modules if any(x.type == "broadcast_ip" for x in m.ip_methods)
-    ]
+    modules = [m for m in modules if any(x.type == "broadcast_ip" for x in m.ip_methods)]
     log.info(
         f"Broadcast scanning {pluralize(len(bcast_ip_targets), 'IP target')} using "
         f"{pluralize(len(modules), 'module')}: "
@@ -701,9 +678,7 @@ def broadcast_scan(
     for target in sorted_bcast_ip_targets:
         for method, module in methods:
             if not method.identify_function:
-                raise consts.PeatError(
-                    f"No identify_function defined for method!\n{repr(method)}"
-                )
+                raise consts.PeatError(f"No identify_function defined for method!\n{repr(method)}")
 
             try:
                 target_results = method.identify_function(target)
@@ -808,11 +783,7 @@ def serial_scan(
         sweep_results = utils.sort(
             {  # Merged dict of online and offline ports
                 **dict.fromkeys(active_ports, True),
-                **{
-                    off: False
-                    for off in serial_port_addresses
-                    if off not in active_ports
-                },
+                **{off: False for off in serial_port_addresses if off not in active_ports},
             }
         )
         return sweep_results, [], []  # no modules are used for sweep
@@ -1019,8 +990,7 @@ def scan(
 
     if not results:
         log.warning(
-            f"{scan_type} scan failed: no results "
-            f"(duration: {utils.fmt_duration(scan_duration)})"
+            f"{scan_type} scan failed: no results (duration: {utils.fmt_duration(scan_duration)})"
         )
         return None
 
@@ -1029,9 +999,7 @@ def scan(
 
     # * Format scan results *
     online_hosts = [
-        dev.get_comm_id()
-        for dev in datastore.objects
-        if dev._is_active and not dev._is_verified
+        dev.get_comm_id() for dev in datastore.objects if dev._is_active and not dev._is_verified
     ]  # type: list[str]
 
     # Remove fields that are excessive for a summary

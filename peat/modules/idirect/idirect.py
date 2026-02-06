@@ -183,9 +183,7 @@ class Idirect(DeviceModule):
 
             return True
         except Exception as ex:
-            cls.log.trace(
-                f"Failed {protocol.capitalize()} verify due to exception: {ex}"
-            )
+            cls.log.trace(f"Failed {protocol.capitalize()} verify due to exception: {ex}")
             conn.disconnect()
             return False
 
@@ -211,9 +209,7 @@ class Idirect(DeviceModule):
         if not entity.organization:
             entity = cert.issuer
         if not entity.organization:
-            cls.log.debug(
-                f"No 'subject' or 'issuer' in HTTPS SSL certificate from {dev.ip}"
-            )
+            cls.log.debug(f"No 'subject' or 'issuer' in HTTPS SSL certificate from {dev.ip}")
             return False
 
         dev._cache["idirect_ssl_fingerprinted"] = True
@@ -239,9 +235,7 @@ class Idirect(DeviceModule):
                     f"'{pull_type_cap}' not listed in 'sage.pull_methods' option"
                 )
             elif (
-                dev.service_status(
-                    {"protocol": pull_type, "port": dev.options[pull_type]["port"]}
-                )
+                dev.service_status({"protocol": pull_type, "port": dev.options[pull_type]["port"]})
                 == "closed"
             ):
                 cls.log.warning(
@@ -279,9 +273,7 @@ class Idirect(DeviceModule):
                 f"'ssl' not listed in 'idirect.pull_methods' option"
             )
         elif (
-            dev.service_status(
-                {"protocol": "https", "port": dev.options["https"]["port"]}
-            )
+            dev.service_status({"protocol": "https", "port": dev.options["https"]["port"]})
             == "closed"
         ):
             cls.log.warning(f"Failed to pull SSL on {dev.ip}: HTTPS service is closed")
@@ -334,9 +326,7 @@ class Idirect(DeviceModule):
                 password=dev.options["ssh"]["pass"],
             )
             dev._cache["idirect_ssh_session"] = conn
-            exit_handler.register(
-                dev._cache["idirect_ssh_session"].disconnect, "CONNECTION"
-            )
+            exit_handler.register(dev._cache["idirect_ssh_session"].disconnect, "CONNECTION")
             conn.test_connection()
             conn.read()
             dev.related.user.add(dev.options["ssh"]["user"])
@@ -562,8 +552,7 @@ class FalconOptParser(NixParserBase):
 
                 except Exception as ex:
                     log.warning(
-                        f"Failed to parse key '{key}' in "
-                        f"falcon_opt section '{section_name}': {ex}"
+                        f"Failed to parse key '{key}' in falcon_opt section '{section_name}': {ex}"
                     )
 
 

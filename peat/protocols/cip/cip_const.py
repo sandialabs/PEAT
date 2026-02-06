@@ -931,9 +931,7 @@ CIP_SERVICE_TO_CODE: Final[dict[str, int]] = {
 # This replaces the old variables in enip_const.py
 # "UNCONNECTED_SEND_RESPONSE": b'\xd2'
 CIP_SC_BYTES: Final[dict[str, bytes]] = {
-    val: key.to_bytes(1, "big")
-    for key, val in CIP_SERVICE_CODES.items()
-    if val != "RESERVED"
+    val: key.to_bytes(1, "big") for key, val in CIP_SERVICE_CODES.items() if val != "RESERVED"
 }
 
 CIP_ERROR_CODES: Final[dict[int, str]] = {

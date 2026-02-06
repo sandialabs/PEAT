@@ -43,9 +43,7 @@ class ByteLenField(FieldLenField):
 class AbCIP(Packet):
     name = "CIP"
     fields_desc = [
-        ByteEnumField(
-            "cmServiceCode", 0x52, CIP_SERVICE_CODES
-        ),  # 0x52 = UNCONNECTED_SEND
+        ByteEnumField("cmServiceCode", 0x52, CIP_SERVICE_CODES),  # 0x52 = UNCONNECTED_SEND
         ByteField("cmReqPathSize", 2),
         IntField("cmReqPath", 0x20062401),  # for UNCONNECTED_SEND
         ShortField("timeout", 0x069A),
@@ -73,9 +71,7 @@ class CIP(Packet):
     fields_desc = [
         LEIntField("handle", 0),  # Interface Handle (0=CIP)
         LEShortField("timeout", 0),
-        LEShortField(
-            "itemCount", 2
-        ),  # Item count: should be at list 2 (Address and Data)
+        LEShortField("itemCount", 2),  # Item count: should be at list 2 (Address and Data)
         LEShortField("dataItemType_1", 0),  # Address Item Type ID
         LEShortField("dataItemLength_1", 0),  # Address Item Length
         LEShortField("dataItemType_2", 0),  # Address Item Type ID

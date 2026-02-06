@@ -219,15 +219,12 @@ def parse(
             log.error(f"Failed to push parse result summary to {state.elastic.type}")
 
     log.info(
-        f"Completed parsing of {len(parse_results)} files "
-        f"in {utils.fmt_duration(parse_duration)}"
+        f"Completed parsing of {len(parse_results)} files in {utils.fmt_duration(parse_duration)}"
     )
     return parse_summary
 
 
-def parse_data(
-    source: str | Path | TextIO, dev_cls: type[DeviceModule]
-) -> DeviceData | None:
+def parse_data(source: str | Path | TextIO, dev_cls: type[DeviceModule]) -> DeviceData | None:
     log.info(f"Parsing {dev_cls.__name__} file '{source}'")
 
     # Read data as bytes from stdin (CLI input, e.g. pipes or redirection)

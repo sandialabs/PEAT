@@ -134,8 +134,7 @@ def run_peat(args: dict[str, Any], start_time: float) -> None:
     # Dump state to Elasticsearch
     if state.elastic and config.ELASTIC_SAVE_STATE:
         log.info(
-            f"Saving state to {state.elastic.type} "
-            f"(index basename: {config.ELASTIC_STATE_INDEX})"
+            f"Saving state to {state.elastic.type} (index basename: {config.ELASTIC_STATE_INDEX})"
         )
 
         if not state.elastic.push(config.ELASTIC_STATE_INDEX, state.export()):
@@ -155,12 +154,7 @@ def run_peat(args: dict[str, Any], start_time: float) -> None:
     # Only gets executed if running as root on a POSIX system.
     # exit_handler.register() here to run on exit after other atexit
     # handlers run (e.g. config/state dumps).
-    if (
-        consts.POSIX
-        and state.superuser_privs
-        and config.OUT_DIR
-        and config.RUN_DIR.exists()
-    ):
+    if consts.POSIX and state.superuser_privs and config.OUT_DIR and config.RUN_DIR.exists():
         exit_handler.register(utils.fix_file_owners, "FILE", args=(config.RUN_DIR,))
 
     # Write the README.md file to OUT_DIR (e.g., ./peat_results/README.md)
@@ -325,9 +319,7 @@ def export_device_data(args: dict[str, Any]) -> bool:
     # Combine any duplicate devices before exporting
     datastore.deduplicate(prune_inactive=args["func"] in ["scan", "pull", "push"])
 
-    devices = [
-        d for d in datastore.objects if d._is_verified or (d._is_active and d._module)
-    ]
+    devices = [d for d in datastore.objects if d._is_verified or (d._is_active and d._module)]
     success = True
 
     if not devices:
@@ -418,8 +410,7 @@ def get_targets(args: dict[str, Any]) -> TargetsType:
             for host in config.HOSTS:
                 if not host.get("identifiers"):
                     log.warning(
-                        f"For 'all' target, skipping host with missing 'identifiers' "
-                        f"field: {host}"
+                        f"For 'all' target, skipping host with missing 'identifiers' field: {host}"
                     )
                     continue
 

@@ -438,9 +438,7 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(title="commands")
 
     # Parse command
-    parse_description = (
-        "Parse and extract data from project files, device configs, and PEAT pulls"
-    )
+    parse_description = "Parse and extract data from project files, device configs, and PEAT pulls"
     parse_parser = subparsers.add_parser(
         name="parse",
         # help: displayed next to the sub-command when running "peat --help"
@@ -451,9 +449,7 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
     parse_parser.set_defaults(func="parse")
 
     # Pull command
-    pull_description = (
-        "Pull and extract firmware, configs, logic, and/or logs from devices"
-    )
+    pull_description = "Pull and extract firmware, configs, logic, and/or logs from devices"
     pull_parser = subparsers.add_parser(
         name="pull",
         help=pull_description,
@@ -480,9 +476,7 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
     push_parser.set_defaults(func="push")
 
     # Pillage command
-    pillage_description = (
-        "Find and parse firmware, configuration, and logic from a disk image"
-    )
+    pillage_description = "Find and parse firmware, configuration, and logic from a disk image"
     pillage_parser = subparsers.add_parser(
         name="pillage",
         help=pillage_description,

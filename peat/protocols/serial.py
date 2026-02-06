@@ -169,10 +169,7 @@ def port_nums_to_addresses(port_values: list[str]) -> list[str]:
         Sorted :class:`list` of unique platform-specific serial port address strings
     """
     if not isinstance(port_values, list):
-        log.critical(
-            f"Expected a list of serial port values, got "
-            f"'{type(port_values).__name__}'"
-        )
+        log.critical(f"Expected a list of serial port values, got '{type(port_values).__name__}'")
         state.error = True
         return []
 
@@ -271,8 +268,7 @@ def parse_baudrates(baudrate_values: list[str]) -> list[int]:
     #   with slightly different calls.
     if not isinstance(baudrate_values, list):
         log.critical(
-            f"Expected a list of baud rate values, got "
-            f"'{type(baudrate_values).__name__}'"
+            f"Expected a list of baud rate values, got '{type(baudrate_values).__name__}'"
         )
         state.error = True
         return []
@@ -342,9 +338,7 @@ def serial_write(wr_bytes: bytes, address: str) -> int:
         br = serial_cxns[address].baudrate
 
         if config.DEBUG >= 3:
-            log.trace3(
-                f"Writing to {address} @ {br} baud: {pretty_hex_bytes(wr_bytes)}"
-            )
+            log.trace3(f"Writing to {address} @ {br} baud: {pretty_hex_bytes(wr_bytes)}")
 
         num_written = serial_cxns[address].write(wr_bytes)
 
@@ -444,8 +438,7 @@ def handle_scan_serial_exception(port: str, ex: Exception) -> bool:
     # Linux: "[Errno 2] No such file or directory: '/dev/ttyUSB4'"
     elif "filenotfounderror" in ex_str or "no such file or directory" in ex_str:
         log.warning(
-            f"Failed to scan serial port {port}: the port either "
-            f"isn't connected or doesn't exist"
+            f"Failed to scan serial port {port}: the port either isn't connected or doesn't exist"
         )
     else:
         log.warning(f"Unknown SerialException on {port}: {ex}")

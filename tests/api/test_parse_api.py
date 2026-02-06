@@ -36,9 +36,7 @@ def test_parse_api_parse_failures(top_datapath, tmp_path, mocker, assert_glob_pa
     )
     mocker.patch.object(datastore, "objects", [])
 
-    summary = parse(
-        [top_datapath("test_load_from_file.json")], ["SCEPTRE"]
-    )  # type: dict
+    summary = parse([top_datapath("test_load_from_file.json")], ["SCEPTRE"])  # type: dict
 
     assert summary
     assert summary["peat_version"] == __version__
@@ -58,12 +56,8 @@ def test_parse_api_parse_failures(top_datapath, tmp_path, mocker, assert_glob_pa
 
 # TODO: Re-add bennu tests from open-source sceptre-bennu after open sourcing
 # https://github.com/sandialabs/sceptre-bennu/tree/main/data/configs
-@pytest.mark.skip(
-    "Re-add bennu tests from open-source sceptre-bennu after open sourcing"
-)
-def test_parse_api_multiple_files(
-    test_dir, tmp_path, mocker, assert_glob_path, assert_no_errors
-):
+@pytest.mark.skip("Re-add bennu tests from open-source sceptre-bennu after open sourcing")
+def test_parse_api_multiple_files(test_dir, tmp_path, mocker, assert_glob_path, assert_no_errors):
     parse_path = tmp_path / "summaries"
     mocker.patch.dict(
         config["CONFIG"],

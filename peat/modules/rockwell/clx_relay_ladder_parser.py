@@ -48,9 +48,7 @@ def decompile_ladder_process_logic(
     return out_resolved
 
 
-def disassemble_ladder_process_logic(
-    process_logic: list[int], starting_address: int = 0
-) -> str:
+def disassemble_ladder_process_logic(process_logic: list[int], starting_address: int = 0) -> str:
     """
     Disassembles a buffer (list of bytes) representing the process logic.
     """
@@ -75,8 +73,7 @@ def disassemble_ladder_process_logic(
         for instruction in instruction_list:
             out.append(
                 f"[0x{starting_address:0>8x}]  "
-                f"{instruction & 0xFFFFFFFF:0>8x}  "
-                + disassemble_instruction(instruction)
+                f"{instruction & 0xFFFFFFFF:0>8x}  " + disassemble_instruction(instruction)
             )
             starting_address += 0x4
         return "\n".join(out)
@@ -174,9 +171,7 @@ def _decompile_CONST(
     #    operand = operand & 0x007FFFFF
     #    val = operand + MODULE_SEGMENT_ADDRESS
     return (
-        "{}[{}] := [0x{:0>8x}]".format(
-            LOGIC_OPCODE[opcode]["name"], operand_index, val
-        ),
+        "{}[{}] := [0x{:0>8x}]".format(LOGIC_OPCODE[opcode]["name"], operand_index, val),
         starting_address,
     )
 
@@ -373,9 +368,7 @@ def _decompile_BIT_OP(
     argument = f"@0x{argument_value & 0xFFFFFFFF:0>8x}@"
 
     return (
-        "{}({})[{}]".format(
-            LOGIC_OPCODE[opcode]["name"], argument, str(operand_bit_index)
-        ),
+        "{}({})[{}]".format(LOGIC_OPCODE[opcode]["name"], argument, str(operand_bit_index)),
         starting_address,
     )
 
@@ -586,9 +579,7 @@ def _decompile_BLOCK(
         block_instruction_list, inblock_address, indent_level + 1
     )
     out.append("".join(block_out))
-    out.append(
-        "\n" + _get_line_prefix(0x00, 0x00, indent_level) + "END INSTRUCTION BLOCK"
-    )
+    out.append("\n" + _get_line_prefix(0x00, 0x00, indent_level) + "END INSTRUCTION BLOCK")
 
     return out, next_instruction_address
 
@@ -634,15 +625,11 @@ def _decompile_SPC_block_op_default(
     # Output the operation's args, enclosed by square brackets
     out.append("[")
     out.append(
-        decompile_process_logic_segment(
-            instruction_args, argsstart_address, indent_level + 1
-        )
+        decompile_process_logic_segment(instruction_args, argsstart_address, indent_level + 1)
     )
     out.append("\n" + _get_line_prefix(0x00, 0x00, indent_level) + "]")
 
-    spc_instruction_length = (
-        argsend_idx + OPERATION_STRUCT[spc_instruction]["footer_len"] - 1
-    )
+    spc_instruction_length = argsend_idx + OPERATION_STRUCT[spc_instruction]["footer_len"] - 1
     current_address += spc_instruction_length * 4
 
     return "".join(out), current_address
@@ -756,9 +743,7 @@ def _decompile_SPC_function_ptr(
     # If next operand is pointer, print it out, but without name resolution
     if LOGIC_OPCODE[next_opcode]["name"] == "PTR":
         current_address += 4
-        out.append(
-            "\n" + _get_line_prefix(current_address, next_instruction, indent_level)
-        )
+        out.append("\n" + _get_line_prefix(current_address, next_instruction, indent_level))
         out.append(
             _decompile_PTR(
                 instruction_list[1:],
@@ -827,9 +812,7 @@ def _decompile_SPC(
     else:
         spc_dec = _decompile_SPC_default
 
-    spc_out, current_address = spc_dec(
-        instruction_list, starting_address, indent_level, operand
-    )
+    spc_out, current_address = spc_dec(instruction_list, starting_address, indent_level, operand)
     out.append(spc_out)
 
     return out, current_address
@@ -1826,15 +1809,12 @@ def instruction_buffer_to_instruction_list(instruction_buffer: list) -> list:
 
     instruction_byte_list = list(zip(*(iter(instruction_buffer),) * 4, strict=False))
     instruction_list = [
-        unpack_dint(bytes(instruction)) & 0xFFFFFFFF
-        for instruction in instruction_byte_list
+        unpack_dint(bytes(instruction)) & 0xFFFFFFFF for instruction in instruction_byte_list
     ]
     return instruction_list
 
 
-def _resolve_token_name(
-    token_address: int, symbol_list: list[tuple], template_data: dict
-) -> str:
+def _resolve_token_name(token_address: int, symbol_list: list[tuple], template_data: dict) -> str:
     """
     Returns the name of the token at the specified memory address.
 
@@ -1875,9 +1855,7 @@ def _resolve_token_name(
     return token_name
 
 
-def _resolve_all_token_names(
-    data: str, symbol_list: LayoutType, template_data: dict
-) -> str:
+def _resolve_all_token_names(data: str, symbol_list: LayoutType, template_data: dict) -> str:
     """
     Returns the original string with all token names resolved.
 

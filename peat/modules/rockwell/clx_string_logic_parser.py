@@ -61,9 +61,7 @@ def decompile_string_process_logic(
     return tag_name_replaced
 
 
-def disassemble_string_process_logic(
-    logic_bytes: bytes, logic_language: int
-) -> tuple[str, str]:
+def disassemble_string_process_logic(logic_bytes: bytes, logic_language: int) -> tuple[str, str]:
     """
     Returns the disassembled logic of a text-based program as it is
     stored on the Logix5000 device.
@@ -88,8 +86,7 @@ def disassemble_string_process_logic(
     min_data_len = (len(routine_data["HEADER"]) + len(routine_data["FOOTER"])) * 4
     if len(logic_bytes) < min_data_len:
         error_message = (
-            f"Data too short to be valid "
-            f"(len={len(logic_bytes)} < min_len={min_data_len})"
+            f"Data too short to be valid (len={len(logic_bytes)} < min_len={min_data_len})"
         )
         log.warning(error_message)
         raise DisassembleStringLogicError(error_message)
@@ -111,9 +108,7 @@ def disassemble_string_process_logic(
         # val = b"".join(
         #     bytes([x]) for x in logic_bytes[-(data_offset_reverse + 4):
         #                                     len(logic_bytes) - data_offset_reverse])
-        val = logic_bytes[
-            -(data_offset_reverse + 4) : len(logic_bytes) - data_offset_reverse
-        ]
+        val = logic_bytes[-(data_offset_reverse + 4) : len(logic_bytes) - data_offset_reverse]
         footer[footer_field] = unpack_dint(val)
         data_offset_reverse += 4
 
@@ -131,9 +126,7 @@ def disassemble_string_process_logic(
         )
         instruction_address += 4
 
-    out.append(
-        f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]            LOGIC STRING:\n"
-    )
+    out.append(f"[0x{instruction_address & 0xFFFFFFFF:0>8x}]            LOGIC STRING:\n")
     out.append(logic_string)
     instruction_address += logic_string_raw_length
 
@@ -145,9 +138,7 @@ def disassemble_string_process_logic(
         instruction_address += 4
     out = "".join(out)
 
-    log.trace3(
-        f"disassemble_string_process_logic: DONE. Returning:\n{out}{logic_string}"
-    )
+    log.trace3(f"disassemble_string_process_logic: DONE. Returning:\n{out}{logic_string}")
     return out, logic_string
 
 
@@ -185,9 +176,7 @@ def _resolve_token_name(
     if token[0] == CLASS_CODE["Template Object"]:
         try:
             template_member_idx = INDEX_HASH[token[3]]
-            ordered_template_members = list(
-                template_tags[token[1]]["Structure"].values()
-            )
+            ordered_template_members = list(template_tags[token[1]]["Structure"].values())
             token_name = ordered_template_members[template_member_idx]["Name"]
         except KeyError:
             log.warning(f"Cannot resolve token name ({token})")

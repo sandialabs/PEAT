@@ -52,9 +52,7 @@ def push(
         raise PeatError(f"bad input source '{source}'")
 
     if push_type not in get_args(consts.PushType):
-        raise PeatError(
-            f"Invalid '{push_type}' (supported types: {get_args(consts.PushType)})"
-        )
+        raise PeatError(f"Invalid '{push_type}' (supported types: {get_args(consts.PushType)})")
 
     # TODO: make input a list of
     #   (device_id, device_comm_type, device_peat_module)
@@ -63,9 +61,7 @@ def push(
     if skip_scan:
         log.warning(f"Skipping verification scan and pushing to {len(targets)} targets")
         if len(device_types) > 1:
-            raise PeatError(
-                "more than 1 device type specified when PUSH_SKIP_SCAN is enabled"
-            )
+            raise PeatError("more than 1 device type specified when PUSH_SKIP_SCAN is enabled")
         modules = module_api.lookup_types(device_types, filter_attr="ip_methods")
 
         ips = sort_ips(hosts_to_ips(targets))

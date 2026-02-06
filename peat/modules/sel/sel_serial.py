@@ -91,8 +91,7 @@ class SELSerial(SELAscii):
                 raise ex
             except Exception as ex:
                 raise CommError(
-                    f"Error connecting to SEL relay serial "
-                    f"port {self.address}: {ex}"
+                    f"Error connecting to SEL relay serial port {self.address}: {ex}"
                 ) from ex
 
         return self._comm
@@ -194,9 +193,7 @@ class SELSerial(SELAscii):
         try:
             decoded = raw.decode(self.ENCODING)
         except UnicodeDecodeError as ex:
-            self.log.warning(
-                f"Bad data (failed decode using '{self.ENCODING}' encoding): {raw}"
-            )
+            self.log.warning(f"Bad data (failed decode using '{self.ENCODING}' encoding): {raw}")
             raise ex
 
         self.all_output.append(decoded)
@@ -344,9 +341,7 @@ class SELSerial(SELAscii):
         # shell out to rz command for YMODEM file retrieval
         cmd = f"{self.rz_path} --ymodem --quiet > {self.address} < {self.address}"
         self.log.debug(f"Starting 'rz' subprocess: {cmd}")
-        proc = subprocess.run(
-            cmd, shell=True, cwd=out_dir, stderr=subprocess.PIPE, check=False
-        )
+        proc = subprocess.run(cmd, shell=True, cwd=out_dir, stderr=subprocess.PIPE, check=False)
         self.log.debug("Finished executing 'rz'")
 
         # rz writes files lowercase
@@ -366,14 +361,11 @@ class SELSerial(SELAscii):
         self.comm.reset_input_buffer()
 
         if proc.returncode != 0:
-            self.log.error(
-                f"rz failed to transfer '{file_id}'\n**stderr**\n{proc.stderr}"
-            )
+            self.log.error(f"rz failed to transfer '{file_id}'\n**stderr**\n{proc.stderr}")
             return None
         elif not file_pulled:
             self.log.error(
-                f"No file transferred with rz, but process exited "
-                f"successfully for '{file_id}'"
+                f"No file transferred with rz, but process exited successfully for '{file_id}'"
             )
             return None
 
@@ -404,8 +396,7 @@ class SELSerial(SELAscii):
 
         if not configs_dir.is_dir():
             self.log.error(
-                f"Configs directory doesn't exist for serial upload "
-                f"(directory: {configs_dir})"
+                f"Configs directory doesn't exist for serial upload (directory: {configs_dir})"
             )
             return False
 
@@ -456,7 +447,9 @@ class SELSerial(SELAscii):
 
     # TODO: rename from "download_binary"
     def download_binary(
-        self, filename: str, save_to_file: bool = True  # noqa: ARG002
+        self,
+        filename: str,
+        save_to_file: bool = True,  # noqa: ARG002
     ) -> str | bytes | None:
         # TODO: change "filename" arg to "file_id", fix "SETTINGS SET_P1.TXT" being a thing here
         self.log.info(f"Reading file: {filename}")

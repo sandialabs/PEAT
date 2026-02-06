@@ -95,7 +95,4 @@ def test_sanitize_filepath():
 def test_sanitize_filename():
     assert consts.sanitize_filename("") == ""
     assert consts.sanitize_filename("hardware-info.html") == "hardware-info.html"
-    assert (
-        consts.sanitize_filename("01:01:01-hardware-info.html")
-        == "01_01_01-hardware-info.html"
-    )
+    assert consts.sanitize_filename("01:01:01-hardware-info.html") == "01_01_01-hardware-info.html"

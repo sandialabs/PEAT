@@ -105,8 +105,7 @@ class Easygen3500XT(DeviceModule):
                 password = dev.options["ftp"]["pass"]
                 if not ftp.login(username, password):
                     cls.log.debug(
-                        f"Failed to verify {dev.ip} via FTP: "
-                        f"login failed (username: {username})"
+                        f"Failed to verify {dev.ip} via FTP: login failed (username: {username})"
                     )
                     return False
                 dev.related.user.add(username)
@@ -122,8 +121,7 @@ class Easygen3500XT(DeviceModule):
 
                 if "/ram" not in pwd.lower():
                     cls.log.debug(
-                        f"Failed to verify {dev.ip} via FTP: "
-                        f"current directory is not /ram/"
+                        f"Failed to verify {dev.ip} via FTP: current directory is not /ram/"
                     )
                     return False
 
@@ -144,14 +142,11 @@ class Easygen3500XT(DeviceModule):
             port = dev.options["servlink_tcp"]["port"]
         timeout = dev.options["servlink_tcp"]["timeout"]
 
-        cls.log.debug(
-            f"Verifying Servlink/TCP for {dev.ip}:{port} (timeout: {timeout})"
-        )
+        cls.log.debug(f"Verifying Servlink/TCP for {dev.ip}:{port} (timeout: {timeout})")
 
         if (
             _svltcp_init(dev.ip, SVLTCP_INIT_MSG) == SVLTCP_INIT_ACK
-            and "eg3500"
-            in str(_easygen_tcp_sys_txn(dev.ip, svl_sys_cmds["Application"])).lower()
+            and "eg3500" in str(_easygen_tcp_sys_txn(dev.ip, svl_sys_cmds["Application"])).lower()
         ):
             if not dev._runtime_options.get("servlink_tcp"):
                 dev._runtime_options["servlink_tcp"] = {}
@@ -179,12 +174,9 @@ class Easygen3500XT(DeviceModule):
             #   We should try to avoid duplication of work somehow.
             if (
                 open_serial_port(dev.serial_port, baudrate, timeout)
-                and _svlser_raw_txn(dev.serial_port, SVLSER_INIT_MSG, True)
-                == SVLSER_INIT_ACK
+                and _svlser_raw_txn(dev.serial_port, SVLSER_INIT_MSG, True) == SVLSER_INIT_ACK
                 and "eg3500"
-                in str(
-                    _easygen_ser_sys_txn(dev.serial_port, svl_sys_cmds["Application"])
-                ).lower()
+                in str(_easygen_ser_sys_txn(dev.serial_port, svl_sys_cmds["Application"])).lower()
             ):
                 cls.log.debug(f"Verified {dev.serial_port} (baudrate: {baudrate})")
                 iface = Interface(
@@ -207,9 +199,7 @@ class Easygen3500XT(DeviceModule):
         pull_successful = False
 
         # Serial pull
-        if dev.serial_port and dev.retrieve(
-            "interface", {"type": "serial", "connected": True}
-        ):
+        if dev.serial_port and dev.retrieve("interface", {"type": "serial", "connected": True}):
             serial_info = cls._get_serial_data(dev.serial_port)
             if serial_info:
                 pull_successful = True
@@ -238,15 +228,11 @@ class Easygen3500XT(DeviceModule):
                 == "closed"
             ):
                 cls.log.warning(
-                    f"Failed to pull Servlink/TCP on {dev.ip}: "
-                    f"Servlink/TCP service is closed"
+                    f"Failed to pull Servlink/TCP on {dev.ip}: Servlink/TCP service is closed"
                 )
-            elif not dev._cache.get(
-                "servlink_fingerprinted"
-            ) and not cls._verify_servlink(dev):
+            elif not dev._cache.get("servlink_fingerprinted") and not cls._verify_servlink(dev):
                 cls.log.warning(
-                    f"Failed to pull Servlink/TCP on {dev.ip}: "
-                    f"Servlink/TCP verification failed"
+                    f"Failed to pull Servlink/TCP on {dev.ip}: Servlink/TCP verification failed"
                 )
             else:
                 servlink_info = cls._get_svl_tcp_data(dev.ip)
@@ -264,20 +250,12 @@ class Easygen3500XT(DeviceModule):
                     f"'ftp' not listed in 'woodward.pull_methods' option"
                 )
             elif (
-                dev.service_status(
-                    {"protocol": "ftp", "port": dev.options["ftp"]["port"]}
-                )
+                dev.service_status({"protocol": "ftp", "port": dev.options["ftp"]["port"]})
                 == "closed"
             ):
-                cls.log.warning(
-                    f"Failed to pull FTP on {dev.ip}: FTP service is closed"
-                )
-            elif not dev._cache.get(
-                "easygen_ftp_fingerprinted"
-            ) and not cls._verify_ftp(dev):
-                cls.log.warning(
-                    f"Failed to pull FTP on {dev.ip}: FTP verification failed"
-                )
+                cls.log.warning(f"Failed to pull FTP on {dev.ip}: FTP service is closed")
+            elif not dev._cache.get("easygen_ftp_fingerprinted") and not cls._verify_ftp(dev):
+                cls.log.warning(f"Failed to pull FTP on {dev.ip}: FTP verification failed")
             else:
                 # TODO: preserve FTP session between verify and pull
                 cls._pull_ftp(dev)
@@ -366,18 +344,14 @@ class Easygen3500XT(DeviceModule):
         # Get the system information
         for k in svl_sys_cmds.keys():
             cls.log.debug("Pulling System\\%s", k)
-            serial_info["system"][k] = _easygen_ser_sys_txn(
-                serial_port, svl_sys_cmds[k]
-            )
-            cls.log.trace2(f"{k} = \"{serial_info['system'][k]}\"")
+            serial_info["system"][k] = _easygen_ser_sys_txn(serial_port, svl_sys_cmds[k])
+            cls.log.trace2(f'{k} = "{serial_info["system"][k]}"')
 
         # Get the configuration
         for k in svl_dat_prms.keys():
             cls.log.debug("Pulling %s", k)
-            serial_info["config"][k] = _easygen_ser_dat_txn(
-                serial_port, svl_dat_prms[k]
-            )
-            cls.log.trace2(f"{k} = \"{serial_info['config'][k]}\"")
+            serial_info["config"][k] = _easygen_ser_dat_txn(serial_port, svl_dat_prms[k])
+            cls.log.trace2(f'{k} = "{serial_info["config"][k]}"')
 
         if not serial_info["system"]:
             del serial_info["system"]
@@ -412,13 +386,13 @@ class Easygen3500XT(DeviceModule):
         for k in svl_sys_cmds.keys():
             cls.log.debug("Pulling System\\%s", k)
             svl_info["system"][k] = _easygen_tcp_sys_txn(ip, svl_sys_cmds[k])
-            cls.log.trace2(f"{k} = \"{svl_info['system'][k]}\"")
+            cls.log.trace2(f'{k} = "{svl_info["system"][k]}"')
 
         # Get the configuration
         for k in svl_dat_prms.keys():
             cls.log.debug("Pulling %s", k)
             svl_info["config"][k] = _easygen_tcp_dat_txn(ip, svl_dat_prms[k])
-            cls.log.trace2(f"{k} = \"{svl_info['config'][k]}\"")
+            cls.log.trace2(f'{k} = "{svl_info["config"][k]}"')
 
         if not svl_info["system"]:
             del svl_info["system"]
@@ -431,9 +405,7 @@ class Easygen3500XT(DeviceModule):
     @classmethod
     def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         if file.suffix.lower() == ".tc":
-            raise DeviceError(
-                f"*.tc files are not currently supported (filename: '{file.name}')"
-            )
+            raise DeviceError(f"*.tc files are not currently supported (filename: '{file.name}')")
 
         parsed_config = parse_wset(file)
 

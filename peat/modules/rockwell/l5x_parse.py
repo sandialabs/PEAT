@@ -45,12 +45,8 @@ def get_logic(project: l5x.Project) -> dict:
     logic["id"] = project.controller.element.attrib.get("ProjectSN", "")
     logic["author"] = project.doc.attrib.get("Owner", "")
 
-    logic["created_date"] = project.controller.element.attrib.get(
-        "ProjectCreationDate", ""
-    )
-    logic["last_modified_date"] = project.controller.element.attrib.get(
-        "LastModifiedDate", ""
-    )
+    logic["created_date"] = project.controller.element.attrib.get("ProjectCreationDate", "")
+    logic["last_modified_date"] = project.controller.element.attrib.get("LastModifiedDate", "")
 
     logic["major_rev"] = project.controller.element.attrib.get("MajorRev", "")
     logic["minor_rev"] = project.controller.element.attrib.get("MinorRev", "")
@@ -65,9 +61,7 @@ def get_logic(project: l5x.Project) -> dict:
             routines_iter = project.programs[name].element.iter("Routine")
 
             for routine in routines_iter:
-                xml_str = ET.tostring(
-                    routine, encoding="utf-8", method="xml"
-                )  # type: bytes
+                xml_str = ET.tostring(routine, encoding="utf-8", method="xml")  # type: bytes
 
                 # Remove the initial xml tag that ElementTree tacks on the beginning
                 # start_index = xml_str.find(b"\n")  # + 1

@@ -121,9 +121,7 @@ def extract_memory_layout(
         for routine_id, routine_value in program_symbols.items():
             for key, label in [(0x2, "Routine"), (8, "Symbol")]:
                 r_val = routine_value[key] & 0xFFFFFFFF
-                r_str = (
-                    f"Program{hex(program_id)} Routine{hex(routine_id)} {label} Address"
-                )
+                r_str = f"Program{hex(program_id)} Routine{hex(routine_id)} {label} Address"
                 memory_list.append((r_val, r_str))
 
     for program_symbols in program_symbol_attributes.values():
@@ -191,9 +189,7 @@ def extract_symbol_list(
 
     for program_id, program_symbols in program_symbol_attributes.items():
         for symbol in program_symbols.values():
-            program_name = symbol_dict[program_attributes[program_id][16] & 0xFFFFFFFF][
-                1
-            ]
+            program_name = symbol_dict[program_attributes[program_id][16] & 0xFFFFFFFF][1]
             program_name = program_name.decode()  # bytes to str
             symbol[1] = program_name + "." + symbol[1].decode()  # bytes to str
             symbol_dict[symbol[3] & 0xFFFFFFFF] = symbol
@@ -237,14 +233,9 @@ def parse_process_logic(
             #   Use: print_bytes_line(logic_data)
 
             # TODO: function to parse each language type
-            lang_name = LOGIC_LANGUAGE_BY_INT.get(
-                routine_language, f"unknown {routine_language}"
-            )
+            lang_name = LOGIC_LANGUAGE_BY_INT.get(routine_language, f"unknown {routine_language}")
 
-            log.debug(
-                f"Language for routine {routine_id}: {lang_name} "
-                f"(program id: {program_id})"
-            )
+            log.debug(f"Language for routine {routine_id}: {lang_name} (program id: {program_id})")
             if routine_language == LANG_RLL:
                 logic_str += "\nProgram is Relay Ladder Logic\n"
                 # TODO: finish implementing RLL disassembly and save it somewhere

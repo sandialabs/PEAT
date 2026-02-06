@@ -78,8 +78,7 @@ class Totus(DeviceModule):
                 page = response.text
                 if not page:
                     cls.log.debug(
-                        f"Failed to verify {dev.ip} via HTTP: no "
-                        f"page content in response"
+                        f"Failed to verify {dev.ip} via HTTP: no page content in response"
                     )
                     return False
 
@@ -93,9 +92,7 @@ class Totus(DeviceModule):
 
                 cls.log.debug(f"Failed to verify {dev.ip} via HTTP")
         except Exception:
-            cls.log.exception(
-                f"failed to verify {dev.ip} via HTTP due to an unhandled exception"
-            )
+            cls.log.exception(f"failed to verify {dev.ip} via HTTP due to an unhandled exception")
 
         return False
 

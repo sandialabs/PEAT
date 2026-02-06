@@ -44,9 +44,7 @@ atexit.unregister(exit_handler.run_handlers)
 # This adds "--run-slow" and "--run-ci" as valid pytest CLI arguments
 # https://docs.pytest.org/en/latest/example/simple.html
 def pytest_addoption(parser):
-    parser.addoption(
-        "--run-slow", action="store_true", default=False, help="run slow tests"
-    )
+    parser.addoption("--run-slow", action="store_true", default=False, help="run slow tests")
     parser.addoption(
         "--run-ci",
         action="store_true",
@@ -66,9 +64,7 @@ def pytest_collection_modifyitems(config, items):
     # slow tests labelled with "pytest.mark.slow()".
     # Setting the environment variable "RUN_SLOW"
     # will also work to run the slow tests.
-    if not config.getoption("--run-slow") and not (
-        os.environ.get("RUN_SLOW") is not None
-    ):
+    if not config.getoption("--run-slow") and not (os.environ.get("RUN_SLOW") is not None):
         skip_slow = pytest.mark.skip(reason="need --run-slow option to run")
         for item in items:
             if "slow" in item.keywords:
@@ -294,9 +290,7 @@ def exec_command() -> Callable[[str, bool], CompletedProcess]:
 
 @pytest.fixture
 def win_or_wsl() -> bool:
-    return bool(
-        system() == "Windows" or (system() == "Linux" and "Microsoft" in version())
-    )
+    return bool(system() == "Windows" or (system() == "Linux" and "Microsoft" in version()))
 
 
 @pytest.fixture

@@ -87,8 +87,7 @@ def mac_to_vendor(mac: str) -> Vendor | None:
     """  # noqa: E501
     if MacParserClass is None:
         log.warning(
-            f"Failed OUI lookup for MAC address {mac}: the 'manuf' "
-            f"package is not installed"
+            f"Failed OUI lookup for MAC address {mac}: the 'manuf' package is not installed"
         )
         return None
 
@@ -107,9 +106,7 @@ def mac_to_vendor(mac: str) -> Vendor | None:
         mac = clean_mac(mac)  # Cleanup address for lookup
         result = MAC_PARSER.get_all(mac)
 
-        if not all(
-            x is None for x in result
-        ):  # Every value will be None if lookup failed
+        if not all(x is None for x in result):  # Every value will be None if lookup failed
             return result
 
         log.warning(f"OUI lookup failed for MAC address '{mac}'")

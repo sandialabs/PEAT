@@ -130,8 +130,7 @@ class SELHTTP(HTTP):
 
         if not resp or resp.status_code != 200:
             self.log.error(
-                f"Login failed: bad response "
-                f"({resp.status_code if resp else 'No response'})"
+                f"Login failed: bad response ({resp.status_code if resp else 'No response'})"
             )
             return False
 
@@ -140,9 +139,7 @@ class SELHTTP(HTTP):
         # 351 has "login"
         self.log.trace(f"Response URL: {resp.url}")
         sess_url = (
-            resp.url.replace("login_query.html", "")
-            .replace("login.html", "")
-            .replace("login", "")
+            resp.url.replace("login_query.html", "").replace("login.html", "").replace("login", "")
         )
 
         self.log.trace(f"Intermediate session URL: {sess_url}")
@@ -187,8 +184,7 @@ class SELHTTP(HTTP):
         """
         if not self._url_parts:
             self.log.trace(
-                "'_url_parts' attribute is unset, attempting to "
-                "determine the proper URL format"
+                "'_url_parts' attribute is unset, attempting to determine the proper URL format"
             )
 
             for parts in [("", ".html"), ("static_command.html?cmd=", "")]:
@@ -224,9 +220,7 @@ class SELHTTP(HTTP):
             if response.text:
                 dev = datastore.get(self.ip)
 
-                f_name = (
-                    "/".join(url.split("/")[3:]).replace("?", "_").replace(":", "_")
-                )
+                f_name = "/".join(url.split("/")[3:]).replace("?", "_").replace(":", "_")
 
                 # Ensure the written file ends with ".html"
                 # e.g. turn "...static_command.html_cmd=ver"
@@ -393,9 +387,7 @@ class SELHTTP(HTTP):
                 if "Default Home Page" in dev.extra["web_device_info"]:
                     del dev.extra["web_device_info"]["Default Home Page"]
             except ValueError as ex:
-                self.log.warning(
-                    f"No table in 'device_info': {ex} (check credentials?)"
-                )
+                self.log.warning(f"No table in 'device_info': {ex} (check credentials?)")
 
         # This was previously inside SELRTAC._verify_http()
         web_inf = dash_config["web_device_info"]
@@ -498,9 +490,7 @@ class SELHTTP(HTTP):
                 web_diag["automation_task_usage"] = int(at_use) / 100.0
 
             if "Power Source Voltage" in web_diag:
-                web_diag["power_source_voltage"] = float(
-                    web_diag.pop("Power Source Voltage")
-                )
+                web_diag["power_source_voltage"] = float(web_diag.pop("Power Source Voltage"))
 
             # KB strings to int
             # (TODO: better way to do this that handles other types, e.g MB, GB)
@@ -513,9 +503,7 @@ class SELHTTP(HTTP):
                 "Number of Users Logged In",
             ]:
                 if key in web_diag:
-                    new_key = (
-                        utils.clean_replace(key, "", "():").replace(" ", "_").lower()
-                    )
+                    new_key = utils.clean_replace(key, "", "():").replace(" ", "_").lower()
                     web_diag[new_key] = int(str(web_diag.pop(key)).split(" ")[0])
 
             dash_config["web_diagnostics"] = web_diag
@@ -523,9 +511,7 @@ class SELHTTP(HTTP):
             if web_diag.get("memory_usage_ram"):
                 dev.hardware.memory_usage = int(web_diag.pop("memory_usage_ram"))
             if web_diag.get("memory_available_ram"):
-                dev.hardware.memory_available = int(
-                    web_diag.pop("memory_available_ram")
-                )
+                dev.hardware.memory_available = int(web_diag.pop("memory_available_ram"))
             if web_diag.get("storage_usage"):
                 dev.hardware.storage_usage = int(web_diag.pop("storage_usage"))
             if web_diag.get("storage_available"):
@@ -536,19 +522,14 @@ class SELHTTP(HTTP):
                 try:
                     raw_ts = str(web_diag["Modified Time of Project"]).strip()
                     dev.logic.last_updated = utils.parse_date(raw_ts)
-                    del web_diag[
-                        "Modified Time of Project"
-                    ]  # del here in case parsing fails
+                    del web_diag["Modified Time of Project"]  # del here in case parsing fails
                 except Exception as ex:
-                    self.log.warning(
-                        f"Failed to parse project modification timestamp: {ex}"
-                    )
+                    self.log.warning(f"Failed to parse project modification timestamp: {ex}")
 
             dev.extra["web_diagnostics"] = dash_config["web_diagnostics"]
         except ValueError:
             self.log.exception(
-                "No table in 'diagnostics' or failed to parse "
-                "parts of it (check credentials?)"
+                "No table in 'diagnostics' or failed to parse parts of it (check credentials?)"
             )
 
         # === Post summary ===
@@ -585,9 +566,7 @@ class SELHTTP(HTTP):
         self.log.info("Getting RTAC usage policy (customize.sel)")
 
         web_usagepolicy = {}
-        usage_policy = self.post(
-            f"{self.url}/customize.sel", params=self._rtac_session, dev=dev
-        )
+        usage_policy = self.post(f"{self.url}/customize.sel", params=self._rtac_session, dev=dev)
         self.dump_htmltable(usage_policy, web_usagepolicy)
         dev.extra["web_usagepolicy"] = web_usagepolicy
 
@@ -622,9 +601,7 @@ class SELHTTP(HTTP):
             try:
                 file_data["timestamp"] = utils.parse_date(values[0])
             except Exception as ex:
-                self.log.warning(
-                    f"Failed to parse web file timestamp for '{values[0]}': {ex}"
-                )
+                self.log.warning(f"Failed to parse web file timestamp for '{values[0]}': {ex}")
 
             web_files[filename] = file_data
             dev.related.files.add(str(filename))
@@ -704,9 +681,7 @@ class SELHTTP(HTTP):
 
         self.log.info("Getting RTAC user accounts (user_table.sel)")
 
-        accounts_page = self.post(
-            f"{self.url}/user_table.sel", params=self._rtac_session, dev=dev
-        )
+        accounts_page = self.post(f"{self.url}/user_table.sel", params=self._rtac_session, dev=dev)
 
         raw_web_accounts = {}
         self.dump_htmltable(accounts_page, raw_web_accounts)
@@ -786,9 +761,7 @@ class SELHTTP(HTTP):
         )
 
         if not response or not response.text:
-            self.log.error(
-                "No response or data for Sequence of Events (SOE) log (soe.csv)"
-            )
+            self.log.error("No response or data for Sequence of Events (SOE) log (soe.csv)")
 
         dev.write_file(
             data=response.text,
@@ -825,9 +798,7 @@ class SELHTTP(HTTP):
                 raw_msg = raw["message"].strip()
 
                 if raw.get("tag_name"):
-                    event_action = (
-                        raw["tag_name"].split(".")[-1].lower().replace("_", "-")
-                    )
+                    event_action = raw["tag_name"].split(".")[-1].lower().replace("_", "-")
                 else:
                     event_action = utils.clean_replace(msg, "-", " ,:")
                     event_action = event_action.strip("-").replace("--", "-")
@@ -949,9 +920,7 @@ class SELHTTP(HTTP):
                     if match:
                         extra["logon_user"] = match.groupdict()["username"].strip()
                         dev.related.user.add(extra["logon_user"])
-                        extra["logon_service"] = (
-                            match.groupdict()["service"].strip().lower()
-                        )
+                        extra["logon_service"] = match.groupdict()["service"].strip().lower()
                         if extra["logon_service"] in ["odbc", "web"]:
                             event_category.add("database")
                         event_action = (
@@ -960,8 +929,7 @@ class SELHTTP(HTTP):
                         )
                     else:
                         self.log.warning(
-                            f"logged_on: "
-                            f"Failed to match username regex for message '{raw_msg}'"
+                            f"logged_on: Failed to match username regex for message '{raw_msg}'"
                         )
                         event_kind.add("pipeline_error")
                 elif "application_status" in msg:
@@ -972,11 +940,7 @@ class SELHTTP(HTTP):
                     event_type.add("change")
                     if "restarted" in msg:
                         event_action = "application-restarted"
-                elif (
-                    "firmware: " in msg
-                    or "project: " in msg
-                    or "power_up_description" in msg
-                ):
+                elif "firmware: " in msg or "project: " in msg or "power_up_description" in msg:
                     event_kind.add("state")
                     event_action = "rtac-started"
                     # TODO: using a regex here would be more flexible to format changes
@@ -986,9 +950,7 @@ class SELHTTP(HTTP):
                         if not dev.logic.name:
                             dev.logic.name = project_name
                     if "firmware: " in msg:
-                        extra["firmware"] = (
-                            msg.split(",")[0].split("firmware: ")[-1].strip()
-                        )
+                        extra["firmware"] = msg.split(",")[0].split("firmware: ")[-1].strip()
                         process_fid(extra["firmware"], dev)
 
                 # TODO: change time parsing if 't_dst_enabled' is 't' instead of 'f'?
@@ -1063,14 +1025,10 @@ class SELHTTP(HTTP):
             exeguard, prp diagnostic, arp table.
         """
         self.log.info("Getting RTAC network info (services_rpt.cev)")
-        ip_settings = self.post(
-            f"{self.url}/services_rpt.cev", params=self._rtac_session, dev=dev
-        )
+        ip_settings = self.post(f"{self.url}/services_rpt.cev", params=self._rtac_session, dev=dev)
 
         if not ip_settings or not ip_settings.text:
-            self.log.warning(
-                "No content returned for services_rpt.cev (web_ip_settings)"
-            )
+            self.log.warning("No content returned for services_rpt.cev (web_ip_settings)")
             return {"web_ip_settings": {}}
 
         # TODO: finish implementing
@@ -1133,12 +1091,8 @@ class SELHTTP(HTTP):
             dev=dev,
         )
         try:
-            self.dump_htmltable(
-                ldap_attributes, config["web_ldap"]["ldap_attribute_mapping"]
-            )
-            dev.extra["web_ldap_attmapping"] = config["web_ldap"][
-                "ldap_attribute_mapping"
-            ]
+            self.dump_htmltable(ldap_attributes, config["web_ldap"]["ldap_attribute_mapping"])
+            dev.extra["web_ldap_attmapping"] = config["web_ldap"]["ldap_attribute_mapping"]
         except ValueError:
             self.log.exception("not table in attribute mapping")
 
@@ -1285,9 +1239,7 @@ class SELHTTP(HTTP):
             dev.extra["e4_configuration"] = parse_simple_line("E4 Configuration", page)
 
         if "Interface Boards" in page:
-            dev.extra["interface_boards"] = parse_simple_table(
-                "Interface Boards", "E4", page
-            )
+            dev.extra["interface_boards"] = parse_simple_table("Interface Boards", "E4", page)
 
         if "Analog Inputs" in page:
             dev.extra["analog_inputs"] = parse_simple_table(
@@ -1301,9 +1253,7 @@ class SELHTTP(HTTP):
         # Data present on the 351/351S page
         # 451 has "Extended Relay Features" so use a newline to differentiate
         if "\nRelay Features" in page:
-            dev.extra["relay_features"] = parse_simple_list(
-                "Relay Features", "SELboot", page
-            )
+            dev.extra["relay_features"] = parse_simple_list("Relay Features", "SELboot", page)
 
         # TODO: 351/351S Analog Input Voltage
         #   Analog Input Voltage (PT):  300 Vac, Wye, Delta, or Single connected
@@ -1345,9 +1295,7 @@ class SELHTTP(HTTP):
             return False
 
         # Extract info about the communication ports
-        extracted_ports = re.findall(
-            r"\nPORT\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)", page
-        )
+        extracted_ports = re.findall(r"\nPORT\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)", page)
         port_information = {
             str(port[0]): {  # Key is the port name
                 "link": str(port[1]).lower(),
@@ -1389,9 +1337,7 @@ class SELHTTP(HTTP):
                 "errors_received": int(stats[5]) if "$" not in stats[5] else -1,
             }
         else:
-            self.log.warning(
-                "Failed to extract network statistics from ETH page (no regex match)"
-            )
+            self.log.warning("Failed to extract network statistics from ETH page (no regex match)")
             network_statistics = {}
 
         # Extract IPv4 address and subnet information
@@ -1456,9 +1402,7 @@ class SELHTTP(HTTP):
                 try:
                     if self._port_args_len == 1:  # 351, 351S
                         # Port F is retrieved as port 4 on older devices
-                        page = self.read_page(
-                            f"shop{str(4) if index == 4 else port_id}"
-                        )
+                        page = self.read_page(f"shop{str(4) if index == 4 else port_id}")
                     else:  # 451
                         page = self.read_page("sho", f"P%20{port_id}")
                 except Exception as ex:
@@ -1507,9 +1451,7 @@ class SELHTTP(HTTP):
             return False
 
         settings = normalize_keys(parse_multiple_lists(page))
-        settings["front_panel_settings"] = parse_comments(
-            settings["front_panel_settings"]
-        )
+        settings["front_panel_settings"] = parse_comments(settings["front_panel_settings"])
 
         dev.extra["front_panel_data"] = settings
         return True
@@ -1558,9 +1500,7 @@ class SELHTTP(HTTP):
 
         lines = split_lines(page)
         # Find the header line for the actual events
-        header_index = next(
-            i for i, s in enumerate(lines) if s[0] == "#" and "date" in s.lower()
-        )
+        header_index = next(i for i, s in enumerate(lines) if s[0] == "#" and "date" in s.lower())
         if header_index != 0:
             # Process the status information front matter
             self._process_status_data(lines[:header_index], dev)
@@ -1580,8 +1520,7 @@ class SELHTTP(HTTP):
             res = re.match(hist_event_regex, line, re.ASCII | re.IGNORECASE)
             if not res:
                 self.log.warning(
-                    f"Historical Event line parsing regex failed"
-                    f"\n***Raw Data: {repr(line)}"
+                    f"Historical Event line parsing regex failed\n***Raw Data: {repr(line)}"
                 )
                 continue
             values = res.groups()
@@ -1796,9 +1735,7 @@ class SELHTTP(HTTP):
             )
 
             if "invalid command" in page.lower():
-                self.log.debug(
-                    f"Device doesn't have logic group {index} ('Invalid Command')"
-                )
+                self.log.debug(f"Device doesn't have logic group {index} ('Invalid Command')")
                 logic_results[group_str] = {}
 
             # TODO: 351
@@ -2490,9 +2427,7 @@ def parse_simple_table(table_start: str, table_end: str, page_data: str) -> dict
     try:
         regex = rf"{table_start}:\n([\s\S]+){table_end}"
         data = re.findall(regex, page_data)[0].split("\n")
-        table_data = [
-            re.findall(r"\s+([^=|:]+)[=|:]\s+(.+)", line)[0] for line in data if line
-        ]
+        table_data = [re.findall(r"\s+([^=|:]+)[=|:]\s+(.+)", line)[0] for line in data if line]
         return {v[0]: v[1] for v in table_data}
     except IndexError:
         log.warning(
@@ -2538,8 +2473,7 @@ def parse_simple_line(param_name: str, page_data: str) -> str:
         return re.findall(rf"\n\s*{param_name}[=|:]\s*(\S+)", page_data)[0]
     except IndexError:
         log.warning(
-            f"Failed parse_simple_line\nParam name: '{param_name}'\n"
-            f"Raw data: {repr(page_data)}\n"
+            f"Failed parse_simple_line\nParam name: '{param_name}'\nRaw data: {repr(page_data)}\n"
         )
         return ""
 

@@ -145,9 +145,7 @@ class SELRTAC(DeviceModule):
     }
 
     @classmethod
-    def _verify_http(
-        cls, dev: DeviceData, protocol: Literal["http", "https"] = "http"
-    ) -> bool:
+    def _verify_http(cls, dev: DeviceData, protocol: Literal["http", "https"] = "http") -> bool:
         """
         Verify a device is a SEL RTAC via the HTTP web interface.
         """
@@ -155,8 +153,7 @@ class SELRTAC(DeviceModule):
         timeout = dev.options[protocol]["timeout"]
 
         cls.log.debug(
-            f"Verifying RTAC HTTP for {dev.ip}:{port} using "
-            f"{protocol} (timeout: {timeout})"
+            f"Verifying RTAC HTTP for {dev.ip}:{port} using {protocol} (timeout: {timeout})"
         )
 
         session = SELHTTP(dev.ip, port, timeout)
@@ -181,9 +178,7 @@ class SELRTAC(DeviceModule):
                 passwords = dev.options["web"]["passwords"]
 
             for username in users:
-                cls.log.debug(
-                    f"Attempting RTAC login to {dev.ip} with user '{username}'"
-                )
+                cls.log.debug(f"Attempting RTAC login to {dev.ip} with user '{username}'")
 
                 for password in passwords:
                     logged_in = session.login_rtac(username, password, protocol)
@@ -261,9 +256,7 @@ class SELRTAC(DeviceModule):
 
         if "SEL" in entity.common_name and "RTAC" in entity.common_name:
             cls.log.debug(f"SSL verification successful for {dev.ip}:{port}")
-            dev.description.model = entity.common_name.partition(" ")[0].partition("-")[
-                2
-            ]
+            dev.description.model = entity.common_name.partition(" ")[0].partition("-")[2]
             dev.type = "RTAC"
             cls.update_dev(dev)
             return True
@@ -519,9 +512,7 @@ class SELRTAC(DeviceModule):
             cls.pull_postgres(dev)
             cls.update_dev(dev)
         else:
-            cls.log.warning(
-                f"Skipping postgres pull from {dev.ip} (sel.pull_postgres=False)"
-            )
+            cls.log.warning(f"Skipping postgres pull from {dev.ip} (sel.pull_postgres=False)")
 
         # NOTE: exceptions are handled by pull_api, it doesn't check method
         # return status at the moment, so we re-raise web exception here.
@@ -559,8 +550,7 @@ class SELRTAC(DeviceModule):
                 password = "OTTER"
             if not session.login_rtac(username, password, protocol):
                 cls.log.error(
-                    f"Failed to login to web interface on "
-                    f"{dev.ip} with user '{username}'"
+                    f"Failed to login to web interface on {dev.ip} with user '{username}'"
                 )
                 return None
             dev.related.user.add(username)
@@ -593,12 +583,9 @@ class SELRTAC(DeviceModule):
             try:
                 method_result = method(dev)  # type: dict
 
-                if not method_result or not any(
-                    bool(val) for val in method_result.values()
-                ):
+                if not method_result or not any(bool(val) for val in method_result.values()):
                     cls.log.warning(
-                        f"No data from HTTP method '{method.__name__}' "
-                        f"on {dev.ip}:{port}"
+                        f"No data from HTTP method '{method.__name__}' on {dev.ip}:{port}"
                     )
                 else:
                     pulled_config.update(method_result)

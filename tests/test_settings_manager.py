@@ -59,17 +59,13 @@ def test_save_to_file(settings_instance, tmp_path, assert_glob_path):
     assert json.loads(json_path.read_text()) == settings_instance.export()
 
     yaml_path = assert_glob_path(tmp_path, "peat_configuration.yaml")
-    assert yaml.safe_load(yaml_path.read_text()) == lower_dict(
-        settings_instance.export()
-    )
+    assert yaml.safe_load(yaml_path.read_text()) == lower_dict(settings_instance.export())
 
 
 def test_save_to_file_no_yaml(settings_instance, tmp_path, assert_glob_path):
     settings_instance.save_to_file(outdir=tmp_path, save_yaml=False)
 
-    json_path = assert_glob_path(
-        tmp_path, "peat_configuration.json"
-    )  # only a JSON file
+    json_path = assert_glob_path(tmp_path, "peat_configuration.json")  # only a JSON file
     assert json.loads(json_path.read_text()) == settings_instance.export()
 
 
@@ -77,16 +73,12 @@ def test_save_to_file_no_json(settings_instance, tmp_path, assert_glob_path):
     settings_instance.save_to_file(outdir=tmp_path, save_json=False)
 
     yaml_path = assert_glob_path(tmp_path, "peat_configuration.yaml")
-    assert yaml.safe_load(yaml_path.read_text()) == lower_dict(
-        settings_instance.export()
-    )
+    assert yaml.safe_load(yaml_path.read_text()) == lower_dict(settings_instance.export())
 
 
 def test_save_to_file_raises(settings_instance, tmp_path):
     with pytest.raises(PeatError):
-        settings_instance.save_to_file(
-            outdir=tmp_path, save_yaml=False, save_json=False
-        )
+        settings_instance.save_to_file(outdir=tmp_path, save_yaml=False, save_json=False)
 
 
 def test_export(settings_instance):
@@ -107,9 +99,7 @@ def test_export(settings_instance):
 
 def test_yaml(settings_instance):
     assert settings_instance.yaml()
-    assert yaml.safe_load(settings_instance.yaml()) == lower_dict(
-        settings_instance.export()
-    )
+    assert yaml.safe_load(settings_instance.yaml()) == lower_dict(settings_instance.export())
 
 
 def test_json(settings_instance):

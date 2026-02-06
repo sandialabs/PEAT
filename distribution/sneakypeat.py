@@ -53,9 +53,7 @@ def build_argument_parser() -> argparse.ArgumentParser:
         version=f"sneakypeat {__version__}",
     )
     parser.add_argument("--scan", action="store_true", help="Scan for devices")
-    parser.add_argument(
-        "--pull", action="store_true", help="Pull configs and logic from devices"
-    )
+    parser.add_argument("--pull", action="store_true", help="Pull configs and logic from devices")
     parser.add_argument(
         "--modify",
         type=str,
@@ -100,15 +98,12 @@ def build_argument_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="Format the output of pulls and scans as indented JSON",
     )
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="Enable debugging messages"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="Enable debugging messages")
     parser.add_argument(
         "targets",
         type=str,
         nargs="+",
-        help="Hosts to target. IP addresses, hostnames, FQDNs, "
-        "or subnets in CIDR notation.",
+        help="Hosts to target. IP addresses, hostnames, FQDNs, or subnets in CIDR notation.",
     )
 
     return parser
@@ -248,10 +243,7 @@ def modify_sel(dev, args: argparse.Namespace):
     else:
         set_file = f"SET_{args.group}.TXT"
 
-    log(
-        f"({dev.ip}) changing '{args.modify}' for group {args.group} "
-        f"(settings file: {set_file})"
-    )
+    log(f"({dev.ip}) changing '{args.modify}' for group {args.group} (settings file: {set_file})")
 
     # Pull setting via FTP
     log(f"({dev.ip}) pulling '{set_file}' via FTP")

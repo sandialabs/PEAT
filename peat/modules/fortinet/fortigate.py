@@ -120,9 +120,7 @@ class Fortigate(DeviceModule):
     def _pull(cls, dev: DeviceData) -> bool:
         # Sanity checks in case users messed up config (since there isn't config validation yet)
         if not dev.options["fortigate"]["pull_methods"]:
-            cls.log.error(
-                f"The 'fortigate.pull_methods' option is empty or null for {dev.ip}"
-            )
+            cls.log.error(f"The 'fortigate.pull_methods' option is empty or null for {dev.ip}")
             return False
 
         for method in dev.options["fortigate"]["pull_methods"]:
@@ -205,9 +203,7 @@ class Fortigate(DeviceModule):
             if not local_path.parent.exists():
                 local_path.parent.mkdir(exist_ok=True, parents=True)
             remote_path = "/config/sys_config"  # location of config file on machine
-            cls.log.info(
-                f"Transferring sys_config from '{remote_path}' to '{local_path}'"
-            )
+            cls.log.info(f"Transferring sys_config from '{remote_path}' to '{local_path}'")
 
             # Download the file
             with SCPClient(ssh.comm.get_transport()) as scp_client:
@@ -305,12 +301,9 @@ class Fortigate(DeviceModule):
 
         # Debug log. This is also a large file, needs time to download, hence timeout
         cls.log.info(
-            f"Downloading 'debug' log from {dev.ip}, "
-            f"this may take up to {pull_timeout} seconds"
+            f"Downloading 'debug' log from {dev.ip}, this may take up to {pull_timeout} seconds"
         )
-        db_resp = http.get(
-            "/api/v2/monitor/system/debug/download", timeout=pull_timeout
-        )
+        db_resp = http.get("/api/v2/monitor/system/debug/download", timeout=pull_timeout)
         if not db_resp:
             cls.log.error(
                 f"Failed to pull debug log from {dev.ip}. "
@@ -356,9 +349,7 @@ class Fortigate(DeviceModule):
         port = dev.options["https"]["port"]
         timeout = dev.options["https"]["timeout"]
 
-        cls.log.debug(
-            f"Verifying FortiGate HTTPS for {dev.ip}:{port} (timeout: {timeout})"
-        )
+        cls.log.debug(f"Verifying FortiGate HTTPS for {dev.ip}:{port} (timeout: {timeout})")
 
         http = HTTP(
             ip=dev.ip,

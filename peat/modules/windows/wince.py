@@ -240,9 +240,7 @@ class WindowsCE(DeviceModule):
                     if not isinstance(v_data, str):
                         continue
 
-                    if "TP700" in v_data and (
-                        "Siemens" in v_data or "SIEMENS" in k_name
-                    ):
+                    if "TP700" in v_data and ("Siemens" in v_data or "SIEMENS" in k_name):
                         dev.type = "HMI"
                         dev.description.vendor.id = "Siemens"
                         dev.description.vendor.name = "Siemens AG"

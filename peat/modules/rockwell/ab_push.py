@@ -54,9 +54,7 @@ def query_device(sock: socket.socket, session: int) -> tuple[int, dict | None]:
     }
     cip_payload = bytes(CIP(**cip_fields))
 
-    s_pkt = bytes(
-        ENIP(commandCode="SendRRData", sessionHandle=session, data=cip_payload)
-    )
+    s_pkt = bytes(ENIP(commandCode="SendRRData", sessionHandle=session, data=cip_payload))
 
     r_pkt = send_enip_pkt(sock, s_pkt)
     if r_pkt.status != 0:
@@ -80,8 +78,7 @@ def generate_pre_data_packet(session: int, request_path: bytes, length: bytes) -
         "service": "RESERVED_0X51",
         "requestPathSize": 2,
         "requestPath": request_path,
-        "data": length + b"\x00\x41\x03\x10\x07\x00\x01\x00"
-        b"\xe0\xcf\xc2\x00\x01\x00\x01\x00",
+        "data": length + b"\x00\x41\x03\x10\x07\x00\x01\x00\xe0\xcf\xc2\x00\x01\x00\x01\x00",
     }
     ccm_payload = bytes(CCM(**ccm_fields))
 
@@ -96,9 +93,7 @@ def generate_pre_data_packet(session: int, request_path: bytes, length: bytes) -
     }
     cip_payload = bytes(CIP(**cip_fields))
 
-    return bytes(
-        ENIP(commandCode="SendRRData", sessionHandle=session, data=cip_payload)
-    )
+    return bytes(ENIP(commandCode="SendRRData", sessionHandle=session, data=cip_payload))
 
 
 def generate_data_packet(session: int, request_path: bytes, payload: bytes) -> bytes:
@@ -126,9 +121,7 @@ def generate_data_packet(session: int, request_path: bytes, payload: bytes) -> b
     return bytes(ENIP(commandCode="SendRRData", sessionHandle=session, data=payload))
 
 
-def send_file(
-    sock: socket.socket, session: int, file_data: bytes, request_path: bytes
-) -> None:
+def send_file(sock: socket.socket, session: int, file_data: bytes, request_path: bytes) -> None:
     # TODO: Add test code
     length = (len(file_data)).to_bytes(4, byteorder="little")
     s_pkt = generate_pre_data_packet(session, request_path, length)
@@ -160,9 +153,7 @@ def reset(sock: socket.socket, session: int) -> None:
 
 def push_firmware(firmware: bytes, ip: str, port: int = 44818) -> bool:
     _log = log.bind(target=f"{ip}:{port}")
-    _log.info(
-        f"Pushing firmware to {ip}:{port} (size: {utils.fmt_size(len(firmware))})"
-    )
+    _log.info(f"Pushing firmware to {ip}:{port} (size: {utils.fmt_size(len(firmware))})")
 
     # Extract the files out of the firmware blob
     try:
@@ -177,9 +168,7 @@ def push_firmware(firmware: bytes, ip: str, port: int = 44818) -> bool:
         sock.connect((ip, port))
 
         _log.debug("Register Session")
-        session = send_enip_pkt(
-            sock, bytes(ENIP(commandCode="RegisterSession"))
-        ).sessionHandle
+        session = send_enip_pkt(sock, bytes(ENIP(commandCode="RegisterSession"))).sessionHandle
         _log.debug(f"Session: {session}")
         sleep(2)
 
@@ -222,9 +211,7 @@ def push_firmware(firmware: bytes, ip: str, port: int = 44818) -> bool:
 
         # TODO: does session need to be unregistered after reboot?
     except OSError as ex:
-        _log.error(
-            f"Network error occurred while pushing firmware to {ip}:{port}: {ex}"
-        )
+        _log.error(f"Network error occurred while pushing firmware to {ip}:{port}: {ex}")
         return False
 
     _log.debug(f"Finished pushing firmware to device {ip}:{port}")

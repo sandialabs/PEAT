@@ -213,10 +213,7 @@ def list_loaded_modules() -> list[str]:
 
 def search(source: Path, results: Path) -> bool:
     if not source.is_dir():
-        log.error(
-            f"Failed pillage search: source path '{source}' "
-            f"is not a valid directory."
-        )
+        log.error(f"Failed pillage search: source path '{source}' is not a valid directory.")
         return False
 
     excluded = [
@@ -255,16 +252,13 @@ def search(source: Path, results: Path) -> bool:
                 ext_only = dst_file.suffix
                 count = 1
                 while dst_file.exists():
-                    dst_file = (
-                        Path(results) / config_type / f"{name_only}{ext_only}.{count}"
-                    )
+                    dst_file = Path(results) / config_type / f"{name_only}{ext_only}.{count}"
                     count += 1
 
                 # Prompt user if they want to copy each file
                 if not config.PILLAGE["auto_copy"]:
                     auto_copy = input(
-                        f"Found {src_file}, do you want to copy it to {dst_file}"
-                        " (Y or N):"
+                        f"Found {src_file}, do you want to copy it to {dst_file} (Y or N):"
                     )
                     print(auto_copy, file=sys.stderr, flush=True)  # noqa: T201
 

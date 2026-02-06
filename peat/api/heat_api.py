@@ -67,9 +67,7 @@ def heat_main() -> bool:
         if result:
             run_result = True
         else:
-            log.error(
-                f"HEAT extractor '{extractor.__name__}' failed. See PEAT logs for details."
-            )
+            log.error(f"HEAT extractor '{extractor.__name__}' failed. See PEAT logs for details.")
 
     if not run_result:  # if all HEAT plugins failed, PEAT run failed
         log.error("All HEAT plugins failed")

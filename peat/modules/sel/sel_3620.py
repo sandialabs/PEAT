@@ -44,8 +44,7 @@ class SEL3620(DeviceModule):
         timeout = dev.options["https"]["timeout"]
 
         cls.log.debug(
-            f"Verifying SEL-3620 HTTP for {dev.ip}:{port} using "
-            f"HTTPS (timeout: {timeout})"
+            f"Verifying SEL-3620 HTTP for {dev.ip}:{port} using HTTPS (timeout: {timeout})"
         )
 
         session = SELHTTP(dev.ip, port, timeout)
@@ -69,9 +68,7 @@ class SEL3620(DeviceModule):
                 passwords = dev.options["web"]["passwords"]
 
             for username in users:
-                cls.log.debug(
-                    f"Attempting SEL-3620 login to {dev.ip} with user '{username}'"
-                )
+                cls.log.debug(f"Attempting SEL-3620 login to {dev.ip} with user '{username}'")
 
                 for password in passwords:
                     logged_in = session.login_3620(username, password)
@@ -101,8 +98,7 @@ class SEL3620(DeviceModule):
 
             # TODO: don't hardcode check to 3620, process_fid() should set model #
             if (
-                "3620"
-                in dashboard["web_device_info"]["Firmware Version"]
+                "3620" in dashboard["web_device_info"]["Firmware Version"]
                 # and "3620" in dashboard["web_device_info"]["Host Name"]
             ):
                 # Cache the session using this protocol

@@ -121,10 +121,7 @@ class ClxHTTP(HTTP):
         the column names and values being the values from that row.
         """
         rows = cls._extract_rows(text, start, **kwargs)
-        labels = [
-            str(column.string) if column.string else str(column.text)
-            for column in rows[0]
-        ]
+        labels = [str(column.string) if column.string else str(column.text) for column in rows[0]]
 
         return [
             {label: str(val.string) for label, val in zip(labels, row, strict=False)}
@@ -190,9 +187,7 @@ class ClxHTTP(HTTP):
             return False
 
         for group in self.MEMORY_GROUPS:
-            pat = r"rokform/SysListDetail\?name={}&id=(\d+)&comp=Apex".format(
-                group["search"]
-            )
+            pat = r"rokform/SysListDetail\?name={}&id=(\d+)&comp=Apex".format(group["search"])
             match = re.search(pat, apex.text, re.ASCII | re.IGNORECASE)
             if match:
                 self.memory_page_ids[group["name"]] = match.groups()[0]
@@ -516,8 +511,7 @@ class ClxHTTP(HTTP):
                 dev.mac = mac
             elif dev.mac != mac:
                 log.warning(
-                    f"Device MAC '{dev.mac}' != HTTP MAC '{mac}', "
-                    f"which could be weird/interesting"
+                    f"Device MAC '{dev.mac}' != HTTP MAC '{mac}', which could be weird/interesting"
                 )
                 dev.extra["http_home_info"]["ethernet_address_mac"] = mac
 
@@ -527,8 +521,7 @@ class ClxHTTP(HTTP):
                 dev.ip = ip
             elif dev.ip != ip:
                 log.warning(
-                    f"Device IP '{dev.ip}' != HTTP IP '{ip}', "
-                    f"which could be weird/interesting"
+                    f"Device IP '{dev.ip}' != HTTP IP '{ip}', which could be weird/interesting"
                 )
                 dev.extra["http_home_info"]["ip_address"] = ip
 
@@ -557,9 +550,7 @@ class ClxHTTP(HTTP):
         if info:
             for og_key, value in info.items():
                 if value and value.strip():
-                    key = (
-                        utils.clean_replace(og_key, "", "()").replace(" ", "_").lower()
-                    )
+                    key = utils.clean_replace(og_key, "", "()").replace(" ", "_").lower()
 
                     # NOTE: this is usually the serial number of the
                     # communication adapter, not the CPU.
@@ -738,9 +729,7 @@ class ClxHTTP(HTTP):
 
             dev.event.append(event)
 
-    def get_serverlog(
-        self, username: str = "Administrator", password: str = ""
-    ) -> list[dict]:
+    def get_serverlog(self, username: str = "Administrator", password: str = "") -> list[dict]:
         """
         Get ``serverlog`` data from a EWEB module.
 
@@ -749,9 +738,7 @@ class ClxHTTP(HTTP):
            attempted but could differ on other devices. They are configurable
            via the "web" option in the PEAT configuration file.
         """
-        page = self.get(
-            self.SERVERLOG, use_cache=False, auth=HTTPDigestAuth(username, password)
-        )
+        page = self.get(self.SERVERLOG, use_cache=False, auth=HTTPDigestAuth(username, password))
 
         if not page or not page.text:
             return []
@@ -817,10 +804,7 @@ class ClxHTTP(HTTP):
                     event_type.add("user")
                     dev.related.user.add(user)
                 except Exception as ex:
-                    log.warning(
-                        f"Failed to process username for URL "
-                        f"'{raw_event['URL']}': {ex}"
-                    )
+                    log.warning(f"Failed to process username for URL '{raw_event['URL']}': {ex}")
                     event_kind.add("pipeline_error")
 
             event = Event(
@@ -933,9 +917,7 @@ class ClxHTTP(HTTP):
         """
         Parse and extract list of modules from HTML text.
         """
-        rows = cls._extract_rows(
-            text, start=1, width="100%", align="left", cellpadding=0
-        )
+        rows = cls._extract_rows(text, start=1, width="100%", align="left", cellpadding=0)
         data = []
 
         for row in rows:

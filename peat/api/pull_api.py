@@ -63,8 +63,7 @@ def pull(
 
     pull_duration = timeit.default_timer() - start_time
     log.info(
-        f"Finished pulling from {len(devices)} devices "
-        f"in {utils.fmt_duration(pull_duration)}"
+        f"Finished pulling from {len(devices)} devices in {utils.fmt_duration(pull_duration)}"
     )
 
     # * Sort pull results by device ID for consistency *

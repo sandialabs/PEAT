@@ -282,17 +282,13 @@ class DeviceModule:
         else:
             # Treat file streams as raw data
             if isinstance(to_parse, (io.RawIOBase, io.StringIO)):
-                cls.log.debug(
-                    f"Parsing data from file stream ({to_parse.__class__.__name__}"
-                )
+                cls.log.debug(f"Parsing data from file stream ({to_parse.__class__.__name__}")
                 to_parse = to_parse.read()
             elif isinstance(to_parse, io.TextIOWrapper):  # Regular text file
                 cls.log.debug("Parsing data from file buffer (TextIOWrapper)")
                 to_parse = to_parse.buffer.read()  # Don't decode, read raw
             else:
-                cls.log.debug(
-                    f"Parsing raw data with type '{to_parse.__class__.__name__}'"
-                )
+                cls.log.debug(f"Parsing raw data with type '{to_parse.__class__.__name__}'")
 
             # TODO: use "magic" fingerprinting to determine type
             #   Implement using a "file_magic_methods" class
@@ -322,9 +318,7 @@ class DeviceModule:
         #   we really should just generate file metadata and return a device
         #   based on file name instead of passing it to the module for parsing.
         if file.is_file() and file.stat().st_size == 0:
-            cls.log.warning(
-                f"Input file '{file.name}' is empty, PEAT may behave strangely"
-            )
+            cls.log.warning(f"Input file '{file.name}' is empty, PEAT may behave strangely")
         # Check if directory is empty
         elif file.is_dir() and not list(file.iterdir()):
             raise DeviceError(f"Input directory is empty: {file}")
@@ -346,10 +340,7 @@ class DeviceModule:
             )
 
         if parse_dev not in datastore.objects:
-            cls.log.debug(
-                f"Parsed device {parse_dev.get_id()} not in "
-                f"datastore, adding it now..."
-            )
+            cls.log.debug(f"Parsed device {parse_dev.get_id()} not in datastore, adding it now...")
             datastore.objects.append(parse_dev)
 
         cls.update_dev(parse_dev)
@@ -361,9 +352,7 @@ class DeviceModule:
             parse_dev.export_to_files()
 
             if file.is_file():
-                utils.move_file(
-                    config.TEMP_DIR / file.name, parse_dev.get_out_dir() / file.name
-                )
+                utils.move_file(config.TEMP_DIR / file.name, parse_dev.get_out_dir() / file.name)
             elif file.is_dir():
                 # NOTE: we allow directories for things like the SEL or the ION
                 shutil.move(
@@ -419,9 +408,7 @@ class DeviceModule:
         if not dev._module:
             dev._module = cls
         elif dev._module != cls:
-            cls.log.warning(
-                f"Existing module {dev._module} != update_dev() module {cls}"
-            )
+            cls.log.warning(f"Existing module {dev._module} != update_dev() module {cls}")
 
         # Add any module-defined fields
         if cls.annotate_fields:
@@ -441,8 +428,7 @@ class DeviceModule:
         :class:`~peat.device.DeviceModule`).
         """
         return (
-            getattr(cls, method_name).__code__
-            is not getattr(DeviceModule, method_name).__code__
+            getattr(cls, method_name).__code__ is not getattr(DeviceModule, method_name).__code__
         )
 
 

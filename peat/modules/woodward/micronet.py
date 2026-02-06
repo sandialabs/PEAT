@@ -33,9 +33,7 @@ class MicroNet(DeviceModule):
     brand = "MicroNet"
     model = "Plus"
 
-    default_options = {
-        "ftp": {"timeout": 10, "user": "ServiceUser", "pass": "ServiceUser"}
-    }
+    default_options = {"ftp": {"timeout": 10, "user": "ServiceUser", "pass": "ServiceUser"}}
 
     @classmethod
     def _verify_ftp(cls, dev: DeviceData) -> bool:
@@ -51,9 +49,7 @@ class MicroNet(DeviceModule):
         try:
             with FTP(dev.ip, port, timeout=timeout) as f:
                 cls.log.info("Attempting to verify")
-                f.login(
-                    user=dev.options["ftp"]["user"], passwd=dev.options["ftp"]["pass"]
-                )
+                f.login(user=dev.options["ftp"]["user"], passwd=dev.options["ftp"]["pass"])
 
                 # attempt to pull boot file via FTP
                 f.cwd("HD1Flash/Registry")
@@ -122,9 +118,7 @@ class MicroNet(DeviceModule):
             return False
 
     @classmethod
-    def pull_all_files(
-        cls, dev: DeviceData, directory: str, output_dir: pathlib.Path, ftp: FTP
-    ):
+    def pull_all_files(cls, dev: DeviceData, directory: str, output_dir: pathlib.Path, ftp: FTP):
         """
         Pull all files available recursively
 
@@ -160,9 +154,7 @@ class MicroNet(DeviceModule):
                 for filename in file_list:
                     if cls.is_file(filename, ftp):  # if file, download and save locally
                         try:
-                            ftp.download_binary(
-                                filename, dev.get_out_dir() / path / filename
-                            )
+                            ftp.download_binary(filename, dev.get_out_dir() / path / filename)
                             # get file hashes and store in dev.extra
                             timestamp = ftp.cmd(f"MDTM {filename}").split()[1]
                             date_time = parser.parse(timestamp)
@@ -207,9 +199,7 @@ class MicroNet(DeviceModule):
 
                     if "Log.txt" in filename[0:7] and "HD1Flash" in str(path):
                         cls.log.info(f"Attempting to extract info from {filename}")
-                        parse_micronet.parse_log(
-                            dev, dev.get_out_dir() / path / filename
-                        )
+                        parse_micronet.parse_log(dev, dev.get_out_dir() / path / filename)
 
                 # Now recurse over the folders
                 for folder in folder_list:

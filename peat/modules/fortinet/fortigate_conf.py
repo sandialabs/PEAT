@@ -199,9 +199,7 @@ def process_fg_system(system: dict[str, dict], dev: DeviceData) -> None:
                 if utils.is_ip(system["dns"][key]):
                     dev.related.ip.add(system["dns"][key])
                 else:
-                    log.warning(
-                        f"Invalid IP for Fortigate DNS server: {system['dns'][key]}"
-                    )
+                    log.warning(f"Invalid IP for Fortigate DNS server: {system['dns'][key]}")
 
         if system["dns"].get("server-hostname"):
             dev.related.hosts.add(system["dns"]["server-hostname"])
@@ -235,9 +233,7 @@ def process_fg_system(system: dict[str, dict], dev: DeviceData) -> None:
                 if not dev.description.description:
                     dev.description.description = sns["description"]
                 else:
-                    dev.description.description += (
-                        f"---SNMP description: {sns['description']}"
-                    )
+                    dev.description.description += f"---SNMP description: {sns['description']}"
 
             if sns.get("status"):
                 svc.enabled = consts.str_to_bool(sns.pop("status"))

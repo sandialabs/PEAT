@@ -13,9 +13,8 @@ Authors
 import binascii
 import socket
 
-from peat import CommError
+from peat import CommError, utils
 from peat import log as peat_logger
-from peat import utils
 from peat.protocols import FTP, SNMP
 
 from .umas_packets import UMASResponse, send_umas_packet
@@ -26,9 +25,7 @@ from .umas_packets import UMASResponse, send_umas_packet
 
 
 # TODO: what parts of this are status, and what are config?
-def pull_network_config(
-    ip: str, timeout: float = 1.0, snmp_community: str = "public"
-) -> dict:
+def pull_network_config(ip: str, timeout: float = 1.0, snmp_community: str = "public") -> dict:
     """
     Pull configuration information using SNMP, FTP, and Modbus/TCP.
 
@@ -41,9 +38,7 @@ def pull_network_config(
         The device configuration information
     """
     log = peat_logger.bind(target=ip)
-    log.debug(
-        f"Pulling configuration using network services for Schneider device {ip}..."
-    )
+    log.debug(f"Pulling configuration using network services for Schneider device {ip}...")
     device_info = {}
 
     # Get configuration information from network sources
@@ -95,16 +90,15 @@ def pull_network_config(
                             if (
                                 "mac_address" in device_info[j]
                                 and "mac_address" in ftp_info[index]
-                                and device_info[j]["mac_address"]
-                                != ftp_info[index]["mac_address"]
+                                and device_info[j]["mac_address"] != ftp_info[index]["mac_address"]
                             ):
                                 log.warning(
                                     f"Conflicting MAC addresses found for "
                                     f"module {j!s} in device {ip}"
                                 )
-                                device_info[j]["conflicted_mac_address"] = device_info[
-                                    j
-                                ]["mac_address"]
+                                device_info[j]["conflicted_mac_address"] = device_info[j][
+                                    "mac_address"
+                                ]
 
                             # Merge the module dicts
                             device_info[j].update(ftp_info[index])
@@ -126,8 +120,7 @@ def pull_network_config(
             log.error(f"Unknown service for device {ip}: {service!s}")
 
     log.debug(
-        f"Finished pulling configuration using network "
-        f"services for Schneider device {ip}",
+        f"Finished pulling configuration using network services for Schneider device {ip}",
     )
     return device_info
 
@@ -270,16 +263,12 @@ def _get_snmp_metadata(
             elif name == "communication_services":
                 srvcs = {}
                 bits = [int(x) for x in f"{int(data):07b}"]
-                srvcs["port_502_messaging"] = (
-                    "supported" if bits[0] == 1 else "unsupported"
-                )
+                srvcs["port_502_messaging"] = "supported" if bits[0] == 1 else "unsupported"
                 srvcs["io_scanning"] = "supported" if bits[1] == 1 else "unsupported"
                 srvcs["global_data"] = "supported" if bits[2] == 1 else "unsupported"
                 srvcs["web"] = "supported" if bits[3] == 1 else "unsupported"
                 srvcs["address_server"] = "supported" if bits[4] == 1 else "unsupported"
-                srvcs["time_management"] = (
-                    "supported" if bits[5] == 1 else "unsupported"
-                )
+                srvcs["time_management"] = "supported" if bits[5] == 1 else "unsupported"
                 srvcs["email"] = "supported" if bits[6] == 1 else "unsupported"
                 module_info[name] = srvcs
             else:

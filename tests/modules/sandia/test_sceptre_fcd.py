@@ -31,9 +31,7 @@ data_files = [
 
 # TODO: Re-add bennu tests from open-source sceptre-bennu after open sourcing
 # https://github.com/sandialabs/sceptre-bennu/tree/main/data/configs
-@pytest.mark.skip(
-    "Re-add bennu tests from open-source sceptre-bennu after open sourcing"
-)
+@pytest.mark.skip("Re-add bennu tests from open-source sceptre-bennu after open sourcing")
 @pytest.mark.parametrize("input_filename", data_files)
 def test_parse_sceptre_fcd(
     json_data,

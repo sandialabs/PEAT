@@ -148,9 +148,7 @@ class SageCommands:
 
             if not parse_success:
                 # ti response was invalid, remove entry
-                self.log.debug(
-                    f"{t_dict['NAME']} is no longer valid and will be removed"
-                )
+                self.log.debug(f"{t_dict['NAME']} is no longer valid and will be removed")
                 invalid_tasks.append(task_id)
 
         # Can't mutate the dict in place while iterating
@@ -181,8 +179,8 @@ class SageCommands:
 
                 # Add debug log for memory read_time_duration
                 self.log.debug(
-                    f'{t_dict["NAME"]} took {read_time_duration:.2f} '
-                    f'seconds for {t_dict["SIZE"]} bytes'
+                    f"{t_dict['NAME']} took {read_time_duration:.2f} "
+                    f"seconds for {t_dict['SIZE']} bytes"
                 )
 
 
@@ -201,17 +199,13 @@ def parse_ti_response(ti_response: str, tid_dict: dict[str, Any]) -> bool:
         True if the task was found, False if not.
     """
     if not ti_response:
-        log.warning(
-            f"Empty output from 'ti' command for task "
-            f"{tid_dict.get('NAME', 'unknown')}"
-        )
+        log.warning(f"Empty output from 'ti' command for task {tid_dict.get('NAME', 'unknown')}")
         return False
 
     # remove the task because it no longer exists...
     if "task not found" in ti_response:
         log.debug(
-            f"Task {tid_dict.get('NAME', 'unknown')} will be removed "
-            f"because it no longer exists"
+            f"Task {tid_dict.get('NAME', 'unknown')} will be removed because it no longer exists"
         )
         return False
 
@@ -305,9 +299,7 @@ def mark_duplicate_tasks(tasks: dict[str, Any]) -> None:
 
     for t_dict in tasks.values():
         if t_dict["d_query"] in d_query_list:
-            t_dict["d_query_duplicate"] = tid_list[
-                d_query_list.index(t_dict["d_query"])
-            ]
+            t_dict["d_query_duplicate"] = tid_list[d_query_list.index(t_dict["d_query"])]
             log.debug(
                 f"{t_dict['NAME']} uses {t_dict['ENTRY']} which is a duplicate of "
                 f"{tasks[tid_list[d_query_list.index(t_dict['d_query'])]]['NAME']}"
@@ -331,9 +323,7 @@ def find_duplicate_memory_reads(tasks: dict[str, Any]) -> None:
     for t_dict in tasks.values():
         if t_dict["d_query_duplicate"] != "":
             t_dict["d_response"] = tasks[t_dict["d_query_duplicate"]]["d_response"]
-            t_dict["memory_read_time"] = tasks[t_dict["d_query_duplicate"]][
-                "memory_read_time"
-            ]
+            t_dict["memory_read_time"] = tasks[t_dict["d_query_duplicate"]]["memory_read_time"]
 
 
 def convert_memory_reads_to_hex_strings(tasks: dict[str, Any]) -> None:
@@ -347,9 +337,7 @@ def convert_memory_reads_to_hex_strings(tasks: dict[str, Any]) -> None:
     """
     for task_id, t_dict in tasks.items():
         try:
-            t_dict["memory_hex"] = convert_memory_read_to_hex_string(
-                t_dict["d_response"]
-            )
+            t_dict["memory_hex"] = convert_memory_read_to_hex_string(t_dict["d_response"])
         except ParseError as ex:
             t_dict["memory_hex"] = ""
             t_dict["memory_bytes"] = b""
@@ -418,7 +406,7 @@ def save_memory_reads_to_disk(dev: DeviceData, tasks: dict[str, Any]) -> None:
         tasks: Parsed tasks from checkStack
     """
     for t_dict in tasks.values():
-        task_str = f'{t_dict["NAME"]}-{t_dict["TID"]}'.replace(":", "")
+        task_str = f"{t_dict['NAME']}-{t_dict['TID']}".replace(":", "")
         mem_dir = dev.get_sub_dir("memory_reads")
 
         # "Hexdump"-style format from the response

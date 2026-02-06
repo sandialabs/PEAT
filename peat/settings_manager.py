@@ -102,8 +102,7 @@ class SettingsManager(dict):
         # https://github.com/python/cpython/blob/3.7/Lib/dataclasses.py#L828
         annotations: dict = getattr(self, "__annotations__", {})
         defaults: dict = {
-            anno_name: dict.__getattribute__(self, anno_name)
-            for anno_name in annotations.keys()
+            anno_name: dict.__getattribute__(self, anno_name) for anno_name in annotations.keys()
         }
         self["default_configs"] = defaults
 
@@ -123,9 +122,7 @@ class SettingsManager(dict):
         if init_env:
             self.load_from_environment(env_prefix=env_prefix)
 
-    def _load_values(
-        self, conf: dict[str, Any], load_to: str, key_prefix: str = ""
-    ) -> None:
+    def _load_values(self, conf: dict[str, Any], load_to: str, key_prefix: str = "") -> None:
         """
         Read and set configuration values from a input dictionary.
 
@@ -194,9 +191,7 @@ class SettingsManager(dict):
         if env_prefix is None:
             env_prefix = self.env_prefix
 
-        self._load_values(
-            conf=dict(os.environ), load_to="env_configs", key_prefix=env_prefix
-        )
+        self._load_values(conf=dict(os.environ), load_to="env_configs", key_prefix=env_prefix)
 
     def load_from_file(self, file: Path) -> bool:
         """
@@ -218,9 +213,7 @@ class SettingsManager(dict):
         log.info(f"Loading configuration from file '{file.name}'...")
 
         if not file.is_file():
-            log.error(
-                f"Configuration file '{file.name}' is not a file or does not exist"
-            )
+            log.error(f"Configuration file '{file.name}' is not a file or does not exist")
             return False
 
         if file.suffix.lower() in [".yml", ".yaml"]:
@@ -247,9 +240,7 @@ class SettingsManager(dict):
 
         return True
 
-    def save_to_file(
-        self, outdir: Path, save_yaml: bool = True, save_json: bool = True
-    ) -> None:
+    def save_to_file(self, outdir: Path, save_yaml: bool = True, save_json: bool = True) -> None:
         """
         Save the currently stored values to YAML and JSON files.
 
@@ -259,9 +250,7 @@ class SettingsManager(dict):
             save_json: if settings should be saved as JSON
         """
         if not save_yaml and not save_json:
-            raise PeatError(
-                "Either save_yaml or save_json must be true for save_to_file"
-            )
+            raise PeatError("Either save_yaml or save_json must be true for save_to_file")
 
         if save_yaml:
             yaml_file = outdir / f"peat_{self['label']}.yaml"
@@ -425,9 +414,7 @@ class SettingsManager(dict):
                 typecast = Path
             else:
                 # Set typecast to the first type class in a Union that isn't "None"
-                typecast = next(
-                    iter(filter(lambda x: not isinstance(x, type(None)), args))
-                )
+                typecast = next(iter(filter(lambda x: not isinstance(x, type(None)), args)))
         # The typing container is a base Python type, e.g. list, set, dict, etc.
         elif og and isinstance(og, type):
             # TODO: typecast items in a container, e.g. a list of path strings
@@ -467,9 +454,7 @@ class SettingsManager(dict):
             If the item has a value that *overrides* the default value. Note that
             this method will also return :class:`False` if the key isn't valid.
         """
-        return any(
-            key in self[k] for k in ["runtime_configs", "env_configs", "file_configs"]
-        )
+        return any(key in self[k] for k in ["runtime_configs", "env_configs", "file_configs"])
 
     def is_default_value(self, key: str) -> bool:
         """

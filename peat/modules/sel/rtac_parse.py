@@ -124,9 +124,7 @@ def parse_devices(device: ET, device_info: dict) -> None:
     results[name]["coils"] = parse_device_coils(connection, "Coils")
 
     # Parse Discrete Inputs
-    results[name]["discrete_inputs"] = parse_device_discrete_inputs(
-        connection, "Discrete Inputs"
-    )
+    results[name]["discrete_inputs"] = parse_device_discrete_inputs(connection, "Discrete Inputs")
 
     # Parse Holding Registers
     results[name]["holding_registers"] = parse_device_modbus_registers(
@@ -134,9 +132,7 @@ def parse_devices(device: ET, device_info: dict) -> None:
     )
 
     # Parse Input Registers
-    results[name]["input_registers"] = parse_device_modbus_registers(
-        connection, "Input Registers"
-    )
+    results[name]["input_registers"] = parse_device_modbus_registers(connection, "Input Registers")
 
     # remove empty dictionaries
     for key in list(results[name].keys()):
@@ -339,9 +335,7 @@ def parse_contact_ios(contact: ET, device_info: dict) -> None:
                                 continue
                             # pull label and value from columns 0 and 1
                             label = setting[0].text
-                            results[name][tag_val][label] = convert_to_elastic(
-                                setting[1].text
-                            )
+                            results[name][tag_val][label] = convert_to_elastic(setting[1].text)
 
     device_info["ContactIO"] = results
 
@@ -400,11 +394,7 @@ def parse_systemtags(tag: ET, device_info: dict) -> None:
                     else:
                         # get name of setting from entry in row
                         tag_val = tagname_from_ET(row, "Tag Name")
-                        if (
-                            tag_val
-                            and len(tag_val) > 11
-                            and tag_val[0:11] == "SystemTags."
-                        ):
+                        if tag_val and len(tag_val) > 11 and tag_val[0:11] == "SystemTags.":
                             tag_val = tag_val[11:]
                         if tag_val is None:
                             tag_val = "None"

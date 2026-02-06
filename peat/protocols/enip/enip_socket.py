@@ -45,9 +45,7 @@ class EnipSocket:
         if config.DEBUG >= 2 and config.LOG_DIR:
             self.log_to_file = True
             d_ip = self.ip.replace(".", "-")
-            self.fmt_log_path = (
-                config.LOG_DIR / "enip" / f"{d_ip}_enip-data-formatted.log"
-            )
+            self.fmt_log_path = config.LOG_DIR / "enip" / f"{d_ip}_enip-data-formatted.log"
             self.raw_log_path = config.LOG_DIR / "enip" / f"{d_ip}_enip-data-raw.csv"
 
         self.log.trace(f"Initialized {repr(self)}")
@@ -81,12 +79,8 @@ class EnipSocket:
         try:
             self.sock.connect((self.ip, self.port))
         except TimeoutError:
-            self.log.debug(
-                f"Socket timed out during connect (timeout: {self.timeout} seconds)"
-            )
-            raise EnipCommError(
-                f"socket timeout during connection to {str(self)}"
-            ) from None
+            self.log.debug(f"Socket timed out during connect (timeout: {self.timeout} seconds)")
+            raise EnipCommError(f"socket timeout during connection to {str(self)}") from None
 
         self.is_connected = True
         return self.is_connected
@@ -123,18 +117,11 @@ class EnipSocket:
             try:
                 sent = self.sock.send(message[total_sent:])
                 if not sent:
-                    raise EnipCommError(
-                        f"socket connection broken during send to {str(self)}"
-                    )
+                    raise EnipCommError(f"socket connection broken during send to {str(self)}")
                 total_sent += sent
             except TimeoutError:
-                self.log.warning(
-                    f"Socket timed out during send "
-                    f"(timeout: {self.timeout} seconds)"
-                )
-                raise EnipCommError(
-                    f"socket timeout during send to {str(self)}"
-                ) from None
+                self.log.warning(f"Socket timed out during send (timeout: {self.timeout} seconds)")
+                raise EnipCommError(f"socket timeout during send to {str(self)}") from None
             except OSError:
                 raise EnipCommError(
                     f"socket connection broken during send to {str(self)}"
@@ -172,12 +159,9 @@ class EnipSocket:
                 bytes_received += len(chunk)
             except TimeoutError:
                 self.log.warning(
-                    f"Socket timed out during receive "
-                    f"(timeout: {self.timeout} seconds)"
+                    f"Socket timed out during receive (timeout: {self.timeout} seconds)"
                 )
-                raise EnipCommError(
-                    f"socket timeout during receive from {str(self)}"
-                ) from None
+                raise EnipCommError(f"socket timeout during receive from {str(self)}") from None
             except OSError:
                 raise EnipCommError(
                     f"socket connection broken during receive from {str(self)}"

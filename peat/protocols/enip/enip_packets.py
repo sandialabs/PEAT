@@ -57,9 +57,7 @@ ENIP_COMMANDS: Final[dict[int, str]] = {
 
 # Command name => command code
 # Inverted dict of ENIP_COMMANDS
-ENIP_CMD_TO_CODE: Final[dict[str, int]] = {
-    value: key for key, value in ENIP_COMMANDS.items()
-}
+ENIP_CMD_TO_CODE: Final[dict[str, int]] = {value: key for key, value in ENIP_COMMANDS.items()}
 
 # https://gitlab.com/wireshark/wireshark/-/blob/master/epan/dissectors/packet-enip.c#L536
 ENIP_TYPE_IDS: Final[dict[int, str]] = {
@@ -203,11 +201,7 @@ class GetAttributesAllResponse(Packet):
         LEShortField("status", 0),
         LEIntField("serialNumber", 0),  # 4 bytes
         ByteField("productNameLength", 0),
-        MayEnd(
-            StrLenField(
-                "productName", b"", length_from=lambda pkt: pkt.productNameLength
-            )
-        ),
+        MayEnd(StrLenField("productName", b"", length_from=lambda pkt: pkt.productNameLength)),
         XByteField("state", 0),
     ]
 

@@ -84,9 +84,7 @@ class DeepChainMap(ChainMap):
         return converted
 
 
-def lookup_by_str(
-    container: list[BaseModel], value: BaseModel, lookup: str
-) -> int | None:
+def lookup_by_str(container: list[BaseModel], value: BaseModel, lookup: str) -> int | None:
     """
     String of attribute to search for, e.g. ``"ip"`` to lookup interfaces
     using ``Interface.ip`` attribute on the value.
@@ -252,9 +250,7 @@ def dedupe_model_list(current: list[BaseModel]) -> list[BaseModel]:
         return current
 
     if not isinstance(current[0], BaseModel):
-        raise PeatError(
-            f"expected BaseModel for dedupe_model_list, got {type(current[0])}"
-        )
+        raise PeatError(f"expected BaseModel for dedupe_model_list, got {type(current[0])}")
 
     # NOTE (cegoes, 02/21/2023)
     #
@@ -298,9 +294,7 @@ def dedupe_model_list(current: list[BaseModel]) -> list[BaseModel]:
 
     duplicates = set()  # type: set[int]
     model_cache = {id(m): m for m in current}  # type: dict[int, BaseModel]
-    outer_dicts = {
-        id(m): m.dict(exclude_defaults=True, exclude_none=True) for m in current
-    }  # type: dict[int, dict]
+    outer_dicts = {id(m): m.dict(exclude_defaults=True, exclude_none=True) for m in current}  # type: dict[int, dict]
     inner_dicts = copy.deepcopy(outer_dicts)  # type: dict[int, dict]
 
     for item_id, item_dict in outer_dicts.items():
@@ -325,10 +319,7 @@ def dedupe_model_list(current: list[BaseModel]) -> list[BaseModel]:
                 model_type == "Service"
                 and (
                     comp_dict.get("status") == "verified"
-                    or (
-                        comp_dict.get("status") == "open"
-                        and item_dict.get("status") == "closed"
-                    )
+                    or (comp_dict.get("status") == "open" and item_dict.get("status") == "closed")
                 )
                 and compare_dicts(item_dict, comp_dict, ["port", "protocol"])
             ):
@@ -347,9 +338,7 @@ def dedupe_model_list(current: list[BaseModel]) -> list[BaseModel]:
 
     # Create a de-duplicated list of objects
     # by excluding those that were marked as duplicate
-    deduped = [
-        model for model_id, model in model_cache.items() if model_id not in duplicates
-    ]  # type: list[BaseModel]
+    deduped = [model for model_id, model in model_cache.items() if model_id not in duplicates]  # type: list[BaseModel]
 
     if duplicates and config.DEBUG:
         log.trace(
@@ -394,9 +383,7 @@ def sort_model_list(model_list: list[BaseModel]) -> None:
         return
 
     if not isinstance(model_list[0], BaseModel):
-        raise PeatError(
-            f"expected BaseModel for sort_model_list, got {type(model_list[0])}"
-        )
+        raise PeatError(f"expected BaseModel for sort_model_list, got {type(model_list[0])}")
 
     if not getattr(model_list[0], "_sort_by_fields", None):
         raise PeatError(
@@ -405,10 +392,7 @@ def sort_model_list(model_list: list[BaseModel]) -> None:
         )
 
     if config.DEBUG >= 3:
-        log.debug(
-            f"Sorting '{model_list[0].__repr_name__()}' "
-            f"list with {len(model_list)} items"
-        )
+        log.debug(f"Sorting '{model_list[0].__repr_name__()}' list with {len(model_list)} items")
 
     model_list.sort(key=none_aware_attrgetter(model_list[0]._sort_by_fields))
 
@@ -436,9 +420,7 @@ def merge_models(dest: BaseModel, source: BaseModel) -> None:
                 # If there's an existing module in same slot, merge the contents
                 for curr_mod in dest.module:
                     if (
-                        curr_mod.slot
-                        and mod_to_merge.slot
-                        and curr_mod.slot == mod_to_merge.slot
+                        curr_mod.slot and mod_to_merge.slot and curr_mod.slot == mod_to_merge.slot
                     ) or (
                         curr_mod.serial_number
                         and mod_to_merge.serial_number

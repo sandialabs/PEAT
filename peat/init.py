@@ -251,9 +251,7 @@ def initialize_peat(conf: dict, entrypoint: consts.EntrypointType = "Package") -
             baudrates = protocols.parse_baudrates(config.DEVICE_OPTIONS["baudrates"])
             datastore.global_options["baudrates"] = baudrates
 
-        if config.DEVICE_OPTIONS.get("timeout") and not datastore.global_options.get(
-            "timeout"
-        ):
+        if config.DEVICE_OPTIONS.get("timeout") and not datastore.global_options.get("timeout"):
             # !! hack to inject default timeout to individual protocols !!
             for v in DEFAULT_OPTIONS.values():
                 if isinstance(v, dict) and "timeout" in v:

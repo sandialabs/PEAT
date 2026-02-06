@@ -175,25 +175,20 @@ class TC6:
         root = self.root
 
         if sceptre:
-            log.info(
-                "The generated ST will be compatible with the SCEPTRE PLC (OpenPLC)"
-            )
+            log.info("The generated ST will be compatible with the SCEPTRE PLC (OpenPLC)")
 
             # We don't want to contaminate the tree with modifications made for OpenPLC
             # This enables pure logic to still be generated separately,
             # with only a minor hit to performance
             log.debug(
-                "Copying tree to prevent contamination "
-                "by SCEPTRE compatibility modifications"
+                "Copying tree to prevent contamination by SCEPTRE compatibility modifications"
             )
 
             sceptre_root = copy.deepcopy(self.root)
             log.debug("Finished copying tree")
             configs = sceptre_root.find(".//configurations")
             if configs is not None:
-                config_element = SubElement(
-                    configs, "configuration", {"name": "Config0"}
-                )
+                config_element = SubElement(configs, "configuration", {"name": "Config0"})
                 resource = SubElement(config_element, "resource", {"name": "Res0"})
                 task = SubElement(
                     resource,
@@ -227,9 +222,7 @@ class TC6:
         log.debug("Finished generating formatted TC6 XML")
         return generated_xml
 
-    def generate_st(
-        self, generated_xml: str | None = None, sceptre: bool = False
-    ) -> str:
+    def generate_st(self, generated_xml: str | None = None, sceptre: bool = False) -> str:
         """
         Generates IEC 61131-3 compliant Structured Text logic.
 

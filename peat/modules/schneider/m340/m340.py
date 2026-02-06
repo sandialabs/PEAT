@@ -139,8 +139,7 @@ class M340(DeviceModule):
 
                 if not resp:
                     cls.log.warning(
-                        f"Login successful but no output from DINF "
-                        f"FTP command on {dev.ip}"
+                        f"Login successful but no output from DINF FTP command on {dev.ip}"
                     )
                     return False
 
@@ -210,9 +209,7 @@ class M340(DeviceModule):
                 sock.send(binascii.unhexlify("000000000005002b0e0200"))
                 response = Modbus(sock.recv(4096))
 
-                if "Schneider" in str(response.data) and cpu_model in str(
-                    response.data
-                ):
+                if "Schneider" in str(response.data) and cpu_model in str(response.data):
                     is_m340 = True
 
                 # Method #2: Request CPU and memory using the Unity code
@@ -227,8 +224,7 @@ class M340(DeviceModule):
                 is_m340 = False
 
         log.debug(
-            f"Modbus/TCP verification of device {dev.ip} "
-            f"{'succeeded' if is_m340 else 'failed'}"
+            f"Modbus/TCP verification of device {dev.ip} {'succeeded' if is_m340 else 'failed'}"
         )
         return is_m340
 
@@ -389,9 +385,7 @@ class M340(DeviceModule):
                 count += 1
 
             count -= 1  # Don't include the final "close stream" packet in the count
-            send_umas_packet(
-                sock, stop_pull_packet(cid, count), UMASResponse, packet_tracker
-            )
+            send_umas_packet(sock, stop_pull_packet(cid, count), UMASResponse, packet_tracker)
 
         # Dump of the raw UMAS bytes from the blob for debugging purposes
         if debug_data:
@@ -620,8 +614,7 @@ class M340(DeviceModule):
                 )
             except Exception:
                 cls.log.error(
-                    "Exception while generating the TC6 XML. Perhaps "
-                    "the variable region is wrong?"
+                    "Exception while generating the TC6 XML. Perhaps the variable region is wrong?"
                 )
                 cls.log.debug(f"** Traceback **\n{traceback.format_exc()}")
             else:
@@ -634,9 +627,7 @@ class M340(DeviceModule):
                     )
 
                     if not xml_string:
-                        cls.log.error(
-                            "Failed to generate TC6 XML string for non-empty logic"
-                        )
+                        cls.log.error("Failed to generate TC6 XML string for non-empty logic")
                     else:
                         dev.logic.formats["tc6"] = xml_string
                         st_logic = dev._cache["tc6"].generate_st(
@@ -660,8 +651,7 @@ class M340(DeviceModule):
 
             if m_data["slot"] < 0:
                 cls.log.debug(
-                    f"Skipping module {module_name} with negative "
-                    f"slot number '{m_data['slot']}'"
+                    f"Skipping module {module_name} with negative slot number '{m_data['slot']}'"
                 )
                 continue
 
@@ -672,9 +662,7 @@ class M340(DeviceModule):
                 module.description.product = m_data["model_name"]
                 if m_data["model_name"].startswith("BMX"):
                     module.description.brand = "BMX"
-                    module.description.model = (
-                        m_data["model_name"].split("BMX")[1].strip()
-                    )
+                    module.description.model = m_data["model_name"].split("BMX")[1].strip()
                 module.description.vendor = dev.description.vendor
 
             if m_data.get("ipv4_address"):
@@ -841,25 +829,20 @@ class M340(DeviceModule):
         if tc6.element_empty(body):
             # TODO: make a copy of the tree before modifying?
             cls.log.warning(
-                "No logic present in TC6, adding a empty 'ST' "
-                "element to body so OpenPLC is happy."
+                "No logic present in TC6, adding a empty 'ST' element to body so OpenPLC is happy."
             )
 
             logic_element = SubElement(body, "ST")
             content_element = SubElement(logic_element, "xhtml:p")
             content_element.text = "(* No logic was extracted by PEAT *)"
 
-            tc6_xml = tc6.generate_xml_string(
-                dev.options["sceptre_plc_compatible_st_logic"]
-            )
+            tc6_xml = tc6.generate_xml_string(dev.options["sceptre_plc_compatible_st_logic"])
         else:
             tc6_xml = dev.logic.formats["tc6"]
 
         if dev.options["m340"]["generate_openplc_project"] == "dev_out_dir":
             proj_name = dev.logic.name if dev.logic.name else dev.get_id()
-            proj_path = dev.get_sub_dir(
-                f"openplc_project_{proj_name.replace(' ', '-')}"
-            )
+            proj_path = dev.get_sub_dir(f"openplc_project_{proj_name.replace(' ', '-')}")
         else:
             proj_path = Path(dev.options["m340"]["generate_openplc_project"]).resolve()
 
@@ -868,9 +851,7 @@ class M340(DeviceModule):
   <TargetType/>
 </BeremizRoot>
 """
-        utils.write_file(
-            beremiz_xml, proj_path / "beremiz.xml", overwrite_existing=True
-        )
+        utils.write_file(beremiz_xml, proj_path / "beremiz.xml", overwrite_existing=True)
         utils.write_file(tc6_xml, proj_path / "plc.xml", overwrite_existing=True)
 
         cls.log.info(f"Generated OpenPLC project files in {proj_path.name}")

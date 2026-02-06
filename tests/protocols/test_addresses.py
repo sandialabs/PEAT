@@ -57,10 +57,7 @@ def test_expand_filenames_to_hosts(examples_path):
         "192.0.2.100-105",
     ]
     assert expand_filenames_to_hosts([json_path, text_path]) == expected
-    assert (
-        expand_filenames_to_hosts([json_path.as_posix(), text_path.as_posix()])
-        == expected
-    )
+    assert expand_filenames_to_hosts([json_path.as_posix(), text_path.as_posix()]) == expected
     cmp = [
         "10.0.0.1",
         b"172.16.0.1",

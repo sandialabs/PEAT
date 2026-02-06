@@ -441,9 +441,7 @@ class ClxCIP:
             tag_buffer.extend(reply_data)
 
         if config.DEBUG >= 4:
-            self.log.debug(
-                f"get_instance_list_tag_buffer: DONE. tag_buffer:\n{tag_buffer}"
-            )
+            self.log.debug(f"get_instance_list_tag_buffer: DONE. tag_buffer:\n{tag_buffer}")
         return tag_buffer
 
     def get_attributes_tag_buffer(
@@ -462,9 +460,7 @@ class ClxCIP:
             attributes of an instance
         """
         if config.DEBUG >= 4:
-            self.log.debug(
-                f"get_attributes_tag_buffer({instance_path}, {attribute_list})"
-            )
+            self.log.debug(f"get_attributes_tag_buffer({instance_path}, {attribute_list})")
 
         service = TAG_SERVICES_REQUEST["Get Attributes"]
         tag_buffer = []
@@ -486,9 +482,7 @@ class ClxCIP:
             tag_buffer.extend(reply_data)
 
         if config.DEBUG >= 4:
-            self.log.debug(
-                f"get_attributes_tag_buffer: DONE. tag_buffer:\n{tag_buffer}"
-            )
+            self.log.debug(f"get_attributes_tag_buffer: DONE. tag_buffer:\n{tag_buffer}")
         return tag_buffer
 
     def read_tag(self, instance_path: PathType, tag_offset: int = 0) -> list[int]:
@@ -524,9 +518,7 @@ class ClxCIP:
             self.log.debug(f"read_tag: DONE. tag_buffer:\n{tag_buffer}")
         return tag_buffer
 
-    def read_tag_fragmented(
-        self, instance_path: PathType, tag_offset: int = 0
-    ) -> list[int]:
+    def read_tag_fragmented(self, instance_path: PathType, tag_offset: int = 0) -> list[int]:
         """
         Return a data buffer representing the tag data of an instance at a
         specified path (at a specified offset).
@@ -550,13 +542,9 @@ class ClxCIP:
             reply = self.driver.send_connected_command(
                 service=TAG_SERVICES_REQUEST["Read Tag Fragmented"],
                 path=path_string,
-                cmd_data=b"\x00\x00\x00\x00"
-                + pack_uint(tag_offset)
-                + b"\x00\x00\x00\x00",
+                cmd_data=b"\x00\x00\x00\x00" + pack_uint(tag_offset) + b"\x00\x00\x00\x00",
             )
-            reply_data, tag_size, tag_address = read_tag_fragmented_data_from_reply(
-                reply
-            )
+            reply_data, tag_size, tag_address = read_tag_fragmented_data_from_reply(reply)
             tag_buffer.extend(reply_data)
             tag_offset += tag_size
 
@@ -566,9 +554,7 @@ class ClxCIP:
             self.log.debug(f"read_tag_fragmented: DONE. ret:\n{ret}")
         return ret
 
-    def read_template(
-        self, instance_path: PathType, size: int, offset: int = 0
-    ) -> list:
+    def read_template(self, instance_path: PathType, size: int, offset: int = 0) -> list:
         """
         Return a data buffer representing the tag data of a template
         instance at a specified path (at a specified offset).
@@ -582,9 +568,7 @@ class ClxCIP:
             Data buffer representing the tag data of a template instance
         """
         if config.DEBUG >= 4:
-            self.log.debug(
-                f"read_template({instance_path}, {hex(size)}, {hex(offset)})"
-            )
+            self.log.debug(f"read_template({instance_path}, {hex(size)}, {hex(offset)})")
 
         tag_buffer = []
         tag_offset = offset
@@ -665,9 +649,7 @@ def get_size_of_type(
     type_bits = type_id & 0x0FFF
 
     if structure_bit == 0:  # Atomic data
-        if (type_bits in I_DATA_TYPE) and (
-            I_DATA_TYPE[type_bits] in DATA_FUNCTION_SIZE
-        ):
+        if (type_bits in I_DATA_TYPE) and (I_DATA_TYPE[type_bits] in DATA_FUNCTION_SIZE):
             type_size = DATA_FUNCTION_SIZE[I_DATA_TYPE[type_bits]]
         else:
             log.warning(f"Something went wrong. Unseen type: {type_bits}")
@@ -911,8 +893,7 @@ def read_tag_fragmented_data_from_reply(cip_data: bytes) -> FragListType:
         tag_size = len(tag_data) // 4
         if config.DEBUG >= 4:
             log.debug(
-                f"read_tag_fragmented: reading reply: "
-                f"IN PROGRESS...:tag_size: {hex(tag_size)}"
+                f"read_tag_fragmented: reading reply: IN PROGRESS...:tag_size: {hex(tag_size)}"
             )
     else:
         log.debug(
@@ -1006,9 +987,7 @@ def parse_get_instance_list(cip_data: bytes) -> list[int]:
         log.debug(f"parse_get_instance_list({cip_data})")
 
     if len(cip_data) % 4 == 0:
-        instance_list = [
-            unpack_dint(cip_data[i : i + 4]) for i in range(0, len(cip_data), 4)
-        ]
+        instance_list = [unpack_dint(cip_data[i : i + 4]) for i in range(0, len(cip_data), 4)]
     else:
         log.debug("parse_get_instance_list: length of input data not multiple of 4")
         instance_list = []
@@ -1108,10 +1087,7 @@ def parse_get_attributes(cip_data: bytes, cip_class: int) -> dict[int, int]:
         idx += 4 + attribute_size
 
     if config.DEBUG >= 4:
-        log.debug(
-            f"parse_get_attributes: DONE. instance_attributes:\n"
-            f"{instance_attributes}"
-        )
+        log.debug(f"parse_get_attributes: DONE. instance_attributes:\n{instance_attributes}")
     return instance_attributes
 
 

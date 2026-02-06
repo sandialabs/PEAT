@@ -241,9 +241,7 @@ def get_platform_info() -> dict[str, str | int | bool]:
             info["os_family"] = distro.id().lower()  # "ubuntu", "debian"
             info["os_ver"] = distro.version(best=True)  # "19.04"
             # "Linux 5.0.0-20-generic (Ubuntu 19.04)"
-            info["os_full"] = (
-                f"{info['os_name']} {info['os_rel']} ({distro.name(True)})"
-            )
+            info["os_full"] = f"{info['os_name']} {info['os_rel']} ({distro.name(True)})"
         except Exception:
             pass  # Fail silently if anything goes wrong, info is non-critical
 
@@ -315,9 +313,7 @@ def lower_dict(to_lower: dict[str, Any], children: bool = True) -> dict[str, Any
         children: if values that are dicts should have their keys converted as well
     """
     return {
-        key.lower(): (
-            lower_dict(value) if isinstance(value, dict) and children else value
-        )
+        key.lower(): (lower_dict(value) if isinstance(value, dict) and children else value)
         for key, value in to_lower.items()
     }
 

@@ -53,7 +53,7 @@ from pysnmp.hlapi import (
 from pysnmp.smi.builder import DirMibSource, MibBuilder
 
 import peat
-from peat import consts, config, state, utils, exit_handler, log
+from peat import config, consts, exit_handler, log, state, utils
 
 # https://www.iana.org/assignments/ianaiftype-mib/ianaiftype-mib
 INTERFACE_MAP: Final[dict[int, str]] = {
@@ -149,9 +149,7 @@ class SNMP:
         if self.all_output:
             try:
                 dev = peat.data.datastore.get(self.ip)
-                dev.write_file(
-                    self.all_output, "raw-snmp-output.json", merge_existing=True
-                )
+                dev.write_file(self.all_output, "raw-snmp-output.json", merge_existing=True)
             except Exception as ex:
                 self.log.warning(f"Failed to write raw output to file: {ex}")
 
@@ -184,6 +182,7 @@ class SNMP:
 
            from pathlib import Path
            from peat.protocols.snmp import SNMP
+
            snmp = SNMP(ip="192.0.2.1")
            # OID
            snmp.get("1.3.6.1.2.1.1.1.0")
@@ -226,17 +225,13 @@ class SNMP:
 
         if not isinstance(identity, (str, tuple)):
             state.error = True
-            raise ValueError(
-                f"{self.ip}: identity is not str or tuple (value={identity})"
-            )
+            raise ValueError(f"{self.ip}: identity is not str or tuple (value={identity})")
 
         if isinstance(identity, str):
             identity = (identity,)  # Convert str to 1-item tuple
 
         self.log.trace(f"SNMP query: {identity}")
-        object_identity = ObjectIdentity(
-            *identity
-        )  # TODO: self.cache of these objects?
+        object_identity = ObjectIdentity(*identity)  # TODO: self.cache of these objects?
 
         # Add a local MIB file to use for resolving names and types
         if self.mib_paths:
@@ -262,9 +257,7 @@ class SNMP:
                 lexicographicMode=walk_whole_mib,
             )
         if querier is None:
-            raise ValueError(
-                f"{self.ip}: bad querier iterator (single_query={single_query})"
-            )
+            raise ValueError(f"{self.ip}: bad querier iterator (single_query={single_query})")
 
         values = []
         finished = False
@@ -282,9 +275,7 @@ class SNMP:
                 elif error_status:  # SNMP agent errors
                     errloc = var_binds[int(error_index) - 1] if error_index else "?"
                     pretty_err = error_status.prettyPrint()
-                    self.log.debug(
-                        f"SNMP agent error: '{pretty_err}' at location {errloc}"
-                    )
+                    self.log.debug(f"SNMP agent error: '{pretty_err}' at location {errloc}")
                     return []
                 elif isinstance(var_binds[0][1], ObjectIdentity):
                     self.log.debug(
@@ -320,9 +311,7 @@ class SNMP:
                     # auto-convert interface types to PEAT-standard names
                     if object_name == "ifType":
                         if var_dict["value_encoded"] in INTERFACE_MAP:
-                            var_dict["value_string"] = INTERFACE_MAP[
-                                var_dict["value_encoded"]
-                            ]
+                            var_dict["value_string"] = INTERFACE_MAP[var_dict["value_encoded"]]
                         else:
                             var_dict["value_string"] = utils.convert_to_snake_case(
                                 var_dict["value_string"]
@@ -356,8 +345,7 @@ class SNMP:
             ValueError: If a critical error occurred, such as a invalid type being passed
         """
         self.log.debug(
-            f"Verifying SNMP device with identity '{identity}' "
-            f"and search string {to_find}"
+            f"Verifying SNMP device with identity '{identity}' and search string {to_find}"
         )
 
         try:
@@ -444,9 +432,7 @@ def snmp_walk(
         if error_status:
             errloc = var_binds[int(error_index) - 1] if error_index else "?"
             pretty_err = error_status.prettyPrint()
-            log.debug(
-                f"SNMP agent error for {ip}:{port}: '{pretty_err}' at location {errloc}"
-            )
+            log.debug(f"SNMP agent error for {ip}:{port}: '{pretty_err}' at location {errloc}")
             break
 
         for varBind in var_binds:

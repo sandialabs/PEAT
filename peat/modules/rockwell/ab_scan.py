@@ -30,9 +30,7 @@ DevDescType = dict[str, dict | int | str]
 # TODO: use EnipDriver here
 
 
-def broadcast_scan(
-    ip: str, port: int = 44818, timeout: float = 5.0
-) -> list[DevDescType]:
+def broadcast_scan(ip: str, port: int = 44818, timeout: float = 5.0) -> list[DevDescType]:
     """
     Scan by sending a broadcast packet and waiting for responses from devices.
 
@@ -99,9 +97,7 @@ def fingerprint_device(sock: socket.socket) -> DevDescType | None:
         dev_desc = extract_info_response(identity)
         dev_desc["ip"] = ip
         dev_desc["port"] = port
-        log.info(
-            f"Found {dev_desc['vendor']} {dev_desc['product_name']} at {ip}:{port}"
-        )
+        log.info(f"Found {dev_desc['vendor']} {dev_desc['product_name']} at {ip}:{port}")
 
         # Get information on all slots on the device (if it's not a MicroLogix)
         if dev_desc["product_code"] not in clx_const.MLX_PRODUCT_CODES:
@@ -125,13 +121,10 @@ def fingerprint_device(sock: socket.socket) -> DevDescType | None:
                         dt = cpu.get("product_type")
                         if dt and dt != "PLC":
                             log.warning(
-                                f"CPU slot {cpu_slot} of {ip} has "
-                                f"invalid product_type {dt}"
+                                f"CPU slot {cpu_slot} of {ip} has invalid product_type {dt}"
                             )
                         elif not dt:
-                            log.warning(
-                                f"No product_type for CPU slot {cpu_slot} on {ip}"
-                            )
+                            log.warning(f"No product_type for CPU slot {cpu_slot} on {ip}")
                         dev_desc["cpu_serial"] = cpu["serial_number"]
                     dev_desc["modules"] = slots
             else:
@@ -140,10 +133,7 @@ def fingerprint_device(sock: socket.socket) -> DevDescType | None:
 
         return dev_desc
     else:
-        log.warning(
-            f"Invalid command code '{resp_packet.commandCode}' "
-            f"received from {ip}:{port}"
-        )
+        log.warning(f"Invalid command code '{resp_packet.commandCode}' received from {ip}:{port}")
         return None
 
 
@@ -164,8 +154,7 @@ def enumerate_device_modules(
     """
     log = peat_logger.bind(target=f"{ip}:{port}")
     log.info(
-        f"Enumerating modules for ControlLogix device "
-        f"{ip}:{port} (timeout: {timeout:.2f} seconds)"
+        f"Enumerating modules for ControlLogix device {ip}:{port} (timeout: {timeout:.2f} seconds)"
     )
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:

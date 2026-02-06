@@ -134,9 +134,7 @@ def test_disassemble_process_logic_sfc_malformed_zlib_section():
         b"x\x9c+I-.\x89/.)\xca\xccK\x07\x00\x1cy\x04"
     )
     with pytest.raises(DisassembleStringLogicError):
-        disassemble_string_process_logic(
-            data, LOGIC_LANGUAGE["Sequential Function Chart"]
-        )
+        disassemble_string_process_logic(data, LOGIC_LANGUAGE["Sequential Function Chart"])
 
 
 @pytest.mark.skip("Token lookups are not finished yet")

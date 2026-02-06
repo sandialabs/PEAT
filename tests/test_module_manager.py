@@ -161,9 +161,7 @@ def test_lookup_names():
     assert module_api.lookup_names(["controllogix"]) == ["ControlLogix"]
     assert module_api.lookup_names(ControlLogix) == ["ControlLogix"]
     assert module_api.lookup_names([ControlLogix]) == ["ControlLogix"]
-    assert module_api.lookup_names(["controllogix"], filter_attr="vendor_id") == [
-        "ControlLogix"
-    ]
+    assert module_api.lookup_names(["controllogix"], filter_attr="vendor_id") == ["ControlLogix"]
     assert module_api.lookup_names("all") == module_api.names
 
 
@@ -171,9 +169,7 @@ def test_process_types_special_cases():
     assert module_api.lookup_types() == module_api.classes
     assert module_api.get_modules("INVALIDMODULE") == []
     assert module_api.lookup_types("INVALIDMODULE") == []
-    assert module_api.lookup_types(["allen-bradley", "clx", "controllogix"]) == [
-        ControlLogix
-    ]
+    assert module_api.lookup_types(["allen-bradley", "clx", "controllogix"]) == [ControlLogix]
     assert module_api.lookup_types(M340) == [M340]  # Class
     assert module_api.lookup_types([M340]) == [M340]  # Class
     assert module_api.lookup_types(M340()) == [M340]  # Instance

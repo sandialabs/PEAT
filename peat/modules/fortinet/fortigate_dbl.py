@@ -50,11 +50,7 @@ def extract_ips(lines: list[str]) -> set[str]:
     for line in lines:
         # extract IPs from anywhere in the line
         for ip in re.findall(IPV4_RE, line):
-            if (
-                utils.is_ip(ip)
-                and ip.count("255") <= 1
-                and ip not in ["255.0.0.0", "0.0.0.0"]
-            ):
+            if utils.is_ip(ip) and ip.count("255") <= 1 and ip not in ["255.0.0.0", "0.0.0.0"]:
                 ip_addrs.add(ip)
 
     return ip_addrs
@@ -142,9 +138,7 @@ def process_fg_crashlog(crashlog: list[str], dev: DeviceData) -> None:
                 pname = re.search(r'process_name="([^"]+)"', msg).group(1)
                 dev.related.process.add(pname)
         except Exception as ex:
-            log.trace3(
-                f"Skipping bad Fortigate crashlog line: '{line}' (exception: {ex})"
-            )
+            log.trace3(f"Skipping bad Fortigate crashlog line: '{line}' (exception: {ex})")
             continue
 
 
@@ -168,7 +162,7 @@ def parse_fg_ls(ls_output: list[str], ls_command: str) -> list[dict]:
                "size": 0,
                "name": "example_filename",
                "link_target": null,
-               "parent": "/tmp"
+               "parent": "/tmp",
            }
 
     """
@@ -410,9 +404,7 @@ def process_fg_sys_flash_list(lines: list[str], dev: DeviceData) -> None:
                 if not dev.firmware.revision:
                     dev.firmware.revision = res.groupdict()["build"]
                 if not dev.firmware.release_date:
-                    dev.firmware.release_date = utils.parse_date(
-                        res.groupdict()["timestamp"]
-                    )
+                    dev.firmware.release_date = utils.parse_date(res.groupdict()["timestamp"])
 
 
 def process_fg_interfaces(db_log: dict[str, list[str]], dev: DeviceData) -> None:
@@ -452,9 +444,7 @@ def process_fg_interfaces(db_log: dict[str, list[str]], dev: DeviceData) -> None
     #     pass
 
     # "get hardware nic lan", etc.
-    nic_keys = [
-        k.split(" ")[-1] for k in db_log.keys() if k.startswith("get hardware nic")
-    ]
+    nic_keys = [k.split(" ")[-1] for k in db_log.keys() if k.startswith("get hardware nic")]
 
     for nic in nic_keys:
         # Some of the virtual interfaces, e.g. "npu0_vlink1",
@@ -530,12 +520,8 @@ def process_fg_debug_log(db_log: dict[str, list[str]], dev: DeviceData) -> None:
     processors = {
         "get system status": process_fg_system_status,
         "diagnose debug crashlog read": process_fg_crashlog,
-        "diagnose ip address list": lambda d, dev: dev.related.ip.update(
-            extract_ips(d)
-        ),
-        "diagnose firewall iplist list": lambda d, dev: dev.related.ip.update(
-            extract_ips(d)
-        ),
+        "diagnose ip address list": lambda d, dev: dev.related.ip.update(extract_ips(d)),
+        "diagnose firewall iplist list": lambda d, dev: dev.related.ip.update(extract_ips(d)),
         # TODO: will this parse the macs?
         "diagnose firewall ipmac list": [
             lambda d, dev: dev.related.ip.update(extract_ips(d)),
@@ -546,12 +532,8 @@ def process_fg_debug_log(db_log: dict[str, list[str]], dev: DeviceData) -> None:
         "diagnose sys top-all 1 100 1": process_fg_top,
         # TODO: extract server-hostname
         # TODO: parse with normal config parser
-        "show full-configuration system dns": lambda d, dev: dev.related.ip.update(
-            extract_ips(d)
-        ),
-        "fnsysctl ls -l /tmp": functools.partial(
-            process_fg_ls, ls_command="fnsysctl ls -l /tmp"
-        ),
+        "show full-configuration system dns": lambda d, dev: dev.related.ip.update(extract_ips(d)),
+        "fnsysctl ls -l /tmp": functools.partial(process_fg_ls, ls_command="fnsysctl ls -l /tmp"),
         # /dev/cmdb seems to be a Fortigate-specific path.
         # "CMDB" might mean "Configuration Management Database?"
         "fnsysctl ls -l /dev/cmdb": functools.partial(
@@ -565,9 +547,7 @@ def process_fg_debug_log(db_log: dict[str, list[str]], dev: DeviceData) -> None:
             lambda d, dev: dev.related.ip.update(extract_ips(d)),
             lambda d, dev: dev.related.mac.update(extract_macs(d)),
         ],
-        "diagnose ip rtcache list": lambda d, dev: dev.related.ip.update(
-            extract_ips(d)
-        ),
+        "diagnose ip rtcache list": lambda d, dev: dev.related.ip.update(extract_ips(d)),
         # "get hardware memory" and "diagnose hardware sysinfo memory"  have same output
         # "diagnose" happens later in the dump and free memory is more accurate.
         "get hardware memory": process_fg_hardware_memory,
@@ -587,9 +567,7 @@ def process_fg_debug_log(db_log: dict[str, list[str]], dev: DeviceData) -> None:
             else:
                 func(db_log[section], dev=dev)
         except Exception as ex:
-            log.exception(
-                f"Failed to process fortigate debug log section '{section}': {ex}"
-            )
+            log.exception(f"Failed to process fortigate debug log section '{section}': {ex}")
 
     # Process interface information
     process_fg_interfaces(db_log, dev)

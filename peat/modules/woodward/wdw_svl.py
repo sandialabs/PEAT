@@ -65,9 +65,7 @@ def _svlser_dat_txn(
     type_bytes: bytes | None = None,
     delim: bytes | None = None,
 ) -> dict:
-    raw_bytes = _svlser_seq_txn(
-        address, _svlser_dat_fmt(dat_cmd_itm, type_bytes, delim)
-    )
+    raw_bytes = _svlser_seq_txn(address, _svlser_dat_fmt(dat_cmd_itm, type_bytes, delim))
     return _svlser_parse_rsp(raw_bytes)
 
 
@@ -96,9 +94,7 @@ def _svlser_seq_txn(address: str, wr_bytes: bytes) -> bytearray | None:
     return txn_bytes  # rsp
 
 
-def _svlser_raw_txn(
-    address: str, wr_bytes: bytes, reset: bool = False
-) -> bytearray | None:
+def _svlser_raw_txn(address: str, wr_bytes: bytes, reset: bool = False) -> bytearray | None:
     """
     Send a raw Servlink serial message.
     Optionally reset the Servlink sequence.
@@ -200,11 +196,7 @@ def _svlser_parse_rsp(rd_bytes: bytes | None) -> dict:
         return ser_rsp
 
     # Remove formatting bytes and get CRC
-    if (
-        len(rd_bytes) >= 7
-        and rd_bytes[-4] == 3
-        and (rd_bytes[-3] == 16 or rd_bytes[-2] == 16)
-    ):
+    if len(rd_bytes) >= 7 and rd_bytes[-4] == 3 and (rd_bytes[-3] == 16 or rd_bytes[-2] == 16):
         # Sometimes the CRC has a 0x10 inserted before and a 0x20 ORed with one
         # of the bytes of the CRC.
         #   0 - echoes byte 0 of command
@@ -536,9 +528,7 @@ def _svl_parse_data(data_bytes: bytes, rfmt: type) -> str | int | bool | float |
             return struct.unpack(">f", data_bytes[(rlen - 4) :])[0]
         elif rfmt is not bytes:
             # Working as designed, but log to debug. Fall through for bytes.
-            log.debug(
-                f"Unexpected format, expected {rfmt} for {pretty_hex_bytes(data_bytes)}"
-            )
+            log.debug(f"Unexpected format, expected {rfmt} for {pretty_hex_bytes(data_bytes)}")
     except Exception as ex:
         log.error(f"Error parsing response for {pretty_hex_bytes(data_bytes)}: {ex}")
 

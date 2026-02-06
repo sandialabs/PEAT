@@ -11,9 +11,7 @@ def test_wrong_password(tmp_path, examples_dir):
     filepath = examples_dir / "encryption/example_config.yaml"
     tmp_filepath = tmp_path / "test"
     tmp_filepath.mkdir()
-    shutil.copy(
-        src=filepath.as_posix(), dst=f"{tmp_filepath.as_posix()}/example_config.yaml"
-    )
+    shutil.copy(src=filepath.as_posix(), dst=f"{tmp_filepath.as_posix()}/example_config.yaml")
     config_crypto.encrypt_config(
         file_path=tmp_filepath / "example_config.yaml", user_password="passw"
     )

@@ -36,23 +36,23 @@ from .base_model import BaseModel
 from .data_utils import (
     DeepChainMap,
     dedupe_model_list,
+    lookup_by_str,
     match_all,
     merge_models,
     sort_model_list,
     strip_empty_and_private,
     strip_key,
-    lookup_by_str,
 )
 from .validators import (
     clean_protocol,
     cleanstr,
+    convert_arbitrary_path_to_purepath,
+    strip_quotes,
     validate_ecs,
     validate_hash,
+    validate_hex,
     validate_ip,
     validate_mac,
-    strip_quotes,
-    validate_hex,
-    convert_arbitrary_path_to_purepath,
 )
 
 # NOTE:
@@ -68,7 +68,8 @@ from .validators import (
 # Needed for generation of JSON schema + the documentation
 @classmethod
 def __pathlib_modify_schema__(
-    cls, field_schema: dict[str, Any]  # noqa: ARG001
+    cls,  # noqa: ARG001
+    field_schema: dict[str, Any],
 ) -> None:
     field_schema.update(type="string", format="path")
 
@@ -137,9 +138,7 @@ class Description(BaseModel):
     or other general information that is useful to note.
     """
 
-    full: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    full: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     Combination of vendor, brand, model, and any other
     identifiers. Used to perform lookups with fuzzy string matching.
@@ -160,9 +159,7 @@ class Description(BaseModel):
     - ``351S``
     """
 
-    product: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    product: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     The product identifier for the device, minus the vendor.
     This is includes the brand and model.
@@ -176,9 +173,7 @@ class Description(BaseModel):
     vendor: Vendor = Vendor()
     """The manufacturer/vendor of the device."""
 
-    _strip_quotes = validator("description", "contact_info", allow_reuse=True)(
-        strip_quotes
-    )
+    _strip_quotes = validator("description", "contact_info", allow_reuse=True)(strip_quotes)
 
 
 class Hardware(BaseModel):
@@ -296,15 +291,13 @@ class Hash(BaseModel):
     )
     """SHA256 hash."""
 
-    sha512: constr(min_length=128, max_length=128, strip_whitespace=True) | None = (
-        Field(default=None, title="SHA512 hash")
+    sha512: constr(min_length=128, max_length=128, strip_whitespace=True) | None = Field(
+        default=None, title="SHA512 hash"
     )
     """SHA512 hash."""
 
     # Validators
-    _validate_hash = validator("md5", "sha1", "sha256", "sha512", allow_reuse=True)(
-        validate_hash
-    )
+    _validate_hash = validator("md5", "sha1", "sha256", "sha512", allow_reuse=True)(validate_hash)
 
 
 class User(BaseModel):
@@ -312,9 +305,7 @@ class User(BaseModel):
     Information describing a user on a device.
     """
 
-    description: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    description: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     General description of the user (this is open to interpretation).
     """
@@ -338,9 +329,7 @@ class User(BaseModel):
     - example@example.com
     """
 
-    full_name: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    full_name: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     The user's full name, if known.
 
@@ -355,9 +344,7 @@ class User(BaseModel):
     Unique identifier of the user.
     """
 
-    name: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    name: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     Short name or login of the user.
     """
@@ -396,9 +383,7 @@ class User(BaseModel):
     from the device that may be relevant.
     """
 
-    _sort_by_fields: tuple[str] = PrivateAttr(
-        default=("id", "name", "full_name", "description")
-    )
+    _sort_by_fields: tuple[str] = PrivateAttr(default=("id", "name", "full_name", "description"))
 
     def annotate(self, dev: DeviceData | None = None):
         if dev:
@@ -539,9 +524,7 @@ class File(BaseModel):
     File creation time.
     """
 
-    description: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    description: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     General human-readable description of what the file is.
     """
@@ -864,9 +847,7 @@ class Logic(BaseModel):
        of Modbus registers.
     """
 
-    author: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    author: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     Name of the person/organization/program that wrote the logic.
     """
@@ -912,9 +893,7 @@ class Logic(BaseModel):
     :term:`UTC` timestamp of when the logic was last updated on the device.
     """
 
-    name: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    name: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     Project name or other such identifier for the logic,
     e.g. a human-readable name for the logic stored by the device.
@@ -936,9 +915,9 @@ class Logic(BaseModel):
     protection schemes on a substation relay.
     """
 
-    _strip_quotes = validator(
-        "author", "description", "name", "id", "parsed", allow_reuse=True
-    )(strip_quotes)
+    _strip_quotes = validator("author", "description", "name", "id", "parsed", allow_reuse=True)(
+        strip_quotes
+    )
 
     def annotate(self, dev: DeviceData | None = None):
         if self.original and not _all_hashes_set(self.hash):
@@ -1065,9 +1044,7 @@ class UEFIHash(BaseModel):
     pathname: str = ""
     hash: str = ""
     _es_index_varname: str = PrivateAttr(default="ELASTIC_UEFI_HASHES_INDEX")
-    _sort_by_fields: tuple[str] = PrivateAttr(
-        default=("file_system", "pathname", "hash")
-    )
+    _sort_by_fields: tuple[str] = PrivateAttr(default=("file_system", "pathname", "hash"))
 
     def gen_elastic_content(self, dev: DeviceData | None = None) -> dict:
         self.annotate(dev)  # populate fields
@@ -1595,12 +1572,10 @@ class Interface(BaseModel):
     )
 
     # Validators
-    _clean_str = validator(
-        "application", "type", "parity", "flow_control", allow_reuse=True
-    )(cleanstr)
-    _validate_ip = validator("ip", "subnet_mask", "gateway", allow_reuse=True)(
-        validate_ip
+    _clean_str = validator("application", "type", "parity", "flow_control", allow_reuse=True)(
+        cleanstr
     )
+    _validate_ip = validator("ip", "subnet_mask", "gateway", allow_reuse=True)(validate_ip)
     _validate_mac = validator("mac", "hardware_mac", allow_reuse=True)(validate_mac)
     _strip_quotes = validator("description", allow_reuse=True)(strip_quotes)
 
@@ -2288,9 +2263,7 @@ class Event(BaseModel):
     - ``pipeline_error`` : Used for indicating there was an error processing the event
     """
 
-    message: constr(strip_whitespace=True) = Field(
-        default="", elastic_type=KEYWORD_AND_TEXT
-    )
+    message: constr(strip_whitespace=True) = Field(default="", elastic_type=KEYWORD_AND_TEXT)
     """
     Simplified message body, for example a human-readable portion of the raw event.
     This should be set *in addition to* setting the ``original`` field.
@@ -2601,9 +2574,7 @@ class Memory(BaseModel):
     """
 
     _es_index_varname: str = PrivateAttr(default="ELASTIC_MEMORY_INDEX")
-    _sort_by_fields: tuple[str] = PrivateAttr(
-        default=("device", "dataset", "address", "created")
-    )
+    _sort_by_fields: tuple[str] = PrivateAttr(default=("device", "dataset", "address", "created"))
 
     # Validators
     _validate_hexes = validator("address", "value", allow_reuse=True)(validate_hex)
@@ -3194,11 +3165,7 @@ class DeviceData(BaseModel):
         module_defaults = [
             # deepcopy to prevent changes to self._options from modifying source
             deepcopy(
-                {
-                    k: v
-                    for k, v in module.default_options.items()
-                    if k not in self._DEFAULT_OPTIONS
-                }
+                {k: v for k, v in module.default_options.items() if k not in self._DEFAULT_OPTIONS}
             )
             for module in module_api.modules.values()
             if getattr(module, "default_options", None)
@@ -3266,8 +3233,7 @@ class DeviceData(BaseModel):
                     value = str(value)  # convert ipaddress objects to str
                 return value
         raise PeatError(
-            f"'.address': no valid address defined out of "
-            f"{valid_addresses} (dev.id: {self.id})"
+            f"'.address': no valid address defined out of {valid_addresses} (dev.id: {self.id})"
         )
 
     @property
@@ -3296,17 +3262,13 @@ class DeviceData(BaseModel):
                 c_locals = inspect.stack()[1][0].f_locals
                 klass = c_locals.get("cls", c_locals.get("self"))
                 if klass and hasattr(klass, "default_options"):
-                    k_name = getattr(
-                        klass, "__name__", klass.__class__.__name__
-                    )  # type: str
+                    k_name = getattr(klass, "__name__", klass.__class__.__name__)  # type: str
                     if not self._last_module or (
                         self._last_module and k_name != self._last_module
                     ):
                         self._last_module = k_name
                         self._module_default_options.clear()
-                        self._module_default_options.update(
-                            deepcopy(klass.default_options)
-                        )
+                        self._module_default_options.update(deepcopy(klass.default_options))
             except Exception:
                 pass
         return self._options
@@ -3343,10 +3305,7 @@ class DeviceData(BaseModel):
 
         if not self._cache.get("_rand_id"):
             self._cache["_rand_id"] = consts.gen_random_dev_id()
-            log.critical(
-                f"Failed to find a valid ID! Using "
-                f"'{self._cache['_rand_id']}' as the ID"
-            )
+            log.critical(f"Failed to find a valid ID! Using '{self._cache['_rand_id']}' as the ID")
 
         return self._cache["_rand_id"]
 
@@ -3445,9 +3404,7 @@ class DeviceData(BaseModel):
         if not to_include:
             to_include = None
 
-        results = self.dict(
-            exclude=to_exclude, include=to_include, exclude_defaults=True
-        )
+        results = self.dict(exclude=to_exclude, include=to_include, exclude_defaults=True)
 
         if not include_original:  # Note: parsed logic is stored in "parsed"
             results = strip_key(results, "original")
@@ -3542,9 +3499,7 @@ class DeviceData(BaseModel):
 
             return True
         except Exception:
-            log.exception(
-                f"Failed to export data to files for device '{self.get_id()}'"
-            )
+            log.exception(f"Failed to export data to files for device '{self.get_id()}'")
             state.error = True
             return False
 
@@ -3599,9 +3554,7 @@ class DeviceData(BaseModel):
                 )
 
                 # Export all models in the list to Elasticsearch
-                if not export_models_to_elastic(
-                    models=model_list, dev=self, elastic=elastic
-                ):
+                if not export_models_to_elastic(models=model_list, dev=self, elastic=elastic):
                     success = False
 
         if success:
@@ -3641,7 +3594,8 @@ class DeviceData(BaseModel):
         return results
 
     def gen_elastic_content(
-        self, dev: DeviceData | None = None  # noqa: ARG002
+        self,
+        dev: DeviceData | None = None,  # noqa: ARG002
     ) -> dict:
         self.populate_fields()
 
@@ -3733,9 +3687,7 @@ class DeviceData(BaseModel):
 
         # If device file output is disabled, return the filename as a path
         if not self._out_dir and not config.DEVICE_DIR:
-            log.debug(
-                f"Device file output is disabled, skipping write to file {filename}"
-            )
+            log.debug(f"Device file output is disabled, skipping write to file {filename}")
             return Path(filename)
 
         if not out_dir:
@@ -3878,13 +3830,11 @@ class DeviceData(BaseModel):
         if not self.description.full:
             if self.description.vendor.name and self.description.product:
                 self.description.full = (
-                    f"{self.description.vendor.name} "
-                    f"{self.description.product}".strip()
+                    f"{self.description.vendor.name} {self.description.product}".strip()
                 )
             elif self.description.vendor.id and self.description.product:
                 self.description.full = (
-                    f"{self.description.vendor.id} "
-                    f"{self.description.product}".strip()
+                    f"{self.description.vendor.id} {self.description.product}".strip()
                 )
 
         # Populate vendor name from ID
@@ -3900,9 +3850,7 @@ class DeviceData(BaseModel):
                 [x for x in [vend, self.os.name, self.os.version] if x]
             ).strip()
 
-    def retrieve(
-        self, attr: str, search: dict[str, Any]
-    ) -> BaseModel | list[BaseModel] | None:
+    def retrieve(self, attr: str, search: dict[str, Any]) -> BaseModel | list[BaseModel] | None:
         """
         Retrieve a complex device data value.
 
@@ -4219,9 +4167,7 @@ class DeviceData(BaseModel):
             if_position = match_all(self.interface, interface_lookup)
             if if_position is not None:
                 # Merge with existing services on the interface
-                self._lookup_and_merge(
-                    self.interface[if_position].services, value, lookup
-                )
+                self._lookup_and_merge(self.interface[if_position].services, value, lookup)
 
         # Copy comm attributes from first interface added
         if key == "interface" and len(self.interface) == 1:
@@ -4368,9 +4314,7 @@ class DeviceData(BaseModel):
         """
         attrs = [k for k in self.__dict__.keys() if not k.startswith("_")]
 
-        attribute_names = [
-            attr for attr in attrs if isinstance(getattr(self, attr, None), typ)
-        ]
+        attribute_names = [attr for attr in attrs if isinstance(getattr(self, attr, None), typ)]
 
         return attribute_names
 
@@ -4516,9 +4460,7 @@ def process_file_extension(file: File) -> None:
                 file.mime_type = guessed_type
 
 
-def annotate_obj_and_file(
-    obj: Firmware | Logic, field_name: str, dev: DeviceData
-) -> None:
+def annotate_obj_and_file(obj: Firmware | Logic, field_name: str, dev: DeviceData) -> None:
     """
     Populate original field if not set,
     and save data to file if it hasn't been.
@@ -4537,8 +4479,7 @@ def annotate_obj_and_file(
                     obj.original = f.read()
             except UnicodeDecodeError:
                 log.warning(
-                    f"Skipping save of non-text source for logic "
-                    f"(source: {obj.file.local_path})"
+                    f"Skipping save of non-text source for logic (source: {obj.file.local_path})"
                 )
 
     # If there's data and the data hasn't been saved locally (and output directory is set)

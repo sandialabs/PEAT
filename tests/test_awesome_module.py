@@ -64,9 +64,7 @@ def test_import_awesome_module_parse_cli(run_peat, tmp_path, example_module_file
 
 
 @pytest.mark.slow
-def test_import_awesome_module_parse_cli_no_device_type(
-    run_peat, tmp_path, example_module_file
-):
+def test_import_awesome_module_parse_cli_no_device_type(run_peat, tmp_path, example_module_file):
     """
     Regression test for bug fixed on 04/20/2023.
     The following command would fail with a confusing exception, due to lack of "-d" argument:

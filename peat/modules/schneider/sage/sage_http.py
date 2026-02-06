@@ -83,9 +83,7 @@ class SageHTTP(HTTP):
                 ) as connection:
                     sock = context.wrap_socket(connection, server_hostname=self.ip)
             else:
-                sock = socket.create_connection(
-                    address=(self.ip, self.port), timeout=self.timeout
-                )
+                sock = socket.create_connection(address=(self.ip, self.port), timeout=self.timeout)
         except Exception:
             self.log.exception(
                 "An error occurred when trying to create or establish a socket connection"
@@ -107,9 +105,7 @@ class SageHTTP(HTTP):
                 self.log.error("Socket timed out while waiting for additional data")
                 break
             except Exception as ex:
-                self.log.error(
-                    f"An unknown error occurred when getting data from a socket: {ex}"
-                )
+                self.log.error(f"An unknown error occurred when getting data from a socket: {ex}")
                 break
 
         return response_data
@@ -179,9 +175,7 @@ class SageHTTP(HTTP):
         # Wait for device to get the config ready for download
         while status != 5:
             try:
-                config_page_post_data = (
-                    f"type=UP_DOWN&entid=&state=&exectime=&channel={channel}"
-                )
+                config_page_post_data = f"type=UP_DOWN&entid=&state=&exectime=&channel={channel}"
 
                 response = session.post(
                     url,
@@ -200,9 +194,7 @@ class SageHTTP(HTTP):
                 # )
 
                 if response.status_code != 200:
-                    self.log.error(
-                        f"Unexpected response status code: {response.status_code}"
-                    )
+                    self.log.error(f"Unexpected response status code: {response.status_code}")
                     break
 
                 response_text = response.text
@@ -210,9 +202,7 @@ class SageHTTP(HTTP):
                 if '"status":' in response_text:
                     status_start = response_text.find('"status": "') + len('"status": ')
                     status_end = response_text.find("}", status_start)
-                    status = int(
-                        response_text[status_start:status_end].strip().strip('"')[:1]
-                    )
+                    status = int(response_text[status_start:status_end].strip().strip('"')[:1])
                 else:
                     self.log.error("'status' not found in response")
                     break
@@ -226,15 +216,13 @@ class SageHTTP(HTTP):
                     channel = "0"
                 elif status == 5:
                     if '"fw_fileName"' in response_text:
-                        fw_filename_start = response_text.find(
-                            '"fw_fileName" : "'
-                        ) + len('"fw_fileName" : ')
+                        fw_filename_start = response_text.find('"fw_fileName" : "') + len(
+                            '"fw_fileName" : '
+                        )
                         fw_filename_end = response_text.find("}", fw_filename_start)
 
                         fw_filename = (
-                            response_text[fw_filename_start:fw_filename_end]
-                            .strip()
-                            .strip('"')
+                            response_text[fw_filename_start:fw_filename_end].strip().strip('"')
                         )
 
                         self.log.debug(f"config filename is: {fw_filename}")
@@ -244,9 +232,7 @@ class SageHTTP(HTTP):
                     self.log.error("'fw_fileName' not found in response")
                     break
             except requests.exceptions.RequestException as ex:
-                self.log.error(
-                    f"An error occurred when updating the web configuration file: {ex}"
-                )
+                self.log.error(f"An error occurred when updating the web configuration file: {ex}")
                 break
             except Exception as ex:
                 self.log.error(f"An unexpected error occurred: {ex}")
@@ -272,9 +258,7 @@ class SageHTTP(HTTP):
             )
 
             if not response:
-                self.log.error(
-                    f"Failed to download config file '{self.config_file_name}'"
-                )
+                self.log.error(f"Failed to download config file '{self.config_file_name}'")
                 return b""
 
             return response.content

@@ -71,10 +71,7 @@ class SELAscii(ABC):
         exit_handler.unregister(self.disconnect, "CONNECTION")
 
         if exc_type:
-            self.log.debug(
-                f"Unhandled exception while exiting - "
-                f"{exc_type.__name__}: {exc_val}"
-            )
+            self.log.debug(f"Unhandled exception while exiting - {exc_type.__name__}: {exc_val}")
             self.log.trace(
                 f"Exception traceback\n"
                 f"{''.join(traceback.format_tb(exc_tb))}"
@@ -85,10 +82,7 @@ class SELAscii(ABC):
         return self.address
 
     def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}(address={self.address}, "
-            f"timeout={self.timeout})"
-        )
+        return f"{self.__class__.__name__}(address={self.address}, timeout={self.timeout})"
 
     def _save_state_to_file(self) -> bool:
         """
@@ -193,9 +187,7 @@ class SELAscii(ABC):
         if self.POST_WRITE_SLEEP:
             sleep(self.POST_WRITE_SLEEP)
 
-    def read_lines(
-        self, exclude_command: bool = True, read_until_str: bool = False
-    ) -> list[str]:
+    def read_lines(self, exclude_command: bool = True, read_until_str: bool = False) -> list[str]:
         """
         Read raw data and process it into a clean trimmed list.
 
@@ -267,8 +259,7 @@ class SELAscii(ABC):
 
         if not match:
             self.log.error(
-                f"Failed to find data in command output.\n"
-                f"** raw data **\n{repr(raw_data)}"
+                f"Failed to find data in command output.\n** raw data **\n{repr(raw_data)}"
             )
             return ""
 
@@ -286,9 +277,7 @@ class SELAscii(ABC):
             )
 
             if not self.elevate(level):
-                raise DeviceError(
-                    f"failed to auto-elevate privilege level on {self.address}"
-                )
+                raise DeviceError(f"failed to auto-elevate privilege level on {self.address}")
 
     def elevate(self, level: int, creds: dict | None = None) -> bool:
         """
@@ -318,9 +307,7 @@ class SELAscii(ABC):
             return False
 
         if level == self.priv_level:
-            self.log.debug(
-                f"Already at privilege level {level}, no elevation commands sent"
-            )
+            self.log.debug(f"Already at privilege level {level}, no elevation commands sent")
             return True
 
         if not creds:
@@ -366,8 +353,7 @@ class SELAscii(ABC):
                     return False
         except Exception as ex:
             self.log.debug(
-                f"Failed elevation to privilege level {level} from "
-                f"{self.priv_level}: {ex}"
+                f"Failed elevation to privilege level {level} from {self.priv_level}: {ex}"
             )
             self.disconnect()
             return False
@@ -423,9 +409,7 @@ class SELAscii(ABC):
         if not current_group:
             self.log.warning("Unable to determine active settings group")
         elif current_group == new_group:
-            self.log.info(
-                f"Settings group '{new_group}' is already active, skipping change"
-            )
+            self.log.info(f"Settings group '{new_group}' is already active, skipping change")
             return
 
         # Change active group requires level 2
@@ -512,23 +496,17 @@ class SELAscii(ABC):
         for line in lines[:-2]:  # Exclude '=>>' and weird byte lines
             # Handle any weird input that could happen
             if "," not in line:
-                self.log.trace2(
-                    f"No comma in line of id command output. Raw line: {line}"
-                )
+                self.log.trace2(f"No comma in line of id command output. Raw line: {line}")
                 continue
 
             # Example line: "DEVID=STATION A","049C"
             # Remove the trailing hex and quotes, then split on '='
-            key_val = (
-                line.rpartition(",")[0].replace('"', "").replace("\x02", "").split("=")
-            )
+            key_val = line.rpartition(",")[0].replace('"', "").replace("\x02", "").split("=")
             self.log.trace2(f"get_id() => 'key_val': {key_val}")
 
             # Handle cases of no value for a key, e.g. "configVersion=","0609"
             if len(key_val) == 1:
-                self.log.trace(
-                    f"No value for key '{key_val[0]}' in result of id command"
-                )
+                self.log.trace(f"No value for key '{key_val[0]}' in result of id command")
             else:
                 info[key_val[0]] = key_val[1]  # info['DEVID'] = 'STATION A'
 
@@ -623,9 +601,7 @@ class SELAscii(ABC):
                 self.log.warning(f"{dir_name} is empty or doesn't exist")
                 return []
 
-            m = re.search(
-                r"(?P<item>[\w.]+)\s+(?P<type>\w)", line, re.ASCII | re.IGNORECASE
-            )
+            m = re.search(r"(?P<item>[\w.]+)\s+(?P<type>\w)", line, re.ASCII | re.IGNORECASE)
 
             if m:
                 name = m.groups()[0]  # name, filetype ('R' or 'D')

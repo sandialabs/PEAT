@@ -107,9 +107,7 @@ class TotusHTTP(HTTP):
             return True
 
         if config.DEBUG:
-            self.log.trace(
-                f"Logging in with username '{username}' and password '{password}'"
-            )
+            self.log.trace(f"Logging in with username '{username}' and password '{password}'")
         else:
             self.log.debug(f"Logging in with username '{username}'")
 
@@ -161,8 +159,7 @@ class TotusHTTP(HTTP):
 
                 if not response or not response.text:
                     self.log.warning(
-                        f"Failed to get {label} from {method['page']}: "
-                        "no data or error response"
+                        f"Failed to get {label} from {method['page']}: no data or error response"
                     )
                     failed_methods.append(label)
                     continue
@@ -197,14 +194,11 @@ class TotusHTTP(HTTP):
 
                 at_least_one_success = True
             except Exception as ex:
-                self.log.exception(
-                    f"'{label}' method failed with unhandled exception: {ex}"
-                )
+                self.log.exception(f"'{label}' method failed with unhandled exception: {ex}")
                 failed_methods.append(label)
 
         self.log.info(
-            f"Finished getting and processing data from {dev.ip} "
-            f"using {len(self.methods)} methods"
+            f"Finished getting and processing data from {dev.ip} using {len(self.methods)} methods"
         )
 
         if failed_methods:
@@ -246,9 +240,7 @@ class TotusHTTP(HTTP):
             # Calculate start_time from device's timestamp - uptime
             curr_time = utils.parse_date(time_info["time"])
             if curr_time:
-                dev.start_time = curr_time - timedelta(
-                    seconds=dev.uptime.total_seconds()
-                )
+                dev.start_time = curr_time - timedelta(seconds=dev.uptime.total_seconds())
 
     @staticmethod
     def process_ntp_config(dev: DeviceData, ntp_config: dict) -> None:
@@ -368,9 +360,7 @@ class TotusHTTP(HTTP):
             )
 
     @staticmethod
-    def process_network_configuration(
-        dev: DeviceData, net_config: dict[str, list[dict]]
-    ) -> None:
+    def process_network_configuration(dev: DeviceData, net_config: dict[str, list[dict]]) -> None:
         for raw_if in net_config["devices"]:
             iface = Interface(name=raw_if.get("name", ""))
 
@@ -429,9 +419,7 @@ class TotusHTTP(HTTP):
                     dev.related.mac.add(mac)
 
     @staticmethod
-    def process_users(
-        dev: DeviceData, users: dict[str, list[dict[str, str | int]]]
-    ) -> None:
+    def process_users(dev: DeviceData, users: dict[str, list[dict[str, str | int]]]) -> None:
         for user_dict in users["items"]:
             dev.related.user.add(user_dict.get("sub", ""))
             dev.related.user.add(user_dict.get("name", ""))
@@ -467,9 +455,7 @@ class TotusHTTP(HTTP):
         """
         for role in roles["items"]:
             if not role.get("name"):
-                log.warning(
-                    f"Skipping role with no name for {dev.get_comm_id()}: {role}"
-                )
+                log.warning(f"Skipping role with no name for {dev.get_comm_id()}: {role}")
                 continue
 
             dev.related.roles.add(role["name"])
@@ -495,9 +481,7 @@ class TotusHTTP(HTTP):
         Serial ports on device.
         """
         for ser_dev in serial_ports:
-            iface = Interface(
-                name=ser_dev["name"], type="serial", serial_port=ser_dev["device"]
-            )
+            iface = Interface(name=ser_dev["name"], type="serial", serial_port=ser_dev["device"])
 
             if ser_dev.get("flow_control") and "none" in ser_dev["flow_control"]:
                 iface.flow_control = "none"
@@ -541,8 +525,7 @@ class TotusHTTP(HTTP):
                     dev.related.files.add(key_parts[0])
                 else:
                     log.warning(
-                        f"TotusHTTP: failed to parse SSH key "
-                        f"from {dev.ip} (key='{key_parts}')"
+                        f"TotusHTTP: failed to parse SSH key from {dev.ip} (key='{key_parts}')"
                     )
                     continue
 
@@ -710,9 +693,7 @@ class TotusHTTP(HTTP):
                 mb_data.append(
                     {
                         h: str(td.string) if td.string else None
-                        for h, td in zip(
-                            mb_headers, tbl_entry.find_all("td"), strict=False
-                        )
+                        for h, td in zip(mb_headers, tbl_entry.find_all("td"), strict=False)
                     }
                 )
 
@@ -783,9 +764,7 @@ class TotusHTTP(HTTP):
                 parsed_section.append(
                     {
                         h: str(td.string) if td.string else None
-                        for h, td in zip(
-                            section_headers, tbl_entry.find_all("td"), strict=False
-                        )
+                        for h, td in zip(section_headers, tbl_entry.find_all("td"), strict=False)
                     }
                 )
             dnp3_data[section_name] = parsed_section

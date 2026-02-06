@@ -78,12 +78,8 @@ class D25Telnet:
         try:
             self.sock.connect((self.ip, self.port))
         except TimeoutError:
-            self.log.debug(
-                f"Socket timed out during connect (timeout: {self.timeout} seconds)"
-            )
-            raise Exception(
-                f"socket timeout during connection to {str(self)}"
-            ) from None
+            self.log.debug(f"Socket timed out during connect (timeout: {self.timeout} seconds)")
+            raise Exception(f"socket timeout during connection to {str(self)}") from None
         self.is_connected = True
         return self.is_connected
 
@@ -159,8 +155,7 @@ class D25Telnet:
                         self.select_menu_option(c)
                 else:
                     self.log.warning(
-                        "Trouble navigating to desired menu "
-                        f"(menu options: {menu_options})"
+                        f"Trouble navigating to desired menu (menu options: {menu_options})"
                     )
                     return False
 
@@ -411,9 +406,7 @@ class GERTU(DeviceModule):
         return True
 
     @classmethod
-    def process_io(
-        cls, dev: DeviceData, data: dict[str, str], typ: str, direction: str
-    ) -> None:
+    def process_io(cls, dev: DeviceData, data: dict[str, str], typ: str, direction: str) -> None:
         for addr in data.keys():
             io = IO(
                 address=addr,
@@ -468,9 +461,7 @@ class GERTU(DeviceModule):
                         dataset="user_log",
                         kind={"event"},
                         extra={},
-                        module=(
-                            cls.__name__ if not dev._module else dev._module.__name__
-                        ),
+                        module=(cls.__name__ if not dev._module else dev._module.__name__),
                         sequence=int(seq),
                         type={"access", "allowed", "user", "connection"},
                     )
@@ -483,10 +474,7 @@ class GERTU(DeviceModule):
                                 raw_time=log_values[log_type], year_first=True
                             )
                         except Exception as ex:
-                            cls.log.warning(
-                                f"Failed to parse event timestamp "
-                                f"for {dev.ip}: {ex}"
-                            )
+                            cls.log.warning(f"Failed to parse event timestamp for {dev.ip}: {ex}")
                             event.kind.add("pipeline_error")
                     else:
                         cls.log.warning(
@@ -773,9 +761,7 @@ def parse_internet_stats_menu(data: str) -> dict:
     # Fix numbers not separated by commas
     re_result = re.finditer(r"\d+\s\d+", data)
     for r in re_result:
-        data = data.replace(
-            data[r.start() : r.end()], data[r.start() : r.end()].replace(" ", ",")
-        )
+        data = data.replace(data[r.start() : r.end()], data[r.start() : r.end()].replace(" ", ","))
     parts = data.split(",")
 
     # Get Keys and Values

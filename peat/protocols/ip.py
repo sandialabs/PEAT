@@ -107,10 +107,7 @@ def check_tcp_port(
         return True
 
     if (not syn_sweep and config.DEBUG >= 3) or config.DEBUG >= 4:
-        log.trace3(
-            f"TCP scan of {ip}:{port} failed due to "
-            f"an error: {err_code_to_str(result)}"
-        )
+        log.trace3(f"TCP scan of {ip}:{port} failed due to an error: {err_code_to_str(result)}")
 
     return False
 
@@ -194,16 +191,13 @@ def fingerprint(
                 )
             except Exception as err:
                 log.debug(
-                    f"Failed to receive a response from an unknown "
-                    f"device due to an error: {err}"
+                    f"Failed to receive a response from an unknown device due to an error: {err}"
                 )
                 raise err from None
         return None
 
 
-def make_udp_socket(
-    timeout: float | None = None, broadcast: bool = False
-) -> socket.socket | None:
+def make_udp_socket(timeout: float | None = None, broadcast: bool = False) -> socket.socket | None:
     """
     Creates and binds a IPv4 UDP :class:`~socket.socket`.
 
@@ -233,9 +227,7 @@ def make_udp_socket(
     return sock
 
 
-def send_discovery_packet(
-    sock: socket.socket, ip: str, port: int, payload: bytes
-) -> bool:
+def send_discovery_packet(sock: socket.socket, ip: str, port: int, payload: bytes) -> bool:
     """
     Send initial hello packet used to fingerprint the device.
 

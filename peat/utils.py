@@ -76,10 +76,7 @@ def fmt_duration(seconds: int | float | timedelta) -> str:
     if (isinstance(seconds, timedelta) and seconds.seconds >= 60) or (
         not isinstance(seconds, timedelta) and int(seconds) >= 60
     ):
-        return (
-            f"{format_timespan(seconds, detailed=False, max_units=10)}"
-            f" [{seconds:.2f} seconds]"
-        )
+        return f"{format_timespan(seconds, detailed=False, max_units=10)} [{seconds:.2f} seconds]"
     else:
         return format_timespan(seconds, detailed=False, max_units=10)
 
@@ -226,30 +223,28 @@ def get_formatted_platform_str() -> str:
     """
 
     runtime_info = f"""
-Start time          {SYSINFO['start_time']} ({SYSINFO['timezone']})
+Start time          {SYSINFO["start_time"]} ({SYSINFO["timezone"]})
 PEAT directory      {_pth_log_string(config.OUT_DIR)}
 Run directory       {_pth_log_string(config.RUN_DIR)}
-PEAT Run ID         {SYSINFO['run_id']}
+PEAT Run ID         {SYSINFO["run_id"]}
 PEAT Entrypoint     {state.entrypoint}\n"""
     if "cli_arguments" in SYSINFO:
-        runtime_info += (
-            f"\nCLI arguments       {SYSINFO['cli_exe']} {SYSINFO['cli_arguments']}"
-        )
+        runtime_info += f"\nCLI arguments       {SYSINFO['cli_exe']} {SYSINFO['cli_arguments']}"
     environment_info = f"""\n
 Environment
-    Python version      {SYSINFO['python_version']} ({SYSINFO['python_impl']} {SYSINFO['arch']})
-    Python executable   {SYSINFO['python_exe']}
+    Python version      {SYSINFO["python_version"]} ({SYSINFO["python_impl"]} {SYSINFO["arch"]})
+    Python executable   {SYSINFO["python_exe"]}
     Current directory   {Path.cwd().as_posix()}
-    tcpdump path        {SYSINFO['tcpdump']}
-    Process ID          {SYSINFO['pid']}\n"""
+    tcpdump path        {SYSINFO["tcpdump"]}
+    Process ID          {SYSINFO["pid"]}\n"""
     system_info = f"""
 System
-    Hostname       {SYSINFO['hostname']}
-    Username       {SYSINFO['username']}
-    OS             {SYSINFO['os_full']}
-    CPU            {SYSINFO['cpu']}
-    Containerized  {SYSINFO['containerized']}
-    Podman         {SYSINFO['podman']}\n"""
+    Hostname       {SYSINFO["hostname"]}
+    Username       {SYSINFO["username"]}
+    OS             {SYSINFO["os_full"]}
+    CPU            {SYSINFO["cpu"]}
+    Containerized  {SYSINFO["containerized"]}
+    Podman         {SYSINFO["podman"]}\n"""
     if config.OUT_DIR and config.OUT_DIR.parent.exists():
         disk_stats = shutil.disk_usage(config.OUT_DIR.parent.as_posix())
         disk_info = f"""    Disk space (disk where OUT_DIR is configured)
@@ -282,10 +277,10 @@ def get_debug_string() -> str:
     Locale                 {loc if loc[0] else locale.getdefaultlocale()}
     Filesystem encoding    {sys.getfilesystemencoding()}
     sys.path               {sys.path}
-    User site-packages     {site.getusersitepackages() if hasattr(site, 'getusersitepackages') else ''}
-    Global site-packages   {site.getsitepackages() if hasattr(site, 'getsitepackages') else ''}
+    User site-packages     {site.getusersitepackages() if hasattr(site, "getusersitepackages") else ""}
+    Global site-packages   {site.getsitepackages() if hasattr(site, "getsitepackages") else ""}
     Environ keys           {list(dict(os.environ).keys())}
-    PATH                   {os.environ.get('PATH')}\n\n"""  # noqa: E501
+    PATH                   {os.environ.get("PATH")}\n\n"""  # noqa: E501
     except Exception as ex:
         log.exception(f"Failed to generate debug info: {ex}")
         return ""
@@ -316,8 +311,7 @@ def get_resource(package: str, file: str) -> str:
     if not os.path.exists(path):
         state.error = True
         raise FileNotFoundError(
-            f"Resource does not exist at path '{path}' "
-            f"(package: '{package}', file: '{file}')"
+            f"Resource does not exist at path '{path}' (package: '{package}', file: '{file}')"
         )
 
     return path
@@ -362,14 +356,9 @@ def copy_file(src_path: Path, dst_path: Path, overwrite: bool = False) -> None:
 
     if dst_path.exists() and dst_path.samefile(src_path):
         log.debug(
-            f"Skipping copying of {src_path.name} to "
-            f"{dst_path.parent.name}, it's the same file"
+            f"Skipping copying of {src_path.name} to {dst_path.parent.name}, it's the same file"
         )
-    elif (
-        not overwrite
-        and dst_path.exists()
-        and calc_hash(src_path) != calc_hash(dst_path)
-    ):
+    elif not overwrite and dst_path.exists() and calc_hash(src_path) != calc_hash(dst_path):
         incremented_path = dup_path(dst_path)
         log.warning(
             f"Destination file '{str(dst_path)}' exists and has a "
@@ -629,10 +618,7 @@ def write_file(
 
     # Check the file argument is a valid type
     if not isinstance(file, Path):
-        log.critical(
-            f"Invalid file argument type '{type(file).__name__}' "
-            f"for file '{repr(file)}'"
-        )
+        log.critical(f"Invalid file argument type '{type(file).__name__}' for file '{repr(file)}'")
         state.error = True
         return False
 
@@ -682,9 +668,7 @@ def write_file(
             existing = json.loads(file.read_text(encoding="utf-8"))
 
             if type(existing) is not type(data):
-                log.critical(
-                    f"write_file: existing data doesn't match new data for '{file.name}'"
-                )
+                log.critical(f"write_file: existing data doesn't match new data for '{file.name}'")
                 state.error = True
                 return False
 
@@ -947,9 +931,7 @@ def is_email(to_check: str) -> bool:
     """
     return bool(
         to_check
-        and re.fullmatch(
-            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", to_check.strip()
-        )
+        and re.fullmatch(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", to_check.strip())
     )
 
 

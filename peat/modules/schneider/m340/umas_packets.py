@@ -23,9 +23,8 @@ from scapy.all import (
     XByteField,
 )
 
-from peat import CommError, config
+from peat import CommError, config, utils
 from peat import log as peat_logger
-from peat import utils
 
 # TODO: refactor the UMAS packets to properly implement the UMAS protocol
 #   based on what we know now about it. hopefully improve reliability.
@@ -40,7 +39,7 @@ class Modbus(Packet):
             "length",
             None,
             length_of="data",
-            adjust=lambda pkt, x: (x + 2),  # noqa: ARG005
+            adjust=lambda pkt, x: x + 2,  # noqa: ARG005
         ),
         XByteField("unitID", 0),
         ByteField("functionCode", 90),
@@ -168,10 +167,7 @@ def send_umas_packet(
         if config.DEBUG >= 2:
             log.trace2(f"{bytes_sent} bytes were sent to {device}")
         if bytes_sent != len(payload):
-            log.error(
-                f"Only {bytes_sent} bytes were sent "
-                f"out of {len(payload)} total bytes"
-            )
+            log.error(f"Only {bytes_sent} bytes were sent out of {len(payload)} total bytes")
     except OSError as err:
         log.exception("Could not send UMAS packet")
         raise err

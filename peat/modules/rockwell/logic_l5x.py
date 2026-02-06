@@ -192,9 +192,7 @@ class L5X(DeviceModule):
             if "Rockwell" in module_dev.description.vendor.name:
                 module_dev.description.vendor.id = "Rockwell"
         except Exception:
-            cls.log.warning(
-                f"Unknown vendor ID for module '{module_dev.name}': {vendor_id}"
-            )
+            cls.log.warning(f"Unknown vendor ID for module '{module_dev.name}': {vendor_id}")
             module_dev.extra["vendor_id"] = vendor_id
 
         if module_dict.get("major"):

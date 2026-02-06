@@ -123,9 +123,7 @@ def test_cli_pull_devices_localhost(
 
 
 @pytest.mark.slow
-def test_cli_pull_fake_subnet(
-    exec_peat, tmp_path, assert_meta_files, assert_no_criticals
-):
+def test_cli_pull_fake_subnet(exec_peat, tmp_path, assert_meta_files, assert_no_criticals):
     """
     RFC 5737 - IPv4 Address Blocks Reserved for Documentation
     https://tools.ietf.org/html/rfc5737
@@ -185,9 +183,7 @@ def test_cli_scan_results_file_localhost(
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize(
-    "device_name", ["m340", "controllogix", "siprotec", "selrelay", "sel"]
-)
+@pytest.mark.parametrize("device_name", ["m340", "controllogix", "siprotec", "selrelay", "sel"])
 def test_cli_scan_devices_short_timeout(
     run_peat,
     tmp_path,
@@ -248,9 +244,7 @@ def test_cli_scan_all_devices_short_timeout(
 
 
 @pytest.mark.slow
-def test_cli_scan_all_devices_short_timeout_duplicate_host(
-    run_peat, tmp_path, assert_meta_files
-):
+def test_cli_scan_all_devices_short_timeout_duplicate_host(run_peat, tmp_path, assert_meta_files):
     args = [
         "scan",
         "-q",
@@ -343,9 +337,7 @@ def test_cli_encryption(run_peat, tmp_path, examples_dir, read_text, datapath):
     shutil.copy(src=config_original, dst=path_to_config)
     run_peat(args)[0]
 
-    assert read_text(
-        datapath(f"{testing_path.as_posix()}/encrypted_example_config.yaml")
-    )
+    assert read_text(datapath(f"{testing_path.as_posix()}/encrypted_example_config.yaml"))
 
 
 @pytest.mark.slow

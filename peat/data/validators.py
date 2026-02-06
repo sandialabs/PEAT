@@ -128,9 +128,7 @@ def validate_hash(v: str) -> str:
     # MD5, SHA1, SHA256, SHA512
     valid_lengths = {32, 40, 64, 128}
     if len(v) not in valid_lengths:
-        raise ValueError(
-            f"invalid length {len(v)} for hash '{v}', must be one of {valid_lengths}"
-        )
+        raise ValueError(f"invalid length {len(v)} for hash '{v}', must be one of {valid_lengths}")
 
     return v
 

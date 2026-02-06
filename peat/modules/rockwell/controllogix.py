@@ -91,8 +91,7 @@ class ControlLogix(DeviceModule):
 
                 if not ftp.login(username, password):
                     cls.log.debug(
-                        f"Failed to verify {dev.ip} via FTP: "
-                        f"login failed (username: {username})"
+                        f"Failed to verify {dev.ip} via FTP: login failed (username: {username})"
                     )
                     return False
 
@@ -297,9 +296,7 @@ class ControlLogix(DeviceModule):
     def _pull(cls, dev: DeviceData) -> bool:
         # Sanity checks in case users messed up config (since there isn't config validation yet)
         if not dev.options["rockwell"]["pull_methods"]:
-            cls.log.error(
-                f"The 'rockwell.pull_methods' option is empty or null for {dev.ip}"
-            )
+            cls.log.error(f"The 'rockwell.pull_methods' option is empty or null for {dev.ip}")
             return False
 
         for method in dev.options["rockwell"]["pull_methods"]:
@@ -325,9 +322,7 @@ class ControlLogix(DeviceModule):
             )
         elif dev.service_status({"protocol": "cip"}) == "closed":
             cls.log.warning(f"Failed to pull CIP on {dev.ip}: CIP port is closed")
-        elif not dev._cache.get("cip_fingerprinted") and not cls._verify_cip_unicast(
-            dev
-        ):
+        elif not dev._cache.get("cip_fingerprinted") and not cls._verify_cip_unicast(dev):
             cls.log.warning(
                 f"Failed to pull CIP on {dev.ip}: CIP unicast "
                 f"list-identity verification method failed"
@@ -355,9 +350,7 @@ class ControlLogix(DeviceModule):
         elif (
             not dev._is_verified or not dev._cache.get("snmp_verified")
         ) and not cls._verify_snmp(dev):
-            cls.log.warning(
-                f"Failed to pull SNMP on {dev.ip}: SNMP verification method failed"
-            )
+            cls.log.warning(f"Failed to pull SNMP on {dev.ip}: SNMP verification method failed")
         else:
             dev._is_verified = True
             cls.update_dev(dev)
@@ -374,9 +367,7 @@ class ControlLogix(DeviceModule):
         elif dev.service_status({"protocol": "ftp"}) == "closed":
             cls.log.warning(f"Failed to pull FTP on {dev.ip}: FTP port is closed")
         elif not dev._is_verified and not cls._verify_ftp(dev):
-            cls.log.warning(
-                f"Failed to pull FTP on {dev.ip}: FTP verification method failed"
-            )
+            cls.log.warning(f"Failed to pull FTP on {dev.ip}: FTP verification method failed")
         else:
             dev._is_verified = True
             if cls.pull_ftp(dev):
@@ -392,9 +383,7 @@ class ControlLogix(DeviceModule):
         elif dev.service_status({"protocol": "http"}) == "closed":
             cls.log.warning(f"Failed to pull HTTP on {dev.ip}: HTTP port is closed")
         elif not dev._is_verified and not cls._verify_http(dev):
-            cls.log.warning(
-                f"Failed to pull HTTP on {dev.ip}: HTTP verification method failed"
-            )
+            cls.log.warning(f"Failed to pull HTTP on {dev.ip}: HTTP verification method failed")
         else:
             dev._is_verified = True
             if cls.pull_http(dev):
@@ -434,9 +423,7 @@ class ControlLogix(DeviceModule):
                 if welcome_string and not dev.extra.get("ftp_welcome"):
                     ftp.process_vxworks_ftp_welcome(welcome_string, dev)
 
-                if not ftp.login(
-                    dev.options["ftp"]["user"], dev.options["ftp"]["pass"]
-                ):
+                if not ftp.login(dev.options["ftp"]["user"], dev.options["ftp"]["pass"]):
                     cls.log.error(f"Failed to pull from {dev.ip} via FTP: login failed")
                     return False
 
@@ -446,8 +433,7 @@ class ControlLogix(DeviceModule):
                     file_dir = ftp.dir()
                     if not file_dir:
                         cls.log.error(
-                            f"Failed to pull from {dev.ip} via FTP: "
-                            f"no results from dir() command"
+                            f"Failed to pull from {dev.ip} via FTP: no results from dir() command"
                         )
                         return False
                     dev.extra["ftp_files"] = file_dir[0]
@@ -463,9 +449,7 @@ class ControlLogix(DeviceModule):
 
                 # TODO: parse downloaded files
 
-                cls.log.info(
-                    f"Finished downloading {len(files)} files via FTP from {dev.ip}"
-                )
+                cls.log.info(f"Finished downloading {len(files)} files via FTP from {dev.ip}")
                 return True
         except Exception as ex:
             cls.log.error(f"Failed to pull from {dev.ip} via FTP: {ex}")
@@ -491,9 +475,7 @@ class ControlLogix(DeviceModule):
                 ip=dev.ip,
                 port=dev.options["snmp"]["port"],
                 timeout=dev.options["snmp"]["timeout"],
-                community=dev._cache.get(
-                    "snmp_community", dev.options["snmp"]["community"]
-                ),
+                community=dev._cache.get("snmp_community", dev.options["snmp"]["community"]),
             )
             dev._cache["snmp_object"] = snmp
 
@@ -502,16 +484,12 @@ class ControlLogix(DeviceModule):
         if sys_uptime:
             # Timeticks: (2378054664) 275 days, 5:42:26.64
             # hundredths of a second (centiseconds)
-            dev.uptime = timedelta(
-                milliseconds=int(sys_uptime[0]["value_encoded"]) * 10
-            )
+            dev.uptime = timedelta(milliseconds=int(sys_uptime[0]["value_encoded"]) * 10)
 
         sys_contact = snmp.get(("SNMPv2-MIB", "sysContact", 0))
         if sys_contact:
             contact = str(sys_contact[0]["value_string"])
-            if (
-                "Wind River System" not in contact
-            ):  # ignore a useless contact I saw on L7
+            if "Wind River System" not in contact:  # ignore a useless contact I saw on L7
                 dev.related.user.add(contact)
 
         sys_name = snmp.get(("SNMPv2-MIB", "sysName", 0))
@@ -577,9 +555,7 @@ class ControlLogix(DeviceModule):
                 # network management subsystem, then this object contains a
                 # zero value."
                 # NOTE: this is also Timeticks,
-                if_uptime = snmp.get(("IF-MIB", "ifLastChange", index))[0][
-                    "value_encoded"
-                ]  # int
+                if_uptime = snmp.get(("IF-MIB", "ifLastChange", index))[0]["value_encoded"]  # int
                 iface.uptime = timedelta(milliseconds=int(if_uptime) * 10)
 
                 # INTEGER: false(2), true(1)
@@ -589,9 +565,7 @@ class ControlLogix(DeviceModule):
                 if if_promisc:
                     # prettyPrint in SNMP.get() converts integer to strings "false" or "true"
                     # We then convert those to a boolean using PEAT's utility function
-                    iface.promiscuous_mode = consts.str_to_bool(
-                        if_promisc[0]["value_string"]
-                    )
+                    iface.promiscuous_mode = consts.str_to_bool(if_promisc[0]["value_string"])
 
                 # why is ifConnectorPresent always false for all modules?
                 # This object has the value 'true(1)' if the interface
@@ -669,8 +643,7 @@ class ControlLogix(DeviceModule):
         timeout = dev.options["cip"]["timeout"]
 
         cls.log.info(
-            f"Beginning logic pull from {dev.ip}:{port} via CIP "
-            f"(timeout: {timeout} seconds)"
+            f"Beginning logic pull from {dev.ip}:{port} via CIP (timeout: {timeout} seconds)"
         )
 
         slots = dev.options.get("slots", [])  # type: list[int]
@@ -688,8 +661,7 @@ class ControlLogix(DeviceModule):
             dev._cache["drivers"] = {}  # dict[int, ClxCIP]
 
         cls.log.info(
-            f"Querying {dev.ip}:{port} via CIP for configuration, "
-            f"program data, and memory map...."
+            f"Querying {dev.ip}:{port} via CIP for configuration, program data, and memory map...."
         )
         for slot in slots:
             cls.log.info(f"Pulling logic from slot {slot} on {dev.ip}:{port}")
@@ -700,8 +672,7 @@ class ControlLogix(DeviceModule):
 
                 if not driver.open():
                     cls.log.warning(
-                        f"ClxCIP failed to connect via CIP to slot "
-                        f"{slot} on {dev.ip}:{port}"
+                        f"ClxCIP failed to connect via CIP to slot {slot} on {dev.ip}:{port}"
                     )
                     continue
 
@@ -789,9 +760,7 @@ class ControlLogix(DeviceModule):
             # Parse the data
             parsed_data = parse_logic(logic_dict=data, driver=driver)
             if not parsed_data:
-                cls.log.warning(
-                    f"Failed to parse logic pulled from slot {slot} on {dev.ip}"
-                )
+                cls.log.warning(f"Failed to parse logic pulled from slot {slot} on {dev.ip}")
             parsed_slots[slot] = parsed_data
 
         dev.logic.file.local_path = dev.write_file(parsed_slots, "parsed-logic.json")

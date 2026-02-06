@@ -160,9 +160,7 @@ class ModuleManager:
 
         if found:
             log.trace3(f"Found modules: {found}")
-            log.info(
-                f"Attempting to import {len(found)} device modules from {path.name}"
-            )
+            log.info(f"Attempting to import {len(found)} device modules from {path.name}")
             valid = 0
 
             for module in found:
@@ -170,18 +168,14 @@ class ModuleManager:
                     valid += 1
 
             if valid:
-                log.info(
-                    f"Finished importing {valid} valid device modules from {path.name}"
-                )
+                log.info(f"Finished importing {valid} valid device modules from {path.name}")
                 self.runtime_paths.add(path)
                 return True
 
         log.error(f"No valid modules found in path: {path!s}")
         return False
 
-    def import_module_cls(
-        self, module: type[DeviceModule], remove_aliases: bool = True
-    ) -> bool:
+    def import_module_cls(self, module: type[DeviceModule], remove_aliases: bool = True) -> bool:
         """
         Adds the module object to the registered PEAT device modules.
 
@@ -231,9 +225,7 @@ class ModuleManager:
         """
         return self.modules.get(self._norm_name(name))
 
-    def get_modules(
-        self, name: str, filter_attr: str | None = None
-    ) -> list[type[DeviceModule]]:
+    def get_modules(self, name: str, filter_attr: str | None = None) -> list[type[DeviceModule]]:
         """
         Get PEAT device module classes.
 
@@ -362,9 +354,7 @@ class ModuleManager:
         Returns:
             List of module names
         """
-        types = self.lookup_types(
-            dev_types, filter_attr, subclass_method, filter_values
-        )
+        types = self.lookup_types(dev_types, filter_attr, subclass_method, filter_values)
         return self._mods_to_names(types)
 
     def alias_to_names(self, alias: str) -> list[str]:
@@ -408,9 +398,7 @@ class ModuleManager:
         return name.strip().lower().replace("-", "").replace(" ", "")
 
     @staticmethod
-    def _filter(
-        mods: Iterable[type[DeviceModule]], filter_attr: str
-    ) -> list[type[DeviceModule]]:
+    def _filter(mods: Iterable[type[DeviceModule]], filter_attr: str) -> list[type[DeviceModule]]:
         """
         Filter modules to those with a 'truthy' class attribute.
         """

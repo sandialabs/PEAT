@@ -16,7 +16,6 @@ from peat.api.config_builder_api import (
 
 
 class PullMethod(HorizontalGroup):
-
     module = ""
     pull_methods = []
     selected_pull_method = reactive("")
@@ -25,18 +24,11 @@ class PullMethod(HorizontalGroup):
     def compose(self) -> ComposeResult:
         yield Button("Delete Pull Method", id="deletepullmethod", variant="error")
         yield Select(
-            [
-                (pull_method, index + 1)
-                for index, pull_method in enumerate(self.pull_methods)
-            ]
+            [(pull_method, index + 1) for index, pull_method in enumerate(self.pull_methods)]
         )
         pull_fields = [
-            HorizontalGroup(
-                Label("username"), Input(placeholder="username", id="username")
-            ),
-            HorizontalGroup(
-                Label("password"), Input(placeholder="password", id="password")
-            ),
+            HorizontalGroup(Label("username"), Input(placeholder="username", id="username")),
+            HorizontalGroup(Label("password"), Input(placeholder="password", id="password")),
             HorizontalGroup(Label("port"), Input(placeholder="22", id="port")),
         ]
 
@@ -60,9 +52,9 @@ class PullMethod(HorizontalGroup):
                 self.query_one("#password").placeholder = default_options[
                     self.selected_pull_method
                 ]["pass"]
-                self.query_one("#port").placeholder = default_options[
-                    self.selected_pull_method
-                ]["port"]
+                self.query_one("#port").placeholder = default_options[self.selected_pull_method][
+                    "port"
+                ]
             except Exception:
                 pass
         else:
@@ -95,10 +87,7 @@ class Host(HorizontalGroup):
                 str(len(self.pull_methods))
                 + " Pull Methods: "
                 + ", ".join(
-                    [
-                        pull_method.selected_pull_method
-                        for pull_method in self.pull_methods
-                    ]
+                    [pull_method.selected_pull_method for pull_method in self.pull_methods]
                 )
             )
 
@@ -108,23 +97,14 @@ class Host(HorizontalGroup):
 
     def compose(self) -> ComposeResult:
         yield Label(
-            "Host: "
-            + self.name
-            + "\n"
-            + "IP: "
-            + self.ip
-            + "\n"
-            + "Module: "
-            + self.module,
+            "Host: " + self.name + "\n" + "IP: " + self.ip + "\n" + "Module: " + self.module,
             id="hostinfo",
         )
 
         self.pull_methods_collapsible = Collapsible(
             title=str(len(self.pull_methods))
             + " Pull Methods: "
-            + ", ".join(
-                [pull_method.selected_pull_method for pull_method in self.pull_methods]
-            )
+            + ", ".join([pull_method.selected_pull_method for pull_method in self.pull_methods])
         )
         with self.pull_methods_collapsible:
             yield VerticalScroll(*self.pull_methods, id="pull_methods")
@@ -137,9 +117,7 @@ class Host(HorizontalGroup):
         self.pull_methods_collapsible.title = (
             str(len(self.pull_methods))
             + " Pull Methods: "
-            + ", ".join(
-                [pull_method.selected_pull_method for pull_method in self.pull_methods]
-            )
+            + ", ".join([pull_method.selected_pull_method for pull_method in self.pull_methods])
         )
 
     # Requires changing self list reference to force UI update
@@ -148,9 +126,7 @@ class Host(HorizontalGroup):
         self.pull_methods_collapsible.title = (
             str(len(self.pull_methods))
             + " Pull Methods: "
-            + ", ".join(
-                [pull_method.selected_pull_method for pull_method in self.pull_methods]
-            )
+            + ", ".join([pull_method.selected_pull_method for pull_method in self.pull_methods])
         )
 
 
@@ -200,10 +176,7 @@ class PEATBuilder(App):
             Input(placeholder="device", id="name_input"),
             Label("Module: "),
             Select(
-                [
-                    (pull_method, index + 1)
-                    for index, pull_method in enumerate(self.modules)
-                ],
+                [(pull_method, index + 1) for index, pull_method in enumerate(self.modules)],
                 id="module_input",
             ),
         )
@@ -217,41 +190,30 @@ class PEATBuilder(App):
             if config["hosts"][index]["options"] is not None:
                 enabled_methods = []
                 for pull_method in host.pull_methods:
-                    if (
-                        pull_method.selected_pull_method
-                        in config["hosts"][index]["options"]
-                    ):
+                    if pull_method.selected_pull_method in config["hosts"][index]["options"]:
                         if (
                             "user"
-                            in config["hosts"][index]["options"][
-                                pull_method.selected_pull_method
-                            ]
+                            in config["hosts"][index]["options"][pull_method.selected_pull_method]
                         ):
-                            config["hosts"][index]["options"][
-                                pull_method.selected_pull_method
-                            ]["user"] = pull_method.query_one("#username").value
+                            config["hosts"][index]["options"][pull_method.selected_pull_method][
+                                "user"
+                            ] = pull_method.query_one("#username").value
                         if (
                             "pass"
-                            in config["hosts"][index]["options"][
-                                pull_method.selected_pull_method
-                            ]
+                            in config["hosts"][index]["options"][pull_method.selected_pull_method]
                         ):
-                            config["hosts"][index]["options"][
-                                pull_method.selected_pull_method
-                            ]["pass"] = pull_method.query_one("#password").value
+                            config["hosts"][index]["options"][pull_method.selected_pull_method][
+                                "pass"
+                            ] = pull_method.query_one("#password").value
                         if (
                             "port"
-                            in config["hosts"][index]["options"][
-                                pull_method.selected_pull_method
-                            ]
+                            in config["hosts"][index]["options"][pull_method.selected_pull_method]
                         ):
-                            config["hosts"][index]["options"][
-                                pull_method.selected_pull_method
-                            ]["port"] = pull_method.query_one("#port").value
+                            config["hosts"][index]["options"][pull_method.selected_pull_method][
+                                "port"
+                            ] = pull_method.query_one("#port").value
                         enabled_methods.append(pull_method.selected_pull_method)
-                for template_pull_method in list(
-                    config["hosts"][index]["options"].keys()
-                ):
+                for template_pull_method in list(config["hosts"][index]["options"].keys()):
                     if template_pull_method not in enabled_methods:
                         try:
                             config["hosts"][index]["options"][host.module.lower()][
@@ -299,9 +261,7 @@ class PEATBuilder(App):
         self.host_data = new_host_data
 
     def action_toggle_dark(self) -> None:
-        self.theme = (
-            "textual-dark" if self.theme == "textual-light" else "textual-light"
-        )
+        self.theme = "textual-dark" if self.theme == "textual-light" else "textual-light"
 
 
 def launch_builder():

@@ -1,6 +1,5 @@
 import logging
 import inspect
-from typing import Union
 import warnings
 from functools import partialmethod
 
@@ -40,9 +39,11 @@ DEBUG_LEVELS = {
 # Replaces "logging.captureWarnings(True)""
 showwarning_ = warnings.showwarning
 
+
 def showwarning(message, *args, **kwargs):
     log.warning(message)
     showwarning_(message, *args, **kwargs)
+
 
 warnings.showwarning = showwarning
 
@@ -88,6 +89,7 @@ for logger_name in [
     tp_logger.handlers = [InterceptHandler()]
 
 from importlib.metadata import version as importlib_get_version
+
 RAW_PEAT_VERSION = importlib_get_version("PEAT")
 __version__ = RAW_PEAT_VERSION.split(".dev")[0]
 

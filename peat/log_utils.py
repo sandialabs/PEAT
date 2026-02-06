@@ -39,8 +39,7 @@ class ElasticLogSink:
         """
         self.index = index
         logger.info(
-            f"Connecting to Elasticsearch or OpenSearch for logging "
-            f"(index basename: {index})"
+            f"Connecting to Elasticsearch or OpenSearch for logging (index basename: {index})"
         )
 
         try:
@@ -227,9 +226,7 @@ def use_colors() -> bool:
     - Environment variable ``PEAT_NO_COLOR``
     """
     return not (
-        config.NO_COLOR
-        or os.environ.get("NO_COLOR")
-        or os.environ.get("TERM", "") == "dumb"
+        config.NO_COLOR or os.environ.get("NO_COLOR") or os.environ.get("TERM", "") == "dumb"
     )
 
 
@@ -289,8 +286,9 @@ def setup_logging(
             backtrace=bool(config.VERBOSE or config.DEBUG),
             diagnose=bool(config.DEBUG),  # TODO
             enqueue=True,  # multiprocessing
-            filter=lambda r: not r["extra"].get("es_logger")
-            and not r["extra"].get("is_telnetlib"),
+            filter=lambda r: (
+                not r["extra"].get("es_logger") and not r["extra"].get("is_telnetlib")
+            ),
         )
 
     # log file sink, human-readable log file
@@ -305,8 +303,9 @@ def setup_logging(
             diagnose=bool(config.DEBUG),
             catch=True,
             enqueue=True,  # multiprocessing
-            filter=lambda r: not r["extra"].get("es_logger")
-            and not r["extra"].get("is_telnetlib"),
+            filter=lambda r: (
+                not r["extra"].get("es_logger") and not r["extra"].get("is_telnetlib")
+            ),
         )
         state.written_files.add(log_path.as_posix())
         logger.info(f"Log file: {utils.short_pth_str(log_path)}")
@@ -325,8 +324,9 @@ def setup_logging(
             diagnose=False,
             catch=True,
             enqueue=True,  # multiprocessing
-            filter=lambda r: not r["extra"].get("es_logger")
-            and not r["extra"].get("is_telnetlib"),
+            filter=lambda r: (
+                not r["extra"].get("es_logger") and not r["extra"].get("is_telnetlib")
+            ),
         )
         state.written_files.add(json_path.as_posix())
         logger.trace(f"JSON Log file: {utils.short_pth_str(json_path)}")
@@ -379,16 +379,12 @@ def setup_logging(
             from scapy.all import conf as scapy_conf
 
             info += f"\n\n*** scapy.conf str() ***\n\n{str(scapy_conf)}\n"
-            info += (
-                f"\n\n*** scapy.conf formatted ***\n\n"
-                f"{pformat(scapy_conf.__dict__)}\n"
-            )
+            info += f"\n\n*** scapy.conf formatted ***\n\n{pformat(scapy_conf.__dict__)}\n"
 
         # Raw config dump only when debugging internals
         if config.DEBUG >= 3:
             info += (
-                f"\n\n** raw config dump ***\n\n"
-                f"{json.dumps(consts.convert(config), indent=2)}\n"
+                f"\n\n** raw config dump ***\n\n{json.dumps(consts.convert(config), indent=2)}\n"
             )
 
         df.write_text(info, encoding="utf-8")
@@ -460,8 +456,7 @@ def print_logo() -> None:
         )
     else:
         logo_str = (
-            f"{consts.NO_COLOR_LOGO}\nPEAT {__version__}\n"
-            f"Run ID (agent.id): {consts.RUN_ID}\n"
+            f"{consts.NO_COLOR_LOGO}\nPEAT {__version__}\nRun ID (agent.id): {consts.RUN_ID}\n"
         )
 
     print(logo_str, file=sys.stderr, flush=True)  # noqa: T201

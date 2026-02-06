@@ -35,11 +35,7 @@ class TestDataGenerator:
             if cls.input_filenames:
                 inputs = [Path(data_files, f).resolve() for f in cls.input_filenames]
             elif cls.input_globs:
-                inputs = [
-                    file
-                    for glb_str in cls.input_globs
-                    for file in data_files.glob(glb_str)
-                ]
+                inputs = [file for glb_str in cls.input_globs for file in data_files.glob(glb_str)]
             else:
                 inputs = [data_files]
 
@@ -226,9 +222,7 @@ def main():
     generators: dict[str, type[TestDataGenerator]] = {
         k.split("Generator")[0]: v
         for k, v in globals().items()
-        if isinstance(v, type)
-        and issubclass(v, TestDataGenerator)
-        and v is not TestDataGenerator
+        if isinstance(v, type) and issubclass(v, TestDataGenerator) and v is not TestDataGenerator
     }
 
     arg_parser = argparse.ArgumentParser()

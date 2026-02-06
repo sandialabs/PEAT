@@ -151,8 +151,7 @@ class Sage(DeviceModule):
                 password = dev.options["ftp"]["pass"]
                 if not ftp.login(username, password):
                     cls.log.debug(
-                        f"Failed to verify {dev.ip} via FTP: "
-                        f"login failed (username: {username})"
+                        f"Failed to verify {dev.ip} via FTP: login failed (username: {username})"
                     )
                     return False
                 dev.related.user.add(username)
@@ -168,8 +167,7 @@ class Sage(DeviceModule):
 
                 if "/ata0a" not in pwd.lower():
                     cls.log.debug(
-                        f"Failed to verify {dev.ip} via FTP: "
-                        f"current directory is not /ata0a/"
+                        f"Failed to verify {dev.ip} via FTP: current directory is not /ata0a/"
                     )
                     return False
 
@@ -212,9 +210,7 @@ class Sage(DeviceModule):
             logged_in = conn.login(username, password)
 
             if not logged_in:
-                cls.log.debug(
-                    f"Failed {protocol.capitalize()} verify for {dev.ip}: login failed"
-                )
+                cls.log.debug(f"Failed {protocol.capitalize()} verify for {dev.ip}: login failed")
                 conn.disconnect()
                 return False
             dev.related.user.add(username)
@@ -234,32 +230,24 @@ class Sage(DeviceModule):
             # Cache the session for use in _pull_protocol(), and ensure
             # the connection is closed properly when PEAT exits.
             dev._cache[f"sage_{protocol}_session"] = conn
-            exit_handler.register(
-                dev._cache[f"sage_{protocol}_session"].disconnect, "CONNECTION"
-            )
+            exit_handler.register(dev._cache[f"sage_{protocol}_session"].disconnect, "CONNECTION")
             dev._cache[f"sage_{protocol}_fingerprinted"] = True
 
             return True
         except Exception as ex:
-            cls.log.trace(
-                f"Failed {protocol.capitalize()} verify due to exception: {ex}"
-            )
+            cls.log.trace(f"Failed {protocol.capitalize()} verify due to exception: {ex}")
             conn.disconnect()
             return False
 
     @classmethod
-    def _verify_http(
-        cls, dev: DeviceData, protocol: Literal["http", "https"] = "http"
-    ) -> bool:
+    def _verify_http(cls, dev: DeviceData, protocol: Literal["http", "https"] = "http") -> bool:
         """
         Verify a device is a Sage RTU via parsing of the web interface.
         """
         port = dev.options[protocol]["port"]
         timeout = dev.options[protocol]["timeout"]
 
-        cls.log.debug(
-            f"Verifying {dev.ip}:{port} using {protocol} (timeout: {timeout})"
-        )
+        cls.log.debug(f"Verifying {dev.ip}:{port} using {protocol} (timeout: {timeout})")
 
         with HTTP(dev.ip, port, timeout) as http:
             resp = http.get(protocol=protocol)
@@ -268,9 +256,7 @@ class Sage(DeviceModule):
             page_data = resp.text
 
         if "Telvent" in page_data and "Config@WEB" in page_data:
-            cls.log.debug(
-                f"{protocol.upper()} verification successful for {dev.ip}:{port}"
-            )
+            cls.log.debug(f"{protocol.upper()} verification successful for {dev.ip}:{port}")
             return True
 
         return False
@@ -321,9 +307,7 @@ class Sage(DeviceModule):
                     f"'{pull_type_cap}' not listed in 'sage.pull_methods' option"
                 )
             elif (
-                dev.service_status(
-                    {"protocol": pull_type, "port": dev.options[pull_type]["port"]}
-                )
+                dev.service_status({"protocol": pull_type, "port": dev.options[pull_type]["port"]})
                 == "closed"
             ):
                 cls.log.warning(
@@ -360,8 +344,7 @@ class Sage(DeviceModule):
                 f"'ftp' not listed in 'sage.pull_methods' option"
             )
         elif (
-            dev.service_status({"protocol": "ftp", "port": dev.options["ftp"]["port"]})
-            == "closed"
+            dev.service_status({"protocol": "ftp", "port": dev.options["ftp"]["port"]}) == "closed"
         ):
             cls.log.warning(f"Failed to pull FTP on {dev.ip}: FTP service is closed")
         elif not dev._cache.get("sage_ftp_fingerprinted") and not cls._verify_ftp(dev):
@@ -369,9 +352,7 @@ class Sage(DeviceModule):
         else:
             # !! hack to workaround status not being set to "verified" !!
             # !! if _verify* is called from _pull() !!
-            svc = dev.retrieve(
-                "service", {"protocol": "ftp", "port": dev.options["ftp"]["port"]}
-            )
+            svc = dev.retrieve("service", {"protocol": "ftp", "port": dev.options["ftp"]["port"]})
             if svc:
                 svc.status = "verified"
                 dev.store("service", svc, interface_lookup={"ip": dev.ip})
@@ -388,9 +369,7 @@ class Sage(DeviceModule):
                 f"'ssl' not listed in 'sage.pull_methods' option"
             )
         elif (
-            dev.service_status(
-                {"protocol": "https", "port": dev.options["https"]["port"]}
-            )
+            dev.service_status({"protocol": "https", "port": dev.options["https"]["port"]})
             == "closed"
         ):
             cls.log.warning(f"Failed to pull SSL on {dev.ip}: HTTPS service is closed")
@@ -435,9 +414,7 @@ class Sage(DeviceModule):
                 f_data = f_data.rstrip("->").split("\n", 1)[1].replace("\r\r", "\r")
                 dev.write_file(f_data, f"ssh_files/{pth.name}")
             except Exception as ex:
-                cls.log.error(
-                    f"Failed to download file {pth.name} via SSH from {dev.ip}: {ex}"
-                )
+                cls.log.error(f"Failed to download file {pth.name} via SSH from {dev.ip}: {ex}")
                 failures += 1
                 continue
 
@@ -525,8 +502,7 @@ class Sage(DeviceModule):
                     listing = ftp.rdir(filesystem)
                     if not listing:
                         cls.log.error(
-                            f"Failed to pull FTP files for {filesystem}: "
-                            f"'dir' commands failed"
+                            f"Failed to pull FTP files for {filesystem}: 'dir' commands failed"
                         )
                         continue
 
@@ -579,9 +555,7 @@ class Sage(DeviceModule):
         return True
 
     @classmethod
-    def _pull_http(
-        cls, dev: DeviceData, web_protocol: Literal["http", "https"]
-    ) -> bool:
+    def _pull_http(cls, dev: DeviceData, web_protocol: Literal["http", "https"]) -> bool:
         with SageHTTP(
             ip=dev.ip,
             port=dev.options[web_protocol]["port"],
@@ -590,9 +564,7 @@ class Sage(DeviceModule):
             dev=dev,
         ) as http:
             try:
-                cls.log.info(
-                    f"Pulling from {dev.ip}:{http.port} using {web_protocol.upper()}"
-                )
+                cls.log.info(f"Pulling from {dev.ip}:{http.port} using {web_protocol.upper()}")
 
                 http.get_session_cookie(
                     uname=dev.options["web"]["user"], pword=dev.options["web"]["pass"]
@@ -626,9 +598,7 @@ class Sage(DeviceModule):
         return False
 
     @classmethod
-    def _pull_protocol(
-        cls, dev: DeviceData, protocol: Literal["telnet", "ssh"]
-    ) -> dict:
+    def _pull_protocol(cls, dev: DeviceData, protocol: Literal["telnet", "ssh"]) -> dict:
         """
         Pulls memory data from the SAGE RTU via Telnet/SSH.
 
@@ -643,9 +613,7 @@ class Sage(DeviceModule):
         timeout = dev.options[protocol]["timeout"]  # type: float
         port = dev.options[protocol]["port"]  # type: int
 
-        cls.log.info(
-            f"Pulling from {dev.ip}:{port} using {proto_cap} (timeout: {timeout})"
-        )
+        cls.log.info(f"Pulling from {dev.ip}:{port} using {proto_cap} (timeout: {timeout})")
 
         # Reuse an existing telnet/ssh session from _verify_protocol(),
         # or a previous pull in the same run.
@@ -662,9 +630,7 @@ class Sage(DeviceModule):
                 raise ValueError(f"Protocol {protocol} not supported!")
 
             dev._cache[f"sage_{protocol}_session"] = conn
-            exit_handler.register(
-                dev._cache[f"sage_{protocol}_session"].disconnect, "CONNECTION"
-            )
+            exit_handler.register(dev._cache[f"sage_{protocol}_session"].disconnect, "CONNECTION")
 
         if not conn.dev:
             conn.dev = dev
@@ -908,8 +874,7 @@ class Sage(DeviceModule):
                         sage_parse.parse_file(path, f_handle, device_info)
                     else:
                         cls.log.trace3(
-                            f"Failed to extract {member.name} "
-                            f"(it's probably a directory)"
+                            f"Failed to extract {member.name} (it's probably a directory)"
                         )
         elif file.is_dir():
             device_info["existing_files"] = []
@@ -1035,8 +1000,7 @@ class Sage(DeviceModule):
                 t_path = dev.get_sub_dir(f"{file_basename}_raw_files")
 
                 cls.log.debug(
-                    f"Extracting raw files from {file.name} to "
-                    f"{t_path.parent.name}/{t_path.name}"
+                    f"Extracting raw files from {file.name} to {t_path.parent.name}/{t_path.name}"
                 )
 
                 with tarfile.open(name=file, mode="r:gz", encoding="utf-8") as tar:

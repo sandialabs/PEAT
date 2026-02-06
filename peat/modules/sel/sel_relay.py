@@ -309,9 +309,7 @@ class SELRelay(DeviceModule):
                     dev._is_active = True
 
                     if not cls._selascii_get_id(dev, ser):
-                        cls.log.warning(
-                            f"Baudrate {baudrate} didn't work for {dev.serial_port}"
-                        )
+                        cls.log.warning(f"Baudrate {baudrate} didn't work for {dev.serial_port}")
                         continue
 
                     iface = Interface(
@@ -342,8 +340,7 @@ class SELRelay(DeviceModule):
                 raise ex
             except Exception as ex:
                 cls.log.warning(
-                    f"Failed verify of serial port {dev.serial_port} "
-                    f"at baudrate {baudrate}: {ex}"
+                    f"Failed verify of serial port {dev.serial_port} at baudrate {baudrate}: {ex}"
                 )
                 continue
 
@@ -396,9 +393,7 @@ class SELRelay(DeviceModule):
         return True
 
     @classmethod
-    def _selascii_verify_post_process(
-        cls, dev: DeviceData, comm: SELTelnet | SELSerial
-    ) -> bool:
+    def _selascii_verify_post_process(cls, dev: DeviceData, comm: SELTelnet | SELSerial) -> bool:
         # Close the connection cleanly
         try:
             comm.disconnect()
@@ -447,9 +442,7 @@ class SELRelay(DeviceModule):
         return True
 
     @classmethod
-    def _verify_http(
-        cls, dev: DeviceData, protocol: Literal["http", "https"] = "http"
-    ) -> bool:
+    def _verify_http(cls, dev: DeviceData, protocol: Literal["http", "https"] = "http") -> bool:
         """
         Verify a device is a SEL Relay via the HTTP web interface.
         """
@@ -457,8 +450,7 @@ class SELRelay(DeviceModule):
         timeout = dev.options[protocol]["timeout"]
 
         cls.log.debug(
-            f"Verifying Relay HTTP for {dev.ip}:{port} using "
-            f"{protocol} (timeout: {timeout})"
+            f"Verifying Relay HTTP for {dev.ip}:{port} using {protocol} (timeout: {timeout})"
         )
 
         session = SELHTTP(dev.ip, port, timeout)
@@ -478,8 +470,7 @@ class SELRelay(DeviceModule):
 
             for username, password in creds.items():
                 cls.log.debug(
-                    f"Attempting SEL Relay HTTP login to "
-                    f"{dev.ip} with user '{username}'"
+                    f"Attempting SEL Relay HTTP login to {dev.ip} with user '{username}'"
                 )
 
                 logged_in = session.login(username, password, protocol)
@@ -544,16 +535,10 @@ class SELRelay(DeviceModule):
         # Parse Sequential Event Recorder (SER) events
         events = []
         if all_files.get("SER.TXT") and all_files["SER.TXT"]["data"].strip():
-            events = parse_and_process_events(
-                all_files["SER.TXT"]["data"], "SER.TXT", dev
-            )[0]
+            events = parse_and_process_events(all_files["SER.TXT"]["data"], "SER.TXT", dev)[0]
 
         # Fallback to parsing CSER if SER parsing fails
-        if (
-            not events
-            and all_files.get("CSER.TXT")
-            and all_files["CSER.TXT"]["data"].strip()
-        ):
+        if not events and all_files.get("CSER.TXT") and all_files["CSER.TXT"]["data"].strip():
             parse_and_process_events(all_files["CSER.TXT"]["data"], "CSER.TXT", dev)
 
         # Parse CFG.TXT, if it's present
@@ -565,9 +550,7 @@ class SELRelay(DeviceModule):
             try:
                 parse_cfg_txt(all_files["CFG.TXT"]["data"], dev)
             except Exception as ex:
-                cls.log.warning(
-                    f"Failed to parse CFG.TXT pulled from {dev.address}: {ex}"
-                )
+                cls.log.warning(f"Failed to parse CFG.TXT pulled from {dev.address}: {ex}")
                 successful = False
 
         if all_files.get("SET_ALL.TXT") and all_files["SET_ALL.TXT"]["data"].strip():
@@ -626,12 +609,8 @@ class SELRelay(DeviceModule):
                 # "modmap": functools.partial(comms.exec_read, "modmap", added_delay=2.0),
                 "who": functools.partial(comms.exec_read, "who", added_delay=3.0),
                 "status": functools.partial(comms.exec_read, "status", added_delay=4.0),
-                "card_17": functools.partial(
-                    comms.exec_read, "card 17", added_delay=4.0
-                ),
-                "card_18": functools.partial(
-                    comms.exec_read, "card 18", added_delay=4.0
-                ),
+                "card_17": functools.partial(comms.exec_read, "card 17", added_delay=4.0),
+                "card_18": functools.partial(comms.exec_read, "card 18", added_delay=4.0),
             }
         else:
             commands = {
@@ -655,9 +634,7 @@ class SELRelay(DeviceModule):
             # if elevation fails, continue anyway
             comms.elevate(2, dev.options["sel"]["creds"])
 
-        cls.log.info(
-            f"Attempting to run {len(commands)} SEL terminal commands on {dev.address}"
-        )
+        cls.log.info(f"Attempting to run {len(commands)} SEL terminal commands on {dev.address}")
 
         results = {}
         for cmd, func in commands.items():
@@ -674,9 +651,7 @@ class SELRelay(DeviceModule):
                 else:
                     cls.log.warning(f"No output from '{cmd}' function on {dev.address}")
             except Exception as ex:
-                cls.log.warning(
-                    f"Failed to run function '{cmd}' on {dev.address}: {ex}"
-                )
+                cls.log.warning(f"Failed to run function '{cmd}' on {dev.address}: {ex}")
 
         if not results:
             cls.log.error(f"No commands were successful on {dev.address}")
@@ -726,9 +701,7 @@ class SELRelay(DeviceModule):
             # if results.get("status"):
             #     pass  # TODO
         except Exception:
-            cls.log.exception(
-                f"Unexpected error processing command results from {dev.address}"
-            )
+            cls.log.exception(f"Unexpected error processing command results from {dev.address}")
             dev.extra["additional_command_outputs"] = results
             return False
 
@@ -768,9 +741,7 @@ class SELRelay(DeviceModule):
 
             if pull_files:
                 if not cls.pull_configs(dev, tn):
-                    cls.log.warning(
-                        f"There were issues downloading files via Telnet for {dev.ip}"
-                    )
+                    cls.log.warning(f"There were issues downloading files via Telnet for {dev.ip}")
                     successful = False
             else:
                 cls.log.debug(f"Skipping file pull via Telnet for {dev.ip}")
@@ -816,9 +787,7 @@ class SELRelay(DeviceModule):
                         f"YMODEM pulls do not work on Windows "
                         f"(sel.force_ymodem was configured for {dev.serial_port})"
                     )
-                cls.log.warning(
-                    f"Forcing use of YMODEM for serial pull from {dev.serial_port}"
-                )
+                cls.log.warning(f"Forcing use of YMODEM for serial pull from {dev.serial_port}")
 
             successful = True
 
@@ -878,10 +847,7 @@ class SELRelay(DeviceModule):
 
                 # Download files
                 if not cls.pull_configs(dev, ftp):
-                    cls.log.error(
-                        f"Failed to pull FTP from {dev.ip}: "
-                        f"no files were downloaded"
-                    )
+                    cls.log.error(f"Failed to pull FTP from {dev.ip}: no files were downloaded")
                     return False
 
                 return True
@@ -889,16 +855,12 @@ class SELRelay(DeviceModule):
             cls.log.warning(f"Failed FTP pull from {dev.ip}: connection failed")
             cls.log.trace(f"Exception: {ex}")
         except Exception as ex:
-            cls.log.warning(
-                f"Failed FTP pull from {dev.ip} due to an unhandled exception: {ex}"
-            )
+            cls.log.warning(f"Failed FTP pull from {dev.ip} due to an unhandled exception: {ex}")
 
         return False
 
     @classmethod
-    def pull_http(
-        cls, dev: DeviceData, protocol: Literal["http", "https"] = "http"
-    ) -> bool:
+    def pull_http(cls, dev: DeviceData, protocol: Literal["http", "https"] = "http") -> bool:
         """
         Pull configuration and other data from the relay via HTTP.
         """
@@ -936,8 +898,7 @@ class SELRelay(DeviceModule):
 
             if not session.login(username, password, protocol):
                 cls.log.error(
-                    f"Failed to login to web interface on "
-                    f"{dev.ip}:{port} with user '{username}'"
+                    f"Failed to login to web interface on {dev.ip}:{port} with user '{username}'"
                 )
 
                 session.disconnect()
@@ -972,8 +933,7 @@ class SELRelay(DeviceModule):
             web_methods.insert(0, session.get_device_features)
 
         cls.log.info(
-            f"Beginning web pull from {dev.ip}:{port} using "
-            f"{len(web_methods)} web methods"
+            f"Beginning web pull from {dev.ip}:{port} using {len(web_methods)} web methods"
         )
 
         # Note the number of successful methods somewhere
@@ -989,8 +949,7 @@ class SELRelay(DeviceModule):
 
                 if not method_result:
                     cls.log.warning(
-                        f"No data from HTTP method '{method.__name__}' "
-                        f"on {dev.ip}:{port}"
+                        f"No data from HTTP method '{method.__name__}' on {dev.ip}:{port}"
                     )
                 else:
                     dev._cache["num_successful_methods"] += 1
@@ -1022,9 +981,7 @@ class SELRelay(DeviceModule):
             return cls.pull_serial(dev)
 
         if not dev.options["sel"]["pull_methods"]:
-            cls.log.error(
-                f"The 'sel.pull_methods' option is empty or null for {dev.ip}"
-            )
+            cls.log.error(f"The 'sel.pull_methods' option is empty or null for {dev.ip}")
             return False
 
         for method in dev.options["sel"]["pull_methods"]:
@@ -1039,9 +996,7 @@ class SELRelay(DeviceModule):
         files_pulled = False
         for method in dev.options["sel"]["pull_methods"]:
             if dev.service_status({"protocol": method}) == "closed":
-                cls.log.warning(
-                    f"Failed to pull {method} on {dev.ip}: {method} port is closed"
-                )
+                cls.log.warning(f"Failed to pull {method} on {dev.ip}: {method} port is closed")
                 continue
 
             # TODO: handle case where dev._is_verified is False,
@@ -1051,8 +1006,7 @@ class SELRelay(DeviceModule):
                 pull_files = False
 
                 if (
-                    not files_pulled
-                    and dev.options["sel"]["allow_telnet_file_download"]
+                    not files_pulled and dev.options["sel"]["allow_telnet_file_download"]
                 ) or dev.options["sel"]["force_telnet_file_download"]:
                     pull_files = True
 
@@ -1174,15 +1128,10 @@ class SELRelay(DeviceModule):
         if to_push.is_dir():
             config_files = sorted(to_push.glob("SET_*.TXT"))
             if "SET_ALL.TXT" in (x.name for x in config_files):
-                cls.log.warning(
-                    f"Ignoring SET_ALL.TXT in config files for push to {dev.ip}."
-                )
+                cls.log.warning(f"Ignoring SET_ALL.TXT in config files for push to {dev.ip}.")
                 config_files = [x for x in config_files if x.name != "SET_ALL.TXT"]
             if not config_files:
-                cls.log.error(
-                    f"Push failed: couldn't find any configs "
-                    f"in {to_push.as_posix()}"
-                )
+                cls.log.error(f"Push failed: couldn't find any configs in {to_push.as_posix()}")
                 return False
             cls.log.debug(f"Using {len(config_files)} config files from dir {to_push}")
         elif to_push.is_file():
@@ -1203,9 +1152,7 @@ class SELRelay(DeviceModule):
                 if not relay.login(
                     user=dev.options["ftp"]["user"], passwd=dev.options["ftp"]["pass"]
                 ):
-                    cls.log.error(
-                        f"Failed to push config to {dev.ip}: FTP login failed"
-                    )
+                    cls.log.error(f"Failed to push config to {dev.ip}: FTP login failed")
                     return False
 
                 delay = dev.options["ftp"]["pull_delay"]
@@ -1222,8 +1169,7 @@ class SELRelay(DeviceModule):
                     return False
 
                 cls.log.debug(
-                    f"Sleeping for {delay} seconds before pushing "
-                    f"configs to {dev.ip}..."
+                    f"Sleeping for {delay} seconds before pushing configs to {dev.ip}..."
                 )
                 time.sleep(delay)
 
@@ -1267,9 +1213,7 @@ class SELRelay(DeviceModule):
                 # If the settings are in a "SETTINGS" directory, then change
                 # directories before transferring configs ("cd SETTINGS")
                 if settings_root == "SETTINGS":
-                    cls.log.info(
-                        "Changing directory to 'SETTINGS' before pushing configs"
-                    )
+                    cls.log.info("Changing directory to 'SETTINGS' before pushing configs")
                     relay.cd("/SETTINGS")
 
                 file_delay = 2
@@ -1284,8 +1228,7 @@ class SELRelay(DeviceModule):
                 for conf_file in config_files:
                     if "SET_P" not in conf_file.name:
                         cls.log.info(
-                            f"Transferring config '{conf_file.name}' "
-                            f"({conf_file.as_posix()})"
+                            f"Transferring config '{conf_file.name}' ({conf_file.as_posix()})"
                         )
                         with conf_file.open("rb") as f:
                             relay.upload_text(conf_file.name, f)
@@ -1337,8 +1280,7 @@ class SELRelay(DeviceModule):
             return False
         except Exception as ex:
             cls.log.warning(
-                f"Failed to push config to {dev.ip} due "
-                f"to an unhandled exception: {ex}"
+                f"Failed to push config to {dev.ip} due to an unhandled exception: {ex}"
             )
             return False
 
@@ -1352,9 +1294,7 @@ class SELRelay(DeviceModule):
         port = dev.options["ftp"]["port"]
         if not dev.retrieve("service", {"port": port}):
             if not check_tcp_port(dev.ip, port, reset=True):
-                cls.log.error(
-                    f"Failed FTP setup: TCP port {port} is not open on {dev.ip}"
-                )
+                cls.log.error(f"Failed FTP setup: TCP port {port} is not open on {dev.ip}")
                 return False
             else:
                 svc = Service(port=port, transport="tcp", status="open")
@@ -1368,31 +1308,21 @@ class SELRelay(DeviceModule):
         if not dev._runtime_options.get("ftp"):
             dev._runtime_options["ftp"] = deepcopy(cls.default_options["ftp"])
         elif not dev._runtime_options["ftp"].get("creds"):
-            dev._runtime_options["ftp"]["creds"] = deepcopy(
-                cls.default_options["ftp"]["creds"]
-            )
+            dev._runtime_options["ftp"]["creds"] = deepcopy(cls.default_options["ftp"]["creds"])
 
         # Set informed defaults if login credentials aren't manually specified
         if dev.options["ftp"]["creds"] == cls.default_options["ftp"]["creds"]:
             cls.log.trace(f"FTP creds for {dev.ip} are: INFORMED DEFAULTS")
 
             if dev.description.model in ["351S", "700G", "710", "751"]:
-                utils.move_item(
-                    dev._runtime_options["ftp"]["creds"], 0, ("FTPUSER", "TAIL")
-                )
+                utils.move_item(dev._runtime_options["ftp"]["creds"], 0, ("FTPUSER", "TAIL"))
             elif dev.description.model in ["451", "411L", "487E"]:
-                utils.move_item(
-                    dev._runtime_options["ftp"]["creds"], 0, ("2AC", "TAIL")
-                )
+                utils.move_item(dev._runtime_options["ftp"]["creds"], 0, ("2AC", "TAIL"))
                 dev._runtime_options["ftp"]["creds"].insert(1, ("ACC", "OTTER"))
             elif dev.description.model in ["351"]:
-                utils.move_item(
-                    dev._runtime_options["ftp"]["creds"], 0, ("FTP", "TAIL")
-                )
+                utils.move_item(dev._runtime_options["ftp"]["creds"], 0, ("FTP", "TAIL"))
             elif dev.description.model in ["2032"]:
-                utils.move_item(
-                    dev._runtime_options["ftp"]["creds"], 0, ("2AC", "TAIL")
-                )
+                utils.move_item(dev._runtime_options["ftp"]["creds"], 0, ("2AC", "TAIL"))
         else:
             cls.log.trace(f"FTP creds for {dev.ip} are: USER PROVIDED")
 
@@ -1422,10 +1352,7 @@ class SELRelay(DeviceModule):
                         )
                         return False
 
-                    cls.log.debug(
-                        f"FTP login succeeded on {dev.ip} "
-                        f"after {attempts} attempt(s)"
-                    )
+                    cls.log.debug(f"FTP login succeeded on {dev.ip} after {attempts} attempt(s)")
 
                     dev._runtime_options["ftp"]["user"] = creds[0]
                     dev._runtime_options["ftp"]["pass"] = creds[1]
@@ -1445,14 +1372,12 @@ class SELRelay(DeviceModule):
                 return False
             except Exception as ex:
                 cls.log.warning(
-                    f"FTP verification failed for {dev.ip} due "
-                    f"to an unhandled exception: {ex}"
+                    f"FTP verification failed for {dev.ip} due to an unhandled exception: {ex}"
                 )
                 return False
 
         cls.log.debug(
-            f"FTP setup failed for {dev.ip}: no credentials were valid "
-            f"({attempts} attempts)"
+            f"FTP setup failed for {dev.ip}: no credentials were valid ({attempts} attempts)"
         )
 
         return False
@@ -1470,12 +1395,7 @@ class SELRelay(DeviceModule):
 
         # CFG.TXT, SER.TXT, CSER.TXT, HISTORY.TXT, CHISTORY.TXT, *.CID
         f_name = file.name.lower()
-        if (
-            "cfg" in f_name
-            or "ser" in f_name
-            or "history" in f_name
-            or f_name.endswith(".cid")
-        ):
+        if "cfg" in f_name or "ser" in f_name or "history" in f_name or f_name.endswith(".cid"):
             if not dev:
                 dev = datastore.get(f"selrelay_{file.stem.lower()}", "id")
 
@@ -1540,9 +1460,7 @@ class SELRelay(DeviceModule):
         return dev
 
     @classmethod
-    def parse_config(
-        cls, set_all: str, dev: DeviceData | None = None
-    ) -> DeviceData | None:
+    def parse_config(cls, set_all: str, dev: DeviceData | None = None) -> DeviceData | None:
         try:
             parsed, dev = parse_set_all(set_all_data=set_all, dev=dev)
         except Exception:

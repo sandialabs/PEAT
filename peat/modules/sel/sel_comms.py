@@ -87,10 +87,7 @@ def download_files(
             file_data = comms.download_binary(path, save_to_file=False)
 
             if file_data is None:
-                log.error(
-                    f"Failed to download {filename} "
-                    f"from {comms.address} via {method}"
-                )
+                log.error(f"Failed to download {filename} from {comms.address} via {method}")
                 continue
 
             if isinstance(file_data, bytes) and path.upper().endswith(".TXT"):
@@ -137,10 +134,7 @@ def download_files(
 
         except Exception as ex:
             if handle_download_errors:
-                log.error(
-                    f"Failed to retrieve '{path}' from "
-                    f"{comms.address} via {method}: {ex}"
-                )
+                log.error(f"Failed to retrieve '{path}' from {comms.address} via {method}: {ex}")
             else:
                 raise ex from None
 
@@ -174,17 +168,13 @@ def filter_names(
     for path in sorted(paths):
         if only:
             for allow_pattern in only:
-                if path == allow_pattern or fnmatch(
-                    path.lower(), allow_pattern.lower()
-                ):
+                if path == allow_pattern or fnmatch(path.lower(), allow_pattern.lower()):
                     filtered.add(path)
                     break
         elif never:
             excluded = False
             for exclude_pattern in never:
-                if path == exclude_pattern or fnmatch(
-                    path.lower(), exclude_pattern.lower()
-                ):
+                if path == exclude_pattern or fnmatch(path.lower(), exclude_pattern.lower()):
                     excluded = True
                     break
             if not excluded:
@@ -254,9 +244,7 @@ def pull_files(
             continue
 
         # Determine file path to use for download
-        if dirname != "/" and not (
-            dev.extra.get("sel_old_ftp") or dev.options["sel"]["old_ftp"]
-        ):
+        if dirname != "/" and not (dev.extra.get("sel_old_ftp") or dev.options["sel"]["old_ftp"]):
             # Telnet requires space between directory and file name
             # Technically you can get away with a slash, but some devices don't like this.
             sep = "/" if isinstance(comms, FTP) else " "
@@ -272,31 +260,28 @@ def pull_files(
 
         try:
             # Change directory if needed for older devices
-            if (
-                dev.extra.get("sel_old_ftp") or dev.options["sel"]["old_ftp"]
-            ) and isinstance(comms, FTP):
+            if (dev.extra.get("sel_old_ftp") or dev.options["sel"]["old_ftp"]) and isinstance(
+                comms, FTP
+            ):
                 comms.cd(dirname)  # cd <dirname> => retr <file> => cd ..
 
             downloaded = download_files(
                 files=paths,
                 comms=comms,
                 save_dir=sub_dir,
-                handle_download_errors=dev.options["sel"].get(
-                    "handle_download_errors", True
-                ),
+                handle_download_errors=dev.options["sel"].get("handle_download_errors", True),
             )
 
             all_files.update(downloaded)
 
             # Restore directory location
-            if (
-                dev.extra.get("sel_old_ftp") or dev.options["sel"]["old_ftp"]
-            ) and isinstance(comms, FTP):
+            if (dev.extra.get("sel_old_ftp") or dev.options["sel"]["old_ftp"]) and isinstance(
+                comms, FTP
+            ):
                 comms.cd("..")
         except Exception as ex:
             log.warning(
-                f"Failed to retrieve files from {dirname} "
-                f"on {dev.address} via {method}: {ex}"
+                f"Failed to retrieve files from {dirname} on {dev.address} via {method}: {ex}"
             )
 
     duration = timeit.default_timer() - start_time
@@ -304,10 +289,7 @@ def pull_files(
         f"Pulled {len(all_files)} files from {dev.address} via {method} "
         f"(duration: {utils.fmt_duration(duration)})"
     )
-    log.debug(
-        f"Files pulled from {dev.address} via {method}: "
-        f"{', '.join(all_files.keys())}"
-    )
+    log.debug(f"Files pulled from {dev.address} via {method}: {', '.join(all_files.keys())}")
 
     # TODO: if "SET_ALL.TXT" not in files and SET_x.TXT in files,
     #  then reconstruct SET_ALL from individual settings files
@@ -335,8 +317,7 @@ def populate_file_listing(dev: DeviceData, comms: FTP | SELTelnet | SELSerial) -
         else:
             dev.extra["settings_root_directory"] = "/"
         log.debug(
-            f"Settings root directory for {dev.address}: "
-            f"'{dev.extra['settings_root_directory']}'"
+            f"Settings root directory for {dev.address}: '{dev.extra['settings_root_directory']}'"
         )
 
     root_files = []

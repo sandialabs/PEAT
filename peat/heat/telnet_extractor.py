@@ -420,10 +420,7 @@ class TelnetExtractor(HeatProtocol):
                     else:
                         raise e
                 except KeyError:
-                    if (
-                        "data_raw" in packet["telnet"]
-                        and "data" not in packet["telnet"]
-                    ):
+                    if "data_raw" in packet["telnet"] and "data" not in packet["telnet"]:
                         log.error("Telnet data not in hex format")
                     else:
                         pass
@@ -446,19 +443,13 @@ class TelnetExtractor(HeatProtocol):
             packets=self.elastic_data[streamid],
             source_ip=self.elastic_data[streamid][0]["source"]["ip"],
             source_mac=self.elastic_data[streamid][0]["source"].get("mac", ""),
-            source_oui=_cleanup_oui(
-                self.elastic_data[streamid][0]["source"].get("vendor", "")
-            ),
+            source_oui=_cleanup_oui(self.elastic_data[streamid][0]["source"].get("vendor", "")),
             dest_ip=self.elastic_data[streamid][0]["destination"]["ip"],
             dest_mac=self.elastic_data[streamid][0]["destination"].get("mac", ""),
-            dest_oui=_cleanup_oui(
-                self.elastic_data[streamid][0]["destination"].get("vendor", "")
-            ),
+            dest_oui=_cleanup_oui(self.elastic_data[streamid][0]["destination"].get("vendor", "")),
             start_time=self.start_times[streamid],
             end_time=self.end_times[streamid],
-            duration=(
-                self.start_times[streamid] - self.end_times[streamid]
-            ).total_seconds(),
+            duration=(self.start_times[streamid] - self.end_times[streamid]).total_seconds(),
             direction=filedirection,
             bytestream=self.bytestreams[streamid],
             start=startoffset,
@@ -548,9 +539,7 @@ class TelnetExtractor(HeatProtocol):
                         selcommand = command[readMatch.span()[0] : readMatch.span()[1]]
                     else:
                         direction = "UPLOAD"
-                        selcommand = command[
-                            writeMatch.span()[0] : writeMatch.span()[1]
-                        ]
+                        selcommand = command[writeMatch.span()[0] : writeMatch.span()[1]]
                         i -= j
                         i += writeMatch.span()[1]
                         # reset index to be at the carriage return so that YMODEM
@@ -758,12 +747,8 @@ class TelnetExtractor(HeatProtocol):
 
         # for each telnet stream
         for i in range(len(self.elastic_data)):
-            self.start_times[i] = utils.parse_date(
-                self.elastic_data[i][0]["@timestamp"], False
-            )
-            self.end_times[i] = utils.parse_date(
-                self.elastic_data[i][-1]["@timestamp"], False
-            )
+            self.start_times[i] = utils.parse_date(self.elastic_data[i][0]["@timestamp"], False)
+            self.end_times[i] = utils.parse_date(self.elastic_data[i][-1]["@timestamp"], False)
 
             # build byte stream from packet data
             stream = self._getStream(i)
@@ -785,7 +770,7 @@ class TelnetExtractor(HeatProtocol):
                 f"{artifact.direction}_{artifact.artifact_file_name}_"
                 f"{start}+{int(artifact.duration)}_"
                 f"[{artifact.start}:{artifact.stop}] \
-                    {artifact.artifact_file_name[artifact.artifact_file_name.index('.'):]}"
+                    {artifact.artifact_file_name[artifact.artifact_file_name.index('.') :]}"
             )
             artifact.file_name = str.replace(artifact.file_name, ":", "_")
 
@@ -812,9 +797,7 @@ class TelnetExtractor(HeatProtocol):
             if txtRegex.search(artifact.artifact_file_name):
                 self._parse_artifact(artifact)
             else:
-                ext = artifact.artifact_file_name[
-                    artifact.artifact_file_name.index(".") :
-                ]
+                ext = artifact.artifact_file_name[artifact.artifact_file_name.index(".") :]
                 log.warning(
                     f"Unable to parse file with unsupported extension "
                     f"{ext}: {artifact.artifact_file_name}"
@@ -847,8 +830,7 @@ class TelnetExtractor(HeatProtocol):
                 SELRelay.parse(to_parse=artifact.reconstructed_artifact, dev=dev)
         except Exception:
             log.exception(
-                f"[{artifact.id}] Failed to parse artifact due "
-                f"to an unhandled exception"
+                f"[{artifact.id}] Failed to parse artifact due to an unhandled exception"
             )
             state.error = True
         dev.related.ip.add(artifact.station_ip)

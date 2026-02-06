@@ -63,9 +63,7 @@ def write_encrypted_file(data: str, filepath: Path) -> bool:
         Return true if file was written successfully
     """
     if os.sep in str(filepath.resolve()):
-        filename = (
-            "encrypted_" + filepath.name
-        )  # give the encrypted config a new new name
+        filename = "encrypted_" + filepath.name  # give the encrypted config a new new name
         new_filepath = filepath.with_name(filename)
         new_filepath = new_filepath.resolve()
         log.info(f"Saving encrypted config to {new_filepath}")
@@ -96,9 +94,7 @@ def decrypt_config(filepath: Path, user_password: str) -> str:
     fernet_key = generate_key(user_password)
     encrypted_cfg = filepath.read_text(encoding="utf-8")
     if not encrypt_config:
-        log.error(
-            f"PEAT decrypt encountered an error attempting to read the file: {filepath}"
-        )
+        log.error(f"PEAT decrypt encountered an error attempting to read the file: {filepath}")
         return None
 
     if not check_header(encrypted_cfg):
@@ -132,9 +128,7 @@ def convert_to_dict(decrypted_data: str) -> dict:
     try:
         return yaml.safe_load(decrypted_data)
     except yaml.YAMLError as err:
-        log.error(
-            f"PEAT encountered an error while parsing config file, exiting...: {err}"
-        )
+        log.error(f"PEAT encountered an error while parsing config file, exiting...: {err}")
 
 
 def generate_key(password: str) -> Fernet:

@@ -103,9 +103,7 @@ def test_check_host_unicast_ip_force_module(mocker, caplog):
     dev._module = ControlLogix
     mocker.patch.object(datastore, "objects", [dev])
 
-    assert (
-        scan_api.check_host_unicast_ip("127.0.0.1", [ControlLogix, MicroNet]) is False
-    )
+    assert scan_api.check_host_unicast_ip("127.0.0.1", [ControlLogix, MicroNet]) is False
     assert state.error is False
     assert "Forcing usage of module 'ControlLogix'" in caplog.text
 
@@ -136,9 +134,7 @@ def test_broadcast_scan(mocker, examples_path):
         ["127.0.0.255"],
     )
 
-    assert scan_api.broadcast_scan(
-        [examples_path("broadcast_targets.txt")], [ControlLogix]
-    ) == (
+    assert scan_api.broadcast_scan([examples_path("broadcast_targets.txt")], [ControlLogix]) == (
         {"127.0.0.255": False, "127.0.1.255": False, "127.0.3.255": False},
         [ControlLogix],
         ["127.0.0.255", "127.0.1.255", "127.0.3.255"],

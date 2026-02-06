@@ -114,7 +114,7 @@ class Siprotec(DeviceModule):
             # TODO: add device modules to dev.module
             # TODO: extract interface information
             modname = str(snmp_module["sysName"])
-            module_name = f"module_{modname[:modname.find(' ')]}"  # module_<sysName>
+            module_name = f"module_{modname[: modname.find(' ')]}"  # module_<sysName>
             if module_name in dev.extra:
                 # If module exists, add the info
                 dev.extra[module_name].update(snmp_module)
@@ -128,9 +128,7 @@ class Siprotec(DeviceModule):
         return successful
 
     @classmethod
-    def _get_webmonitor_data(
-        cls, dev: DeviceData, protocol: Literal["http", "https"]
-    ) -> bool:
+    def _get_webmonitor_data(cls, dev: DeviceData, protocol: Literal["http", "https"]) -> bool:
         """
         Query Siprotec webmonitor service for particular files via HTTP or HTTPS.
         """
@@ -165,8 +163,7 @@ class Siprotec(DeviceModule):
 
                     if "DOCTYPE" in raw_data or "<html" in raw_data:
                         cls.log.debug(
-                            f"Failed to pull WebMonitor data from "
-                            f"{dev.ip}: bad {filename} data"
+                            f"Failed to pull WebMonitor data from {dev.ip}: bad {filename} data"
                         )
                         return False
 
@@ -184,9 +181,7 @@ class Siprotec(DeviceModule):
                     dev._cache[f"{f_type}_data_pulled"] = True
                     data_was_pulled = True
 
-        cls.log.debug(
-            f"Finished pulling WebMonitor data from {dev.ip} using {protocol}"
-        )
+        cls.log.debug(f"Finished pulling WebMonitor data from {dev.ip} using {protocol}")
 
         return data_was_pulled
 
@@ -263,9 +258,7 @@ class Siprotec(DeviceModule):
         }
 
         # Create SNMP object to use for pulling data
-        snmp = SNMP(
-            ip=ip, timeout=timeout, community=community, mib_paths=[SIPROTEC_MIBS_DIR]
-        )
+        snmp = SNMP(ip=ip, timeout=timeout, community=community, mib_paths=[SIPROTEC_MIBS_DIR])
 
         cls.log.debug("Pulling SNMP device modules info...")
         fw_ver = 0
@@ -410,8 +403,7 @@ class Siprotec(DeviceModule):
 
         if len(parts) != 2:
             cls.log.warning(
-                f"Parse may be incorrect, encountered an "
-                f"unexpected VER.txt structure: {parts}"
+                f"Parse may be incorrect, encountered an unexpected VER.txt structure: {parts}"
             )
 
         parsed = {
@@ -434,9 +426,7 @@ Siprotec.ip_methods = [
         name="Siprotec WebMonitor HTTP",
         description=str(Siprotec._get_webmonitor_data.__doc__).strip(),
         type="unicast_ip",
-        identify_function=functools.partial(
-            Siprotec._get_webmonitor_data, protocol="http"
-        ),
+        identify_function=functools.partial(Siprotec._get_webmonitor_data, protocol="http"),
         reliability=7,
         protocol="http",
         transport="tcp",
@@ -446,9 +436,7 @@ Siprotec.ip_methods = [
         name="Siprotec WebMonitor HTTP",
         description=str(Siprotec._get_webmonitor_data.__doc__).strip(),
         type="unicast_ip",
-        identify_function=functools.partial(
-            Siprotec._get_webmonitor_data, protocol="https"
-        ),
+        identify_function=functools.partial(Siprotec._get_webmonitor_data, protocol="https"),
         reliability=7,
         protocol="https",
         transport="tcp",

@@ -67,7 +67,7 @@ def update_local_interface_cache():
 
                 state.local_interface_ips.append(item["addr"])
 
-                obj = IPv4Interface(f'{item["addr"]}/{item["netmask"]}')
+                obj = IPv4Interface(f"{item['addr']}/{item['netmask']}")
                 state.local_interface_objects.append(obj)
 
                 if str(obj.network.network_address) not in ["0.0.0.0", "169.254.0.0"]:
@@ -134,8 +134,7 @@ def is_promiscuous(iface: str) -> bool:
                 log.debug(f"Interface '{iface}' is in promiscuous mode")
                 return True
             log.debug(
-                f"Interface '{iface}' is not in "
-                f"promiscuous mode, as expected (Flags: {flags})"
+                f"Interface '{iface}' is not in promiscuous mode, as expected (Flags: {flags})"
             )
         else:
             log.debug(

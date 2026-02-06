@@ -67,10 +67,7 @@ def tc6_to_st(tc6_xml: bytes, output_filepath: str | None = None) -> str:
     # Read the TC6-formatted XML file into the PLCController instance
     error = controller.load_project(tc6_xml)
     if error and "tc6_0201}body" in str(error):
-        log.warning(
-            "PLCOpen parsing failed because there's "
-            "no structured text in the TC6 XML"
-        )
+        log.warning("PLCOpen parsing failed because there's no structured text in the TC6 XML")
         return ""
     elif error:
         log.error(f"PLCOpen error parsing the TC6 XML: {error}")

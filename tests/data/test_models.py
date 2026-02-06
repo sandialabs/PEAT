@@ -120,9 +120,7 @@ def test_device_data_elastic():
         "related": {"ports": {502}, "protocols": {"modbus"}},
         "service": [service.dict(exclude_defaults=True)],
         "geo": geo.dict(exclude_defaults=True),
-        "event": [
-            {"provider": dev_id, "kind": {"event"}, **event.dict(exclude_defaults=True)}
-        ],
+        "event": [{"provider": dev_id, "kind": {"event"}, **event.dict(exclude_defaults=True)}],
     }
 
 

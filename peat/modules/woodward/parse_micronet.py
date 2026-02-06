@@ -108,15 +108,11 @@ def get_info_firmware(
     return False
 
 
-def get_info_bootrom(
-    dev: DeviceData, filepath: Path, timestamp: datetime | None = None
-) -> bool:
+def get_info_bootrom(dev: DeviceData, filepath: Path, timestamp: datetime | None = None) -> bool:
     """
     Extract general info from bootrom file.
     """
-    log.info(
-        f"Attempting to obtain information from device boot firmware '{filepath.name}'"
-    )
+    log.info(f"Attempting to obtain information from device boot firmware '{filepath.name}'")
 
     try:
         fstat = filepath.stat()
@@ -255,9 +251,7 @@ def get_ip_addrs(dev: DeviceData, events: list[Event]) -> None:
                 dev.related.ip.add(new_ip)
 
 
-def get_gap_info(
-    dev: DeviceData, filename: str, path: Path, timestamp: datetime
-) -> bool:
+def get_gap_info(dev: DeviceData, filename: str, path: Path, timestamp: datetime) -> bool:
     """
     Get info on gap file ``*gaprev*.out``.
     """

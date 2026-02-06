@@ -265,10 +265,7 @@ def hosts_to_objs(
             )
             state.error = True
 
-    log.trace(
-        f"Converted {len(host_list)} host strings "
-        f"into {len(obj_set)} ipaddress objects"
-    )
+    log.trace(f"Converted {len(host_list)} host strings into {len(obj_set)} ipaddress objects")
 
     return list(obj_set)  # Convert set to list
 

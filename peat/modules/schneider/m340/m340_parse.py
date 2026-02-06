@@ -340,9 +340,7 @@ def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
     Returns:
         A dictionary containing information parsed from the project file
     """
-    log.info(
-        f"Parsing configuration from the project file (size: {len(config_blob)} bytes)"
-    )
+    log.info(f"Parsing configuration from the project file (size: {len(config_blob)} bytes)")
     device_info = {
         "status_info": {},
         "module_names": [],
@@ -397,9 +395,7 @@ def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
                 address_len = int(block["data"][index])
 
                 if address_len != 0:
-                    address = str(
-                        block["data"][index + 2 : index + 2 + address_len], "utf-8"
-                    )
+                    address = str(block["data"][index + 2 : index + 2 + address_len], "utf-8")
                 else:
                     address = ""
 
@@ -484,9 +480,7 @@ def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
                 module_info["io_groups"] = io_groups
                 device_info[module_name] = module_info
 
-        elif (
-            block["type"] == b"\x03\x24\xcf\xe0" and b"COMExchangeFile" in block["data"]
-        ):
+        elif block["type"] == b"\x03\x24\xcf\xe0" and b"COMExchangeFile" in block["data"]:
             # "Communication Exchange File"
             # Basically, it is the configuration of
             # the communication modules (e.g Ethernet).
@@ -550,9 +544,7 @@ def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
             offset += 3
 
             # TODO: see what multiple network modules looks like
-            device_info["network_configurations"][
-                parsed_network["name"]
-            ] = parsed_network
+            device_info["network_configurations"][parsed_network["name"]] = parsed_network
 
     log.debug("Finished parsing configuration from the project file")
     return device_info
@@ -596,8 +588,7 @@ def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> Non
 
                 if not m:
                     log.warning(
-                        f"ARRAY regex failed for local variable "
-                        f"{var_name}, '{var_values['type']}'"
+                        f"ARRAY regex failed for local variable {var_name}, '{var_values['type']}'"
                     )
                     continue
 
@@ -652,9 +643,7 @@ def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> Non
                 )
                 continue
 
-            var = SubElement(
-                io_vars, "variable", {"name": var_name, "address": new_addr}
-            )
+            var = SubElement(io_vars, "variable", {"name": var_name, "address": new_addr})
             var_type = SubElement(var, "type")
             SubElement(var_type, type_str)
 

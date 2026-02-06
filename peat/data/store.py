@@ -193,8 +193,7 @@ class Datastore:
         self.objects = deduped  # Replace objects list with de-duped objects
 
         log.debug(
-            f"Finished deduplicating objects, {len(removed)} "
-            f"duplicates were merged and removed"
+            f"Finished deduplicating objects, {len(removed)} duplicates were merged and removed"
         )
 
     @property

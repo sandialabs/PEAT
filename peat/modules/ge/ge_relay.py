@@ -119,9 +119,7 @@ class GERelay(DeviceModule):
                         verified = True
                         dev.description.model = model
                         break
-                if not verified and (
-                    "ge power" in lower_data and "relay" in lower_data
-                ):
+                if not verified and ("ge power" in lower_data and "relay" in lower_data):
                     verified = True
                     if "f35 " in lower_data:
                         dev.description.model = "F35"
@@ -138,9 +136,7 @@ class GERelay(DeviceModule):
                             cls.log.warning(f"Failed to parse firmware version: {ex}")
                     return True
         except Exception:
-            cls.log.exception(
-                f"failed to verify {dev.ip} via HTTP due to an unhandled exception"
-            )
+            cls.log.exception(f"failed to verify {dev.ip} via HTTP due to an unhandled exception")
 
         return False
 
@@ -346,12 +342,8 @@ class GERelay(DeviceModule):
         # Network interfaces
         for port in relay_data.get("routing", {}).get("port_status", []):
             iface = Interface(
-                connected=(
-                    True if port.get("link_status", "").upper() == "UP" else False
-                ),
-                enabled=(
-                    True if port.get("function", "").upper() == "ENABLED" else False
-                ),
+                connected=(True if port.get("link_status", "").upper() == "UP" else False),
+                enabled=(True if port.get("function", "").upper() == "ENABLED" else False),
                 name=port.get("port", ""),
                 id=port.get("port", ""),
                 extra={
@@ -481,9 +473,7 @@ class GERelay(DeviceModule):
         return relay_data
 
     @classmethod
-    def _process_event_recorder(
-        cls, dev: DeviceData, event_recorder: list[dict]
-    ) -> None:
+    def _process_event_recorder(cls, dev: DeviceData, event_recorder: list[dict]) -> None:
         """
         Process GE device logs (event recorder) into the PEAT data model.
         """
@@ -519,9 +509,7 @@ class GERelay(DeviceModule):
 
                 dev.store("event", event, lookup="sequence")
         except Exception:
-            cls.log.exception(
-                f"error while processing 'event_recorder' data for {dev.ip}"
-            )
+            cls.log.exception(f"error while processing 'event_recorder' data for {dev.ip}")
             state.error = True
 
 
@@ -662,8 +650,7 @@ def parse_ge_html(text: str, key_value_pairs: bool = False) -> dict[str, list[di
                 if not tr_vals:
                     continue
                 row_values = {
-                    col: value.strip()
-                    for col, value in zip(tbl_header, tr_vals, strict=False)
+                    col: value.strip() for col, value in zip(tbl_header, tr_vals, strict=False)
                 }  # type: dict[str, Union[str, int]]
                 table_values.append(row_values)
 

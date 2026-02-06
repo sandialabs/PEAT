@@ -133,18 +133,14 @@ def parse_file(file_path: Path) -> list[UEFIFile]:
                 number_of_nest = len(nest_split[0])
 
                 if number_of_nest > prev_num_nest:
-                    create_obj_append(
-                        thingToAppend, nest_split, stack, time_string, files
-                    )
+                    create_obj_append(thingToAppend, nest_split, stack, time_string, files)
                     prev_num_nest = number_of_nest
                     obj = {}
                     continue
 
                 if number_of_nest == prev_num_nest:
                     stack.pop()
-                    create_obj_append(
-                        thingToAppend, nest_split, stack, time_string, files
-                    )
+                    create_obj_append(thingToAppend, nest_split, stack, time_string, files)
                     obj = {}
                     continue
 
@@ -154,9 +150,7 @@ def parse_file(file_path: Path) -> list[UEFIFile]:
                     for _i in range(time_to_pop + 1):
                         stack.pop()
 
-                    create_obj_append(
-                        thingToAppend, nest_split, stack, time_string, files
-                    )
+                    create_obj_append(thingToAppend, nest_split, stack, time_string, files)
 
                     prev_num_nest = number_of_nest
                     obj = {}

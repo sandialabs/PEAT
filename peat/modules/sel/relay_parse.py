@@ -9,9 +9,21 @@ import olefile
 from dateutil.parser import parse as date_parse
 from pathvalidate import is_valid_filepath
 
-from peat import IO, DeviceData, Event, Interface, ParseError, Register, Service
+from peat import (
+    IO,
+    DeviceData,
+    Event,
+    Interface,
+    ParseError,
+    Register,
+    Service,
+    consts,
+    datastore,
+    log,
+    state,
+    utils,
+)
 from peat import config as peat_config
-from peat import consts, datastore, log, state, utils
 from peat.data.data_utils import merge_models
 from peat.protocols import clean_ipv4, split_ipv4_cidr
 
@@ -125,9 +137,7 @@ def extract_csv_lines(lines: list[str]) -> list[list[str]]:
     #   Creates a list from the CSV.reader (which is a generator)
     #   Removes empty values from the line
     #   Removes extraneous whitespace from values
-    parsed_lines = [
-        [chunk.strip() for chunk in line] for line in reader if line
-    ]  # type: list[list[str]]
+    parsed_lines = [[chunk.strip() for chunk in line] for line in reader if line]  # type: list[list[str]]
 
     return parsed_lines
 
@@ -377,8 +387,7 @@ def parse_set_all(
         device_info[section.lower()] = parse_logic_section(configs, keys, section)
 
     log.trace(
-        f"{len(configs)} SET_ALL config sections parsed: "
-        f"{', '.join(x for x in configs.keys())}"
+        f"{len(configs)} SET_ALL config sections parsed: {', '.join(x for x in configs.keys())}"
     )
     log.debug(f"Completed parsing of SET_ALL ({len(configs)} sections parsed)")
 
@@ -432,12 +441,7 @@ def process_info_classes(configs: ConfigsType, dev: DeviceData) -> None:
         # Add any filenames from [STORAGE] section, if they're files
         # Lines in this section can be random data too.
         for line in configs["STORAGE"]:
-            if (
-                " " not in line
-                and "." in line
-                and len(line) > 3
-                and is_valid_filepath(line)
-            ):
+            if " " not in line and "." in line and len(line) > 3 and is_valid_filepath(line):
                 file_obj = PurePosixPath(line)
                 dev.related.files.add(file_obj.name)
 
@@ -766,20 +770,14 @@ def process_port_settings(
                     svc.port = int(_getv(settings["SNTPPOR"]))
 
                 if settings.get("SNTPPSIP"):
-                    svc.extra["sntp_primary_ip"] = clean_ipv4(
-                        _getv(settings["SNTPPSIP"])
-                    )
+                    svc.extra["sntp_primary_ip"] = clean_ipv4(_getv(settings["SNTPPSIP"]))
                     dev.related.ip.add(svc.extra["sntp_primary_ip"])
                 elif settings.get("SNTPPIP"):
-                    svc.extra["sntp_primary_ip"] = clean_ipv4(
-                        _getv(settings["SNTPPIP"])
-                    )
+                    svc.extra["sntp_primary_ip"] = clean_ipv4(_getv(settings["SNTPPIP"]))
                     dev.related.ip.add(svc.extra["sntp_primary_ip"])
 
                 if settings.get("SNTPBSIP"):
-                    svc.extra["sntp_backup_ip"] = clean_ipv4(
-                        _getv(settings["SNTPBSIP"])
-                    )
+                    svc.extra["sntp_backup_ip"] = clean_ipv4(_getv(settings["SNTPBSIP"]))
                     dev.related.ip.add(svc.extra["sntp_backup_ip"])
                 elif settings.get("SNTPBIP"):
                     svc.extra["sntp_backup_ip"] = clean_ipv4(_getv(settings["SNTPBIP"]))
@@ -890,9 +888,7 @@ def process_port_settings(
                         # TODO: resolve to actual transport method
                         #   Possible values: (OFF,TCP,UDP_S,UDP_T,UDP_U)
                         endp["transport_scheme"] = str(_getv(settings[f"PMOTS{idx}"]))
-                        endp["enabled"] = bool(
-                            endp["transport_scheme"].lower() != "off"
-                        )
+                        endp["enabled"] = bool(endp["transport_scheme"].lower() != "off")
 
                     if settings.get(f"PMOIPA{idx}"):
                         endp["ip"] = clean_ipv4(_getv(settings[f"PMOIPA{idx}"]))
@@ -934,11 +930,7 @@ def process_network_configuration(configs: dict[str, dict], dev: DeviceData) -> 
     """
     for section, settings in configs.items():
         # NOTE: 311L doesn't have "EPORT"
-        if (
-            "EPORT" not in settings
-            and "PROTO" not in settings
-            and "IPADDR" not in settings
-        ):
+        if "EPORT" not in settings and "PROTO" not in settings and "IPADDR" not in settings:
             continue
 
         port_id = "".join(section[1:]).upper()  # 5 for P5, F for PF
@@ -966,21 +958,15 @@ def parse_ids(configs: dict[str, dict]) -> dict[str, str | dict[str, str]]:
            :caption: Example of returned data from parse_ids
 
            {
-               "relay_id_by_group": {
-                   "1": "GENERATOR",
-                   "2": "GENERATOR"
-               },
+               "relay_id_by_group": {"1": "GENERATOR", "2": "GENERATOR"},
                "station_id_by_group": {},
-               "terminal_id_by_group": {
-                   "1": "TERMINAL",
-                   "2": "TERMINAL"
-               },
+               "terminal_id_by_group": {"1": "TERMINAL", "2": "TERMINAL"},
                "relay_id": "generator",
                "station_id": "",
                "terminal_id": "terminal",
                "raw_rid": "GENERATOR",
                "raw_sid": "",
-               "raw_tid": "TERMINAL"
+               "raw_tid": "TERMINAL",
            }
     """
 
@@ -1108,9 +1094,7 @@ def parse_and_process_dnp3(configs: dict[str, dict], dev: DeviceData) -> None:
 
     for config, settings in configs.items():
         # DNPA, DNPB, D1, D2, D3, etc.
-        if not config[0] == "D" or (
-            not config[1].isdigit() and not config.startswith("DNP")
-        ):
+        if not config[0] == "D" or (not config[1].isdigit() and not config.startswith("DNP")):
             continue
 
         log.debug(f"Parsing and processing DNP3 data from section {config}")
@@ -1217,9 +1201,7 @@ def parse_protection_schemes(
                 for setting, fields in settings.items():
                     # TODO: set flag if scheme is enabled based on global
                     #       flag configuring if setting is enabled.
-                    if re.match(r"^E\d", setting) and re.match(
-                        r"Y|YES|ON|[1-9]", fields["value"]
-                    ):
+                    if re.match(r"^E\d", setting) and re.match(r"Y|YES|ON|[1-9]", fields["value"]):
                         if setting[1:] in ANSI_CODES:
                             code = setting[1:]
                             protection_schemes[code] = ANSI_CODES[code]
@@ -1285,15 +1267,11 @@ def extract_cid(data: bytes | str) -> str:
 
 
 def extract_part_number(data: bytes | str) -> str:
-    return extract_string(
-        data, r"part\s?(?:number|num):?\s+(\w+)\s", flags=re.IGNORECASE
-    )
+    return extract_string(data, r"part\s?(?:number|num):?\s+(\w+)\s", flags=re.IGNORECASE)
 
 
 def extract_serial_number(data: bytes | str) -> str:
-    return extract_string(
-        data, r"serial\s?(?:number|num):?\s+(\w+)\s", flags=re.IGNORECASE
-    )
+    return extract_string(data, r"serial\s?(?:number|num):?\s+(\w+)\s", flags=re.IGNORECASE)
 
 
 def extract_selboot_checksum(data: bytes | str) -> str:
@@ -1618,9 +1596,7 @@ def parse_ser(raw_lines: list[str]) -> tuple[list[dict], dict]:
     try:
         # Find the header line for the actual events
         header_index = next(
-            idx
-            for idx, line in enumerate(raw_lines)
-            if "#" in line and "date" in line.lower()
+            idx for idx, line in enumerate(raw_lines) if "#" in line and "date" in line.lower()
         )
     except StopIteration:
         log.warning("No events found in SER output, attempting to parse status info")
@@ -1659,8 +1635,7 @@ def parse_ser(raw_lines: list[str]) -> tuple[list[dict], dict]:
 
             if not result:
                 log.warning(
-                    f"Failed to parse SER events due to "
-                    f"unexpected format.\nRaw line: '{line}'"
+                    f"Failed to parse SER events due to unexpected format.\nRaw line: '{line}'"
                 )
                 return [], status_info
 
@@ -1693,14 +1668,10 @@ def parse_history(raw_lines: list[str]) -> tuple[list[dict], dict]:
     # Find the header line for the actual events
     try:
         header_index = next(
-            idx
-            for idx, line in enumerate(raw_lines)
-            if "#" in line and "date" in line.lower()
+            idx for idx, line in enumerate(raw_lines) if "#" in line and "date" in line.lower()
         )
     except StopIteration:
-        log.warning(
-            "No events found in HISTORY output, attempting to parse status info"
-        )
+        log.warning("No events found in HISTORY output, attempting to parse status info")
         return [], parse_status_output(raw_lines)
 
     status_info = {}
@@ -1735,8 +1706,7 @@ def parse_history(raw_lines: list[str]) -> tuple[list[dict], dict]:
 
             if not result:
                 log.warning(
-                    f"Failed to parse HISTORY events due to "
-                    f"unexpected format.\nRaw line: {line}"
+                    f"Failed to parse HISTORY events due to unexpected format.\nRaw line: {line}"
                 )
                 return [], status_info
 

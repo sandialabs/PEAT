@@ -12,7 +12,7 @@ from bs4 import BeautifulSoup
 from requests import Response, Session
 
 import peat  # Avoid circular imports
-from peat import config, consts, utils, log
+from peat import config, consts, log, utils
 
 
 class HTTP:
@@ -379,9 +379,7 @@ class HTTP:
             with socket.create_connection(
                 address=(self.ip, self.port), timeout=self.timeout
             ) as connection:
-                with context.wrap_socket(
-                    connection, server_hostname=self.ip
-                ) as ssl_sock:
+                with context.wrap_socket(connection, server_hostname=self.ip) as ssl_sock:
                     der_cert = ssl_sock.getpeercert(True)
 
             if not der_cert:
@@ -394,9 +392,7 @@ class HTTP:
             return None
 
         if not raw_cert:
-            self.log.warning(
-                f"{emsg}: Empty certificate or no certificate was returned"
-            )
+            self.log.warning(f"{emsg}: Empty certificate or no certificate was returned")
             return None
 
         decoded = self.decode_ssl_certificate(raw_cert)
@@ -466,11 +462,7 @@ class HTTP:
             original=raw,
             serial_number=serial_number,
             version_number=str(decoded.get("version", "")),
-            not_after=(
-                utils.parse_date(decoded["notAfter"])
-                if decoded.get("notAfter")
-                else None
-            ),
+            not_after=(utils.parse_date(decoded["notAfter"]) if decoded.get("notAfter") else None),
         )
 
         if decoded.get("notAfter"):

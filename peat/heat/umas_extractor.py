@@ -97,17 +97,14 @@ class UmasExtractor(HeatProtocol):
                     f"packets for {ip} ({len(group_pkts)} packets)."
                 )
                 continue
-            for start_loc, stop_loc in zip(
-                start_locations, stop_locations, strict=False
-            ):
+            for start_loc, stop_loc in zip(start_locations, stop_locations, strict=False):
                 # bucket[0]: INITIALIZE_DOWNLOAD or INITIALIZE_UPLOAD
                 # bucket[-1]: END_DOWNLOAD or END_UPLOAD (hence 'stop_loc + 1')
                 bkt_iter = itertools.islice(group_pkts, start_loc, stop_loc + 1)
                 bucket = list(bkt_iter)
                 if not bucket:
                     log.warning(
-                        f"Empty artifact packets for {ip}. "
-                        f"start: {start_loc}, stop: {stop_loc}"
+                        f"Empty artifact packets for {ip}. start: {start_loc}, stop: {stop_loc}"
                     )
                     continue
                 artifact_buckets[ip].append(bucket)
@@ -128,11 +125,7 @@ class UmasExtractor(HeatProtocol):
                 # TODO: begin constructing artifact in a earlier for loop?
                 #   Don't bucket by IP. Instead, bucket by artifact
                 r_pkt = next(
-                    (
-                        p
-                        for p in packets
-                        if p["umas"]["function_name"] in self.RESP_FUNCS
-                    ),
+                    (p for p in packets if p["umas"]["function_name"] in self.RESP_FUNCS),
                     None,
                 )
                 if not r_pkt:
@@ -187,9 +180,7 @@ class UmasExtractor(HeatProtocol):
                     block_id: int | None = pkt["umas"].get("block_id")
                     func: str = pkt["umas"]["function_name"]
                     if func in self.END_FUNCS:
-                        artifact.expected_blocks = int(
-                            pkt["umas"]["blocks_transferred"]
-                        )
+                        artifact.expected_blocks = int(pkt["umas"]["blocks_transferred"])
                         continue
 
                     # Skip blocks without data (e.g. INITIALIZE_DOWNLOAD)
@@ -213,17 +204,16 @@ class UmasExtractor(HeatProtocol):
                         # So, don't warn if it's the first block ID.
                         if block_id != 1:
                             log.warning(
-                                f"[{artifact.id}] Duplicate block ID "
-                                f"for {func}: {block_id}"
+                                f"[{artifact.id}] Duplicate block ID for {func}: {block_id}"
                             )
                         continue
                     artifact.block_ids.add(block_id)
 
                     if func == "DOWNLOAD_BLOCK":
                         # !! hack to exclude first 4 bytes (zero pad + len) !!
-                        data = response_data[
-                            pkt["mbtcp"]["transaction_identifier"]
-                        ].replace(":", "")
+                        data = response_data[pkt["mbtcp"]["transaction_identifier"]].replace(
+                            ":", ""
+                        )
                         if len(data) >= 8:
                             data = data[8:]  # 4 bytes => 8 nibbles
                     else:  # UPLOAD_BLOCK
@@ -239,8 +229,7 @@ class UmasExtractor(HeatProtocol):
                     f"{len(artifact.blocks)} blocks",
                 )
                 log.trace2(
-                    f"[{artifact.id}] Block IDs for {artifact.direction}: "
-                    f"{artifact.block_ids}",
+                    f"[{artifact.id}] Block IDs for {artifact.direction}: {artifact.block_ids}",
                 )
                 # Verify the number of blocks transferred matches the
                 # amount of blocks expected, as indicated in the
@@ -329,8 +318,7 @@ class UmasExtractor(HeatProtocol):
                 M340.parse(to_parse=artifact.reconstructed_artifact, dev=dev)
         except Exception:
             log.exception(
-                f"[{artifact.id}] Failed to parse artifact due "
-                f"to an unhandled exception"
+                f"[{artifact.id}] Failed to parse artifact due to an unhandled exception"
             )
             state.error = True
         dev.related.ip.add(artifact.station_ip)
@@ -378,8 +366,7 @@ class UmasExtractor(HeatProtocol):
         if config.HEAT_ARTIFACTS_DIR:
             if not dev.logic.formats.get("tc6"):
                 log.warning(
-                    f"[{artifact.id}] No TC6 was generated, skipping "
-                    f"generation of OpenPLC project"
+                    f"[{artifact.id}] No TC6 was generated, skipping generation of OpenPLC project"
                 )
             else:
                 dir_name = (

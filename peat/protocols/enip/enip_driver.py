@@ -258,8 +258,7 @@ class EnipDriver:
         """
         services_response = self._get_services()
         service_names = [
-            svc.serviceName.decode().replace("\x00", "")
-            for svc in services_response.listItems
+            svc.serviceName.decode().replace("\x00", "") for svc in services_response.listItems
         ]
         return service_names
 
@@ -280,8 +279,7 @@ class EnipDriver:
         interfaces = []
         if interfaces_response.listItems:
             interfaces = [
-                svc.itemData.decode().replace("\x00", "")
-                for svc in interfaces_response.listItems
+                svc.itemData.decode().replace("\x00", "") for svc in interfaces_response.listItems
             ]
         return interfaces
 
@@ -354,9 +352,7 @@ class EnipDriver:
 
         return reply.data[22:]
 
-    def send_connected_command(
-        self, service: int, path: bytes, cmd_data: bytes
-    ) -> bytes:
+    def send_connected_command(self, service: int, path: bytes, cmd_data: bytes) -> bytes:
         """
         Sends a connected command to the device.
 
@@ -442,8 +438,7 @@ class EnipDriver:
         """
         if not self.session:
             raise EnipCommError(
-                f"a session need to be registered before call "
-                f"to forward open to {str(self)}"
+                f"a session need to be registered before call to forward open to {str(self)}"
             )
 
         forward_open_msg = [
@@ -505,8 +500,7 @@ class EnipDriver:
         """
         if not self.session:
             raise EnipCommError(
-                f"a session need to be registered before call "
-                f"to forward_close to {str(self)}"
+                f"a session need to be registered before call to forward_close to {str(self)}"
             )
 
         forward_close_msg = [

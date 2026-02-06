@@ -19,9 +19,7 @@ REGISTRY = {
 }  # type: dict[str, list[tuple[Callable, tuple]]]
 
 
-def register(
-    func: Callable, func_type: Literal["CONNECTION", "FILE"], args: tuple = ()
-) -> None:
+def register(func: Callable, func_type: Literal["CONNECTION", "FILE"], args: tuple = ()) -> None:
     if func_type not in REGISTRY or not callable(func):
         raise ValueError(f"invalid '{func_type}' function '{func.__name__}'")
 

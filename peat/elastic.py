@@ -239,18 +239,12 @@ class Elastic:
                 raise err
             except Exception as err:
                 self.log.error(
-                    f"Unknown exception occurred while connecting "
-                    f"to {self.type}: {err}"
+                    f"Unknown exception occurred while connecting to {self.type}: {err}"
                 )
                 raise err
 
-            self.log.info(
-                f"Connected to {self.type} cluster"
-                f" '{self._es.info()['cluster_name']}'"
-            )
-            self.log.trace2(
-                f"** {self.type} server info **\n{pformat(self._es.info())}"
-            )
+            self.log.info(f"Connected to {self.type} cluster '{self._es.info()['cluster_name']}'")
+            self.log.trace2(f"** {self.type} server info **\n{pformat(self._es.info())}")
 
             # Server may have been flushed, reset the index cache
             self._index_cache = set()
@@ -525,8 +519,7 @@ class Elastic:
         """
         if "index" not in search_args:
             self.log.error(
-                "No index in search_args for raw_search(), "
-                "did you forget to include it?"
+                "No index in search_args for raw_search(), did you forget to include it?"
             )
             state.error = True
             return None
@@ -535,8 +528,7 @@ class Elastic:
             return self.es.search(**search_args)
         except (ApiError, TransportError) as ex:
             self.log.error(
-                f"Failed to search index '{search_args['index']}' "
-                f"(args: {search_args}) : {ex}"
+                f"Failed to search index '{search_args['index']}' (args: {search_args}) : {ex}"
             )
         except Exception:
             self.log.exception(
@@ -717,10 +709,7 @@ class Elastic:
                 )
 
             self.log.trace(f"Keys: {body.keys()}")
-            self.log.trace2(
-                f"** Truncated dump of bad data from '{doc_id}' **\n"
-                f"{str(body)[:500]}"
-            )
+            self.log.trace2(f"** Truncated dump of bad data from '{doc_id}' **\n{str(body)[:500]}")
 
             state.error = True
             return False
@@ -777,9 +766,7 @@ class Elastic:
             converted = f"{tstamp}.000Z"
 
         if converted == "0.000Z":
-            log.warning(
-                "ES-converted timestamp is zero ('0.000Z'), returning null value instead"
-            )
+            log.warning("ES-converted timestamp is zero ('0.000Z'), returning null value instead")
             return None
 
         # There was an instance where a timezone snuck in to a doc pushed to elastic...
@@ -802,11 +789,7 @@ class Elastic:
             String in the format ``peat~<run-id>~<microsecond>~<random>``,
                 where ``<microsecond>`` and ``<random>`` are integers.
         """
-        return (
-            f"peat~{consts.RUN_ID}~"
-            f"{utils.utc_now().strftime('%f')}~"
-            f"{randint(0, 9999)}"
-        )
+        return f"peat~{consts.RUN_ID}~{utils.utc_now().strftime('%f')}~{randint(0, 9999)}"
 
 
 __all__ = ["Elastic"]

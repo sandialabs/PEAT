@@ -42,9 +42,7 @@ def _convert_to_elastic(_input: str) -> ElasticType:
                 return _input
 
 
-def _store_dict_items(
-    elem_tree: ET.Element, element_dict: dict[str, ElasticType]
-) -> None:
+def _store_dict_items(elem_tree: ET.Element, element_dict: dict[str, ElasticType]) -> None:
     for item in elem_tree.items():
         try:
             element_dict[item[0]] = int(item[1])
@@ -419,11 +417,7 @@ def process_bootline(dev: DeviceData, data: dict[str, str]) -> None:
         else:
             if not iface.subnet_mask and data.get("ethernet_subnet_mask"):
                 iface.subnet_mask = data["ethernet_subnet_mask"]
-            if (
-                not iface.gateway
-                and data.get("gateway_ip")
-                and utils.is_ip(data["gateway_ip"])
-            ):
+            if not iface.gateway and data.get("gateway_ip") and utils.is_ip(data["gateway_ip"]):
                 iface.gateway = data["gateway_ip"]
 
     if data.get("backplane_ip"):
@@ -509,11 +503,7 @@ def parse_firewall(f_handle: IO[bytes], device_info: dict) -> None:
     i = 0
     for line in lines.split("\n"):
         # Remove comments from firewall rules
-        if (
-            len(line.lstrip()) > 1
-            and line.lstrip()[0] != "#"
-            and line.lstrip()[0:2] != "//"
-        ):
+        if len(line.lstrip()) > 1 and line.lstrip()[0] != "#" and line.lstrip()[0:2] != "//":
             i += 1
             firewall_rules[f"entry_{i}"] = {}
             firewall_entry = firewall_rules[f"entry_{i}"]
@@ -532,9 +522,7 @@ def parse_isagraf(f_handle: IO[bytes], device_info: dict) -> None:
 
     device_info["isagraf"] = {}
     device_info["isagraf"]["version"] = isagraf_version.rstrip()
-    device_info["isagraf"][
-        "note"
-    ] = "Soft Logic Controller, including runtime, and dev tools"
+    device_info["isagraf"]["note"] = "Soft Logic Controller, including runtime, and dev tools"
 
 
 def parse_startup_script(f_handle: IO[bytes], device_info: dict) -> None:
@@ -596,9 +584,7 @@ def parse_ike_cert(f_handle: IO[bytes], device_info: dict) -> None:
     device_info["ike"]["cert"] = ca_data
 
 
-def parse_port_comm_settings(
-    proto: ET.Element, port_settings: dict[str, ElasticType]
-) -> None:
+def parse_port_comm_settings(proto: ET.Element, port_settings: dict[str, ElasticType]) -> None:
     comms = proto.findall("COMM")[0]
     comm_settings = {}
 
@@ -662,9 +648,7 @@ def parse_features(f_handle: IO[bytes], device_info: dict) -> None:
     for proto in protocols:
         device_info["feature_protocols"][proto.text] = {}
         for item in proto.items():
-            device_info["feature_protocols"][proto.text][item[0]] = _convert_to_elastic(
-                item[1]
-            )
+            device_info["feature_protocols"][proto.text][item[0]] = _convert_to_elastic(item[1])
 
 
 def parse_3835(f_handle: IO[bytes], device_info: dict) -> None:
@@ -1461,10 +1445,7 @@ def process_logfile_events(dev: DeviceData, events: list[dict]) -> None:
         if "failure" in lower_msg or "fail " in lower_msg:
             event.outcome = "failure"
 
-        if (
-            "startup" in event.original.lower()
-            or "started up" in event.original.lower()
-        ):
+        if "startup" in event.original.lower() or "started up" in event.original.lower():
             event.type.add("start")
 
         if event.extra.get("ip"):

@@ -67,9 +67,7 @@ class BaseModel(PydanticBaseModel):
 
     def __repr_args__(self) -> list[tuple]:
         return [
-            (a, v)
-            for a, v in super().__repr_args__()
-            if v is not None and not self.is_default(a)
+            (a, v) for a, v in super().__repr_args__() if v is not None and not self.is_default(a)
         ]
 
     def annotate(self, dev=None) -> None:

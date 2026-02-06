@@ -9,13 +9,13 @@ Authors
 - Kevin Cox
 """
 
+import traceback
 from copy import deepcopy
+from pathlib import Path
 from time import sleep
 from typing import Any
-from pathlib import Path
 
 import paramiko
-import traceback
 
 import peat
 from peat import CommError, log
@@ -101,10 +101,7 @@ class SSH:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.disconnect()
         if exc_type:
-            self.log.debug(
-                f"Unhandled exception while exiting - "
-                f"{exc_type.__name__}: {exc_val}"
-            )
+            self.log.debug(f"Unhandled exception while exiting - {exc_type.__name__}: {exc_val}")
             self.log.trace(
                 f"Exception traceback\n"
                 f"{''.join(traceback.format_tb(exc_tb))}"
@@ -177,9 +174,7 @@ class SSH:
                 ) from None
             except Exception as ex:
                 self._close()
-                raise CommError(
-                    f"Failed to SSH connect to {self.ip}:{self.port}: {ex}"
-                ) from ex
+                raise CommError(f"Failed to SSH connect to {self.ip}:{self.port}: {ex}") from ex
 
         return self._comm
 
@@ -191,13 +186,9 @@ class SSH:
         if self.connected:
             self.sftp_conn = self._comm.open_sftp()
 
-    def sftp_recursive_file_walk(
-        self, directory: str, _paths_done: set | None = None
-    ) -> dict:
+    def sftp_recursive_file_walk(self, directory: str, _paths_done: set | None = None) -> dict:
         if not self.sftp_conn:
-            self.log.warning(
-                "No sftp connection established in order to walk file structure"
-            )
+            self.log.warning("No sftp connection established in order to walk file structure")
             return {}
 
         file_info = {directory: []}
@@ -224,9 +215,7 @@ class SSH:
 
     def sftp_download_files(self, local_dir: Path, files: list[dict]):
         if not self.sftp_conn:
-            self.log.warning(
-                "No sftp connection established in order to download files."
-            )
+            self.log.warning("No sftp connection established in order to download files.")
             return False
 
         self.log.info(f"Downloading {len(files)} files to '{local_dir}'")
@@ -298,9 +287,7 @@ class SSH:
                 # Save the raw output to disk as an artifact
                 try:
                     dev = peat.data.datastore.get(self.ip)
-                    dev.write_file(
-                        self.all_output, "ssh-output.json", merge_existing=True
-                    )
+                    dev.write_file(self.all_output, "ssh-output.json", merge_existing=True)
                 except Exception as ex:
                     self.log.warning(f"Failed to write raw SSH output to file: {ex}")
 

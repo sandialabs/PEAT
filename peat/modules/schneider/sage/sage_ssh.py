@@ -21,7 +21,7 @@ Examples:
            "passphrase": "Telvent1!",
            "key_filename": "Admin.ppk",
            "look_for_keys": False,
-           "disabled_algorithms": {'pubkeys': ['rsa-sha2-512', 'rsa-sha2-256']}
+           "disabled_algorithms": {"pubkeys": ["rsa-sha2-512", "rsa-sha2-256"]},
        }
 
        sage_con = SageSSH(
@@ -30,7 +30,7 @@ Examples:
            timeout=5.0,
            username="Admin",
            password="Telvent1!",
-           kwargs=ssh_kwargs
+           kwargs=ssh_kwargs,
        )
        sage_con.login()
 
@@ -142,9 +142,7 @@ class SageSSH(SSH, SageCommands):
         self.dev = dev  # type: Optional[DeviceData]
         self.resp_dir = None  # type: Optional[Path]
 
-    def login(
-        self, user: str | None = "Admin", passwd: str | None = "Telvent1!"
-    ) -> bool:
+    def login(self, user: str | None = "Admin", passwd: str | None = "Telvent1!") -> bool:
         """
         Login to the device's ssh interface.
 
@@ -159,9 +157,7 @@ class SageSSH(SSH, SageCommands):
         self.log.debug(f"Logging into {self.ip}:{self.port} as user '{user}'")
         try:
             self._comm = self.comm
-            self.log.debug(
-                f"Logged in to Sage with user '{user}' at {utils.time_now()}"
-            )
+            self.log.debug(f"Logged in to Sage with user '{user}' at {utils.time_now()}")
             self.successful_creds = (user, passwd)  # Save the creds
             return True
         except (EOFError, OSError) as ex:

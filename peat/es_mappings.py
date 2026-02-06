@@ -369,9 +369,7 @@ ECS_FIELDS: Final[MappingType] = {"version": KEYWORD}
 OBSERVER_FIELDS: Final[NestedMappingType] = {
     "geo": {"properties": GEO_FIELDS},
     "hostname": KEYWORD,
-    "interface": {
-        "properties": {"name": KEYWORD, "egress": {"properties": {"name": KEYWORD}}}
-    },
+    "interface": {"properties": {"name": KEYWORD, "egress": {"properties": {"name": KEYWORD}}}},
     "ip": IP,
     "mac": KEYWORD,
     "os": {"properties": OS_FIELDS},
@@ -481,9 +479,7 @@ PARSE_RESULT: Final[dict[str, NestedMappingType]] = {
         "name": KEYWORD,
         "path": KEYWORD,
         "module": KEYWORD,
-        "results": {
-            "properties": {**HOST_FIELDS, "module": {"properties": HOST_FIELDS}}
-        },
+        "results": {"properties": {**HOST_FIELDS, "module": {"properties": HOST_FIELDS}}},
     }
 }
 

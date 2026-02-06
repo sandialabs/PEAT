@@ -294,9 +294,7 @@ class SCEPTRE(DeviceModule):
                 elif isinstance(content, bytes):
                     ftp.upload_binary(filename, content)
                 else:
-                    cls.log.error(
-                        f"Cannot upload data with type '{type(content).__name__}'"
-                    )
+                    cls.log.error(f"Cannot upload data with type '{type(content).__name__}'")
         except Exception as err:
             cls.log.debug(f"Failed to upload file {filename} to {dev.ip}: {err}")
             return False
@@ -308,9 +306,7 @@ class SCEPTRE(DeviceModule):
         return cls.parse_config(file=file, dev=dev)
 
     @classmethod
-    def parse_config(
-        cls, file: Path | bytes | str, dev: DeviceData | None = None
-    ) -> DeviceData:
+    def parse_config(cls, file: Path | bytes | str, dev: DeviceData | None = None) -> DeviceData:
         """
         Parse a SCEPTRE field device XML configuration file.
 

@@ -6,7 +6,7 @@ from pathlib import Path, PurePosixPath
 from typing import BinaryIO, Optional
 
 import peat  # Avoid circular imports
-from peat import CommError, config, utils, log
+from peat import CommError, config, log, utils
 
 
 class FTP:
@@ -38,8 +38,7 @@ class FTP:
                 # Since "connect" shouldn't be reused on instances,
                 # we create a new instance for every new connection.
                 self.log.debug(
-                    f"Attempting connection to {self.ip}:"
-                    f"{self.port} (timeout: {self.timeout})"
+                    f"Attempting connection to {self.ip}:{self.port} (timeout: {self.timeout})"
                 )
                 self._ftp = ftplib.FTP()
                 self._ftp.connect(self.ip, self.port, self.timeout)
@@ -67,10 +66,7 @@ class FTP:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.disconnect()
         if exc_type:
-            self.log.debug(
-                f"Unhandled exception while exiting - "
-                f"{exc_type.__name__}: {exc_val}"
-            )
+            self.log.debug(f"Unhandled exception while exiting - {exc_type.__name__}: {exc_val}")
             self.log.trace(
                 f"Exception traceback\n"
                 f"{''.join(traceback.format_tb(exc_tb))}"
@@ -117,9 +113,7 @@ class FTP:
                 # Save the raw output to disk as an artifact
                 try:
                     dev = peat.data.datastore.get(self.ip)
-                    dev.write_file(
-                        self.all_output, "raw-ftp-output.json", merge_existing=True
-                    )
+                    dev.write_file(self.all_output, "raw-ftp-output.json", merge_existing=True)
                 except Exception as ex:
                     self.log.warning(f"Failed to write raw output to file: {ex}")
 
@@ -200,14 +194,10 @@ class FTP:
         data = file_obj.getvalue()
 
         if not data:
-            self.log.warning(
-                f"No data for binary file '{filename}' on "
-                f"{self.ip} (command: {cmd})"
-            )
+            self.log.warning(f"No data for binary file '{filename}' on {self.ip} (command: {cmd})")
         elif not isinstance(data, bytes):
             self.log.error(
-                f"download_binary: data has type "
-                f"'{data.__class__.__name__}', not 'bytes'"
+                f"download_binary: data has type '{data.__class__.__name__}', not 'bytes'"
             )
         # Save the raw file to disk as an artifact
         elif data and save_to_file:
@@ -219,9 +209,7 @@ class FTP:
                 if filename.startswith("/"):
                     filename = filename[1:]  # Prevent files being saved in "/"
 
-                dev.write_file(
-                    data=data, filename=filename, out_dir=dev.get_sub_dir("ftp_files")
-                )
+                dev.write_file(data=data, filename=filename, out_dir=dev.get_sub_dir("ftp_files"))
                 dev.related.files.add(filename)
 
         return data
@@ -271,15 +259,11 @@ class FTP:
                     )
                     dev.related.files.add(filename)
         else:
-            self.log.warning(
-                f"No data for text file '{filename}' on {self.ip} (command: {cmd})"
-            )
+            self.log.warning(f"No data for text file '{filename}' on {self.ip} (command: {cmd})")
 
         return text
 
-    def find_file(
-        self, check_for: str, ext: str, directory: str | None = None
-    ) -> str | None:
+    def find_file(self, check_for: str, ext: str, directory: str | None = None) -> str | None:
         for filename in self.nlst_files(directory):
             if check_for in filename and filename.endswith(ext):
                 return filename
@@ -289,9 +273,7 @@ class FTP:
         )
         return None
 
-    def upload_text(
-        self, filename: str, content: str | bytes | TextIOWrapper | BinaryIO
-    ) -> None:
+    def upload_text(self, filename: str, content: str | bytes | TextIOWrapper | BinaryIO) -> None:
         # We make a new variable to avoid over-writing the argument reference
         if isinstance(content, str):
             file_obj = BytesIO(content.encode("utf-8"))  # str to bytes

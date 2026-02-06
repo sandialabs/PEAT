@@ -4,6 +4,7 @@ from typing import Any
 
 import peat
 from peat import CommError, log
+
 from . import forked_telnetlib as telnetlib
 
 
@@ -54,10 +55,7 @@ class Telnet:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         self.disconnect()
         if exc_type:
-            self.log.debug(
-                f"Unhandled exception while exiting - "
-                f"{exc_type.__name__}: {exc_val}"
-            )
+            self.log.debug(f"Unhandled exception while exiting - {exc_type.__name__}: {exc_val}")
             self.log.trace(
                 f"Exception traceback\n"
                 f"{''.join(traceback.format_tb(exc_tb))}"
@@ -81,9 +79,7 @@ class Telnet:
                 self.connected = True
                 self.log.info(f"Connected to {self.ip}:{self.port}")
             except Exception as ex:
-                raise CommError(
-                    f"Failed to connect to {self.ip}:{self.port}: {ex}"
-                ) from ex
+                raise CommError(f"Failed to connect to {self.ip}:{self.port}: {ex}") from ex
 
         return self._comm
 
@@ -115,9 +111,7 @@ class Telnet:
                 # Save the raw output to disk as an artifact
                 try:
                     dev = peat.data.datastore.get(self.ip)
-                    dev.write_file(
-                        self.all_output, "raw-telnet-output.json", merge_existing=True
-                    )
+                    dev.write_file(self.all_output, "raw-telnet-output.json", merge_existing=True)
                 except Exception as ex:
                     self.log.warning(f"Failed to write raw output to file: {ex}")
 

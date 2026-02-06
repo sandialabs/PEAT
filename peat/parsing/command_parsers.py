@@ -179,10 +179,7 @@ class VarLogMessagesParser(NixParserBase):
 
             # !! NOTE: this relies on DateParser running prior this !!
             # make year for timestamps relative to the correct year
-            if (
-                dev.extra.get("current_time")
-                and timestamp.year > dev.extra["current_time"].year
-            ):
+            if dev.extra.get("current_time") and timestamp.year > dev.extra["current_time"].year:
                 timestamp = timestamp.replace(year=dev.extra["current_time"].year)
 
             msg_lower = msg["message"].lower()  # type: str
@@ -457,9 +454,7 @@ class ProcNetDevParser(NixParserBase):
                 continue
 
             iface, raw_data = line.split(":")
-            if_data = {
-                t[0]: int(t[1]) for t in zip(cols, raw_data.split(), strict=False)
-            }
+            if_data = {t[0]: int(t[1]) for t in zip(cols, raw_data.split(), strict=False)}
 
             results[iface] = if_data
 
@@ -708,9 +703,7 @@ class IfconfigParser(NixParserBase):
             r"(\s+HWaddr\s+\b(?P<mac>[0-9A-Fa-f:?]+))?\s+Queue:(?P<queue>\w+)",
             re.IGNORECASE | re.ASCII,
         )
-        cap_re = re.compile(
-            r"capabilities: (?P<capabilities>[\w ]+)\s", re.IGNORECASE | re.ASCII
-        )
+        cap_re = re.compile(r"capabilities: (?P<capabilities>[\w ]+)\s", re.IGNORECASE | re.ASCII)
         ip_re = re.compile(
             r"\s+inet (?P<ip>(?:[0-9]{1,3}\.){3}[0-9]{1,3})"
             r"\s+mask (?P<subnet_mask>(?:[0-9]{1,3}\.){3}[0-9]{1,3})"
@@ -964,9 +957,7 @@ class LsRecursiveParser(NixParserBase):
     # TODO: do a full recursive in certain circumstances
     # command = "ls -lenAR /"
     #  /usr
-    command = (
-        "ls -lenAR /etc /boot /var/log /root /sysopt /sbin /pkg /bin /common /opt /lib"
-    )
+    command = "ls -lenAR /etc /boot /var/log /root /sysopt /sbin /pkg /bin /common /opt /lib"
 
     @classmethod
     def parse(cls, to_parse: str) -> list[dict]:
@@ -1028,9 +1019,7 @@ class LsRecursiveParser(NixParserBase):
                     "perms": parts[0][1:],
                     "uid": parts[2],
                     "gid": parts[3],
-                    "mtime": utils.parse_date(
-                        " ".join(parts[offset + 5 : offset + 10])
-                    ),
+                    "mtime": utils.parse_date(" ".join(parts[offset + 5 : offset + 10])),
                     "name": parts[offset + 10],
                     "parent": dir_path,
                 }
@@ -1061,9 +1050,7 @@ class LsRecursiveParser(NixParserBase):
 
                     # Direct: addgroup -> busybox
                     if "/" not in raw_target:
-                        file_info["symlink_target"] = PurePosixPath(
-                            dir_path, raw_target
-                        )
+                        file_info["symlink_target"] = PurePosixPath(dir_path, raw_target)
                     # Relative: core -> ../proc/kcore
                     elif raw_target.startswith(".."):
                         # Convert "/dev/../proc/kcore" -> "/proc/kcore"
@@ -1224,9 +1211,7 @@ class NetstatSocketsVxWorksParser(NixParserBase):
                         interface_lookup={"ip": "127.0.0.1"},
                     )
                 else:
-                    log.warning(
-                        f"netstat: unknown local_address '{skt['local_address']}'"
-                    )
+                    log.warning(f"netstat: unknown local_address '{skt['local_address']}'")
 
                 # TODO: dev.store service
 

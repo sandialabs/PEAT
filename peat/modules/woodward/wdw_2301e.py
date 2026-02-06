@@ -48,9 +48,7 @@ class WDW2301E(DeviceModule):
     vendor_name = "Woodward, Inc"
     brand = "WDW"
     model = "2301E"
-    filename_patterns = [
-        "*.wset"
-    ]  # TODO: should wset and tc parsing belong here or 3500XT?
+    filename_patterns = ["*.wset"]  # TODO: should wset and tc parsing belong here or 3500XT?
     # TODO: combine some common functions of 3500XT and 2301E?
     woodward_fallback_baudrates = [9600]
 
@@ -70,9 +68,7 @@ class WDW2301E(DeviceModule):
                 open_serial_port(dev.serial_port, baudrate, timeout)
                 and _servlink_hello_txn(dev.serial_port) == SVL_HELLO_ACK
                 and "2301e"
-                in str(
-                    _servlink_sys_txn(svl_sys_cmds["Product"], dev.serial_port)
-                ).lower()
+                in str(_servlink_sys_txn(svl_sys_cmds["Product"], dev.serial_port)).lower()
             ):
                 cls.log.debug(f"Verified {dev.serial_port} (baudrate: {baudrate})")
                 iface = Interface(
@@ -119,7 +115,7 @@ class WDW2301E(DeviceModule):
         for k in svl_sys_cmds.keys():
             cls.log.debug(f"Pulling System\\{k}")
             serial_info["system"][k] = _servlink_sys_txn(svl_sys_cmds[k], address)
-            cls.log.trace2(f"{k} = \"{serial_info['system'][k]}\"")
+            cls.log.trace2(f'{k} = "{serial_info["system"][k]}"')
 
         # Get the configuration
         # TODO: should this only be the keys that start with "CfgA\\"?
@@ -128,7 +124,7 @@ class WDW2301E(DeviceModule):
             serial_info["config"][a] = _servlink_rw_txn(
                 svl_dat_cmds["read"], svl_dat_prms[a], address
             )
-            cls.log.trace2(f"{a} = \"{serial_info['config'][a]}\"")
+            cls.log.trace2(f'{a} = "{serial_info["config"][a]}"')
 
         cls.log.info(f"Finished pulling Serial information from {address}")
         return serial_info
@@ -245,9 +241,7 @@ def _servlink_sys_txn(sys_dict: dict, address: str):
 
 
 # Not sure if this is 2301E-specific
-def _servlink_rw_txn(
-    rw_dict: dict, addr_dict: dict, address: str
-):  # only one addr for now
+def _servlink_rw_txn(rw_dict: dict, addr_dict: dict, address: str):  # only one addr for now
     rw_bytes = _servlink_rw_fmt(rw_dict["cmd"], [addr_dict])
     return _servlink_seq_txn(rw_bytes, address, addr_dict["type"])
 
@@ -411,17 +405,12 @@ def _servlink_rsp_trns(rd_bytes: bytes, fmt: "type") -> str:
         elif fmt is bool and len(data_bytes) == 3:
             return int.from_bytes(data_bytes, "big") != 0
         elif (
-            fmt is float
-            and len(data_bytes) == 6
-            and data_bytes[0] == 0
-            and data_bytes[1] == 0
+            fmt is float and len(data_bytes) == 6 and data_bytes[0] == 0 and data_bytes[1] == 0
         ):  # we get back 6 bytes but floats are 4
             return struct.unpack(">f", data_bytes[2:])[0]
         elif fmt is not bytes:
             # Working as designed, but log to debug
-            log.debug(
-                f"Unmatched response type for {fmt} {pretty_hex_bytes(data_bytes)}"
-            )
+            log.debug(f"Unmatched response type for {fmt} {pretty_hex_bytes(data_bytes)}")
     except Exception as ex:
         log.error(f"Error parsing response for {pretty_hex_bytes(data_bytes)}: {ex}")
 

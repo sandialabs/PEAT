@@ -52,9 +52,7 @@ class SageTelnet(Telnet, SageCommands):
                 self.disconnect()
                 return False
 
-            self.log.debug(
-                f"Logged in to Sage with user '{user}' at {utils.time_now()}"
-            )
+            self.log.debug(f"Logged in to Sage with user '{user}' at {utils.time_now()}")
 
             self.successful_creds = (user, passwd)  # Save the creds
             return True

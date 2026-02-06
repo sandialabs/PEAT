@@ -261,8 +261,7 @@ ANSI_CODES = {
     "64S": "Stator earth fault",
     "64TN": "100% Stator Ground",
     "65": "Governor",
-    "66": "Notching or Jogging Device/Maximum Starting "
-    "Rate/Starts Per Hour/Time Between Starts",
+    "66": "Notching or Jogging Device/Maximum Starting Rate/Starts Per Hour/Time Between Starts",
     "67": "AC Directional Overcurrent Relay",
     "67G": "Ground Directional Overcurrent",
     "67N": "Neutral Directional Overcurrent",

@@ -53,9 +53,7 @@ class FTPExtractor(HeatProtocol):
             pcaps_dir = config.PCAPS
 
             if not pcaps_dir:
-                log.warning(
-                    "No PCAP directory specified (--pcaps), defaulting to './pcaps'"
-                )
+                log.warning("No PCAP directory specified (--pcaps), defaulting to './pcaps'")
                 pcaps_dir = Path("./pcaps").resolve()
 
             if not pcaps_dir.is_dir():
@@ -155,9 +153,7 @@ class FTPExtractor(HeatProtocol):
                 return
 
             if not config.ZEEK_DIR.is_dir():
-                log.error(
-                    f"{config.ZEEK_DIR} doesn't exist or is not a directory. Aborting..."
-                )
+                log.error(f"{config.ZEEK_DIR} doesn't exist or is not a directory. Aborting...")
                 state.error = True
                 return
 
@@ -251,9 +247,7 @@ class FTPExtractor(HeatProtocol):
                         # assemble the artifact
                         # TODO: fix OUIs
                         start_time = datetime.fromtimestamp(conn_json["ts"])
-                        end_time = datetime.fromtimestamp(
-                            conn_json["ts"] + conn_json["duration"]
-                        )
+                        end_time = datetime.fromtimestamp(conn_json["ts"] + conn_json["duration"])
                         dev_mac = None
                         stat_mac = None
 
@@ -338,9 +332,7 @@ class FTPExtractor(HeatProtocol):
             if txtRegex.search(artifact.artifact_name):
                 with open(artifact.zeek_name) as zeek_file:
                     content = zeek_file.read()
-                    utils.write_file(
-                        content, artifact.file_path, overwrite_existing=False
-                    )
+                    utils.write_file(content, artifact.file_path, overwrite_existing=False)
             else:
                 # otherwise, use this logic to do an equivalent action for a non-string file
                 fp = utils.dup_path(artifact.file_path)
@@ -366,9 +358,7 @@ class FTPExtractor(HeatProtocol):
                 if setorserRegex.search(artifact.artifact_name):
                     self._parse_artifact(artifact)
                 else:
-                    log.debug(
-                        f"Unable to parse non-settings artifact {artifact.artifact_name}"
-                    )
+                    log.debug(f"Unable to parse non-settings artifact {artifact.artifact_name}")
             else:
                 try:
                     log.debug(
@@ -434,8 +424,7 @@ class FTPExtractor(HeatProtocol):
                     SELRelay.parse(to_parse=artifact.reconstructed_artifact, dev=dev)
             except Exception:
                 log.exception(
-                    f"[{artifact.id}] Failed to parse artifact due "
-                    f"to an unhandled exception"
+                    f"[{artifact.id}] Failed to parse artifact due to an unhandled exception"
                 )
                 state.error = True
         dev.related.ip.add(artifact.station_ip)

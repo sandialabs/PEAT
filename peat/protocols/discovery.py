@@ -31,9 +31,7 @@ from .addresses import ip_in_local_subnet, ip_is_local_interface, sort_ips
 from .ip import check_tcp_port
 
 
-def check_host(
-    ip: str, timeout: float = 1.0, icmp_fallback_tcp_syn: bool | None = None
-) -> bool:
+def check_host(ip: str, timeout: float = 1.0, icmp_fallback_tcp_syn: bool | None = None) -> bool:
     """
     Checks if a network host is online.
 
@@ -67,10 +65,7 @@ def check_host(
 
     # If it's actually a local interface, skip
     if ip_is_local_interface(ip):
-        log.debug(
-            f"Skipping online check of {ip} since it's "
-            f"an interface on the local system"
-        )
+        log.debug(f"Skipping online check of {ip} since it's an interface on the local system")
         return False
 
     # If we're able to use raw sockets, try using better methods
@@ -178,9 +173,7 @@ def check_host_icmp(ip: str, timeout: float = 1.0):
             log.trace2(f"ICMP check of {ip} succeeded")
             return True
 
-        log.trace2(
-            f"ICMP request to {ip} failed with code {code} (timeout: {timeout:.2f})"
-        )
+        log.trace2(f"ICMP request to {ip} failed with code {code} (timeout: {timeout:.2f})")
 
     return False
 
@@ -215,9 +208,7 @@ def check_host_syn_sweep(ip: str, ports: list[int], timeout: float = 1.0) -> boo
     return False  # All hosts failed
 
 
-def get_reachable_hosts(
-    ip_list: list[str], ports: Iterable[int] | None = None
-) -> list[str]:
+def get_reachable_hosts(ip_list: list[str], ports: Iterable[int] | None = None) -> list[str]:
     """
     Checks for online hosts.
 
@@ -262,8 +253,7 @@ def get_reachable_hosts(
         else:
             if not config.FORCE_ONLINE_METHOD_TCP:
                 log.info(
-                    f"Checking online status of {len(hosts)} hosts "
-                    f"using ARP and/or ICMP requests"
+                    f"Checking online status of {len(hosts)} hosts using ARP and/or ICMP requests"
                 )
             else:
                 log.warning(
