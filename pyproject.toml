@@ -353,7 +353,7 @@ docs = [
 includes = ["peat/", "NOTICE", "COPYRIGHT.md"]
 source-includes = ["AUTHORS", "CHANGELOG.md", "SECURITY.md"]
 # If we some day want to include test and dev dependencies in the sdist
-# (e.g. for packaging),then we can do that. For now, exclude.
+# (e.g. for packaging), then we can do that. For now, exclude.
 excludes = ["tests/"]
 
 
@@ -384,6 +384,10 @@ cmd = "ruff check --fix peat tests distribution/sneakypeat.py examples/example_p
 [tool.pdm.scripts.spelling]
 help = "Spelling checks on all relevant files"
 cmd = "codespell --toml ./pyproject.toml peat tests distribution .github CHANGELOG.md CODE_OF_CONDUCT.md COPYRIGHT.md Dockerfile LICENSE NOTICE README.md SECURITY.md .dockerignore .editorconfig .gitignore .gitattributes pyproject.toml distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
+
+[tool.pdm.scripts.typecheck]
+help = "Variable typing analysis using Mypy"
+cmd = "mypy peat tests"
 
 [tool.pdm.scripts.lint]
 help = "Run all linting checks: unused, spelling, ruff, and formatting"
@@ -422,7 +426,7 @@ pyreverse -o png -p peat-all --ignore plc_open,mibs,csharp_reader.py,namedlist.p
 # If there are extraneous packages, run "pdm sync --clean" to remove packages that
 # are leftover from manual installs or otherwise left over from dependency changes.
 [tool.pdm.scripts.dep-graph]
-help = "Generate a image of PEAT's package dependency graph. Creates the file 'package_dependencies.png'. If there are extraneous packages, run 'pdm sync --clean', then re-run graph creation. NOTE: 'graphviz' must be installed. Linux: 'sudo apt install graphviz'. Windows: download and run the installer from graphviz's website."
+help = "Generate a image of PEAT's package dependency graph. Creates the file 'package_dependencies.png'. If there are extraneous packages, run 'pdm sync -d --clean', then re-run graph creation. NOTE: 'graphviz' must be installed. Linux: 'sudo apt install -y graphviz'. Windows: download and run the installer from graphviz's website."
 shell = """
 pipdeptree --graph-output png --exclude pipdeptree,graphviz,pylint,pytest,flake8,ruff,pyinstaller,staticx,tox,tox-pdm,black,isort,vulture,mypy,check-sdist,codespell,pytest-cov,pytest-mock,pytest-randomly,deepdiff,pytest-xdist,pytest-json-report,xdoctest,requests-mock,Pygments,fire,pdm-backend,check-manifest,pyinstaller-hooks-contrib,virtualenv,types-tzlocal,types-PyYAML,wheel,setuptools,pip,better-exceptions,pyproject-api,packaging,build,pytest-metadata,coverage,mypy-extensions,pyproject_hooks,feedparser,requirements-parser,validate-pyproject,types-pytz,distlib,pluggy,wheel,iniconfig,pathspec,platformdirs,dill,filelock,altgraph,execnet,click,cachetools,exceptiongroup,chardet,tomli,ordered-set,tomlkit,mccabe > package_dependencies.png
 """
