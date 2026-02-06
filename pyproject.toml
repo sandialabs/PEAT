@@ -297,9 +297,6 @@ exe = [
     "setuptools<70.0.0",  # Fix various issues with setuptools lately
 ]
 dev = [
-    # Useful for building quick scripts for testing purposes
-    # https://github.com/google/python-fire
-    "fire",
     # Analyzing dependencies
     # install graphviz to generate graphs
     "graphviz",
