@@ -545,11 +545,11 @@ composite = [
 
 [tool.pdm.scripts.docs-html]
 help = "Build HTML docs (output: _docs_html/)"
-cmd = "sphinx-build -b html docs _docs_html"
+cmd = "sphinx-build -j 4 -b html docs _docs_html"
 
 [tool.pdm.scripts.docs-man]
 help = "Build man pages (output: _docs_man/peat.1)"
-cmd = "sphinx-build -b man docs _docs_man"
+cmd = "sphinx-build -j 4 -b man docs _docs_man"
 
 # TODO: PDF format (using rinohtype)
 [tool.pdm.scripts.docs]
