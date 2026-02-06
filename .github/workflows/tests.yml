@@ -5,6 +5,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   commits:
     runs-on: ubuntu-latest
@@ -23,6 +26,10 @@ jobs:
     name: Code Quality Checks
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
       - name: Checkout repository
         uses: actions/checkout@v6
       - name: Setup PDM
@@ -46,6 +53,10 @@ jobs:
         python-version: ["3.11", "3.12", "3.13"]
         platform: ["ubuntu-24.04", "windows-latest", "windows-2022", "macos-latest"]
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
       - name: Checkout repository
         uses: actions/checkout@v6
       - name: Setup PDM

@@ -14,6 +14,10 @@ jobs:
     name: Build Documentation (HTML and manpage)
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
@@ -47,6 +51,10 @@ jobs:
     name: Build Python package
     runs-on: ubuntu-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
@@ -81,6 +89,10 @@ jobs:
     # NOTE: ubuntu-24 needed for python3.12
     runs-on: ubuntu-24.04
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
@@ -147,6 +159,10 @@ jobs:
     name: Build Windows Executables
     runs-on: windows-latest
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
