@@ -37,14 +37,14 @@ jobs:
           pdm run lint
           pdm run check-sdist --inject-junk
 
-  # TODO: combine linux/windows into a test matrix?
-  # TODO: test on osx?
-  linux-unit-tests:
-    name: Linux Unit Tests
-    runs-on: ubuntu-24.04
+  unit-tests:
+    name: Unit Tests
+    runs-on: ${{ matrix.platform }}
     strategy:
+      # OS images: https://github.com/actions/runner-images
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
+        platform: ["ubuntu-24.04", "windows-latest", "windows-2022", "macos-latest"]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -58,42 +58,12 @@ jobs:
       # NOTE: coverage here is limited since it's not running live tests
       - name: Run Unit Tests
         run: |
-          pdm run pytest --basetemp=./pytest_files --run-slow --durations=10 --cov-report term-missing:skip-covered --cov-report html --cov-report xml --cov=peat --no-cov-on-fail --xdoctest --junitxml=linux-test-results.xml -n 8 ./tests ./peat
+          pdm run pytest --basetemp=./pytest_files --run-slow --durations=10 --cov-report term-missing:skip-covered --cov-report html --cov=peat --no-cov-on-fail --xdoctest -n 8 ./tests ./peat
       - name: Upload Test Results
         uses: actions/upload-artifact@v6
         with:
-          name: linux-test-results-${{ matrix.python-version }}
+          name: test-results-python${{ matrix.python-version }}-${{ matrix.platform }}
           path: |
-            linux-test-results.xml
-            htmlcov/
-            pytest_files/
-          if-no-files-found: error
-
-  windows-unit-tests:
-    name: Windows Unit Tests
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Setup PDM
-        uses: pdm-project/setup-pdm@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-          cache: true
-      - name: Install dependencies
-        run: pdm sync -G test
-      - name: Run Unit Tests
-        run: |
-          pdm run pytest --basetemp=./pytest_files --run-slow --durations=10 --cov-report term-missing:skip-covered --cov-report html --cov-report xml --cov=peat --no-cov-on-fail --xdoctest --junitxml=windows-test-results.xml -vv ./tests ./peat
-      - name: Upload Test Results
-        uses: actions/upload-artifact@v6
-        with:
-          name: windows-test-results-${{ matrix.python-version }}
-          path: |
-            windows-test-results.xml
             htmlcov/
             pytest_files/
           if-no-files-found: error
