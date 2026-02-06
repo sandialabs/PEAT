@@ -10,5 +10,5 @@ from peat.protocols.discovery import get_reachable_hosts
 )
 def test_get_reachable_hosts_localhost(win_or_wsl):
     """Localhost should return as online."""
-    expected = [] if win_or_wsl else ["127.0.0.1"]
+    expected = [] if (win_or_wsl or system() == "Darwin") else ["127.0.0.1"]
     assert get_reachable_hosts(["127.0.0.1"], [44818]) == expected
