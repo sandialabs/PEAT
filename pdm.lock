@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "exe", "lint", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:e33337425ef884910650149addb4849d1aa1d9913a3a2e4ce4fecc4df9eef47e"
+content_hash = "sha256:c7bdd938c326e51da674a71661a2efc7466a80d0f0c53105210f08e2a09afa7d"
 
 [[metadata.targets]]
 requires_python = ">=3.11,<3.14"
@@ -599,19 +599,6 @@ summary = "execnet: rapid multi-Python deployment"
 files = [
     {file = "execnet-2.1.2-py3-none-any.whl", hash = "sha256:67fba928dd5a544b783f6056f449e5e3931a5c378b128bc18501f7ea79e296ec"},
     {file = "execnet-2.1.2.tar.gz", hash = "sha256:63d83bfdd9a23e35b9c6a3261412324f964c2ec8dcd8d3c6916ee9373e0befcd"},
-]
-
-[[package]]
-name = "fire"
-version = "0.7.1"
-requires_python = ">=3.7"
-summary = "A library for automatically generating command line interfaces."
-dependencies = [
-    "termcolor",
-]
-files = [
-    {file = "fire-0.7.1-py3-none-any.whl", hash = "sha256:e43fd8a5033a9001e7e2973bab96070694b9f12f2e0ecf96d4683971b5ab1882"},
-    {file = "fire-0.7.1.tar.gz", hash = "sha256:3b208f05c736de98fb343310d090dcc4d8c78b2a89ea4f32b837c586270a9cbf"},
 ]
 
 [[package]]
