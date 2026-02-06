@@ -246,10 +246,6 @@ lint = [
     # vulture checks for unused code
     "vulture",
 
-    # automatic code formatting to follow a consistent style
-    "isort",
-    "black",
-
     # Type analysis
     "mypy",
     "types-tzlocal",
@@ -363,10 +359,10 @@ run = ["--quiet"]  # suppress output from "pdm run" to facilitate testing
 
 # List scripts: pdm run -l
 [tool.pdm.scripts.format]
-help = "Auto-format code using Black and isort"
+help = "Auto-format code using Ruff"
 composite = [
-    "isort peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
-    "black peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
+    "ruff check --select I --fix peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
+    "ruff format peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
 ]
 
 [tool.pdm.scripts.unused]
@@ -395,8 +391,8 @@ composite = [
     "unused",
     "spelling",
     "ruff check peat tests",
-    "black --check peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
-    "isort --check peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
+    "ruff check --select I peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
+    "ruff format --check peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
 ]
 
 [tool.pdm.scripts.test]
@@ -569,39 +565,6 @@ ignore-words-list = "datas,bre,ser,mot,ot,aci,noe,optin,ro,inh,ardvark,hart,tru,
 skip = "forked_telnetlib.py,manuf,data_files,htmlcov,.doctrees,_docs_html,_docs_man,built_docs,plc_open,mibs,enip,cip,clx_relay_ladder_parser.py,*.pyc,*.class,*.xsd,*.xml,*.ico,*.apx,*.dmk,*.out,*.stu,*.sta,*.ztx,*.PNG,*.inv,*.png,*.jpg,*.dot"
 
 
-[tool.black]
-line-length = 88
-force-exclude = '''
-(
-    mibs
-    | plc_open
-    | csharp_reader\.py
-    | namedlist\.py
-    | peat/__init__\.py
-    | peat/protocols/forked_telnetlib\.py
-)
-'''
-
-
-[tool.isort]
-profile = "black"
-known_first_party = ["peat"]
-extend_skip_glob  = [
-    "peat/modules/woodward/csharp_reader.py",
-    "peat/modules/woodward/namedlist.py",
-    "peat/protocols/mibs/*",
-    "peat/parsing/plc_open/*",
-    "peat/__init__.py",
-    "peat/data/models.py",
-    "peat/protocols/ftp.py",
-    "peat/protocols/http.py",
-    "peat/protocols/snmp.py",
-    "peat/protocols/ssh.py",
-    "peat/protocols/telnet.py",
-    "peat/protocols/forked_telnetlib.py",
-]
-
-
 [tool.ruff]
 line-length = 99
 output-format = "full"
@@ -650,6 +613,7 @@ select = [
     "RUF",  # Ruff-specific rules
     "Q",    # flake8-quotes
     "UP",   # pyupgrade
+    "I",    # isort
 
     # ** Things to potentially enable in the future **
     # DTZ requires all usage of datetime module to have timezone-aware
@@ -689,12 +653,23 @@ ignore = [
 "tests/conftest.py" = ["RET503"]
 "tests/generate_test_data_files.py" = ["T201", "T203"]
 "__init__.py" = ["F401"]
-"peat/__init__.py" = ["E402"]
+"peat/__init__.py" = ["E402", "I001"]
 "peat/cli_args.py" = ["E501"]
-"peat/data/models.py" = ["E501"]
+"peat/data/models.py" = ["E501", "I001"]
 "peat/modules/woodward/easygen_svl.py" = ["E501"]
 "peat/modules/rockwell/clx_relay_ladder_parser.py" = ["ARG001"]
+# if ruff messes up import order then re-add these
+# "peat/protocols/ftp.py" = ["I001"]
+# "peat/protocols/http.py" = ["I001"]
+# "peat/protocols/snmp.py" = ["I001"]
+# "peat/protocols/ssh.py" = ["I001"]
+# "peat/protocols/telnet.py" = ["I001"]
+# "peat/protocols/forked_telnetlib.py" = ["I001"]
 
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+docstring-code-line-length = "dynamic"
 
 # Configuration for mypy
 # https://mypy.readthedocs.io/en/stable/config_file.html#using-a-pyproject-toml-file
