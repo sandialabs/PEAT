@@ -41,7 +41,9 @@ jobs:
           python-version: "3.12"
           cache: true
       - name: Install dependencies
-        run: pdm sync -d -G docs
+        run: pdm sync -d --clean
+      - name: Update dependencies doc pages
+        run: pdm run dep-docs
       - name: Build docs
         run: pdm run docs-html
       - uses: actions/upload-pages-artifact@v4

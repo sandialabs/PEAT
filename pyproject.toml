@@ -342,6 +342,9 @@ docs = [
 
     # For PDF building
     "rinohtype",
+
+    # For dependencies reference page
+    "pip-licenses",
 ]
 
 
@@ -419,17 +422,15 @@ pyreverse -o png -p peat-modules --ignore plc_open,mibs,csharp_reader.py,namedli
 pyreverse -o png -p peat-all --ignore plc_open,mibs,csharp_reader.py,namedlist.py ./peat
 """
 
-# You will need graphviz
-# Linux: 'sudo apt install graphviz'
-# Windows: go to graphviz's website, download and run the installer
-#
-# If there are extraneous packages, run "pdm sync --clean" to remove packages that
-# are leftover from manual installs or otherwise left over from dependency changes.
 [tool.pdm.scripts.dep-graph]
 help = "Generate a image of PEAT's package dependency graph. Creates the file 'package_dependencies.png'. If there are extraneous packages, run 'pdm sync -d --clean', then re-run graph creation. NOTE: 'graphviz' must be installed. Linux: 'sudo apt install -y graphviz'. Windows: download and run the installer from graphviz's website."
 shell = """
 pipdeptree --graph-output png --exclude pipdeptree,graphviz,pylint,pytest,flake8,ruff,pyinstaller,staticx,tox,tox-pdm,black,isort,vulture,mypy,check-sdist,codespell,pytest-cov,pytest-mock,pytest-randomly,deepdiff,pytest-xdist,pytest-json-report,xdoctest,requests-mock,Pygments,fire,pdm-backend,check-manifest,pyinstaller-hooks-contrib,virtualenv,types-tzlocal,types-PyYAML,wheel,setuptools,pip,better-exceptions,pyproject-api,packaging,build,pytest-metadata,coverage,mypy-extensions,pyproject_hooks,feedparser,requirements-parser,validate-pyproject,types-pytz,distlib,pluggy,wheel,iniconfig,pathspec,platformdirs,dill,filelock,altgraph,execnet,click,cachetools,exceptiongroup,chardet,tomli,ordered-set,tomlkit,mccabe > package_dependencies.png
 """
+
+[tool.pdm.scripts.dep-doc]
+help = "Update dependencies table in the documentation using 'pip-licenses'"
+cmd = "pip-licenses --ignore-packages PEAT --with-description --format=rst --output-file=docs/dependencies_table.rst"
 
 [tool.pdm.scripts.update-manuf-linux]
 help = "(Linux) Update the manuf MAC address file included with PEAT (NOTE: doesn't work on Windows)"

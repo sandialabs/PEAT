@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "exe", "lint", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:a5f3434c6d0eca806b75ca9c49fee312f013e17c680fb5e71c234b43983e4d78"
+content_hash = "sha256:7ac5a2bfda516f928a9503b52dc15e59edc662097b7fcacc9eea789cceb8301e"
 
 [[metadata.targets]]
 requires_python = ">=3.11,<3.14"
@@ -1315,6 +1315,20 @@ files = [
 ]
 
 [[package]]
+name = "pip-licenses"
+version = "5.5.1"
+requires_python = ">=3.9"
+summary = "Dump the software license list of Python packages installed with pip."
+dependencies = [
+    "prettytable>=3.12.0",
+    "tomli>=2; python_version < \"3.11\"",
+]
+files = [
+    {file = "pip_licenses-5.5.1-py3-none-any.whl", hash = "sha256:ed5e229a93760e529cfa7edaec6630b5a2cd3874c1bddb8019e5f18a723fdead"},
+    {file = "pip_licenses-5.5.1.tar.gz", hash = "sha256:7df370e6e5024a3f7449abf8e4321ef868ba9a795698ad24ab6851f3e7fc65a7"},
+]
+
+[[package]]
 name = "pipdeptree"
 version = "2.30.0"
 requires_python = ">=3.10"
@@ -1372,6 +1386,19 @@ dependencies = [
 files = [
     {file = "pre_commit-4.5.1-py2.py3-none-any.whl", hash = "sha256:3b3afd891e97337708c1674210f8eba659b52a38ea5f822ff142d10786221f77"},
     {file = "pre_commit-4.5.1.tar.gz", hash = "sha256:eb545fcff725875197837263e977ea257a402056661f09dae08e4b149b030a61"},
+]
+
+[[package]]
+name = "prettytable"
+version = "3.17.0"
+requires_python = ">=3.10"
+summary = "A simple Python library for easily displaying tabular data in a visually appealing ASCII table format"
+dependencies = [
+    "wcwidth",
+]
+files = [
+    {file = "prettytable-3.17.0-py3-none-any.whl", hash = "sha256:aad69b294ddbe3e1f95ef8886a060ed1666a0b83018bbf56295f6f226c43d287"},
+    {file = "prettytable-3.17.0.tar.gz", hash = "sha256:59f2590776527f3c9e8cf9fe7b66dd215837cca96a9c39567414cbc632e8ddb0"},
 ]
 
 [[package]]
@@ -2424,6 +2451,16 @@ dependencies = [
 files = [
     {file = "vulture-2.14-py2.py3-none-any.whl", hash = "sha256:d9a90dba89607489548a49d557f8bac8112bd25d3cbc8aeef23e860811bd5ed9"},
     {file = "vulture-2.14.tar.gz", hash = "sha256:cb8277902a1138deeab796ec5bef7076a6e0248ca3607a3f3dee0b6d9e9b8415"},
+]
+
+[[package]]
+name = "wcwidth"
+version = "0.6.0"
+requires_python = ">=3.8"
+summary = "Measures the displayed width of unicode strings in a terminal"
+files = [
+    {file = "wcwidth-0.6.0-py3-none-any.whl", hash = "sha256:1a3a1e510b553315f8e146c54764f4fb6264ffad731b3d78088cdb1478ffbdad"},
+    {file = "wcwidth-0.6.0.tar.gz", hash = "sha256:cdc4e4262d6ef9a1a57e018384cbeb1208d8abbc64176027e2c2455c81313159"},
 ]
 
 [[package]]

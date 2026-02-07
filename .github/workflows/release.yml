@@ -64,6 +64,7 @@ jobs:
           cp examples/peat-config-simple.yaml peat_linux/
           cp manpage/peat.1 peat_linux/
           cp linux_exe/peat peat_linux/
+          ls -lAht peat_linux/
           tar -czf "peat_linux_${{ github.ref_name }}.tgz" peat_linux/
       - name: Create Windows release bundle
         run: |
@@ -71,7 +72,8 @@ jobs:
           cp examples/peat-config.yaml peat_windows/
           cp examples/peat-config-simple.yaml peat_windows/
           cp windows_exe/peat.exe peat_windows/
-          zip -r "peat_windows_${{ github.ref_name }}.zip"
+          ls -lAht peat_windows/
+          zip -r "peat_windows_${{ github.ref_name }}.zip" peat_windows/
       - name: Zip up HTML docs
         run: |
           cp manpage/peat.1 peat_docs/
