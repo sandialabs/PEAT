@@ -14,7 +14,7 @@ There are many Schweitzer Engineering Laboratories (SEL) devices supported by PE
 
    :class:`~peat.modules.sel.sel_relay.SELRelay`
       PEAT :class:`~peat.device.DeviceModule` implementation for protection relays and other SEL devices
-   
+
    :class:`~peat.modules.sel.sel_3620.SEL3620`
       PEAT :class:`~peat.device.DeviceModule` implementation for SEL-3620 security gateways
 
@@ -137,8 +137,8 @@ To manually extract them without using PEAT:
 .. code-block:: bash
 
    sudo apt update
-	sudo apt install qpdf
-	zlib-flate -uncompress < ./SET_61850.CID > SET_61850.xml
+   sudo apt install qpdf
+   zlib-flate -uncompress < ./SET_61850.CID > SET_61850.xml
 
 
 .. COMMENT: TODO: RTAC section

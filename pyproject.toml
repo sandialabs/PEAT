@@ -254,6 +254,9 @@ lint = [
 
     # Validation that no stray files made it into the sdist (source distribution)
     "check-sdist",
+
+    # Check RST files
+    "doc8",
 ]
 test = [
     # Handles most of the testing work, including execution
@@ -393,6 +396,7 @@ composite = [
     "ruff check peat tests",
     "ruff check --select I peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
     "ruff format --check peat tests distribution/sneakypeat.py examples/example_peat_module/awesome_module.py",
+    "doc8 -q docs/",  # Check RST files
 ]
 
 [tool.pdm.scripts.test]
@@ -554,6 +558,11 @@ composite = [
     "docs-html",
     "docs-man",
 ]
+
+
+[tool.doc8]
+ignore = ["D001"]
+extension = [".rst"]
 
 
 [tool.codespell]

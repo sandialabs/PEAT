@@ -95,7 +95,7 @@ Podman
 
    # Verify the image is present in the list of images
    podman ps
-   
+
    # Verify the container is able to run
    podman run -i ghcr.io/sandialabs/peat:latest --version
    podman run -i ghcr.io/sandialabs/peat:latest --help
