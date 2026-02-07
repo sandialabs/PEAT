@@ -20,8 +20,11 @@
 requires = ["pdm-backend>=2.3.0"]
 build-backend = "pdm.backend"
 
+# https://backend.pdm-project.org/metadata/#dynamic-project-version
 [tool.pdm.version]
 source = "scm"
+tag_filter = "v*.*.*"
+tag_regex = '^v(?P<version>\d{1,4}\.\d{1,2}\.\d{1,2})(\-prerelease|\.dev)?$'
 
 [project]
 name = "PEAT"

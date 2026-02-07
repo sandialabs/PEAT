@@ -8,14 +8,14 @@
 set -e
 
 # cd to the PEAT root directory, regardless of where the script is run
+# NOTE: can't use pushd/popd in case this script is run with "sh"
 INSTALLDIR="$(dirname "$(dirname "$(readlink -f "$0")")")"
-# pushd "$INSTALLDIR" >/dev/null
 CURDIR="$(pwd)"
 cd "$INSTALLDIR" >/dev/null
 
-CURRENT_PEAT_VERSION=${CI_COMMIT_TAG:-"$(git describe --tags --abbrev=0)"}
-IMAGE="${CLI_IMAGE:-ghcr.io/sandialabs/peat}"
-TAG="${CI_COMMIT_REF_SLUG:-latest}"
+GIT_LATEST_TAG="$(git describe --tags --abbrev=0)"
+IMAGE="ghcr.io/sandialabs/peat"
+TAG="${TAG:-latest}"
 BUILDER_TAG="$TAG-builder-cache"
 
 # https://dev.to/pst418/speed-up-multi-stage-docker-builds-in-ci-cd-with-buildkit-s-registry-cache-11gi
@@ -30,7 +30,7 @@ docker build \
   --tag "$IMAGE":"$BUILDER_TAG" \
   --target builder \
   --build-arg BUILDKIT_INLINE_CACHE=1 \
-  --build-arg PDM_BUILD_SCM_VERSION="$CURRENT_PEAT_VERSION" \
+  --build-arg PDM_BUILD_SCM_VERSION="$GIT_LATEST_TAG" \
   --progress=plain \
   .
 
@@ -43,12 +43,11 @@ docker build \
   --target release \
   --label built_by="$(whoami)" \
   --label org.opencontainers.image.created="$(date -I'seconds')" \
-  --label org.opencontainers.image.revision="${CI_COMMIT_SHA:-$(git rev-parse HEAD)}" \
-  --label org.opencontainers.image.version="$CURRENT_PEAT_VERSION" \
-  --build-arg PDM_BUILD_SCM_VERSION="$CURRENT_PEAT_VERSION" \
+  --label org.opencontainers.image.revision="$(git rev-parse HEAD)" \
+  --label org.opencontainers.image.version="$GIT_LATEST_TAG" \
+  --build-arg PDM_BUILD_SCM_VERSION="$GIT_LATEST_TAG" \
   --progress=plain \
   .
 
 # Restore working directory
-# popd >/dev/null
 cd "$CURDIR"
