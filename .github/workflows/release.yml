@@ -1,0 +1,97 @@
+name: Create Releases
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # tags such as v1.2.3
+      - 'v*.*.*-prerelease'  # tags such as v1.2.3
+
+permissions: read-all
+
+jobs:
+  test:
+    name: Tests
+    uses: ./.github/workflows/tests.yml
+
+  build:
+    name: Build artifacts
+    uses: ./.github/workflows/build.yml
+
+  create-release:
+    name: Build and publish GitHub release
+    needs: [test, build]
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+            fetch-tags: true
+            fetch-depth: 0  # checkout full history
+      - name: Install apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: zip
+      # Download all build artifacts to current directory
+      # This also downloads test artifacts...oh well, it's a ergonomics issue with GitHub Actions
+      # In GitLab CI, you'd just put what jobs to pull from and go home. But this isn't GitLab, sigh.
+      - name: Download build artifacts
+        uses: actions/download-artifact@v7
+      - name: List files
+        run: ls -lAht ./
+      - name: Mark files executable
+        run: |
+          chmod +x linux_exe/*
+          chmod +x windows_exe/*
+      - name: Create Linux release bundle
+        run: |
+          mkdir peat_linux
+          cp distribution/linux-install-script.sh peat_linux
+          cp examples/peat-config.yaml peat_linux/
+          cp examples/peat-config-simple.yaml peat_linux/
+          cp manpage/peat.1 peat_linux/
+          cp linux_exe/peat peat_linux/
+          tar -czf "peat_linux_${{ github.ref_name }}.tgz" peat_linux/
+      - name: Create Windows release bundle
+        run: |
+          mkdir peat_windows
+          cp examples/peat-config.yaml peat_windows/
+          cp examples/peat-config-simple.yaml peat_windows/
+          cp windows_exe/peat.exe peat_windows/
+          zip -r "peat_windows_${{ github.ref_name }}.zip"
+      - name: Zip up HTML docs
+        run: |
+          cp manpage/peat.1 peat_docs/
+          zip -r peat_docs.zip peat_docs/
+      # TODO: body of release will come from CHANGELOG.rst
+      # NOTE: This will trigger the Docker workflow
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b  # v2.5.0
+        id: create-release
+        permissions:
+          contents: write
+          discussions: write
+        with:
+          # TODO: body
+          # body: "tbd"
+          # If tag ends with "-pre", then it's a prerelease
+          prerelease: ${{ endsWith(github.ref_name, '-prerelease') }}
+          fail_on_unmatched_files: true
+          discussion_category_name: Announcements
+          generate_release_notes: true
+          files: |
+            peat_linux_${{ github.ref_name }}.tgz
+            peat_docs.zip
+            manpage/peat.1
+            python_package/*.whl
+            python_package/*.tar.gz
+            linux_exe/peat
+            linux_exe/sneakypeat
+            windows_exe/peat.exe
+            windows_exe/sneakypeat.exe
