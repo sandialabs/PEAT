@@ -45,7 +45,13 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v7
       - name: List files
-        run: ls -lAht ./
+        run: |
+          ls -lAht ./
+          ls -lAht ./linux_exe
+          ls -lAht ./windows_exe
+          ls -lAht ./peat_docs
+          ls -lAht ./manpage
+          -s -lAht ./python_package
       - name: Mark files executable
         run: |
           chmod +x linux_exe/*
