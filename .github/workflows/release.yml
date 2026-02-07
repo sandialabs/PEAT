@@ -91,13 +91,15 @@ jobs:
           fail_on_unmatched_files: true
           discussion_category_name: Announcements
           generate_release_notes: true
+          preserve_order: true
           files: |
+            linux_exe/peat
+            windows_exe/peat.exe
             peat_linux_${{ github.ref_name }}.tgz
+            peat_windows_${{ github.ref_name }}.zip
             peat_docs.zip
             manpage/peat.1
             python_package/*.whl
             python_package/*.tar.gz
-            linux_exe/peat
             linux_exe/sneakypeat
-            windows_exe/peat.exe
             windows_exe/sneakypeat.exe
