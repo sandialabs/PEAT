@@ -56,12 +56,11 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: Implementation :: CPython",
-    "Framework :: Pydantic",
-    "Framework :: Pydantic :: 1",
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Manufacturing",
@@ -69,12 +68,9 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: System Administrators",
     "Intended Audience :: Telecommunications Industry",
-    "Topic :: File Formats :: JSON",
-    "Topic :: Internet :: File Transfer Protocol (FTP)",
-    "Topic :: Internet :: WWW/HTTP",
-    "Topic :: Scientific/Engineering :: Interface Engine/Protocol Translator",
     "Topic :: Software Development :: Libraries",
     "Topic :: System",
+    "Topic :: System :: Monitoring",
     "Topic :: System :: Networking",
     "Topic :: Utilities",
     "Topic :: Security",
@@ -233,10 +229,12 @@ dependencies = [
 peat = "peat.__main__:main"
 
 [project.urls]
-"Repository" = "https://github.com/sandialabs/PEAT"
-"Documentation" = "https://sandialabs.github.io/PEAT/"
-"Issue Tracker" = "https://github.com/sandialabs/PEAT/issues"
-"Changelog" = "https://github.com/sandialabs/PEAT/blob/main/CHANGELOG.md"
+Repository = "https://github.com/sandialabs/PEAT"
+Download = "https://github.com/sandialabs/PEAT/releases"
+Changelog = "https://github.com/sandialabs/PEAT/blob/main/CHANGELOG.md"
+Documentation = "https://sandialabs.github.io/PEAT/"
+Issues = "https://github.com/sandialabs/PEAT/issues"
+
 
 [tool.pdm.dev-dependencies]
 lint = [
