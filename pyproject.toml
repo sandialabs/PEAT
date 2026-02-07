@@ -389,7 +389,7 @@ cmd = "codespell --toml ./pyproject.toml peat tests distribution .github CHANGEL
 
 [tool.pdm.scripts.typecheck]
 help = "Variable typing analysis using Mypy"
-cmd = "mypy peat tests"
+cmd = "mypy peat"
 
 [tool.pdm.scripts.lint]
 help = "Run all linting checks: unused, spelling, ruff, and formatting"

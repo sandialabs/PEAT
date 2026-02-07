@@ -43,7 +43,7 @@ jobs:
       - name: Install dependencies
         run: pdm sync -d --clean
       - name: Update dependencies doc pages
-        run: pdm run dep-docs
+        run: pdm run dep-doc
       - name: Build docs
         run: pdm run docs-html
       - uses: actions/upload-pages-artifact@v4
