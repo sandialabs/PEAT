@@ -1,14 +1,9 @@
-# -*- coding: utf-8 -*-
-#
 # Configuration file for the Sphinx documentation builder.
-#
-# This file does only contain a selection of the most common options. For a
-# full list see the documentation:
 # http://www.sphinx-doc.org/en/stable/config
 
 # -- Path setup --------------------------------------------------------------
-import os
 import sys
+import subprocess
 from datetime import datetime
 from pathlib import Path
 
@@ -16,6 +11,19 @@ docs_dir = Path(__file__).resolve().parent  # docs/
 pardir = docs_dir.parent  # peat/
 sys.path.insert(0, str(pardir))
 sys.setrecursionlimit(1500)
+
+
+def _clean_read(pth: Path) -> list:
+    return [x.strip() for x in pth.read_text().splitlines() if x]
+
+
+def get_git_version():
+    try:
+        # Run the git command to get the latest tag
+        return subprocess.check_output(["git", "describe", "--tags"], encoding="utf-8").strip()
+    except Exception:
+        # Handle errors (e.g., if git is not available or no tags exist)
+        return "dev"  # Default version if no tags are found
 
 
 # -- Extensions --------------------------------------------------------------
@@ -54,19 +62,9 @@ current_year = datetime.now().year
 date = datetime.now().strftime("%m/%d/%Y")
 copyright = f"2016 - {current_year}, Sandia National Laboratories"
 author = "Sandia National Laboratories"
-
-
-# Combine AUTHORS files for all tools into a dict keyed by the tool name
-def _clean_read(pth: Path) -> list:
-    return [x.strip() for x in pth.read_text().splitlines() if x]
-
-
 authors = sorted(_clean_read(Path(pardir, "AUTHORS")))
-
-
-# The environment variable "CURRENT_PEAT_VERSION" is defined in the CI pipeline
-# TODO: use latest git tag here
-version = os.environ.get("CURRENT_PEAT_VERSION", "dev")
+version = get_git_version()
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -75,7 +73,7 @@ version = os.environ.get("CURRENT_PEAT_VERSION", "dev")
 #   https://github.com/readthedocs/recommonmark
 source_suffix = [".rst", ".md"]
 source_encoding = "utf-8"
-needs_sphinx = "4.5.0"
+needs_sphinx = "7.0.0"
 
 # Add any paths that contain templates here, relative to this directory
 templates_path = ["_templates"]
