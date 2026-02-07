@@ -31,8 +31,10 @@ TEMPNAME="${EXE_NAME}-pyinstaller-pre-staticx"
 pushd "$INSTALLDIR" >/dev/null
 
 # Remove artifacts from previous builds
-rm -rf ./build/ >/dev/null
-rm -rf ./dist/ >/dev/null
+rm -f "./build/$EXE_NAME" >/dev/null
+rm -f "./build/$TEMPNAME" >/dev/null
+rm -f "./dist/$EXE_NAME" >/dev/null
+rm -f "./dist/$TEMPNAME" >/dev/null
 
 echo "--- Python path: $(which python)"
 
