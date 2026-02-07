@@ -20,7 +20,10 @@ def _clean_read(pth: Path) -> list:
 def get_git_version():
     try:
         # Run the git command to get the latest tag
-        return subprocess.check_output(["git", "describe", "--tags"], encoding="utf-8").strip()
+        return subprocess.check_output(
+            args=["git", "describe", "--tags", "--abbrev=0"],
+            encoding="utf-8"
+        ).strip()
     except Exception:
         # Handle errors (e.g., if git is not available or no tags exist)
         return "dev"  # Default version if no tags are found

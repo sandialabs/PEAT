@@ -31,13 +31,13 @@ VSVersionInfo(
         u'040904e4',
         [StringStruct(u'CompanyName', u'Sandia National Laboratories'),
         StringStruct(u'FileDescription', u'Process Extraction and Analysis Tool (PEAT)'),
-        StringStruct(u'FileVersion', u'2.2.0.20221220'),
+        StringStruct(u'FileVersion', u'2026.2.6'),
         StringStruct(u'InternalName', u'PEAT'),
-        StringStruct(u'LegalCopyright', u'Copyright © 2016-2024 Sandia National Laboratories'),
-        StringStruct(u'LegalTrademarks', u'Copyright (C) 2016-2024 Sandia National Laboratories'),
+        StringStruct(u'LegalCopyright', u'Copyright © 2016-2026 Sandia National Laboratories'),
+        StringStruct(u'LegalTrademarks', u'Copyright (C) 2016-2026 Sandia National Laboratories'),
         StringStruct(u'OriginalFilename', u'peat.exe'),
         StringStruct(u'ProductName', u'PEAT'),
-        StringStruct(u'ProductVersion', u'2.2.0.20221220')])
+        StringStruct(u'ProductVersion', u'2026.2.6')])
       ]), 
     VarFileInfo([VarStruct(u'Translation', [1033, 1252])])
   ]
