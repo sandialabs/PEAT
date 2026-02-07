@@ -14,7 +14,8 @@ Known Issues
 Resolved issues
 ---------------
 
-TBD
+None yet after open-sourcing!
+
 
 Releases
 ========
