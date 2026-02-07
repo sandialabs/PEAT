@@ -167,16 +167,10 @@ jobs:
           cache: true
       - name: Install dependencies
         run: pdm sync -G exe
+      - name: Update version info metadata for executable
+        run: pdm run python .\distribution\update_file_version_info.py
       - name: Build executable
-        shell: powershell
-        run: |
-          $CURRENT_PEAT_VERSION = git describe --tags --abbrev=0
-          if ([string]::IsNullOrWhiteSpace($CURRENT_PEAT_VERSION)) {
-            $CURRENT_PEAT_VERSION = "0.0.0"
-          }
-          Write-Host "CURRENT_PEAT_VERSION=$CURRENT_PEAT_VERSION"
-          pdm run python .\distribution\update_file_version_info.py $CURRENT_PEAT_VERSION
-          pdm run build-exe
+        run: pdm run build-exe
       - name: List executable contents
         run: pdm run pyi-archive_viewer --list dist/peat.exe
       - name: Check executable

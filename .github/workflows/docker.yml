@@ -1,7 +1,13 @@
+# Docker has it's own release pipeline separate from workflow
+# When the release workflow finishes and a release is published,
+# that will trigger docker build.
+#   full release: tag latest + version
+#   pre-release: tag version, with "pre-"
 name: Docker Build and Release
 
 on:
   release:
+    types: [published]  # released and prereleased
   push:
     branches:
       - main
@@ -24,35 +30,16 @@ jobs:
         with:
           fetch-tags: true
           fetch-depth: 0  # checkout full history
-
-      # TODO: not sure if this is needed, metadata-action will grab semver from tag
-      - name: Set peat version
-        id: peat_version
+      - name: Set Tag and Build Timestamp
+        id: tag_ts
         run: |
           # Get the most recent tag (by semantic version order)
           TAG=$(git describe --tags --abbrev=0)
-
-          # Fallback if no tags exist
-          if [ -z "$TAG" ]; then
-            # TODO: hack until first open-source release
-            TAG="2026.1.28"
-            #echo "No tags found in the repository."
-            #exit 1
-          fi
-
           BUILD_TS="$(date -I'seconds')"
-
           echo "Latest tag is $TAG"
           echo "Build timestamp is $BUILD_TS"
-          echo "CURRENT_PEAT_VERSION=$TAG" >> "$GITHUB_OUTPUT"
+          echo "TAG=$TAG" >> "$GITHUB_OUTPUT"
           echo "BUILD_TS=$BUILD_TS" >> "$GITHUB_OUTPUT"
-
-      - name: Show the variable
-        env:
-          CURRENT_PEAT_VERSION: ${{ steps.peat_version.outputs.CURRENT_PEAT_VERSION }}
-        run: |
-          echo "The current Peat version is $CURRENT_PEAT_VERSION"
-
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f  # v5.8.0
@@ -63,9 +50,9 @@ jobs:
           labels: |
             built_by=github-actions
             org.opencontainers.image.source=${{ github.server_url}}/${{ github.repository }}
-            org.opencontainers.image.created=${{ steps.peat_version.outputs.BUILD_TS }}
+            org.opencontainers.image.created=${{ steps.tag_ts.outputs.BUILD_TS }}
             org.opencontainers.image.revision=${{ github.sha }}
-            org.opencontainers.image.version=${{ steps.peat_version.outputs.CURRENT_PEAT_VERSION }}
+            org.opencontainers.image.version=${{ steps.tag_ts.outputs.TAG }}
           # generate Docker tags based on the following events/attributes
           tags: |
             type=ref,event=branch
@@ -87,7 +74,7 @@ jobs:
         uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83  # v6.18.0
         with:
           build-args: |
-            PDM_BUILD_SCM_VERSION=${{ steps.peat_version.outputs.CURRENT_PEAT_VERSION }}
+            PDM_BUILD_SCM_VERSION=${{ steps.tag_ts.outputs.TAG }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
