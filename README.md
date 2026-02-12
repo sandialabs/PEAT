@@ -12,6 +12,8 @@ Documentation about installation, usage, development, and other information is i
 
 Quick "one-liners" to easily install PEAT. We *strongly* recommend verifying script contents before downloading and running.
 
+NOTE: PEAT will hang for a few seconds after running before there is output. This is normal, and is caused by slow imports.
+
 ### Linux/MacOS
 
 The install script will download the latest full release of PEAT and install it into `/usr/local/bin/peat`. It will also download the manpage into `/usr/local/share/man/man1/peat.1` and update the manual database, if `mandb` command is present.
@@ -24,6 +26,12 @@ curl -sSL https://raw.githubusercontent.com/sandialabs/PEAT/refs/heads/main/scri
 
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/sandialabs/PEAT/refs/heads/main/scripts/install_peat.ps1 | iex"
+```
+
+### Docker
+
+```shell
+sudo docker run -i ghcr.io/sandialabs/peat:latest --help
 ```
 
 ## Quickstart
