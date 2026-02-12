@@ -76,7 +76,7 @@ def generate_log_dict(record: loguru.Record) -> dict[str, dict | str | None]:
         "@timestamp": Elastic.convert_tstamp(record["time"].astimezone(UTC)),
         "message": message_field,
         "event": {
-            "dataset": "vedizar.peat",
+            "dataset": "peat",
             "kind": "event",
             "original": record["message"],
             "provider": "peat",

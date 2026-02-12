@@ -572,8 +572,7 @@ class State(SettingsManager):
 
     elastic: peat.Elastic | None = None
     """
-    Elastic instance used to interact with a Elasticsearch database,
-    such as the one used by Vedizar.
+    Elastic instance used to interact with a Elasticsearch or OpenSearch database.
 
     :meta hide-value:
     """

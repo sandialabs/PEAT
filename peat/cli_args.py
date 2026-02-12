@@ -488,7 +488,7 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
     heat_description = (
         "HEAT (High-fidelity Extraction of Artifacts from Traffic). "
         "This feature finds file artifacts in network traffic parsed "
-        "using Vedizar's elastic-utils and stored in Elasticsearch. "
+        "using ingest-tshark and stored in Elasticsearch. "
         "Examples of file artifacts include device firmware images, "
         "configuration files, and other files PEAT knows how to parse."
     )

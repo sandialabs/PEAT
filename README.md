@@ -1,15 +1,30 @@
 # Process Extraction and Analysis Tool (PEAT)
 
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11835/badge)](https://www.bestpractices.dev/projects/11835)
 [![GitHub Actions Pipeline Status](https://github.com/sandialabs/PEAT/actions/workflows/tests.yml/badge.svg)](https://github.com/sandialabs/PEAT/actions)
-
-![Python Version](https://img.shields.io/badge/Python-3.11|3.12|3-13-blue.svg)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11835/badge)](https://www.bestpractices.dev/projects/11835)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
-[![PDM-managed](https://img.shields.io/endpoint?url=https%3A%2F%2Fcdn.jsdelivr.net%2Fgh%2Fpdm-project%2F.github%2Fbadge.json)](https://pdm-project.org)
 
 PEAT is a Operational Technology (OT) device interrogator, including pulling, parsing and uploading artifacts (configuration, firmware, process logic, etc.) and network discovery ("scanning"). It runs on most systems, including Linux, Windows, and as a Docker container.
 
 Documentation about installation, usage, development, and other information is in the [PEAT documentation](https://sandialabs.github.io/PEAT/).
+
+## Easy install
+
+Quick "one-liners" to easily install PEAT. We *strongly* recommend verifying script contents before downloading and running.
+
+### Linux/MacOS
+
+The install script will download the latest full release of PEAT and install it into `/usr/local/bin/peat`. It will also download the manpage into `/usr/local/share/man/man1/peat.1` and update the manual database, if `mandb` command is present.
+
+```shell
+curl -sSL https://raw.githubusercontent.com/sandialabs/PEAT/refs/heads/main/scripts/install_peat.sh | sudo sh -
+```
+
+### Windows
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/sandialabs/PEAT/refs/heads/main/scripts/install_peat.ps1 | iex"
+```
 
 ## Quickstart
 
@@ -25,7 +40,7 @@ Documentation about installation, usage, development, and other information is i
     - Windows: `.\peat.exe scan -i 192.0.2.0/24`
     - Linux: `./peat scan -i 192.0.2.0/24`
 
-## Basic install
+## Install notes
 
 PEAT is distributed in several formats, including executable files for Linux and Windows and a Docker Container. The format you want to install depends on your use case. Typically, you'll want the executable format, which is `peat` on Linux and `peat.exe` on Windows. These can be downloaded from the [releases page](https://github.com/sandialabs/PEAT/releases) or from [CI/CD builds](https://github.com/sandialabs/PEAT/actions).
 

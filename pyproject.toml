@@ -39,7 +39,7 @@ license-files = [
 authors = [
     {name = "PEAT Developers", email = "peat@sandia.gov"},
 ]
-keywords = ["peat", "vedizar", "ics", "scada", "ot", "sandia"]
+keywords = ["peat", "ics", "scada", "ot", "sandia"]
 classifiers = [
     # https://pypi.org/classifiers/
     "Development Status :: 5 - Production/Stable",
