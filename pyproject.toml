@@ -333,13 +333,6 @@ docs = [
     # Required for PEAT to document the Pydantic models
     "autodoc-pydantic",
 
-    # Markdown file parsing
-    # TODO: recommonmark isn't maintained anymore as of 2022
-    #   Migrate to using MyST-Parser
-    #   https://github.com/readthedocs/recommonmark/issues/221
-    "myst-parser",
-    "recommonmark==0.7.1",
-
     # For PDF building
     "rinohtype",
 

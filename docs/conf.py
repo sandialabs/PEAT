@@ -30,8 +30,6 @@ def get_git_version():
 
 
 # -- Extensions --------------------------------------------------------------
-from recommonmark.transform import AutoStructify
-
 extensions = [
     "sphinx.ext.napoleon",  # Google-style docstrings (built-in)
     "sphinx.ext.viewcode",  # Links to source code (built-in)
@@ -43,7 +41,6 @@ extensions = [
     "sphinx_automodapi.automodapi",  # NOTE: requires Graphviz
     "sphinx_copybutton",  # Adds a copy to clipboard button to code blocks
     "sphinx_argparse_cli",  # Document CLI arguments
-    "recommonmark",  # Markdown file parsing
     "sphinxcontrib.autodoc_pydantic",
 ]
 
@@ -71,10 +68,7 @@ release = version
 
 
 # -- General configuration ---------------------------------------------------
-# Markdown:
-#   https://www.sphinx-doc.org/en/master/usage/markdown.html
-#   https://github.com/readthedocs/recommonmark
-source_suffix = [".rst", ".md"]
+source_suffix = [".rst"]
 source_encoding = "utf-8"
 needs_sphinx = "7.0.0"
 
@@ -193,21 +187,3 @@ man_show_urls = True
 #     "target": "peat",  # PDF filename
 #     # TODO: logo?
 # }]
-
-
-# Recommonmark settings (lets us use Markdown instead of reStructuredText)
-# https://recommonmark.readthedocs.io/en/latest/auto_structify.html
-# https://github.com/rtfd/recommonmark/blob/master/docs/conf.py
-def setup(app):
-    app.add_config_value(
-        "recommonmark_config",
-        {
-            "enable_eval_rst": True,
-            "enable_auto_toc_tree": False,
-            "enable_math": False,
-            "enable_inline_math": False,
-            "known_url_schemes": ["http", "https", "mailto"],
-        },
-        True,
-    )
-    app.add_transform(AutoStructify)
