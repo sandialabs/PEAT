@@ -10,7 +10,7 @@ repos:
   hooks:
     - id: conventional-pre-commit
       stages: [commit-msg]
-      args: [build, chore, ci, docs, feat, fix, minor, patch, perf, style, refactor, test]
+      args: [build, chore, ci, docs, feat, fix, minor, patch, perf, style, refactor, test, tests]
 - repo: https://github.com/pre-commit/pre-commit-hooks
   rev: v6.0.0
   hooks:
