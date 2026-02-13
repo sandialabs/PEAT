@@ -3,7 +3,7 @@ Install
 *******
 This section documents how to setup PEAT for optimal use on each supported platform. Refer to :doc:`operate` for next steps after completing installation.
 
-PEAT is distributed in multiple formats customized to each supported platform. All formats are included in the :ref:`release-archive`. If you need to build the executables manually or know more about the various distribution methods, refer to the :ref:`distribution`.
+PEAT is distributed in multiple formats customized to each supported platform. All formats are included in `official releases on GitHub <https://github.com/sandialabs/PEAT/releases>`__. If you need to build the executables manually or know more about the various distribution methods, refer to the :ref:`distribution`.
 
 Installation
 ------------
@@ -13,55 +13,85 @@ Linux
 ^^^^^
 The recommended method of installation for most users is to run the Bash script, however other methods of installation are documented here in case the installation script doesn't work for your use case.
 
-.. note::
-   This guide assumes your current working directory is inside the decompressed :ref:`release-archive`.
-
 Scripted installation
 +++++++++++++++++++++
 .. code-block:: bash
 
-   cd linux
-   sudo bash linux-install-script.sh
+   # Download script
+   curl -fL https://raw.githubusercontent.com/sandialabs/PEAT/refs/heads/main/scripts/install_peat.sh
+
+   # Verify script contents to ensure they are trusted
+   less install_peat.sh
+
+   # Run script
+   chmod +rx install_peat.sh
+   sudo ./install_peat.sh
+
    # Verify installation
    peat --version
    man peat
 
 Manual Installation
 +++++++++++++++++++
+These steps are intended for use in environments where there is no Internet access (or access is restricted). The manual page is optional, but recommended.
+
+.. warning::
+   This assumes the files ``peat`` and ``peat.1`` are in the current working directory.
+
 .. code-block:: bash
 
-   cd linux
    sudo cp ./peat /usr/local/bin/peat
    sudo chmod +rx /usr/local/bin/peat
 
-   # Install the manual page ("manpage")
-   mkdir -p /usr/local/share/man/man1/
-   sudo cp ./peat.1 /usr/local/share/man/man1/
-   sudo mandb
-
    # Verify installation
    peat --version
+
+   # Install the manual page ("manpage")
+   sudo mkdir -p /usr/local/share/man/man1/
+   sudo cp ./peat.1 /usr/local/share/man/man1/
+
+   # (Optional) Update manpage database
+   # If this command fails, then the package "man-db" needs to be installed
+   # sudo apt install -y man-db
+   sudo mandb
+
+   # Verify manual page
    man peat
+
 
 Usage without installation
 ++++++++++++++++++++++++++
+
+.. warning::
+   This assumes the file ``peat.exe`` in the current working directory.
+
 .. code-block:: bash
 
-   cd linux
+   # Mark the file as executable, then run to verify it works
    chmod u+x ./peat
    ./peat --version
+
+   # View man page
    man ./peat.1
 
 Windows
 ^^^^^^^
-The Windows distribution currently does not require any special installation steps. We recommend verifying that the executable works before using it in a deployed environment. There are some special considorations regarding usage, refer to :ref:`windows-usage` for further details.
+The Windows distribution does not require any special installation steps and is usually run from wherever the exectuable is copied to. However, there is a install script that will place it in Local AppData and add to user's PATH for a more persistent installation.
 
-.. note::
-   This guide assumes your current working directory is inside the decompressed :ref:`release-archive`.
+ We recommend verifying that the executable works before using it in a deployed environment. There are some special considorations regarding usage, refer to :ref:`windows-usage` for further details.
+
+Scripted installation
++++++++++++++++++++++
 
 .. code-block:: powershell
 
-   cd windows
+   powershell -ExecutionPolicy ByPass -c "irm https://raw.githubusercontent.com/sandialabs/PEAT/refs/heads/main/scripts/install_peat.ps1 | iex"
+
+Usage without installation
+++++++++++++++++++++++++++
+
+.. code-block:: powershell
+
    .\peat.exe --version
    .\peat.exe --help
 
@@ -69,18 +99,11 @@ Container
 ^^^^^^^^^
 The :term:`Container` image provides a isolated and reliable method of executing PEAT on any platform with a container runtime. It is usable with both :term:`Docker` and :term:`Podman`. Refer to the :ref:`containers` documentation for further details on the Container distribution and it's usage.
 
-.. note::
-   This guide assumes your current working directory is inside the decompressed :ref:`release-archive`.
-
 Docker
 ++++++
 .. code-block:: bash
 
-   cd docker
-   docker load -i peat_docker_image.tar
-
-   # Verify the image is present in the list of images
-   docker ps
+   docker pull ghcr.io/sandialabs/peat:latest
 
    # Verify the container is able to run
    docker run -i ghcr.io/sandialabs/peat:latest --version
@@ -90,42 +113,43 @@ Podman
 ++++++
 .. code-block:: bash
 
-   cd docker
-   podman load -i peat_docker_image.tar
-
-   # Verify the image is present in the list of images
-   podman ps
+   podman pull ghcr.io/sandialabs/peat:latest
 
    # Verify the container is able to run
    podman run -i ghcr.io/sandialabs/peat:latest --version
    podman run -i ghcr.io/sandialabs/peat:latest --help
 
-.. _release-archive:
+Offline system install
+++++++++++++++++++++++
 
-PEAT Release Archive
---------------------
-The standard distribution method for PEAT is a compressed archive (zip format), referred to as the "PEAT Release Archive". This archive includes:
+The container image can be used on isolated or Internet-restricted networks by downloading the image on a Internet-connected system, exporting it to a file, copying to the isolated network, then loading the image from the tar. This should also work for :term:`Podman`.
 
-- The :term:`Container` image (tarball format)
-- The Linux executable (``peat``)
-- The Windows executable (``peat.exe``)
+1. On the Internet-connected system, pull the PEAT container image
+
+      docker pull ghcr.io/sandialabs/peat:latest
+
+2. Save the image to a tar file for transfer
+
+      docker save -o peat_docker_image.tar ghcr.io/sandialabs/peat:latest
+
+3. Copy ``peat_docker_image.tar`` to the isolated system (for example, via approved removable media or transfer mechanism).
+
+4. On the isolated system, load the image from the tar file
+
+      docker load -i peat_docker_image.tar
+
+5. Verify the container runs and reports its version
+
+      docker run -i ghcr.io/sandialabs/peat:latest --version
+
+
+PEAT Releases
+-------------
+PEAT releases are managed via `GitHub Releases <https://github.com/sandialabs/PEAT/releases>`__, and usually consist of the following:
+
+- The Linux and Windows executables (``peat`` and ``peat.exe``)
 - The Python source distribution (``.tar.gz``) and binary wheel (``.whl``)
 - The Linux man page (``peat.1`` file)
-- Some example files
-
-See the earlier sections for details on setting up PEAT for your particular platform and use case.
-
-Archive directory structure
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-- ``docker/``
-    - ``peat_v<version>_cli_docker_image.tar``: The containerized distribution of PEAT, usable with :term:`Docker` or :term:`Podman`
-- ``examples/``: Examples of using PEAT (scripts, etc.), as well as examples of output from running PEAT.
-- ``linux/``
-    - ``linux-install-script.sh``: Installs the PEAT executable in ``/usr/local/bin``, the man page in ``/usr/local/share/man/man1/``, and updates the ``mandb``. Usage: ``sudo linux/linux-install-script.sh``
-    - ``peat``: The PEAT Linux executable. Run with ``./linux/peat``, or ``peat`` after running the install script.
-    - ``peat.1``: Man page documentation. View with ``man peat.1``, or ``man peat`` after running the install script.
-- ``python_package/``
-    - ``PEAT-<version>-py3-none-any.whl``: Python binary "Wheel" distribution of PEAT ("bdist"). Use as a dependency if you are calling the PEAT Python APIs, e.g. any Python code that contains ``import peat`` (excluding custom DeviceModule implementations). Usage: ``pip install PEAT-<version>-py3-none-any.whl``
-    - ``PEAT-<version>.tar.gz``: Python source distribution of PEAT ("sdist"). This is the easiest way to view the source code if that's relevant to your use case.
-- ``windows/``
-    - ``peat.exe``: The PEAT Windows executable. Run with ``.\windows\peat.exe``. We recommend running in an Administrator-level PowerShell terminal or script. Running as a standard user will reduce performance slightly, since certain Windows networking APIs are restricted. This will affect some network features, such as the ability to do ICMP pings, ARP pings, or network sniffing. PEAT will run fine in a CMD terminal but some terminal functionality may not work as well (e.g. terminal output colors and formatting).
+- The :term:`Container` image via GitHub Container Registry (``ghcr.io``)
+- The documentation in HTML format (``peat_docs.zip``)
+- Sneakypeat executables (``sneakypeat`` and ``sneakypeat.exe``)
