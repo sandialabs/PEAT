@@ -24,7 +24,7 @@ Notes
 
 Indices
 =======
-This section lists the Elasticsearch indices (aka "indexes") used by PEAT, and what they are used for. Refer to the ``exemplar.json`` files for examples of data from these indices, and refer to the ``mapping.json`` files for the full index mappings for these indices.
+This section lists the Elasticsearch indices (aka "indexes") used by PEAT, and what they are used for.
 
 - **vedar-logs-[year].[month].[day]**: Logs for PEAT. 1 document = 1 event.
 - **ot-device-hosts-timeseries-[year].[month].[day]**: Results of PEAT pulls. 1 document = results from 1 device.
