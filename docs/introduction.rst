@@ -8,7 +8,7 @@ PEAT (Process Extraction and Analysis Tool) is a multifunction utility and libra
 High-level flow
 ===============
 
-.. image:: PEAT_high-level_flow.png
+.. image:: images/PEAT_high-level_flow.png
    :alt: PEAT High-Level Flow Diagram
 
 

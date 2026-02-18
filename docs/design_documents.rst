@@ -26,7 +26,7 @@ High-level Flow
 ===============
 
 .. comment: https://wiki.sandia.gov/display/VEDAR/PEAT+high-level+flow
-.. image:: PEAT_high-level_flow.png
+.. image:: images/PEAT_high-level_flow.png
    :alt: PEAT High-Level Flow Diagram
 
 
@@ -34,7 +34,7 @@ System Diagram
 ==============
 
 .. comment: https://wiki.sandia.gov/display/VEDAR/PEAT+system+diagram
-.. image:: PEAT_System_Diagram.png
+.. image:: images/PEAT_System_Diagram.png
    :alt: PEAT System Diagram
 
 
