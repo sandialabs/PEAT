@@ -46,7 +46,6 @@ services:
       test: "curl -f http://localhost:5601 || exit 1"
       start_period: 120s
     environment:
-      # https://www.elastic.co/guide/en/kibana/7.9/docker.html
       - elasticsearch.hosts="http://peat-elastic:9200"
       - server.host=localhost
       - server.name=peat-kibana

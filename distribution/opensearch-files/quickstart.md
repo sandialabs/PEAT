@@ -38,7 +38,7 @@
 
 | Index name                        | Description                                                                                                                      | Index name `configuration option `                       |
 |-----------------------------------|----------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| `vedar-logs`                      | PEAT logging events. Useful for knowing exactly what PEAT did.                                                                                                            | `ELASTIC_LOG_INDEX ` |
+| `peat-logs`                      | PEAT logging events. Useful for knowing exactly what PEAT did.                                                                                                            | `ELASTIC_LOG_INDEX ` |
 | `peat-scan-summaries`            | Scan result summaries. Useful for high level understanding of what a scan found.                                                                                                          | `ELASTIC_SCAN_INDEX ` |
 | `peat-pull-summaries`            | Pull result summaries. Useful for high level understanding of what a pull found.                                                                                                         | `ELASTIC_PULL_INDEX ` |
 | `peat-parse-summaries`           | Parse result summaries. Useful for high level understanding of what parse found.                                                                                                         | `ELASTIC_PARSE_INDEX ` |

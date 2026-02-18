@@ -25,7 +25,7 @@ from peat import (
 
 
 class ElasticLogSink:
-    def __init__(self, server_url: str, index: str = "vedar-logs") -> None:
+    def __init__(self, server_url: str, index: str = "peat-logs") -> None:
         """
         Special logging sink for exporting logs to Elasticsearch.
 
@@ -255,7 +255,7 @@ def setup_logging(
             standard log file output will be disabled.
         json_file: Store JSON formatted logs to a file, in JSON Lines (jsonl) format.
             These share the same format as Elasticsearch logging, and can be used to
-            reconstruct the ``vedar-logs`` Elasticsearch index. If :obj:`None`,
+            reconstruct the ``peat-logs`` Elasticsearch index. If :obj:`None`,
             JSON logging will be disabled.
         debug_info_file: Text file with system info, configuration values,
             dumps of scapy internal state, and other info that may be helpful
@@ -310,7 +310,7 @@ def setup_logging(
         state.written_files.add(log_path.as_posix())
         logger.info(f"Log file: {utils.short_pth_str(log_path)}")
 
-    # JSON-formatted logs (for rebuilding the vedar-logs Elasticsearch index)
+    # JSON-formatted logs (for rebuilding the peat-logs Elasticsearch index)
     # https://betterstack.com/community/guides/logging/loguru/
     if json_file:
         json_path = Path(os.path.realpath(os.path.expanduser(json_file)))

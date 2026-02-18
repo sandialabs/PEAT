@@ -25,7 +25,6 @@ There are two PEAT APIs: an internal class-based "module" API, and an external "
 High-level Flow
 ===============
 
-.. comment: https://wiki.sandia.gov/display/VEDAR/PEAT+high-level+flow
 .. image:: images/PEAT_high-level_flow.png
    :alt: PEAT High-Level Flow Diagram
 
@@ -33,7 +32,6 @@ High-level Flow
 System Diagram
 ==============
 
-.. comment: https://wiki.sandia.gov/display/VEDAR/PEAT+system+diagram
 .. image:: images/PEAT_System_Diagram.png
    :alt: PEAT System Diagram
 

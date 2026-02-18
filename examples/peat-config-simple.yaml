@@ -55,7 +55,7 @@ elastic_save_blobs: false
 elastic_timeout: 10.0
 elastic_disable_dated_indices: false
 elastic_additional_tags: []
-elastic_log_index: "vedar-logs"
+elastic_log_index: "peat-logs"
 elastic_scan_index: "scan-summaries"
 elastic_pull_index: "peat-pull-summaries"
 elastic_parse_index: "peat-parse-summaries"

@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-# TODO: rewrite as a Python script
-
 set -e
 
 SCRIPTDIR="$(dirname "$(readlink -f "$0")")"
@@ -49,7 +47,7 @@ check_elastic () {
 
 flush_elastic () {
     check_elastic
-    FLUSH_INDICES=("ot-device" "vedar-logs" "peat-scan-summaries" "peat-pull-summaries" "peat-parse-summaries" "peat-configs" "peat-state")
+    FLUSH_INDICES=("ot-device" "peat-logs" "peat-scan-summaries" "peat-pull-summaries" "peat-parse-summaries" "peat-configs" "peat-state")
     for index in "${FLUSH_INDICES[@]}"; do
         curl --proxy "" -XDELETE "$ES_URL/${index}*"
     done
@@ -62,7 +60,7 @@ export_indices () {
     DIR_NAME="elastic_index_export"
     CONTAINER_DIR="/tmp/$DIR_NAME"
     ES_EXPORT_DIR=${ES_EXPORT_DIR:-"$(pwd)/$DIR_NAME"}
-    INDICES=${EXPORT_INDICES:-"vedar-logs peat-scan-summaries peat-pull-summaries peat-parse-summaries peat-configs peat-state ot-device-hosts-static ot-device-hosts-timeseries ot-device-files ot-device-registers ot-device-tags ot-device-io ot-device-events ot-device-memory"}
+    INDICES=${EXPORT_INDICES:-"peat-logs peat-scan-summaries peat-pull-summaries peat-parse-summaries peat-configs peat-state ot-device-hosts-static ot-device-hosts-timeseries ot-device-files ot-device-registers ot-device-tags ot-device-io ot-device-events ot-device-memory"}
 
     echo "Exporting data from Elasticsearch server $ES_URL to $ES_EXPORT_DIR"
     if [ -d "$ES_EXPORT_DIR" ]; then

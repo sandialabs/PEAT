@@ -19,7 +19,7 @@ PEAT Elasticsearch indices reference
    :widths: 20, 55, 25
    :align: left
 
-   "``vedar-logs``", "PEAT logging events.", ":attr:`ELASTIC_LOG_INDEX <peat.settings.Configuration.ELASTIC_LOG_INDEX>`"
+   "``peat-logs``", "PEAT logging events.", ":attr:`ELASTIC_LOG_INDEX <peat.settings.Configuration.ELASTIC_LOG_INDEX>`"
    "``peat-scan-summaries``", "Scan result summaries.", ":attr:`ELASTIC_SCAN_INDEX <peat.settings.Configuration.ELASTIC_SCAN_INDEX>`"
    "``peat-pull-summaries``", "Pull result summaries.", ":attr:`ELASTIC_PULL_INDEX <peat.settings.Configuration.ELASTIC_PULL_INDEX>`"
    "``peat-parse-summaries``", "Parse result summaries.", ":attr:`ELASTIC_PARSE_INDEX <peat.settings.Configuration.ELASTIC_PARSE_INDEX>`"

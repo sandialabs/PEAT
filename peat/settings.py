@@ -241,7 +241,7 @@ class Configuration(SettingsManager):
     Setting this to an empty string will disable output of these files.
 
     :term:`JSON` formatted log files are also saved here.
-    These can be used to rebuild the ``vedar-logs`` Elasticsearch index.
+    These can be used to rebuild the ``peat-logs`` Elasticsearch index.
 
     Files that may be created in this directory include:
 
@@ -348,7 +348,7 @@ class Configuration(SettingsManager):
     each document pushed to Elasticsearch.
     """
 
-    ELASTIC_LOG_INDEX: str = "vedar-logs"
+    ELASTIC_LOG_INDEX: str = "peat-logs"
     """
     Base name of Elasticsearch index to use PEAT logging events.
     """

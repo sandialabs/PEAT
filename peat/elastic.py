@@ -343,7 +343,7 @@ class Elastic:
             # Minor hack to make configurable indices work
             index_remap = {
                 "alerts": "alerts",  # TODO: kept for backward compatibility
-                config.ELASTIC_LOG_INDEX: "vedar-logs",
+                config.ELASTIC_LOG_INDEX: "peat-logs",
                 config.ELASTIC_SCAN_INDEX: "peat-scan-summaries",
                 config.ELASTIC_PULL_INDEX: "peat-pull-summaries",
                 config.ELASTIC_PARSE_INDEX: "peat-parse-summaries",

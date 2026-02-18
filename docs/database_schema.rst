@@ -3,17 +3,14 @@
 ***************
 Database Schema
 ***************
-This section details the Elasticsearch database schema for the VEDAR family of tools. The objective with this schema is to establish common data structures that can be used to build visualizations and dashboards in Kibana.
+This section details the Elasticsearch database schema for PEAT. The objective with this schema is to establish common data structures that can be used to build visualizations and dashboards in Kibana.
 
 Elastic Common Schema (`ECS <https://www.elastic.co/guide/en/ecs/current/index.html>`__) version: ``8.10.0``
 
 
 Notes
 =====
-- **Elasticsearch is a NoSQL database, why is there a schema?** Because we want to share data between users and tools, we want that data to have a predictable format. We want all of the VEDAR tools to "speak the same language" when it comes to data in the database.
-- **What data should conform to this guide?** Any data that is expected to be seen by a user, or to be used by more than a single tool. Data that's used internally by a single tool does not need to
-   conform to this structure.
-- Elasticsearch is a NoSQL database, so it does not have a "schema" like a traditional database does. In fact, you can ingest pretty much any arbitrary ``.json`` content into an Elasticsearch index.
+- **Elasticsearch is a NoSQL database, why is there a schema?** Because to share data between users and tools, the data should have a predictable format.
 - The schemas here are descriptions of the :term:`JSON` fields expected of a "entry" in the Elasticsearch database (also known as a ``doc``).
 - "Data Type" values are Elasticsearch data types (`reference <https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html>`__). When storing as a plain :term:`JSON` file, ensure the format it is stored in either matches or can be cohered to the corresponding Elasticsearch format.
 - Fields listed as ``required`` must be included in any docs that contain the parent field. If the field is at the root level, it is required for any docs in that index.
@@ -26,7 +23,7 @@ Indices
 =======
 This section lists the Elasticsearch indices (aka "indexes") used by PEAT, and what they are used for.
 
-- **vedar-logs-[year].[month].[day]**: Logs for PEAT. 1 document = 1 event.
+- **peat-logs-[year].[month].[day]**: Logs for PEAT. 1 document = 1 event.
 - **ot-device-hosts-timeseries-[year].[month].[day]**: Results of PEAT pulls. 1 document = results from 1 device.
 - **peat-scan-summaries-[year].[month].[day]**: Results of PEAT scans. 1 document = results from all devices in the scan.
 - **peat-pull-summaries-[year].[month].[day]**: Results of PEAT pulls. 1 document = results from all devices in the scan.
@@ -72,16 +69,13 @@ Information about the tool that generated the event (PEAT). ECS reference: `Agen
    :align: left
 
 
-VEDAR Logs (``vedar-logs-*``)
-=============================
+PEAT Logs (``peat-logs-*``)
+===========================
 Logs from PEAT, such as errors or informational messages. Note that this does not include logs collected from OT devices by PEAT, those fall under ``ot-device-hosts-*``.
-
-.. note::
-   The name is a legacy holdover, and will be changed in the future.
 
 Notes
 -----
-- Index: ``vedar-logs-<date>``, where ``date`` is, ``year.month.day`` in UTC. Example: ``vedar-logs-2026.01.29``
+- Index: ``peat-logs-<date>``, where ``date`` is, ``year.month.day`` in UTC. Example: ``peat-logs-2026.01.29``
 - ``message``: Human-readable log message. No longer than 80 characters.
 - Every entry includes the :ref:`base-fields` and :ref:`agent-fields`.
 - The level and complete log entry text is contained in the ``log.*`` field set, defined below.

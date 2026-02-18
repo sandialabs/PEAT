@@ -486,7 +486,7 @@ PARSE_RESULT: Final[dict[str, NestedMappingType]] = {
 
 # -- PEAT index mappings --
 PEAT_INDICES: Final[dict[str, dict]] = {
-    "vedar-logs": {
+    "peat-logs": {
         "properties": {
             **BASE_FIELDS,
             "error": {"properties": ERROR_FIELDS},
