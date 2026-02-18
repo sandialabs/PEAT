@@ -349,7 +349,7 @@ The scan summary represents the results of device discovery and verification, su
 
 .. csv-table:: Scan summary fields
    :escape: \
-   :file: scan_summaries_fields.csv
+   :file: field_references/scan_summaries_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
@@ -369,7 +369,7 @@ The pull summary is a summary of device pulls. Pull summaries are stored as :ter
 
 .. csv-table:: Pull summary fields
    :escape: \
-   :file: pull_summaries_fields.csv
+   :file: field_references/pull_summaries_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
@@ -389,7 +389,7 @@ The parse summary represents the results of parsing device artifacts using ``pea
 
 .. csv-table:: Parse summary fields
    :escape: \
-   :file: parse_summaries_fields.csv
+   :file: field_references/parse_summaries_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left

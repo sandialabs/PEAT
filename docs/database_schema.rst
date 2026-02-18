@@ -53,7 +53,7 @@ Base Fields
 -----------
 .. csv-table:: Base Fields
    :escape: \
-   :file: base_fields.csv
+   :file: field_references/base_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
@@ -66,7 +66,7 @@ Information about the tool that generated the event (PEAT). ECS reference: `Agen
 
 .. csv-table:: Agent Fields
    :escape: \
-   :file: agent_fields.csv
+   :file: field_references/agent_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
@@ -93,7 +93,7 @@ ECS reference: `Log Fields <https://www.elastic.co/guide/en/ecs/current/ecs-log.
 
 .. csv-table:: Log Fields
    :escape: \
-   :file: log_fields.csv
+   :file: field_references/log_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
@@ -120,7 +120,7 @@ Fields
 
 .. csv-table:: OT Devices Fields
    :escape: \
-   :file: ot_devices_fields.csv
+   :file: field_references/ot_devices_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
@@ -139,7 +139,7 @@ Fields
 ------
 .. csv-table:: Scan Summary Fields
    :escape: \
-   :file: scan_summaries_fields.csv
+   :file: field_references/scan_summaries_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
@@ -158,7 +158,7 @@ Fields
 ------
 .. csv-table:: Pull Summary Fields
    :escape: \
-   :file: pull_summaries_fields.csv
+   :file: field_references/pull_summaries_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
@@ -177,7 +177,7 @@ Fields
 ------
 .. csv-table:: Parse Summary Fields
    :escape: \
-   :file: parse_summaries_fields.csv
+   :file: field_references/parse_summaries_fields.csv
    :header-rows: 1
    :widths: auto
    :align: left
