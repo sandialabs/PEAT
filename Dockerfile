@@ -70,7 +70,7 @@ RUN set -ex \
   && pip install --no-cache-dir --upgrade pdm
 
 WORKDIR /PEAT
-COPY ./COPYRIGHT.md ./
+COPY ./COPYRIGHT.rst ./
 COPY ./LICENSE ./
 COPY ./NOTICE ./
 COPY ./AUTHORS ./
