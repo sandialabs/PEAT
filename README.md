@@ -120,4 +120,4 @@ pdm run test
 
 Copyright 2026 National Technology & Engineering Solutions of Sandia, LLC (NTESS). Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software.
 
-This software is licensed under a GPLv3 license. Please see [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md) for more information.
+This software is licensed under a GPLv3 license. Please see [LICENSE](LICENSE) and [COPYRIGHT.rst](COPYRIGHT.rst) for more information.

@@ -34,7 +34,7 @@ readme = "README.md"
 requires-python = ">=3.11,<3.14"
 license-files = [
     "LICENSE",
-    "COPYRIGHT.md",
+    "COPYRIGHT.rst",
 ]
 authors = [
     {name = "PEAT Developers", email = "peat@sandia.gov"},
@@ -231,7 +231,7 @@ peat = "peat.__main__:main"
 [project.urls]
 Repository = "https://github.com/sandialabs/PEAT"
 Download = "https://github.com/sandialabs/PEAT/releases"
-Changelog = "https://github.com/sandialabs/PEAT/blob/main/CHANGELOG.md"
+Changelog = "https://github.com/sandialabs/PEAT/blob/main/CHANGELOG.rst"
 Documentation = "https://sandialabs.github.io/PEAT/"
 Issues = "https://github.com/sandialabs/PEAT/issues"
 
@@ -345,8 +345,8 @@ docs = [
 # Timestamp for files in wheel is 2016/01/01 by default
 # NOTE: PKG-INFO file in the sdist already includes dependencies, README, and LICENSE
 [tool.pdm.build]
-includes = ["peat/", "NOTICE", "COPYRIGHT.md"]
-source-includes = ["AUTHORS", "CHANGELOG.md", "SECURITY.md"]
+includes = ["peat/", "NOTICE", "COPYRIGHT.rst"]
+source-includes = ["AUTHORS", "CHANGELOG.rst", "SECURITY.rst"]
 # If we some day want to include test and dev dependencies in the sdist
 # (e.g. for packaging), then we can do that. For now, exclude.
 excludes = ["tests/"]
@@ -378,7 +378,7 @@ cmd = "ruff check --fix peat tests distribution/sneakypeat.py examples/example_p
 
 [tool.pdm.scripts.spelling]
 help = "Spelling checks on all relevant files"
-cmd = "codespell --toml ./pyproject.toml peat tests distribution .github CHANGELOG.md CODE_OF_CONDUCT.md COPYRIGHT.md Dockerfile LICENSE NOTICE README.md SECURITY.md .dockerignore .editorconfig .gitignore .gitattributes pyproject.toml distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
+cmd = "codespell --toml ./pyproject.toml peat tests distribution .github CHANGELOG.rst CODE_OF_CONDUCT.rst COPYRIGHT.rst Dockerfile LICENSE NOTICE README.md SECURITY.rst .dockerignore .editorconfig .gitignore .gitattributes pyproject.toml distribution/sneakypeat.py examples/example_peat_module/awesome_module.py"
 
 [tool.pdm.scripts.typecheck]
 help = "Variable typing analysis using Mypy"
@@ -754,7 +754,7 @@ exclude = [
 
 # https://github.com/henryiii/check-sdist
 [tool.check-sdist]
-sdist-only = ["peat", "AUTHORS", "CHANGELOG.md", "COPYRIGHT.md", "SECURITY.md", "NOTICE"]
-git-only = [".*", "distribution", "examples", "scripts", "tests", "docs", ".venv", ".dockerignore", ".editorconfig", ".gitattributes", ".gitignore", "*.spec", "pdm.lock", "CODE_OF_CONDUCT.md", "Dockerfile", "pyproject.toml", "README.md", "LICENSE"]
+sdist-only = ["peat", "AUTHORS", "CHANGELOG.rst", "COPYRIGHT.rst", "SECURITY.rst", "NOTICE"]
+git-only = [".*", "distribution", "examples", "scripts", "tests", "docs", ".venv", ".dockerignore", ".editorconfig", ".gitattributes", ".gitignore", "*.spec", "pdm.lock", "CODE_OF_CONDUCT.rst", "Dockerfile", "pyproject.toml", "README.md", "LICENSE"]
 default-ignore = true
 recurse-submodules = false
