@@ -1,0 +1,53 @@
+name: Devcontainer Build
+
+on:
+  push:
+    branches:
+      - main
+      - docs/contributor-guide
+    paths:
+      - pdm.lock
+      - pyproject.toml
+      - .devcontainer/**
+      - .github/workflows/devcontainer.yml
+      - .pre-commit-config.yaml
+  workflow_dispatch:
+
+jobs:
+  docker-build:
+    name: Build devcontainer image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
+        with:
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0  # checkout full history
+      - name: Set up QEMU for multi-architecture builds
+        uses: docker/setup-qemu-action@ce360397dd3f832beb865e1373c09c0e9f86d70a  # v4.0.0
+      - name: Setup Docker buildx for multi-architecture builds
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd  # v4.0.0
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # hack because it's 2026 and github actions still has no native way to make a variable lowercase...
+      - name: Lowercase repo
+        run: |
+          echo "REPO=${GITHUB_REPOSITORY,,}" >>${GITHUB_ENV}
+      - name: Dev Container Build and Run Action
+        uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6 # v0.3.1900000417
+        with:
+          subFolder: .github
+          imageName: ghcr.io/${{ env.REPO }}/peat-devcontainer
+          cacheFrom: ghcr.io/${{ env.REPO }}/peat-devcontainer
+          push: always
+          platform: linux/amd64,linux/arm64

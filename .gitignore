@@ -3,6 +3,10 @@ peat_results/
 pillage_results/
 pillage_temp/
 
+# hacks
+.devcontainer/Dockerfile
+.devcontainer/*.crt
+
 # PDM
 .pdm-python
 pdm.toml

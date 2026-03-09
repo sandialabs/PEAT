@@ -1,0 +1,20 @@
+{
+    "name": "PEAT Devcontainer Base Image",
+    "image": "mcr.microsoft.com/devcontainers/base:bookworm",
+
+    // Features to add to the dev container. More info: https://containers.dev/features.
+    // https://github.com/devcontainers-extra/features/tree/main/src
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers-extra/features/apt-get-packages:1": {
+            "packages": "python3-dev,patchelf,binutils,scons,libpq-dev,libpq5,graphviz,wget,curl,jq,tree,tcpdump,libpcap0.8,libpcap-dev,lrzsz,iputils-ping,net-tools,iproute2,qemu-utils,kmod,libkmod-dev,libxml2,libxslt1.1,ca-certificates,zip,unzip,dos2unix,pandoc,libssl-dev,libffi-dev,nmap,gcc,file",
+            "preserve_apt_list": false
+        },
+        "ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+        "ghcr.io/devcontainers-extra/features/shellcheck:1": {},
+        "ghcr.io/devcontainers-extra/features/pdm:2": {},
+        "ghcr.io/devcontainers-extra/features/npm-package:1": {
+            "package": "elasticdump"
+        }
+    }
+}

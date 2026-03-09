@@ -1,0 +1,123 @@
+{
+    "name": "PEAT Development",
+    "image": "ghcr.io/ghostofgoes/peat/peat-devcontainer:latest",
+
+    "onCreateCommand": "bash .devcontainer/setup.sh",
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "charliermarsh.ruff", // Ruff
+                "eamodio.gitlens",  // GitLens
+                "editorconfig.editorconfig",  // EditorConfig
+                "kevinrose.vsc-python-indent",  // Python Indent
+                "mechatroner.rainbow-csv",  // Rainbow CSV
+                "ms-python.python",  // Python
+                "ms-python.vscode-pylance",  // Pylance
+                "ms-vscode.hexeditor",  // Hex Editor
+                "redhat.vscode-xml",  // XML
+                "redhat.vscode-yaml",  // YAML
+                "streetsidesoftware.code-spell-checker",  // Code Spell Checker
+                "timonwong.shellcheck",  // ShellCheck
+                "vscode-icons-team.vscode-icons"  // vscode-icons
+            ],
+            "settings": {
+                "workbench.iconTheme": "vscode-icons",
+                "vsicons.dontShowNewVersionMessage": true,
+
+                "python.analysis.typeCheckingMode": "basic",
+                "python.analysis.exclude": [
+                    "**/.*",
+                    "**/build",
+                    "**/node_modules",
+                    "**/__pycache__",
+                    ".git",
+                    ".venv",
+                    ".pytest_cache",
+                    ".pdm-build",
+                    ".ruff_cache",
+                    ".vscode",
+                    "**/peat_results",
+                    "peat_results"
+                ],
+                "python.analysis.diagnosticSeverityOverrides": {
+                    "reportOptionalMemberAccess": "information",  // "information"
+                    "reportOptionalCall": "information",  // "information"
+                    "reportGeneralTypeIssues": "warning"  // "information"
+                },
+
+                // Less naggy about spelling issues
+                "cSpell.diagnosticLevel": "Hint",
+
+                // File comparison
+                "diffEditor.maxComputationTime": 0,
+                "diffEditor.codeLens": true,
+                "diffEditor.ignoreTrimWhitespace": true,
+
+                // Disable telemetry
+                "telemetry.telemetryLevel": "off",
+                "telemetry.feedback.enabled": false,
+                "gitlens.telemetry.enabled": false,
+                "redhat.telemetry.enabled": false,
+                "gitlens.ai.enabled": false,
+
+                "git.blame.ignoreWhitespace": true,
+
+                // GitLens fixups
+                "gitlens.integrations.enabled": false,
+                "gitlens.showWhatsNewAfterUpgrades": false,
+                "gitlens.codeLens.enabled": false,
+                "gitlens.blame.avatars": false,
+                "gitlens.hovers.avatars": false,
+                "gitlens.views.branches.avatars": false,
+                "gitlens.views.contributors.avatars": false,
+                "gitlens.views.commits.avatars": false,
+                "gitlens.views.tags.avatars": false,
+                "gitlens.views.repositories.avatars": false,
+                "gitlens.views.lineHistory.avatars": false,
+                "gitlens.views.searchAndCompare.avatars": false,
+                "gitlens.views.fileHistory.avatars": false,
+                "gitlens.views.remotes.avatars": false,
+
+                // Known file types
+                "files.associations": {
+                    "*.DAT": "ini",
+                    "*.dat": "ini",
+                    "Dockerfile-*": "dockerfile",
+                    "*.spec": "python",
+                    "*.ndjson": "json",
+                    "*.L5X": "xml"
+                },
+
+                "files.watcherExclude": {
+                    "**/__pycache__/**": true,
+                    "**/.pytest_cache/**": true,
+                    "**/.venv/**": true,
+                    "**/htmlcov/**": true,
+                    "**/pytest_files/**": true,
+                    "**/.ruff_cache/**": true
+                },
+                "files.exclude": {
+                    ".coverage": true,
+                    ".pdm-python": true,
+                    ".python-version": true,
+                    ".venv": true,
+                    "**/__pycache__": true,
+                    "**/.pdm-build": true,
+                    "**/.pytest_cache": true,
+                    "**/.classpath": true,
+                    "**/.coverage.py*": true,
+                    "**/.project": true,
+                    "**/.python-version": true,
+                    "**/.ruff_cache": true,
+                    "**/.settings": true,
+                    "**/.venv": true,
+                    "**/.vscode": true,
+                    "**/*.egg-info": true,
+                    "**/*.pytest_cache": true,
+                    "**/build/": true
+                }
+            }
+        }
+    }
+}
