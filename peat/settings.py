@@ -545,6 +545,11 @@ class Configuration(SettingsManager):
     :meta hide-value:
     """
 
+    FORMATTED_OUTPUT: bool = False
+    """
+    If JSON data should be formatted with 4 space indentation.
+    """
+
 
 class State(SettingsManager):
     """

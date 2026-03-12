@@ -202,6 +202,10 @@ temp_dir: !JOIN [*RUNDIR, "temp/"]
 # Also contains Zeek artifacts
 zeek_logdir: !JOIN [*RUNDIR, "zeek_logs/"]
 
+# If JSON data should be formatted with 4 space indentation. 
+# Defaults to false for minified version.
+formatted_output: true
+
 
 # -----------------------------------------------------------------------------
 

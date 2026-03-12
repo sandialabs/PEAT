@@ -710,8 +710,8 @@ def write_file(
 
             if format_json:
                 data = json.dumps(data, indent=4)
-            else:
-                data = json.dumps(data)
+            else:  # Minified json
+                data = json.dumps(data, separators=(",", ":"))
         except (TypeError, ValueError) as err:
             log.error(
                 f"write_file: failed to serialize JSON to '{str(file)}' "

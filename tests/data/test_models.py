@@ -105,6 +105,31 @@ def test_device_data_export_to_files(mocker, tmp_path, assert_glob_path):
     assert "original" not in dev_data["logic"]
 
 
+def test_minified_device_data_export_to_files(mocker, tmp_path, assert_glob_path):
+    mocker.patch.dict(config["CONFIG"], {"DEVICE_DIR": tmp_path})
+    base = Path(tmp_path, "export_to_files_test")
+
+    dev = DeviceData(
+        id="export_to_files_test",
+        logic={"original": "123"},
+        interface=[{"type": "ethernet", "ip": "192.168.2.2"}],  # trigger interface model jsonl
+    )
+    assert not base.exists()
+
+    assert dev.export_to_files() is True
+
+    assert base.is_dir()
+    fd_data_path = assert_glob_path(base, "device-data-full.json")
+
+    # load data from file and check for pretty printing
+    fd_data = fd_data_path.read_text()
+
+    # default is minified
+    assert "\n" not in fd_data
+    assert ": " not in fd_data
+    assert ", " not in fd_data
+
+
 def test_device_data_elastic():
     dev_id = "elastic_test"
     geo = Geo(location=LatLon(lat=-40.002, lon=0.00))

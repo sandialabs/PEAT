@@ -82,6 +82,7 @@ heat_protocols: []
 pcaps: null
 no_run_zeek: false
 zeek_dir: null
+formatted_output: true
 
 pillage:
   auto_copy: true

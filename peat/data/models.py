@@ -3485,6 +3485,7 @@ class DeviceData(BaseModel):
                 data=full_device_data,
                 filename="device-data-full.json",
                 overwrite_existing=overwrite_existing,
+                format_json=config.FORMATTED_OUTPUT,
             )
 
             # Summary of data, excluding excessively large fields
@@ -3658,6 +3659,7 @@ class DeviceData(BaseModel):
         filename: str,
         overwrite_existing: bool = False,
         out_dir: Path | None = None,
+        format_json: bool = True,
         merge_existing: bool = False,
     ) -> Path:
         """
@@ -3676,6 +3678,7 @@ class DeviceData(BaseModel):
                 to the name.
             out_dir: Directory the data should be written to.
                 Defaults to result of ``dev.get_out_dir()``
+            format_json: If JSON data should be formatted with 4 space indentation.
             merge_existing: If the file already exists and is JSON, then
                 read the data from the existing file, merge the new data with it,
                 then overwrite the file with the merged data.
@@ -3699,6 +3702,7 @@ class DeviceData(BaseModel):
             data=data,
             file=full_path,
             overwrite_existing=overwrite_existing,
+            format_json=format_json,
             merge_existing=merge_existing,
         )
 
