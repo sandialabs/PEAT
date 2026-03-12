@@ -88,7 +88,12 @@ def test_device_data_export_to_files(mocker, tmp_path, assert_glob_path):
     mocker.patch.dict(config["CONFIG"], {"DEVICE_DIR": tmp_path})
     base = Path(tmp_path, "export_to_files_test")
 
-    dev = DeviceData(id="export_to_files_test", logic={"original": "123"})
+    dev = DeviceData(
+        id="export_to_files_test",
+        logic={"original": "123"},
+        interface=[{"type": "ethernet", "ip": "192.168.2.2"}],  # trigger interface model jsonl
+    )
+
     assert not base.exists()
 
     assert dev.export_to_files() is True
@@ -103,6 +108,14 @@ def test_device_data_export_to_files(mocker, tmp_path, assert_glob_path):
 
     dev_data = json.loads(dev_data_path.read_text())
     assert "original" not in dev_data["logic"]
+
+    # test data model splitting
+    jsonl_data_path = assert_glob_path(base, "device-data-interface.jsonl")
+    lines = jsonl_data_path.read_text().strip().split("\n")
+    interface_json = json.loads(lines[0])
+
+    assert interface_json["type"] == "ethernet"
+    assert interface_json["ip"] == "192.168.2.2"
 
 
 def test_device_data_elastic():

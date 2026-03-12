@@ -3472,11 +3472,6 @@ class DeviceData(BaseModel):
         self.populate_fields()
         self.purge_duplicates()
 
-        # TODO: export large fields to separate JSON files
-        #   memory
-        #   event
-        #   registers
-
         try:
             # All data, including "original" and other large fields
             full_device_data = self.export(include_original=True)
@@ -3496,6 +3491,37 @@ class DeviceData(BaseModel):
                 filename="device-data-summary.json",
                 overwrite_existing=overwrite_existing,
             )
+
+            # New functionality: Split data models into separate .jsonl files
+            for list_attr_name in self.get_attr_names(list):
+                model_list = getattr(self, list_attr_name, None)
+
+                # Skip if empty or 'module' list
+                if not model_list or list_attr_name == "module":
+                    continue
+
+                log.info(f"Exporting {list_attr_name} to JSONL for Splunk ingestion")
+
+                jsonl_lines = []
+                for model in model_list:
+                    # Normalize to JSON-friendly values
+                    model_dict = model.dict(exclude_defaults=True)
+                    model_dict = consts.convert(model_dict)
+                    model_dict = strip_empty_and_private(model_dict)
+
+                    model_dict["device_id"] = self.get_id()
+
+                    # Convert model to json object and add to list
+                    jsonl_lines.append(json.dumps(model_dict))
+
+                jsonl_data = "\n".join(jsonl_lines)
+
+                # Write to disk: e.g., device-data-event.jsonl
+                self.write_file(
+                    data=jsonl_data,
+                    filename=f"device-data-{list_attr_name}.jsonl",
+                    overwrite_existing=overwrite_existing,
+                )
 
             return True
         except Exception:
