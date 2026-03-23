@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SCEPTRE>
+    <field-device>
+        <name>fep-1</name>
+        <comms>
+            <dnp3-client>
+                <address>1</address>
+                <scan-rate>5</scan-rate>
+                <dnp3-connection>
+		    <endpoint>tcp://127.0.0.1:20000</endpoint>
+                    <address>10</address>
+                    <binary-input>
+                        <address>0</address>
+                        <tag>tank3-powered</tag>
+                    </binary-input>
+                    <binary-output>
+                        <address>1</address>
+                        <tag>tank3-powered-toggle</tag>
+                    </binary-output>
+                    <analog-input>
+                        <address>0</address>
+                        <tag>tank1-temperature</tag>
+                    </analog-input>
+                    <analog-output>
+                        <address>1</address>
+                        <tag>tank1-temperature-setpoint</tag>
+                    </analog-output>
+                </dnp3-connection>
+                <command-interface>tcp://127.0.0.1:1330</command-interface>
+            </dnp3-client>
+        </comms>
+    </field-device>
+</SCEPTRE>

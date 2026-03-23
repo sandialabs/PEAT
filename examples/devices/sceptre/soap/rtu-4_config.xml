@@ -1,0 +1,472 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SCEPTRE>
+    <field-device>
+
+        <name>rtu-4</name>
+        <cycle-time>1000</cycle-time>
+        <tags>
+                
+            <external-tag>
+                <name>var_rtu-4_I0</name>
+                <io>rtu-4_I0</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I1</name>
+                <io>rtu-4_I1</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I2</name>
+                <io>rtu-4_I2</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I3</name>
+                <io>rtu-4_I3</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I4</name>
+                <io>rtu-4_I4</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I5</name>
+                <io>rtu-4_I5</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I6</name>
+                <io>rtu-4_I6</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I7</name>
+                <io>rtu-4_I7</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I8</name>
+                <io>rtu-4_I8</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_O0</name>
+                <io>rtu-4_O0</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I9</name>
+                <io>rtu-4_I9</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I10</name>
+                <io>rtu-4_I10</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I11</name>
+                <io>rtu-4_I11</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_O1</name>
+                <io>rtu-4_O1</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I12</name>
+                <io>rtu-4_I12</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I13</name>
+                <io>rtu-4_I13</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I14</name>
+                <io>rtu-4_I14</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I15</name>
+                <io>rtu-4_I15</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I16</name>
+                <io>rtu-4_I16</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I17</name>
+                <io>rtu-4_I17</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_O2</name>
+                <io>rtu-4_O2</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I18</name>
+                <io>rtu-4_I18</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I19</name>
+                <io>rtu-4_I19</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I20</name>
+                <io>rtu-4_I20</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I21</name>
+                <io>rtu-4_I21</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I22</name>
+                <io>rtu-4_I22</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_I23</name>
+                <io>rtu-4_I23</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-4_O3</name>
+                <io>rtu-4_O3</io>
+                <type>binary</type>
+            </external-tag>
+        </tags>
+        <comms>
+            <dnp3-server>
+	        <endpoint>tcp://10.117.4.104:20000</endpoint>
+                <address>10</address>
+                <event-logging>rtu-4-dnp3-outstation.log</event-logging>
+                
+                <analog-input>
+                    <address>0</address>
+                    <tag>var_rtu-4_I0</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>1</address>
+                    <tag>var_rtu-4_I1</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>2</address>
+                    <tag>var_rtu-4_I2</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>3</address>
+                    <tag>var_rtu-4_I3</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>4</address>
+                    <tag>var_rtu-4_I4</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>5</address>
+                    <tag>var_rtu-4_I5</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>6</address>
+                    <tag>var_rtu-4_I6</tag>
+                </analog-input>
+                
+                <binary-input>
+                    <address>0</address>
+                    <tag>var_rtu-4_I7</tag>
+                </binary-input>
+                
+                <binary-input>
+                    <address>1</address>
+                    <tag>var_rtu-4_I8</tag>
+                </binary-input>
+                
+                <binary-output>
+                    <address>2</address>
+                    <tag>var_rtu-4_O0</tag>
+                </binary-output>
+                
+                <analog-input>
+                    <address>7</address>
+                    <tag>var_rtu-4_I9</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>8</address>
+                    <tag>var_rtu-4_I10</tag>
+                </analog-input>
+                
+                <binary-input>
+                    <address>3</address>
+                    <tag>var_rtu-4_I11</tag>
+                </binary-input>
+                
+                <binary-output>
+                    <address>4</address>
+                    <tag>var_rtu-4_O1</tag>
+                </binary-output>
+                
+                <analog-input>
+                    <address>9</address>
+                    <tag>var_rtu-4_I12</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>10</address>
+                    <tag>var_rtu-4_I13</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>11</address>
+                    <tag>var_rtu-4_I14</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>12</address>
+                    <tag>var_rtu-4_I15</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>13</address>
+                    <tag>var_rtu-4_I16</tag>
+                </analog-input>
+                
+                <binary-input>
+                    <address>5</address>
+                    <tag>var_rtu-4_I17</tag>
+                </binary-input>
+                
+                <binary-output>
+                    <address>6</address>
+                    <tag>var_rtu-4_O2</tag>
+                </binary-output>
+                
+                <analog-input>
+                    <address>14</address>
+                    <tag>var_rtu-4_I18</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>15</address>
+                    <tag>var_rtu-4_I19</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>16</address>
+                    <tag>var_rtu-4_I20</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>17</address>
+                    <tag>var_rtu-4_I21</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>18</address>
+                    <tag>var_rtu-4_I22</tag>
+                </analog-input>
+                
+                <binary-input>
+                    <address>7</address>
+                    <tag>var_rtu-4_I23</tag>
+                </binary-input>
+                
+                <binary-output>
+                    <address>8</address>
+                    <tag>var_rtu-4_O3</tag>
+                </binary-output>
+            </dnp3-server>
+        </comms>
+        <input>
+            <endpoint>udp://172.16.1.7;239.0.0.1:40000</endpoint>
+                
+            <analog>
+                <id>rtu-4_I0</id>
+                <name>bus-245.voltage</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I1</id>
+                <name>bus-245.angle</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I2</id>
+                <name>bus-245.gen_mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I3</id>
+                <name>bus-245.gen_mvar</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I4</id>
+                <name>bus-245.load_mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I5</id>
+                <name>bus-245.load_mvar</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I6</id>
+                <name>bus-245.shunt_mvar</name>
+            </analog>
+                
+            <binary>
+                <id>rtu-4_I7</id>
+                <name>bus-245.active</name>
+            </binary>
+                
+            <binary>
+                <id>rtu-4_I8</id>
+                <name>bus-245.slack</name>
+            </binary>
+                                
+            <analog>
+                <id>rtu-4_I9</id>
+                <name>load-1_bus-245.mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I10</id>
+                <name>load-1_bus-245.mvar</name>
+            </analog>
+                
+            <binary>
+                <id>rtu-4_I11</id>
+                <name>load-1_bus-245.active</name>
+            </binary>
+                                
+            <analog>
+                <id>rtu-4_I12</id>
+                <name>branch-1_242-245.charging</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I13</id>
+                <name>branch-1_242-245.current</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I14</id>
+                <name>branch-1_242-245.source_mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I15</id>
+                <name>branch-1_242-245.target_mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I16</id>
+                <name>branch-1_242-245.phase_angle</name>
+            </analog>
+                
+            <binary>
+                <id>rtu-4_I17</id>
+                <name>branch-1_242-245.active</name>
+            </binary>
+                                
+            <analog>
+                <id>rtu-4_I18</id>
+                <name>branch-1_243-245.charging</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I19</id>
+                <name>branch-1_243-245.current</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I20</id>
+                <name>branch-1_243-245.source_mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I21</id>
+                <name>branch-1_243-245.target_mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-4_I22</id>
+                <name>branch-1_243-245.phase_angle</name>
+            </analog>
+                
+            <binary>
+                <id>rtu-4_I23</id>
+                <name>branch-1_243-245.active</name>
+            </binary>
+                        </input>
+        <output>
+            <endpoint>tcp://172.16.1.2:5555</endpoint>
+                                                                                                                                                                
+            <binary>
+                <id>rtu-4_O0</id>
+                <name>bus-245.active</name>
+            </binary>
+                                                                
+            <binary>
+                <id>rtu-4_O1</id>
+                <name>load-1_bus-245.active</name>
+            </binary>
+                                                                                                                
+            <binary>
+                <id>rtu-4_O2</id>
+                <name>branch-1_242-245.active</name>
+            </binary>
+                                                                                                                
+            <binary>
+                <id>rtu-4_O3</id>
+                <name>branch-1_243-245.active</name>
+            </binary>
+        </output>
+    </field-device>
+</SCEPTRE>
+

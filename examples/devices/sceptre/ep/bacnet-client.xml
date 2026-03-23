@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SCEPTRE>
+    <field-device>
+        <name>fep-1</name>
+        <comms>
+            <bacnet-client>
+                <scan-rate>5</scan-rate>
+                <bacnet-connection>
+                    <endpoint>udp://127.0.0.1:47808</endpoint>
+                    <instance>1234</instance>
+                    <binary-input>
+                        <address>0</address>
+                        <tag>brkr</tag>
+                    </binary-input>
+                    <binary-input>
+                        <address>1</address>
+                        <tag>generator-1_bus-1.active</tag>
+                    </binary-input>
+                    <binary-output>
+                        <address>2</address>
+                        <tag>load-breaker-toggle</tag>
+                    </binary-output>
+                    <binary-output>
+                        <address>3</address>
+                        <tag>generator-1_bus-1.active</tag>
+                    </binary-output>
+
+                    <analog-input>
+                        <address>0</address>
+                        <tag>load-power</tag>
+                    </analog-input>
+                    <analog-input>
+                        <address>1</address>
+                        <tag>bus-1.gen_mw</tag>
+                    </analog-input>
+                    <analog-output>
+                        <address>2</address>
+                        <tag>load-mw-setpoint</tag>
+                    </analog-output>
+                    <analog-output>
+                        <address>3</address>
+                        <tag>bus-1.gen_mw</tag>
+                    </analog-output>
+                </bacnet-connection>
+                <command-interface>tcp://127.0.0.1:1330</command-interface>
+            </bacnet-client>
+        </comms>
+    </field-device>
+</SCEPTRE>
