@@ -99,6 +99,9 @@ def test_device_data_export_to_files(mocker, tmp_path, assert_glob_path):
 
     # load data from files as JSON and compare against exported data
     fd_data = json.loads(fd_data_path.read_text())
+
+    # check for timestamp and remove it
+    assert fd_data.pop("created", None) is not None
     assert dev.export(include_original=True) == fd_data
 
     dev_data = json.loads(dev_data_path.read_text())

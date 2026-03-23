@@ -3479,7 +3479,10 @@ class DeviceData(BaseModel):
 
         try:
             # All data, including "original" and other large fields
-            full_device_data = self.export(include_original=True)
+            # Append timestamp to beginning of json
+            full_device_data = {"created": datetime.now().isoformat()} | self.export(
+                include_original=True
+            )
 
             self.write_file(
                 data=full_device_data,
