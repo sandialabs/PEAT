@@ -15,7 +15,7 @@ services:
     <<: *service-base
     container_name: peat-elastic
     hostname: peat-elastic
-    image: "elasticsearch:${ES_VERSION:-8.12.1}"
+    image: "elasticsearch:${ES_VERSION:-8.19.3}"
     healthcheck:
       test: "curl -f http://localhost:9200 || exit 1"
       timeout: 10s
@@ -28,7 +28,7 @@ services:
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
       - "TAKE_FILE_OWNERSHIP=true"
-      - xpack.security.enabled=true
+      - xpack.security.enabled=false
     ulimits:
       memlock:
         soft: -1
@@ -41,7 +41,7 @@ services:
     <<: *service-base
     container_name: peat-kibana
     hostname: peat-kibana
-    image: "kibana:${ES_VERSION:-8.12.1}"
+    image: "kibana:${ES_VERSION:-8.19.3}"
     healthcheck:
       test: "curl -f http://localhost:5601 || exit 1"
       start_period: 120s

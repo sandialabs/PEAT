@@ -5,7 +5,7 @@ set -e
 SCRIPTDIR="$(dirname "$(readlink -f "$0")")"
 COMPOSE_FILE="$SCRIPTDIR/docker-compose.yml"
 ES_URL=${ES_URL:-"http://localhost:9200"}  # Default if unset
-export ES_VERSION=${2:-"${ES_VERSION:-8.12.1}"}  # Allow version to be specified as argument
+export ES_VERSION=${2:-"${ES_VERSION:-8.19.3}"}  # Allow version to be specified as argument
 
 check_docker () {
     # Ensure docker is installed before trying to run anything
