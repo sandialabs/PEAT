@@ -22,7 +22,7 @@ jobs:
         uses: taskmedia/action-conventional-commits@443b9cf07a7c453dfd92533a7f0d0c67fb4d8140 # v1.1.25
         with:
           types: >
-            build|chore|ci|docs|feat|fix|minor|patch|perf|style|refactor|test|tests
+            build|chore|ci|docs|doc|feat|fix|bug|minor|patch|perf|style|refactor|test|tests|revert|deps|dependencies|sec|security|deprecate
 
   code-quality:
     name: Code Quality Checks
