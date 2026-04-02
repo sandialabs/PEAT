@@ -98,15 +98,16 @@ Configuration details
 Firmware IDs
 ^^^^^^^^^^^^
 - FID: Firmware ID
-   - Example: ``SEL-351-5-R510-V0-Z103103-D20110429``
-      - Model: ``SEL-351``
-      - Variant (??) : ``5`` (some devices may not have this portion)
-      - Release: ``R510`` (major release, generally new or changed features)
-      - Point release: ``V0`` (minor release, usually fixes or minor changes)
-      - Settings version: ``Z103103`` (indicates what version of SEL ACSELERATOR software to use)
-      - Firmware release date: ``D20110429``
 - BFID: Boot firmware ID
    - Similar to FID, but for the boot firmware
+
+- Example FID: ``SEL-351-5-R510-V0-Z103103-D20110429``
+   - Model: ``SEL-351``
+   - Variant (??) : ``5`` (some devices may not have this portion)
+   - Release: ``R510`` (major release, generally new or changed features)
+   - Point release: ``V0`` (minor release, usually fixes or minor changes)
+   - Settings version: ``Z103103`` (indicates what version of SEL ACSELERATOR software to use)
+   - Firmware release date: ``D20110429``
 
 Per SEL's documentation: "The firmware version will be either a standard release or a point release. A standard release adds new functionality to the firmware beyond the specifications of the existing version. A point release is reserved for modifying firmware functionality to conform to the specifications of the existing version."
 
@@ -141,33 +142,6 @@ To manually extract them without using PEAT:
    zlib-flate -uncompress < ./SET_61850.CID > SET_61850.xml
 
 
-.. COMMENT: TODO: RTAC section
-
-Example inputs
---------------
-
-SET_1.TXT
-^^^^^^^^^
-.. literalinclude:: ../examples/devices/sel/sel_351/settings/SET_1.TXT
-   :caption: First 15 lines of ``SET_1.TXT`` from a SEL 351 relay. Full file size is 248 lines.
-   :language: ini
-   :lines: 1-15
-
-SET_P5.TXT
-^^^^^^^^^^
-.. literalinclude:: ../examples/devices/sel/sel_351/settings/SET_P5.TXT
-   :caption: First 11 lines of ``SET_P5.TXT`` from a SEL 351 relay. Full file size is 134 lines.
-   :language: ini
-   :lines: 1-11
-
-SET_ALL.TXT
-^^^^^^^^^^^
-.. literalinclude:: ../examples/devices/sel/sel_351/set_all.txt
-   :caption: First 35 lines of ``SET_ALL.txt`` from a SEL 351 relay. Full file size is 4533 lines.
-   :language: ini
-   :lines: 1-35
-
-
 Developer notes on SEL communications
 -------------------------------------
 SEL relays can communicate over Telnet, serial connection (e.g. RS-232), or a "engineering tunnel" through a SEL 3530 RTAC (I'm not aware of any relays that support SSH yet, but there might be some newer ones that do). The messages sent are part of what they call "SEL ASCII" commands, and those commands are transport-agnostic, which means the "id" command sent over Telnet will have the same response as one sent over serial or an engineering tunnel. The commands and responses are basic ASCII text, except in certain cases, where it's "Compressed ASCII" (this is rare).
@@ -188,6 +162,7 @@ YMODEM is required for relays that don't have the ``file show`` command. PySeria
 
 
 Things that don't require YMODEM and use ``fil show``
+
 - 351S doesn't require YMODEM and uses ``fil show``.
 - 351S was tested on peat rack (port F, front serial, 9600 baud)
 - 351 on peat rack tested (port F, front serial, 57600 baud)
@@ -197,12 +172,14 @@ Things that don't require YMODEM and use ``fil show``
 - 311C-1 has ``file show``, according to docs.
 
 Things that DO require YMODEM for file transfer
-- 451 DOES require YMODEM for file transfer. It uses ``fil read <file>`` instead of ``fil show``.
-- 451. YMODEM with "file read".
-- 487E. YMODEM with "file read".
+
+- 451: DOES require YMODEM for file transfer. It uses ``fil read <file>`` instead of ``fil show``.
+- 451: YMODEM with "file read".
+- 487E: YMODEM with "file read".
 - 2030 (and 2032?): YMODEM with "file read".
 
 XMODEM devices
+
 - NOTE: XMODEM only works for SELboot, doesn't work during normal operations, according to docs. basically lets you upload and download firmware updates.
 - 300G. According to docs it doesn't have any "fil" commands, and also requires XMODEM for transfers.
 - 311A. Same as above, according to docs.
@@ -213,6 +190,7 @@ XMODEM devices
 - 587Z. same as above.
 
 Others
+
 - 387L. Not even xmodem...
 - 587. not even xmodem.
 

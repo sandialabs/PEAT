@@ -29,8 +29,9 @@ Table of Contents
    reference_documents
    design_documents
    developer_reference
-   release_notes
    glossary
    authors
    contributing
    development_infrastructure
+   code_of_conduct
+   changelog
