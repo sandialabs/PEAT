@@ -141,10 +141,10 @@ smartquotes_action = "qe"
 #   https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 # HTML theme: Furo (https://pradyunsg.me/furo/)
 html_theme = "furo"
-html_title = "PEAT documentation"
+html_title = "PEAT Documentation"
 html_short_title = "PEAT"
 html_favicon = "favicon.ico"
-html_logo = "favicon.ico"
+html_logo = "PEAT_Logo.png"
 html_last_updated_fmt = ""
 html_theme_options = {
     "top_of_page_buttons": ["view", "edit"],
@@ -185,5 +185,5 @@ man_show_urls = True
 # rinoh_documents = [{
 #     "doc": "index",
 #     "target": "peat",  # PDF filename
-#     # TODO: logo?
+#     # TODO: add logo in PDF
 # }]
