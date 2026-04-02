@@ -450,7 +450,7 @@ Anything related to installing, packaging, or distributing PEAT. See the :ref:`d
 - ``file_version_info.txt``   Used by `PyInstaller <https://pyinstaller.readthedocs.io/en/stable/usage.html#windows-specific-options>`__ to add `metadata to the final Windows executable <https://stackoverflow.com/a/14626175>`__. DO NOT MODIFY unless you know what you're doing.
 - ``linux-install-script.sh``  Installs the PEAT executable in ``/usr/local/bin``, the man page in ``/usr/local/share/man/man1/``, and updates the ``mandb``. Intended to be distributed with the Linux executable and the man page (``peat.1``).
 - ``peat.spec``  `PyInstaller spec <https://pyinstaller.readthedocs.io/en/stable/spec-files.html>`__ for building portable PEAT executables (for both Linux and Windows)
-- ``tbird.ico``  Icon file used for the Windows executable
+- ``peat_icon.ico``  Icon file used for the Windows executable
 
 examples
 ^^^^^^^^

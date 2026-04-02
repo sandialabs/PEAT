@@ -51,7 +51,7 @@ data_files.extend([
 # Windows EXE resources
 # NOTE: "SPECPATH" is a PyInstaller-provided variable
 version_info_path = os.path.abspath(os.path.join(SPECPATH, 'file_version_info.txt'))
-icon_path = os.path.abspath(os.path.join(SPECPATH, 'tbird.ico'))
+icon_path = os.path.abspath(os.path.join(SPECPATH, 'peat_icon.ico'))
 
 # NOTE: if a third-party module (e.g. middleware) is using a Python
 # standard library module that isn't directly imported anywhere in PEAT,

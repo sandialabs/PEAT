@@ -42,7 +42,7 @@ The Windows version of PEAT that's distributed to end users is a bundled executa
 
 - ``peat.spec``: Describes the install configuration for PyInstaller
 - ``file_version_info.txt``: File metadata for the resulting ``.exe``
-- ``tbird.ico``: Icon for the resulting ``.exe``
+- ``peat_logo.ico``: Icon for the resulting ``.exe``
 
 Building the Windows EXE on a Windows system
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
