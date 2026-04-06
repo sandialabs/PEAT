@@ -23,7 +23,7 @@ Here is how you can get started:
 
 #. **Track the work**
 
-   Submit bug report or feature request via the `issue tracker <https://github.com/sandialabs/PEAT/issues>`__ or `dicussions <https://github.com/sandialabs/PEAT/discussions>`__ on GitHub. If the idea is new/complex, we recommend that the idea is discussed before implementation, to avoid wasting time on an idea that may not be accepted due to lack of consensus.
+   Submit bug report or feature request via the `issue tracker <https://github.com/sandialabs/PEAT/issues>`__ or `discussions <https://github.com/sandialabs/PEAT/discussions>`__ on GitHub. If the idea is new/complex, we recommend that the idea is discussed before implementation, to avoid wasting time on an idea that may not be accepted due to lack of consensus.
 
 #. **Create a fork of PEAT**
 
@@ -282,6 +282,23 @@ Helpful PDM commands
 
    # Build docker
    pdm run build-docker
+
+
+PR Review Guidelines
+--------------------
+
+These are guidelines for maintainers reviewing Pull Requests with changes to PEAT's code.
+
+Maintainers should check all changes for the following:
+
+- PEAT is deployed on sensitive networks with potential consequences on life safety and operation of critical infrastructure. All changes should be viewed through this lens.
+- Trustworthiness
+   - Check for backdoors, malicious changes, etc., especially from untrusted contributors.
+   - Binary or very large files (e.g. test data) should only be accepted from trusted contributors with verified provenance. This is to avoid a ``xz-utils`` type of situation.
+
+- Correctness
+   - How the changes fit into the larger codebase. Are they using the correct APIs? For example, if a file is being written, then ``utils.write_file()`` or ``DeviceData.write_file()`` should be utilized in most cases.
+   - Are there any issues with the code that you can see?
 
 
 Releases
