@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - ci/fix-docs-graphviz
   workflow_dispatch:
 
 permissions:
@@ -22,19 +23,37 @@ jobs:
     name: Build documentation (HTML)
     runs-on: ubuntu-24.04
     steps:
+      # This will block outbound connections that aren't explictly allowed
+      # If this causes a pipeline to fail, investigate what endpoints were blocked.
+      # If they are legitimate, then change to audit mode, run pipeline and collect
+      # endpoints from StepSecurity report, update list of endpoints, then change back
+      # to "block".
       - name: Harden Runner
         uses: step-security/harden-runner@20cf305ff2072d973412fa9b1e3a4f227bda3c76 # v2.14.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            files.pythonhosted.org:443
+            github.com:443
+            pdm-project.org:443
+            pdm.fming.dev:443
+            pypi.org:443
+            raw.githubusercontent.com:443
+            azure.archive.ubuntu.com:80
+            esm.ubuntu.com:443
+            motd.ubuntu.com:443
+            packages.microsoft.com:443
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
             fetch-tags: true
             fetch-depth: 0  # checkout full history
-      - name: Install apt dependencies
-        uses: awalsh128/cache-apt-pkgs-action@v1
-        with:
-          packages: graphviz
+      # NOTE: awalsh128/cache-apt-pkgs-action was failing with cache failures
+      - name: Install Graphviz
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends graphviz
+          dot -V
       - name: Setup PDM
         uses: pdm-project/setup-pdm@v4
         with:
