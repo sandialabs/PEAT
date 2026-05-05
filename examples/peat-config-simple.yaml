@@ -258,6 +258,9 @@ device_options:
     timeout: 5.0
   servlink_serial:
     timeout: 5.0
+  mysql:
+    port: 3306
+    timeout: 5.0
   postgres:
     port: 5432
     timeout: 5.0

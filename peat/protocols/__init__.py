@@ -14,6 +14,7 @@ from .ftp import FTP
 from .http import HTTP
 from .interfaces import *
 from .ip import *
+from .mysql import MySQL
 from .serial import *
 from .snmp import *
 from .ssh import SSH

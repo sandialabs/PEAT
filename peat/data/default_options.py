@@ -39,6 +39,7 @@ DEFAULT_OPTIONS: dict[str, dict[str, ConfigVal] | ConfigVal] = {
     "modbus_tcp": {"port": 502, "timeout": config.DEFAULT_TIMEOUT},
     "servlink_tcp": {"port": 666, "timeout": config.DEFAULT_TIMEOUT},
     "servlink_serial": {"timeout": config.DEFAULT_TIMEOUT},
+    "mysql": {"port": 3306, "timeout": config.DEFAULT_TIMEOUT},
     "postgres": {"port": 5432, "timeout": config.DEFAULT_TIMEOUT},
     "ion_protocol": {
         "port": 7700,
