@@ -83,6 +83,12 @@ HTTP
    :members:
    :private-members:
 
+MySQL
+^^^^^
+.. automodule:: peat.protocols.mysql
+   :members:
+   :private-members:
+
 SNMP
 ^^^^
 .. automodule:: peat.protocols.snmp

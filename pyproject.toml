@@ -202,6 +202,10 @@ dependencies = [
     # NOTE: "psycopg2-binary" provides pre-built binary wheels
     "psycopg2-binary==2.9.10",
 
+    # MySQL/MariaDB database interaction (pure Python, no binary build required)
+    # Required for: MySQL protocol
+    "PyMySQL>=1.1.0",
+
     # Library to load kernel modules for PEAT Pillage
     "kmodpy~=0.1.13;platform_system=='Linux'",
 
@@ -733,6 +737,7 @@ markers = [
     "gitlab_ci_only: run tests that are intended to be run only in the GitLab CI environment",
     "broadcast_ci: run live broadcast tests intended to be used in GitLab CI on PEAT rack",
     "live: integration tests requiring a running OpenPLC instance or PHENIX environment",
+    "container: integration tests requiring a live service container (e.g. MySQL) — run with --run-container"
 ]
 # This is apparently the only straightforward to exclude a file from collection in pytest in 2025...sigh
 # The other option is to add a hook to conftest.py...

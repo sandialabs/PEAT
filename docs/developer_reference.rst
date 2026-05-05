@@ -16,6 +16,7 @@ Documentation of PEAT's Python codebase and APIs.
    device_api
    device_modules
    general_apis
+   mysql
    heat_api
    python_examples
    elastic_implementation
