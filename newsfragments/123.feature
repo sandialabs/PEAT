@@ -1,0 +1,1 @@
+Added test news fragment for testing towncrier-check hook.

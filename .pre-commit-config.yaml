@@ -38,3 +38,10 @@ repos:
       files: ^(peat|tests)/
       types_or: [ python, pyi ]
       args: [ '--check' ]
+- repo: https://github.com/twisted/towncrier
+  rev: 25.8.0
+  hooks:
+    - id: towncrier-check
+      files: ^newsfragments/
+      language: system
+      entry: pdm run towncrier check

@@ -24,17 +24,5 @@ None yet after open-sourcing!
 Releases
 ========
 
-TBD
----
+.. towncrier release notes start
 
-Added
-^^^^^
-
-Changed
-^^^^^^^
-
-Removed
-^^^^^^^
-
-Other
-^^^^^

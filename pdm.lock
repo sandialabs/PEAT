@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "exe", "lint", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:a22c6378021bdeb1a1c8434d83942ae846eb1afd210e523411aee345ba66f26d"
+content_hash = "sha256:8ba4c680cbe5368a6f8da23412190c5467f8ff42199a397f9a3d4979b90ec4f3"
 
 [[metadata.targets]]
 requires_python = ">=3.11,<3.14"
@@ -319,6 +319,19 @@ dependencies = [
 files = [
     {file = "check_sdist-1.3.2-py3-none-any.whl", hash = "sha256:a70dd4d4fe40307b60229678aa9c896f635d2c2f7929aa851792cc171c10b5e9"},
     {file = "check_sdist-1.3.2.tar.gz", hash = "sha256:9faaceca95c03ef9b8edb20db6df631e845d279b2ee6aa97d13a7c3743da7645"},
+]
+
+[[package]]
+name = "click"
+version = "8.3.2"
+requires_python = ">=3.10"
+summary = "Composable command line interface toolkit"
+dependencies = [
+    "colorama; platform_system == \"Windows\"",
+]
+files = [
+    {file = "click-8.3.2-py3-none-any.whl", hash = "sha256:1924d2c27c5653561cd2cae4548d1406039cb79b858b747cfea24924bbc1616d"},
+    {file = "click-8.3.2.tar.gz", hash = "sha256:14162b8b3b3550a7d479eafa77dfd3c38d9dc8951f6f69c78913a8f9a7540fd5"},
 ]
 
 [[package]]
@@ -2341,6 +2354,23 @@ summary = "Style preserving TOML library"
 files = [
     {file = "tomlkit-0.14.0-py3-none-any.whl", hash = "sha256:592064ed85b40fa213469f81ac584f67a4f2992509a7c3ea2d632208623a3680"},
     {file = "tomlkit-0.14.0.tar.gz", hash = "sha256:cf00efca415dbd57575befb1f6634c4f42d2d87dbba376128adb42c121b87064"},
+]
+
+[[package]]
+name = "towncrier"
+version = "25.8.0"
+requires_python = ">=3.9"
+summary = "Building newsfiles for your project."
+dependencies = [
+    "click",
+    "importlib-metadata>=4.6; python_version < \"3.10\"",
+    "importlib-resources>=5; python_version < \"3.10\"",
+    "jinja2",
+    "tomli; python_version < \"3.11\"",
+]
+files = [
+    {file = "towncrier-25.8.0-py3-none-any.whl", hash = "sha256:b953d133d98f9aeae9084b56a3563fd2519dfc6ec33f61c9cd2c61ff243fb513"},
+    {file = "towncrier-25.8.0.tar.gz", hash = "sha256:eef16d29f831ad57abb3ae32a0565739866219f1ebfbdd297d32894eb9940eb1"},
 ]
 
 [[package]]

@@ -66,7 +66,75 @@ Here is how you can get started:
 
 #. **Update the CHANGELOG**
 
-   Record your changes in CHANGELOG.rst
+   PEAT uses `Towncrier <https://towncrier.readthedocs.io/>`_ to manage changelog entries. Towncrier provides several benefits:
+
+   - **Automated changelog generation**: No need to manually edit CHANGELOG.rst
+   - **Avoids merge conflicts**: Multiple contributors can add their own fragment files without conflicting with each other
+   - **Consistent formatting**: All entries follow the same structure
+   - **Easy contribution tracking**: Each change is linked to its Pull Request or Issue
+   - **Pre-commit validation**: Ensures fragments are properly formatted before commit
+   - **Flexible configuration**: Fragment types can be customized in ``pyproject.toml``
+
+   Instead of manually editing CHANGELOG.rst, you need to create a "news fragment" file in the ``newsfragments/`` directory.
+
+   **News Fragment Format:**
+
+   - Filename: ``<PR_NUMBER>.<TYPE>.rst``
+   - Where ``<PR_NUMBER>`` is your Pull Request number (or issue number)
+   - Where ``<TYPE>`` is one of: ``feature``, ``bugfix``, ``doc``, ``removal``, or ``misc``
+
+   **Example:** ``newsfragments/1234.feature.rst``
+
+   **Valid Fragment Types:**
+
+   - ``feature``: New features
+   - ``bugfix``: Bug fixes
+   - ``doc``: Documentation improvements
+   - ``removal``: Deprecations and removals
+   - ``misc``: Miscellaneous changes (content not shown in final changelog)
+
+   **Content:** The file should contain a brief description of your change in reStructuredText format.
+
+   **Note:** These fragment types are configured in ``pyproject.toml`` under the ``[tool.towncrier]`` section. The configuration can be customized to add, remove, or modify fragment types as needed.
+
+   **Example content:**
+
+   .. code-block:: rst
+
+      Added support for new device protocol XYZ.
+
+      This includes parsing of device configuration and status information.
+
+   **Pre-commit Validation:**
+
+   The pre-commit hooks will automatically validate your news fragments when you add or modify files in the ``newsfragments/`` directory. This ensures:
+
+   - Fragment filenames follow the correct format
+   - Fragment content is valid reStructuredText
+   - Fragment types are recognized
+   - No duplicate fragments exist
+
+   **Validation and Release Process:**
+
+   During the release process, GitHub Actions will automatically build the changelog from all accumulated news fragments when a new tag is pushed. The workflow validates that:
+
+   - All news fragments are properly formatted
+   - The changelog can be successfully generated
+   - Issue references are correctly formatted
+
+   **Manual Changelog Building (Optional):**
+
+   If you want to preview the changelog before release, you can use:
+
+   .. code-block:: bash
+
+      # Preview what the changelog will look like for version X.Y.Z
+      towncrier build --draft --version X.Y.Z
+
+      # Or use the convenience script
+      ./scripts/build_changelog.sh X.Y.Z
+
+      # This shows the changes but doesn't commit them
 
 #. **Test**
 
