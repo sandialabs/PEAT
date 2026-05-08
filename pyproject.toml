@@ -202,6 +202,10 @@ dependencies = [
     # NOTE: "psycopg2-binary" provides pre-built binary wheels
     "psycopg2-binary==2.9.10",
 
+    # MySQL/MariaDB database interaction (pure Python, no binary build required)
+    # Required for: MySQL protocol
+    "PyMySQL>=1.1.0",
+
     # Library to load kernel modules for PEAT Pillage
     "kmodpy~=0.1.13;platform_system=='Linux'",
 
