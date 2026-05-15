@@ -34,6 +34,7 @@ force_online_method_tcp: false
 icmp_fallback_tcp_syn: true
 syn_port: 80
 push_skip_scan: false
+pull_skip_scan: false
 scan_sweep: false
 intensive_scan: false
 

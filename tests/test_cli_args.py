@@ -30,3 +30,16 @@ def test_parse_peat_arguments(mocker):
     assert isinstance(result, argparse.Namespace)
     assert result.verbose is True
     assert result.debug == 1
+
+
+def test_pull_skip_scan_arg(mocker):
+    mocker.patch("sys.argv", ["peat", "pull", "--skip-scan"])
+    result = cli_args.parse_peat_arguments()
+    assert isinstance(result, argparse.Namespace)
+    assert result.pull_skip_scan is True
+
+
+def test_pull_skip_scan_default_none(mocker):
+    mocker.patch("sys.argv", ["peat", "pull", "-i", "192.168.0.1"])
+    result = cli_args.parse_peat_arguments()
+    assert not result.pull_skip_scan

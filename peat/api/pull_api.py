@@ -1,13 +1,17 @@
 import timeit
 from operator import itemgetter
 
-from peat import __version__, config, consts, datastore, log, module_api, state, utils
+from peat import PeatError, __version__, config, consts, datastore, log, module_api, state, utils
+from peat.protocols import hosts_to_ips, sort_ips
 
 from .scan_api import scan
 
 
 def pull(
-    targets: list[str], comm_type: consts.AllowedCommTypes, device_types: list[str]
+    targets: list[str],
+    comm_type: consts.AllowedCommTypes,
+    device_types: list[str],
+    skip_scan: bool = False,
 ) -> dict[str, dict | list | str | float | int] | None:
     """Pull from devices.
 
@@ -19,23 +23,71 @@ def pull(
             - ``broadcast_ip``
             - ``serial``
         device_types: Names of device modules or module aliases to use
+        skip_scan: If device verification (scanning) should be skipped.
+            NOTE: this currently only applies to unicast_ip devices.
 
     Returns:
         :ref:`pull-summary` as a :class:`dict`, or :obj:`None` if an error occurred
     """
-    # TODO: option to skip scan and manually specify devices to pull
-    scan_summary = scan(targets, comm_type, device_types)
+    if skip_scan:
+        log.warning(f"Skipping verification scan and pulling from {len(targets)} targets")
 
-    if not scan_summary or not scan_summary["hosts_verified"]:
-        log.error("Pull failed: no devices were found")
-        state.error = True
-        return None
+        ips = sort_ips(hosts_to_ips(targets))
+        if not ips:
+            log.error("Pull failed: no IP targets were valid")
+            state.error = True
+            return None
 
-    # * Combine any duplicate devices *
-    datastore.deduplicate()
+        # Build per-IP module map from YAML config hosts
+        host_module_map: dict = {}
+        for host in config.HOSTS or []:
+            ip = host.get("identifiers", {}).get("ip")
+            peat_module = host.get("peat_module")
+            if ip and peat_module:
+                resolved = module_api.lookup_types([peat_module], filter_attr="ip_methods")
+                if resolved:
+                    host_module_map[ip] = resolved[0]
 
-    # TODO: hack. Make this list the user input if scan is skipped.
-    devices = datastore.verified
+        # Fallback to the explicitly specified device types when no per-host mapping exists
+        fallback_modules = module_api.lookup_types(device_types, filter_attr="ip_methods")
+        if len(fallback_modules) > 1 and not host_module_map:
+            raise PeatError(
+                "More than 1 device type specified with --skip-scan and no per-host "
+                "'peat_module' found in YAML config. Specify a single module using '-d' or "
+                "add 'peat_module' to each host entry in the YAML config."
+            )
+        fallback_module = fallback_modules[0] if len(fallback_modules) == 1 else None
+
+        devices = []
+        for ip in ips:
+            module = host_module_map.get(ip) or fallback_module
+            if module is None:
+                log.error(f"No module resolved for {ip}, unable to pull")
+                state.error = True
+                return None
+
+            dev = datastore.get(ip)
+            dev._is_active = True
+            dev._is_verified = True
+            dev._module = module
+            devices.append(dev)
+
+        if not devices:
+            log.error("Pull failed: no valid devices to pull from")
+            state.error = True
+            return None
+    else:
+        scan_summary = scan(targets, comm_type, device_types)
+
+        if not scan_summary or not scan_summary["hosts_verified"]:
+            log.error("Pull failed: no devices were found")
+            state.error = True
+            return None
+
+        # * Combine any duplicate devices *
+        datastore.deduplicate()
+
+        devices = datastore.verified
 
     # * Pull from all devices specified *
     log.info(f"Beginning pull for {len(devices)} devices")
@@ -75,7 +127,7 @@ def pull(
         "peat_run_id": str(consts.RUN_ID),
         "pull_duration": pull_duration,
         "pull_modules": module_api.lookup_names(device_types),
-        "pull_targets": scan_summary["scan_targets"],
+        "pull_targets": targets if skip_scan else scan_summary["scan_targets"],
         "pull_original_targets": targets,
         "pull_devices": [dev.get_id() for dev in devices],
         "pull_comm_type": comm_type,

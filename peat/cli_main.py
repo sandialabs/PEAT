@@ -259,7 +259,9 @@ def oneshot_main(args: dict[str, Any]) -> bool:
             return True
 
         elif args["func"] == "pull":
-            pull_results = pull(targets, comm_type, sorted_device_types)
+            pull_results = pull(
+                targets, comm_type, sorted_device_types, skip_scan=config.PULL_SKIP_SCAN
+            )
 
             if not pull_results:
                 return False
@@ -383,8 +385,27 @@ def get_targets(args: dict[str, Any]) -> TargetsType:
             comm_type = "serial"
             id_key = "serial_port"
             targets = args["port_list"]  # type: list[str]
+        elif config.HOSTS:
+            # No host argument supplied — derive targets from the YAML config hosts
+            comm_type = "unicast_ip"
+            targets = []
+
+            for host in config.HOSTS:
+                ip = host.get("identifiers", {}).get("ip")
+                if ip:
+                    targets.append(ip)
+
+                    if host.get("peat_module"):
+                        module_set.add(host["peat_module"])
+
+            if not targets:
+                raise PeatError(
+                    "No IP hosts found in YAML config. Add 'identifiers: ip:' to each host entry."
+                )
         else:
-            raise PeatError("Bad target arguments")
+            raise PeatError(
+                "No hosts specified. Provide -i/-s/-f/-b or define hosts in a YAML config with -c."
+            )
 
         if config.DEBUG >= 2:
             log.debug(

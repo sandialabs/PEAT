@@ -237,6 +237,11 @@ peat pull -d clx -i 192.0.2.0/24 -c peat-config.yaml
 # Useful for verifying configuration options before pulling the
 # metaphorical trigger on a pull.
 peat pull --dry-run -d clx -i 192.0.2.0/24
+
+# Skip the scan phase and pull directly from hosts defined in a config file.
+# Hosts must have a peat_module specified in the config. The -i argument is
+# not required when a config file with a hosts list is supplied.
+peat pull --skip-scan -c peat-config.yaml
 """  # End pull examples
 
 
@@ -848,6 +853,15 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
         'of a PEAT module, device vendor, device type (e.g. "plc"), '
         "or other aliases. This can be a single string or a space-separated list of strings.",
     )
+    pull_parser.add_argument(
+        "--skip-scan",
+        action="store_true",
+        default=None,
+        dest="pull_skip_scan",
+        help="Skip scanning and verification of hosts before pulling, "
+        "and assume all hosts are online and valid devices. NOTE: "
+        "this requires a single device type to be specified.",
+    )
 
     # !! NOTE !!
     # input_source is duplicated between parse and push because the order they are
@@ -933,7 +947,8 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
             "and other information sources, such as imported scan "
             "results.",
         )
-        host_group = subp.add_mutually_exclusive_group(required=True)
+        # pull can omit host args when a YAML config with hosts is provided
+        host_group = subp.add_mutually_exclusive_group(required=subp is not pull_parser)
         host_group.add_argument(
             "-i",
             "--ip",

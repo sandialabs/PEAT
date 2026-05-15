@@ -131,6 +131,10 @@ syn_port: 80
 # device type to be specified.
 push_skip_scan: false
 
+# Skip scanning and pull directly from hosts defined in the config file.
+# Requires hosts to be defined with a peat_module in the config.
+pull_skip_scan: false
+
 # Simple host up/down check (equivalent to "nmap -Pn <hosts>").
 # If serial ports are targeted, this will enumerate the active
 # serial ports on the host.

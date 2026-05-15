@@ -161,6 +161,17 @@ class Configuration(SettingsManager):
        (the ``-d`` argument on the :term:`CLI`)
     """
 
+    PULL_SKIP_SCAN: bool = False
+    """
+    Skip scanning and verification of hosts before pulling and assume
+    all hosts are online and valid devices.
+
+    .. note::
+       This requires either a single device type (the ``-d`` argument on
+       the :term:`CLI`) or per-host ``peat_module`` mappings defined in
+       the ``hosts`` list of a YAML config file.
+    """
+
     SCAN_SWEEP: bool = False
     """
     Simple host up/down check (equivalent to ``nmap -Pn <hosts>``).

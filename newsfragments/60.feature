@@ -1,0 +1,1 @@
+Add ``peat pull --skip-scan`` flag to bypass the scan phase and pull directly from hosts defined in a config file. Per-host ``peat_module`` mappings in the ``hosts`` list are respected; a single ``-d`` device type can be used as a fallback. The ``-i``/``-f`` argument is no longer required when a config file with a ``hosts`` list is supplied.
