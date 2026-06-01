@@ -5,7 +5,7 @@
 groups = ["default", "dev", "docs", "exe", "lint", "test"]
 strategy = []
 lock_version = "4.5.0"
-content_hash = "sha256:8ba4c680cbe5368a6f8da23412190c5467f8ff42199a397f9a3d4979b90ec4f3"
+content_hash = "sha256:a22c6378021bdeb1a1c8434d83942ae846eb1afd210e523411aee345ba66f26d"
 
 [[metadata.targets]]
 requires_python = ">=3.11,<3.14"
