@@ -764,6 +764,11 @@ recurse-submodules = false
 # https://towncrier.readthedocs.io/en/stable/configuration.html
 package = "PEAT"
 package_dir = "peat"
+# News fragments live in the top-level ``newsfragments/`` directory (see
+# CONTRIBUTING.rst). Without this, towncrier defaults to looking in
+# ``<package_dir>/<package>/newsfragments`` (i.e. ``peat/PEAT/newsfragments``),
+# which does not exist, so ``towncrier build``/``check`` silently find nothing.
+directory = "newsfragments"
 filename = "CHANGELOG.rst"
 title_format = "{version} ({project_date})"
 issue_format = "`#{issue} <https://github.com/sandialabs/PEAT/issues/{issue}>`_"
