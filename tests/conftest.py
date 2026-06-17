@@ -20,7 +20,7 @@ import pytest
 from deepdiff import DeepDiff
 from elasticsearch import Elasticsearch
 
-from peat import config, exit_handler
+from peat import config, exit_handler, results_crypto
 
 # NOTE: we can't have arguments before subcommands anymore
 PEAT_CMD = [sys.executable, "-m", "peat"]
@@ -488,3 +488,20 @@ def assert_meta_files(assert_glob_path, tmp_path) -> Callable:
         assert_glob_path(run_dir / "peat_metadata", "peat_state.yaml")
 
     return _assert_meta_files
+
+
+@pytest.fixture
+def mock_peat_results(tmp_path) -> Path:
+    mock_peat_results: Path = tmp_path / "mock_peat_results"
+    mock_peat_results.mkdir()
+    (mock_peat_results / "file1.txt").write_text("hello")
+    (mock_peat_results / "file2.txt").write_text("world")
+
+    return mock_peat_results
+
+
+@pytest.fixture
+def mock_encrypted_peat_results(mock_peat_results, tmp_path) -> Path:
+    encrypted_zip_path = tmp_path / "encrypted_mock_peat_results.zip"
+    results_crypto.zip_encrypt_results(mock_peat_results, tmp_path, "testpass")
+    return encrypted_zip_path

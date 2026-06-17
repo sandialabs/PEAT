@@ -511,42 +511,81 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
     )
     config_builder_parser.set_defaults(func="config-builder")
 
-    # Encrypt command
-    encrypt_description = (
+    # Encrypt config command
+    encrypt_config_description = (
         "Encrypt a config file using PEAT's built in encryption capability. Must specify the file path to the config file using the -f flag. "
         "The encrypted file will be saved to the same directory as the original unencrypted config. "
         "The new file will be named the same as the unencrypted file, but will have 'encrypted_' added to the beginning of the filename. "
         "WARNING: PEAT will not save the encrypted file's password for you, it is up to you to remember it"
     )
-    encrypt_parser = subparsers.add_parser(
-        name="encrypt",
+    encrypt_config_parser = subparsers.add_parser(
+        name="encrypt-config",
+        aliases=["encrypt"],  # for legacy users
         # help: displayed next to the sub-command when running "peat --help"
-        help=encrypt_description,
+        help=encrypt_config_description,
         # description: displayed before the arguments when running "peat <command> --help"
-        description=encrypt_description,
+        description=encrypt_config_description,
     )
-    encrypt_parser.set_defaults(func="encrypt")
+    encrypt_config_parser.set_defaults(func="encrypt_config")
 
-    decrypt_description = (
+    decrypt_config_description = (
         "Decrypt a config file using PEAT's built in decryption capability. Must specify the file path to the config file. "
         "The decrypted file will be saved to the same directory as the original encrypted config. "
         "IMPORTANT: PEAT will only decrypt configs that have previously been encrypted by PEAT, and upon receiving the correct password"
     )
-    decrypt_parser = subparsers.add_parser(
-        name="decrypt",
+    decrypt_config_parser = subparsers.add_parser(
+        name="decrypt-config",
+        aliases=["decrypt"],
         # help: displayed next to the sub-command when running "peat --help"
-        help=decrypt_description,
+        help=decrypt_config_description,
         # description: displayed before the arguments when running "peat <command> --help"
-        description=decrypt_description,
+        description=decrypt_config_description,
     )
-    decrypt_parser.set_defaults(func="decrypt")
+    decrypt_config_parser.set_defaults(func="decrypt_config")
+
+    # Encrypt results command
+    encrypt_results_description = (
+        "Encrypt the results directory using PEAT's built in encryption capability. Must specify the directory path if not using the default location using -f flag. "
+        "The encrypted zip file will be saved to the same directory you are running from"
+        "The new file will be named the same as the unencrypted file, but will have 'encrypted_' added to the beginning of the filename. "
+        "WARNING: PEAT will not save the encrypted archive's password for you, it is up to you to remember it"
+    )
+    encrypt_results_parser = subparsers.add_parser(
+        name="encrypt-results",
+        # help: displayed next to the sub-command when running "peat --help"
+        help=encrypt_results_description,
+        # description: displayed before the arguments when running "peat <command> --help"
+        description=encrypt_results_description,
+    )
+    encrypt_results_parser.set_defaults(func="encrypt_results")
+
+    decrypt_results_description = (
+        "Decrypt the results zip file using PEAT's built in decryption capability. Must specify the file path to the zip file "
+        "The decrypted directory will be saved to the directory you run from"
+        "IMPORTANT: PEAT will only decrypt zips that have previously been encrypted by PEAT, and upon receiving the correct password"
+    )
+    decrypt_results_parser = subparsers.add_parser(
+        name="decrypt-results",
+        # help: displayed next to the sub-command when running "peat --help"
+        help=decrypt_results_description,
+        # description: displayed before the arguments when running "peat <command> --help"
+        description=decrypt_results_description,
+    )
+    decrypt_results_parser.set_defaults(func="decrypt_results")
 
     # Add arguments that we want specified after a command to all subparsers.
     # This is where any "general" peat arguments go (e.g "verbose").
     # NOTE: We add these before the command-specific
     #   arguments to order the usage list properly.
     # NOTE: "default=None" means "use the default in peat.config or elsewhere"
+    seen_subp = (
+        set()
+    )  # helps resolve conflict issues when parsers are added twice due to alias, etc.
     for _, subp in subparsers.choices.items():
+        if id(subp) in seen_subp:
+            continue
+        seen_subp.add(id(subp))
+
         group = subp.add_argument_group("general arguments")
         group.add_argument(
             "-c",
@@ -1046,8 +1085,8 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
     )
     add_list_module_args(pillage_parser)  # Hack to add "--list-*" commands
 
-    # Encrypt command
-    encrypt_parser.add_argument(
+    # Encrypt Config command
+    encrypt_config_parser.add_argument(
         "-f",
         "--file-path",
         type=str,
@@ -1057,7 +1096,7 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
         help="File path for config file to encrypt",
     )
 
-    encrypt_parser.add_argument(
+    encrypt_config_parser.add_argument(
         "-p",
         "--password",
         type=str,
@@ -1066,9 +1105,9 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
         dest="user-password",
         help="Specify password to use to encrypt/decrypt file",
     )
-    add_list_module_args(encrypt_parser)  # Hack to add "--list-*" commands
+    add_list_module_args(encrypt_config_parser)  # Hack to add "--list-*" commands
 
-    decrypt_parser.add_argument(
+    decrypt_config_parser.add_argument(
         "-f",
         "--file-path",
         type=str,
@@ -1077,7 +1116,7 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
         dest="filepath",
         help="File path for config file to decrypt",
     )
-    decrypt_parser.add_argument(
+    decrypt_config_parser.add_argument(
         "-w",
         "--write-file",
         type=str,
@@ -1087,7 +1126,7 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
         help="File path to save decrypted file to",
     )
 
-    decrypt_parser.add_argument(
+    decrypt_config_parser.add_argument(
         "-p",
         "--password",
         type=str,
@@ -1096,7 +1135,66 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
         dest="user-password",
         help="Specify password to use to encrypt/decrypt file",
     )
-    add_list_module_args(decrypt_parser)  # Hack to add "--list-*" commands
+    add_list_module_args(decrypt_config_parser)  # Hack to add "--list-*" commands
+
+    # Encrypt Results
+    encrypt_results_parser.add_argument(
+        "-f",
+        "--file-path",
+        type=str,
+        metavar="PATH",
+        default=None,
+        dest="filepath",
+        help="File path for results directory to encrypt",
+    )
+    encrypt_results_parser.add_argument(
+        "-w",
+        "--write-file",
+        type=str,
+        metavar="DIR",
+        default=None,
+        dest="write-path",
+        help="File path to save encrypted archive to",
+    )
+    encrypt_results_parser.add_argument(
+        "-p",
+        "--password",
+        type=str,
+        metavar="USER_PASS",
+        default=None,
+        dest="user-password",
+        help="Specify password to use to encrypt/decrypt zip",
+    )
+    add_list_module_args(encrypt_results_parser)  # Hack to add "--list-*" commands
+
+    decrypt_results_parser.add_argument(
+        "-f",
+        "--file-path",
+        type=str,
+        metavar="PATH",
+        default=None,
+        dest="filepath",
+        help="File path for encrypted results zip",
+    )
+    decrypt_results_parser.add_argument(
+        "-w",
+        "--write-file",
+        type=str,
+        metavar="DIR",
+        default=None,
+        dest="write-path",
+        help="File path to save decrypted zip to",
+    )
+    decrypt_results_parser.add_argument(
+        "-p",
+        "--password",
+        type=str,
+        metavar="USER_PASS",
+        default=None,
+        dest="user-password",
+        help="Specify password to use to encrypt/decrypt zip",
+    )
+    add_list_module_args(decrypt_results_parser)  # Hack to add "--list-*" commands
 
     return parser
 

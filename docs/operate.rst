@@ -9,6 +9,8 @@ PEAT's primary interface is a command-line program with sub-commands for each fu
 - ``push``: push firmware, logic, or configuration to a device
 - ``pillage``: search for :term:`OT` device-specific configuration and project files on a host machine
 - ``heat``: extract and parse device artifacts from network traffic captures (PCAPs)
+- ``encrypt-results``: encrypt a PEAT results directory into a password-protected zip archive
+- ``decrypt-results``: decrypt a PEAT encrypted results archive into a results directory
 
 Basics
 ======
@@ -28,6 +30,8 @@ Basics
    peat parse -h
    peat push -h
    peat pillage -h
+   peat encrypt-results --help
+   peat decrypt-results -h
 
    # Examples
    peat scan --examples
@@ -171,6 +175,8 @@ The output directory structure generally looks like this:
          temp/
                ...
 
+Encrypted result archives created with ``peat encrypt-results`` are written separately from the run directory structure shown above. By default, the archive is created in the current working directory as ``encrypted_<run-dir>.zip``.
+
 
 Viewing the results
 -------------------
@@ -192,6 +198,48 @@ Examples and helpful commands for inspecting the file results.
 
    # Filtering memory and event entries from device results for 192.168.3.200 using 'jq'
    cat peat_results/example_pull/devices/192.168.3.200/device-data-full.json | jq 'del(.memory,.event)'
+
+Encrypting results
+------------------
+PEAT can encrypt a PEAT results run directory into a password-protected zip archive using the ``encrypt-results`` command. This is useful when PEAT results need to be stored or shared more securely after a scan, pull, parse, or other run.
+
+The command expects the path to a PEAT results directory, such as ``./examples/encryption/example_peat_results/``. By default, the encrypted archive is written to the current working directory and named ``encrypted_<run-dir>.zip``.
+
+Use ``-w`` (``--write-file``) to choose where the encrypted archive is written. Use ``-p`` (``--password``) to provide the archive password on the command line. If ``-p`` is not provided, PEAT will prompt interactively for a password.
+
+.. warning::
+   PEAT does not save the password for the encrypted archive. If the password is lost, the encrypted results cannot be recovered.
+
+.. code-block:: bash
+
+   # Encrypt the example PEAT results directory and write the archive
+   # to the current directory
+   peat encrypt-results -f ./examples/encryption/example_peat_results
+
+   # Encrypt the example PEAT results directory into examples/encryption/
+   peat encrypt-results -f ./examples/encryption/example_peat_results -w ./examples/encryption/
+
+   # Encrypt a PEAT run directory with an explicit password
+   peat encrypt-results -f ./examples/encryption/example_peat_results -w ./examples/encryption/ -p example-password
+
+Decrypting results
+------------------
+PEAT can decrypt an archive previously created with ``encrypt-results`` using the ``decrypt-results`` command and the same password that was used when the archive was created.
+
+The command expects the path to an encrypted PEAT archive, such as ``./examples/encryption/encrypted_example_peat_results.zip``. Use ``-w`` (``--write-file``) to choose where the decrypted results directory is written. Use ``-p`` (``--password``) to provide the archive password on the command line. If ``-p`` is not provided, PEAT will prompt interactively for a password.
+
+By default, the decrypted directory is written to the current working directory and named after the original run directory.
+
+.. code-block:: bash
+
+   # Decrypt an encrypted archive into the current directory
+   peat decrypt-results -f ./examples/encryption/encrypted_example_peat_results.zip
+
+   # Decrypt an encrypted archive into a specific output directory
+   peat decrypt-results -f ./examples/encryption/encrypted_example_peat_results.zip -w ./restored_results/
+
+   # Decrypt an encrypted archive with an explicit password
+   peat decrypt-results -f ./examples/encryption/encrypted_example_peat_results.zip -w ./restored_results/ -p example-password
 
 Device-specific results
 -----------------------

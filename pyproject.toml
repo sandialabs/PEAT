@@ -223,6 +223,7 @@ dependencies = [
     # Required for: Fortigate
     "scp>=0.15.0",
     "textual>=6.1.0",
+    "pyzipper>=0.4.0",
 ]
 
 [project.scripts]

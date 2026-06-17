@@ -319,7 +319,7 @@ def test_cli_scan_localhost_subnet(run_peat, tmp_path, assert_meta_files):
 
 
 @pytest.mark.slow
-def test_cli_encryption(run_peat, tmp_path, examples_dir, read_text, datapath):
+def test_cli_config_encryption(run_peat, tmp_path, examples_dir, read_text, datapath):
     testing_path = tmp_path / "config"
     testing_path.mkdir()
     path_to_config = f"{testing_path.as_posix()}/example_config.yaml"
@@ -341,7 +341,7 @@ def test_cli_encryption(run_peat, tmp_path, examples_dir, read_text, datapath):
 
 
 @pytest.mark.slow
-def test_cli_decryption(run_peat, tmp_path, examples_dir, read_text, datapath):
+def test_cli_config_decryption(run_peat, tmp_path, examples_dir, read_text, datapath):
     testing_path = tmp_path / "config"
     testing_path.mkdir()
     # create a path to the encrypted file in tmp_path we'll attempt to decrypt
@@ -364,3 +364,35 @@ def test_cli_decryption(run_peat, tmp_path, examples_dir, read_text, datapath):
     run_peat(args)[0]
 
     assert read_text(datapath(f"{testing_path.as_posix()}/decrypted_config.yaml"))
+
+
+@pytest.mark.slow
+def test_cli_results_encryption(run_peat, tmp_path, mock_peat_results):
+    args = [
+        "encrypt-results",
+        "-f",
+        mock_peat_results,
+        "-p",
+        "secret",
+        "-w",
+        tmp_path,
+    ]
+    run_peat(args)[0]
+
+    assert tmp_path / "encrypted_mock_peat_results.zip"
+
+
+@pytest.mark.slow
+def test_cli_results_decryption(run_peat, tmp_path, mock_encrypted_peat_results):
+    args = [
+        "decrypt-results",
+        "-f",
+        mock_encrypted_peat_results,
+        "-p",
+        "testpass",
+        "-w",
+        tmp_path / "unencrypted",
+    ]
+    run_peat(args)[0]
+
+    assert tmp_path / "unencrypted" / "mock_peat_results.zip"
