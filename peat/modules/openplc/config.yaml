@@ -1,0 +1,35 @@
+metadata:
+  name: "openplcv4-config"
+  description: "PEAT configuration file for the OpenPLCv4 module."
+  author: "wjoslin"
+  created: "July 1st, 2026"
+  updated: "July 1st, 2026"
+
+device_options:
+  # These options will be applied to all devices targeted in the PEAT command.
+  openplcv4:
+    # --- Credentials and Pull Settings ---
+    username: "admin"
+    password: "admin" # Always use a secure password
+    pull_methods: ["https"]
+
+    # --- Push Behavior ---
+    # Set to true to force a clean recompile when pushing a new program.
+    clean_upload: true
+
+    # --- Plugin Status Query ---
+    # Examples: [ethercat, modbus_master, modbus_slave, opcua, s7comm]
+    plugins_to_query: 
+      ethercat: "status"
+
+  https:
+    # Default port for the OpenPLCv4 API
+    port: 8443
+    ssl: true
+
+# You can also define device-specific overrides.
+# For example, if one PLC has a different password:
+# devices:
+#   '192.168.1.51':
+#     openplcv4:
+#       password: "different_password_for_this_plc"
