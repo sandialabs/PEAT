@@ -10,11 +10,12 @@ from peat.modules.openplc.openplcv4 import OpenPLCv4
 """Creates a DeviceData object configured to point to the live Docker container."""
 @pytest.fixture
 def live_dev(tmp_path):
-    """Creates a DeviceData object configured to point to the live Docker container."""
     dev = DeviceData(ip="127.0.0.1")
+    out_dir_path = tmp_path / "devices" / "127.0.0.1"
+    out_dir_path.mkdir(parents=True, exist_ok=True)
     dev.__dict__["options"] = {
         "openplcv4": {
-            "username": "admin", 
+            "username": "admin",
             "password": "admin",
             "pull_methods": ["https"],
             "clean_upload": True,
@@ -24,8 +25,13 @@ def live_dev(tmp_path):
     }
     dev.__dict__["extra"] = {}
     dev.__dict__["successful_pulls"] = {}
-    dev.__dict__["_out_dir"] = tmp_path / "devices" / "127.0.0.1"
-    dev._out_dir.mkdir(parents=True, exist_ok=True)
+    dev.__dict__["_out_dir"] = out_dir_path
+    print(type(dev))
+    print(dev.__dict__)
+    print(dev.__dict__.get("_out_dir"))
+    print(dev._out_dir)
+    print(hasattr(type(dev), "_out_dir"))
+    print(type(dev).__dict__.get("_out_dir"))
     return dev
 
 """Locates the production Relay_Blink_PLC.zip file."""
