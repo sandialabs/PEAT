@@ -1,0 +1,79 @@
+name: Live Tests
+
+on:
+  push:
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  openplcv4-tests:
+    name: OpenPLC Runtime v4
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Start OpenPLC Container & Seed Data
+        run: |
+          # 1. Start the container with required real-time capabilities
+          docker run -d \
+            --name openplc-runtime \
+            -p 8443:8443 \
+            --cap-add=SYS_NICE \
+            --cap-add=SYS_RESOURCE \
+            -v openplc-runtime-data:/var/run/runtime \
+            ghcr.io/autonomy-logic/openplc-runtime:latest
+          
+          echo "Waiting for OpenPLC API to initialize..."
+          timeout 60 bash -c 'until curl -k -s https://127.0.0.1:8443/api/version > /dev/null; do echo "Waiting..."; sleep 2; done'
+          echo "OpenPLC container is ready!"
+
+          CREDENTIALS='{"username": "admin", "password": "admin", "role": "user"}'
+          # 2. Seed the initial user so the PEAT module can authenticate
+          echo "Creating initial admin user for integration tests..."
+          curl -k -X POST https://127.0.0.1:8443/api/create-user \
+            -H "Content-Type: application/json" \
+            -d "$CREDENTIALS"
+
+          # 3. Check to make sure user was created
+          echo "Loggin in as user"
+          LOGIN_RESPONSE=$(curl -k -s -X POST https://127.0.0.1:8443/api/login \
+            -H "Content-Type: application/json" \
+            -d "$CREDENTIALS")
+          TOKEN=$(echo "$LOGIN_RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin).get('access_token', ''))" 2>/dev/null)
+          if [ -z "$TOKEN" ]; then
+            echo "Login Failed. Server response:"
+            echo "$LOGIN_RESPONSE"
+            exit 1
+          fi
+          echo "Login Successfull"
+
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: true
+
+      - name: Install dependencies
+        run: pdm sync -G test
+
+      - name: Run OpenPLC Tests
+        run: |
+          pdm run pytest --basetemp=./pytest_files -s -v ./tests/modules/openplc/test_openplcv4.py
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: openplcv4-test-results
+          path: pytest_files/
+          if-no-files-found: ignore

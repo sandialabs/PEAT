@@ -2,8 +2,8 @@ metadata:
   name: "openplcv4-config"
   description: "PEAT configuration file for the OpenPLCv4 module."
   author: "wjoslin"
-  created: "July 1st, 2026"
-  updated: "July 1st, 2026"
+  created: "July 2nh, 2026"
+  updated: "July 2nd, 2026"
 
 device_options:
   # These options will be applied to all devices targeted in the PEAT command.

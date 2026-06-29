@@ -56,6 +56,10 @@ jobs:
   unit-tests:
     name: Unit Tests
     runs-on: ${{ matrix.platform }}
+    # Place any Live Tests in the 'tests-live.yml'
+    # Make sure to exclude any Live Tests directories in the ignor env \/
+    env:
+      PYTEST_IGNORE_ARGS: "--ignore=./tests/modules/openplc"
     strategy:
       # OS images: https://github.com/actions/runner-images
       matrix:
@@ -75,10 +79,9 @@ jobs:
           cache: true
       - name: Install dependencies
         run: pdm sync -G test
-      # NOTE: coverage here is limited since it's not running live tests
       - name: Run Unit Tests
         run: |
-          pdm run pytest --basetemp=./pytest_files --run-slow --durations=10 --cov-report term-missing:skip-covered --cov-report html --cov=peat --no-cov-on-fail --xdoctest -n 8 ./tests ./peat
+          pdm run pytest --basetemp=./pytest_files --run-slow --durations=10 --cov-report term-missing:skip-covered --cov-report html --cov=peat --no-cov-on-fail --xdoctest -n 8 ${{ env.PYTEST_IGNORE_ARGS }} ./tests ./peat
       - name: Upload Test Results
         uses: actions/upload-artifact@v6
         with:
