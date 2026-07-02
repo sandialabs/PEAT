@@ -8,6 +8,7 @@ Reference Documents
 
    sel
    siemens
+   openplc
 
 .. _peat-index-reference:
 

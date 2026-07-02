@@ -145,7 +145,7 @@ class OpenPLCv4(DeviceModule):
     """Pushes a program to the OpenPLC runtime."""
 
     @classmethod
-    def _push(cls, dev: DeviceData, file: Path) -> bool:
+    def _push(cls, dev: DeviceData, file: Path, _push_type: str) -> bool:
         session = requests.Session()
         if not cls._login(dev, session):
             cls.log.error(f"Push failed for {dev.ip}: Could not authenticate to the API.")
@@ -283,8 +283,7 @@ class OpenPLCv4(DeviceModule):
                 )
                 if plugin_data:
                     cls.log.info(
-                        f"Successfully retrieved data for plugin \
-                        '{plugin_name}' (Command: {command})."
+                        f"Successfully retrieved plugin data: '{plugin_name}' ({command})."
                     )
                     dev.extra["plugin_status"][plugin_name] = plugin_data
                     file_content = json.dumps(plugin_data, indent=2)

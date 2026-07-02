@@ -59,7 +59,7 @@ Pushes a valid program zip
 
 
 def test_push_valid_file(live_dev, production_plc_zip):
-    result = OpenPLCv4._push(live_dev, production_plc_zip)
+    result = OpenPLCv4._push(live_dev, production_plc_zip, "")
     assert result is True, "Failed to push a valid PLC program."
     assert any(e.action == "file_push" and e.outcome == "success" for e in live_dev.event)
 

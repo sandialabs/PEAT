@@ -101,6 +101,15 @@ iDirect Modem
    :members:
    :no-undoc-members:
 
+OpenPLC
+=======
+
+OpenPLC Runtime v4
+------------------
+.. automodule:: peat.modules.openplc.openplcv4
+   :members:
+   :no-undoc-members:
+
 Sandia
 ======
 
