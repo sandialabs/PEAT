@@ -580,6 +580,19 @@ device_options:
     # Telnet on the GE D25 RTU.
     menu_sleep_seconds: 5.0
 
+  # Configuration specific to the OpenPLC Runtime v4 Module
+  openplcv4:
+    # --- Credentials and Pull Settings ---
+    username: ""
+    password: "" # Always use a secure password
+    pull_methods: ["https"]
+    # --- Push Behavior ---
+    # Set to true to force a clean recompile when pushing a new program.
+    clean_upload: true
+    # --- Plugin Status Query ---
+    # Examples: [ethercat, modbus_master, modbus_slave, opcua, s7comm]
+    plugins_to_query: {}
+
   # Configuration specific to the ControlLogix module
   rockwell:
     # What protocols to use for pulling from Rockwell devices

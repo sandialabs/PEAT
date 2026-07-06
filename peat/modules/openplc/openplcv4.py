@@ -6,11 +6,11 @@ programs to an OpenPLC Runtime v4 by interacting with its web API.
 ---
 Usage Examples:
 # 1. Scan for OpenPLC Runtime v4 instances
-peat scan -i 192.168.1.0/24 -I ./openplcv4.py
+pdm run peat scan -i 192.168.1.0/24
 # 2. Pull data from a discovered OpenPLC instance
-peat pull -i 192.168.1.50 -d openplcv4 -I ./openplcv4.py -c ./config.yaml
+pdm run peat pull -i 192.168.1.50 -c ./config.yaml
 # 3. Push a new PLC program to the device
-peat push -i 192.168.1.50 -d openplcv4 -I ./openplcv4.py -c ./config.yaml -- ./program.zip
+pdm run peat push -d openplcv4 -i 192.168.1.50 -c ./config.yaml -- ./program.zip
 """
 
 import json
@@ -42,16 +42,18 @@ class OpenPLCv4(DeviceModule):
     vendor_id = "Autonomy"
     vendor_name = "Autonomy Logic, Inc."
     module_aliases = ["open", "openplc", "openplcv4", "autonomy"]
-    filename_patterns = ["openplc_output.json"]
     default_options = {
         "openplcv4": {
             "username": "",
             "password": "",
             "pull_methods": ["https"],
             "clean_upload": True,
-            "plugins_to_query": [],
+            "plugins_to_query": {},
         },
-        "https": {"port": 8443, "ssl": True},
+        "https": {
+            "port": 8443,
+            "ssl": True,
+        },  # Hardcoded default https port for OpenPLC Runtime v4
     }
 
     """Logs into the OpenPLC API via HTTPS and stores the access token."""
@@ -354,7 +356,7 @@ OpenPLCv4.ip_methods = [
         protocol="https",
         transport="tcp",
         default_port=8443,
-    )
+    ),
 ]
 OpenPLCv4.serial_methods = []
 

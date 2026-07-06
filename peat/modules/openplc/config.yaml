@@ -14,18 +14,13 @@ device_options:
     pull_methods: ["https"]
 
     # --- Push Behavior ---
-    # Set to true to force a clean recompile when pushing a new program.
+    # Set to true to force a clean recompile when pushing a new program. Default True
     clean_upload: true
 
     # --- Plugin Status Query ---
     # Examples: [ethercat, modbus_master, modbus_slave, opcua, s7comm]
     plugins_to_query: 
       ethercat: "status"
-
-  https:
-    # Default port for the OpenPLCv4 API
-    port: 8443
-    ssl: true
 
 # You can also define device-specific overrides.
 # For example, if one PLC has a different password:
