@@ -66,37 +66,50 @@ def portscan(
         # Check if the port was already checked. This prevents duplication
         # of work if we know the status from elsewhere and also works around
         # duplicate ports (e.g. two separate methods that both use port 80).
-        if dev.service_status({"protocol": meth.protocol}) != "unknown":
+        target_port = _determine_port(dev, meth)
+
+        if dev.service_status({"port": target_port}) != "unknown":
             continue
 
-        options = dev.options[meth.protocol]
-        options["port"] = _determine_port(dev, meth)
+        options = dev.options.setdefault(meth.protocol, {})
+        original_port = options.get("port")
+        log.debug(
+            f"protocol: {meth.protocol}: original_port: {original_port} target_port: {target_port}"
+        )
+        options["port"] = target_port
+        timeout = options.get("timeout", 5.0)
+        success = False
 
         # Module-defined function to check if a port is open
-        if meth.port_function:
-            success = meth.port_function(dev)
-        # If the transport is TCP, use a traditional TCP SYN connect
-        elif meth.transport == "tcp":
-            success = check_tcp_port(dev.ip, options["port"], options["timeout"], reset=True)
-        # TODO: Generic way to check UDP services (right now it's just SNMP)
-        #   UDP services: CIP ('identify-type'), HAP, SNMP
-        #   Maybe just require port_function be implemented for UDP?
-        elif meth.transport == "udp":
-            if full_check_snmp and meth.protocol == "snmp":
-                timeout = options["timeout"]
-                # Minor hack to prevent SNMP from bogging down scans
-                if config.is_default_value("DEFAULT_TIMEOUT"):
-                    timeout = 2.0
-                success = check_udp_service(dev.ip, meth.protocol, options["port"], timeout)
+        try:
+            if meth.port_function:
+                success = meth.port_function(dev)
+            # If the transport is TCP, use a traditional TCP SYN connect
+            elif meth.transport == "tcp":
+                success = check_tcp_port(dev.ip, target_port, timeout, reset=True)
+            # TODO: Generic way to check UDP services (right now it's just SNMP)
+            #   UDP services: CIP ('identify-type'), HAP, SNMP
+            #   Maybe just require port_function be implemented for UDP?
+            elif meth.transport == "udp":
+                if full_check_snmp and meth.protocol == "snmp":
+                    # Minor hack to prevent SNMP from bogging down scans
+                    t_out = timeout if not config.is_default_value("DEFAULT_TIMEOUT") else 2.0
+                    success = check_udp_service(dev.ip, meth.protocol, target_port, t_out)
+                else:
+                    # TODO: hack by checking UDP services using TCP SYN-RSTs
+                    success = check_tcp_port(dev.ip, target_port, timeout, reset=True)
             else:
-                # TODO: hack by checking UDP services using TCP SYN-RSTs
-                success = check_tcp_port(dev.ip, options["port"], options["timeout"], reset=True)
-        else:
-            raise DeviceError(f"No port check function for service '{meth.protocol}'")
+                raise DeviceError(f"No port check function for service '{meth.protocol}'")
+        finally:
+            # Revert the port to original
+            if original_port is not None:
+                options["port"] = original_port
+            else:
+                options.pop("port", None)
 
         val = Service(
             protocol=meth.protocol,
-            port=options["port"],
+            port=target_port,
             transport=meth.transport,
             status="open" if success else "closed",
         )
@@ -121,7 +134,6 @@ def _determine_port(dev: DeviceData, method: IPMethod) -> int:
     the proper port (anything that uses dev.options[proto][port]).
     """
     options = dev.options[method.protocol]
-
     if (
         options["port"] == dev._DEFAULT_OPTIONS[method.protocol]["port"]
         and options["port"] != method.default_port
@@ -140,7 +152,7 @@ def _methods_table(
         rows = [
             (
                 m[0].protocol,
-                _determine_port(dev, m[0]),
+                _determine_port(dev, m[0]) if dev is not None else m[0].default_port,
                 m[0].reliability,
                 m[0].name,
                 m[1].__name__,
@@ -402,34 +414,40 @@ def check_host_unicast_ip(ip: str, modules: list[type[DeviceModule]]) -> bool:
     # Generate Interface object and populate MAC/Hostname
     dev.populate_fields(network_only=True)
 
-    # Scan through the services for "open" ports
-    open_protocols = [
-        s.protocol
+    # Create a set of (protocol, port) tuples for fast lookups.
+    open_service_pairs = {
+        (s.protocol, s.port)
         for s in dev.service
         if s.status in {"open", "verified"} and s.protocol in protos
-    ]  # type: list[str]
+    }
 
-    if not open_protocols and not config.INTENSIVE_SCAN:
+    if not open_service_pairs and not config.INTENSIVE_SCAN:
         _log.debug(f"No open ports found for {dev.ip}\nServices: {dev.service}")
         return False
-    elif not open_protocols and config.INTENSIVE_SCAN:
-        # If INTENSIVE_SCAN is enabled, then all identify checks will be used,
-        # regardless of open ports
+    elif not open_service_pairs and config.INTENSIVE_SCAN:
         _log.warning(
             f"{dev.ip} has no open ports but INTENSIVE_SCAN is enabled, "
             f"continuing to check all potential services..."
         )
+        # In intensive scan, we don't filter the methods.
+        pass
     else:
-        # Determine what methods to use based on open ports and user options
+        open_protocols = {s[0] for s in open_service_pairs}
         _log.info(
             f"{dev.ip} has {pluralize(len(open_protocols), 'open port')} "
             f"with {pluralize(len(open_protocols), 'known protocol')}: "
             f"{', '.join(open_protocols)}"
         )
-        methods = [m for m in methods if m[0].protocol in open_protocols]
+        methods = [
+            m for m in methods if (m[0].protocol, _determine_port(dev, m[0])) in open_service_pairs
+        ]
 
     # Filter out methods that don't have an identify function defined
     methods = [m for m in methods if m[0].identify_function]
+
+    if not methods:
+        _log.info(f"No fingerprinting methods match the open ports/protocols for {dev.ip}")
+        return False
 
     id_tbl = _methods_table(methods, dev)
     _log.info(
@@ -913,7 +931,7 @@ def run_identify(
             try:
                 discovered[addr] = future.result()
             except Exception as err:
-                log.error(f"Exception occurred while checking {addr}: {err}")
+                log.exception(f"Exception occurred while checking {addr}: {err}")
                 discovered[addr] = False
 
     elapsed_time = timeit.default_timer() - start_time
