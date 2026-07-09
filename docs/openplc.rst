@@ -4,9 +4,9 @@
 OpenPLC Runtime v4 PEAT Module
 ==============================
 
-:Author: wjoslin
+:Author: Th3BanHamm3r
 :Version: 1.0
-:Date: 2026-07-02
+:Date: 2026-07-10
 
 .. contents::
    :local:
@@ -20,8 +20,9 @@ For initial setup of the runtime environment, please refer to the official Auton
 
 .. seealso::
 
-   * `OpenPLC Runtime <https://github.com/Autonomy-Logic/openplc-runtime>`__
-   * `OpenPLC Editor <https://github.com/Autonomy-Logic/openplc-editor>`__
+   * `OpenPLC Runtime v4 GitHub <https://github.com/Autonomy-Logic/openplc-runtime>`__
+   * `OpenPLC Editor GitHub <https://github.com/Autonomy-Logic/openplc-editor>`__
+   * `Autonomy Edge OpenPLC Documentation <https://edge.autonomylogic.com/docs/>`__
 
 PEAT Module Configuration
 =========================
@@ -84,10 +85,11 @@ When ``peat pull`` is executed, the module authenticates and systematically pull
 The module collects data from the following endpoints:
 
 * ``GET /api/status?include_stats=true``: Retrieves the main PLC status, including run mode (``RUNNING``, ``STOPPED``), loaded program name, and detailed timing statistics for each task.
-* ``GET /api/get-users-info``: Fetches a list of all registered users and their roles.
-* ``GET /api/runtime-logs``: Pulls the latest runtime logs, which are then saved as events and a log file (``openplc_runtime.log``).
-* ``GET /api/compilation-status``: Retrieves the status and output of the last program compilation, saved to ``compilation_status.log``.
-* ``POST /api/plugin-command``: If ``plugins_to_query`` is configured, this endpoint is used to send commands to specific plugins (e.g., ``ethercat status``) and retrieve their output.
+* ``GET /api/get-users-info``: Retrieves a list of all registered users and their roles.
+* ``GET /api/runtime-logs``: Extracts the latest runtime logs, which are then saved as events and a log file (``openplc_runtime.log``).
+* ``GET /api/compilation-status``: Extracts the status and output of the last program compilation, saved to ``compilation_status.log``.
+* ``GET /api/serial-ports``: Retrieves the serial ports available on the device.
+* ``POST /api/plugin-command``: If ``plugins_to_query`` is configured, this endpoint is used to send commands to specific plugins (e.g., ``ethercat status``) and retrieves their output.
 
 Program Pushing (``peat push``)
 -------------------------------
@@ -107,11 +109,12 @@ Key Fields:
 -----------
 
 * **description**: General device info, including vendor ("Autonomy Logic, Inc.") and product model.
-* **os**: Operating system details, specifically "OpenPLC Runtime v4" and its version.
 * **run_mode**: Current PLC state, e.g., "RUNNING".
-* **users**: List of user accounts.
-* **event**: A detailed log of runtime events.
+* **os**: Operating system details, specifically "OpenPLC Runtime v4" and its version.
 * **files**: A list of files generated during the pull, such as logs and plugin status outputs.
+* **interfaces**: A list of interfaces and that the device has made available.
+* **event**: A detailed log of runtime events.
+* **users**: List of user accounts.
 * **extra.timing_stats**: Detailed performance metrics for PLC tasks (cycle times, latency, etc.).
 * **extra.plugin_status**: Contains the output from queried plugins. For example, the ``ethercat`` key holds the status of the EtherCAT master.
 
@@ -125,35 +128,31 @@ Basic status information dictates the core operational state of the PLC.
 
 .. code-block:: json
 
-   {
-       "type": "PLC",
-       "run_mode": "RUNNING",
-       "status": "Online",
-       "os": {
-           "full": "Autonomy Logic, Inc. OpenPLC Runtime v4 v4.1.7",
-           "name": "OpenPLC Runtime v4",
-           "vendor": {
-               "name": "Autonomy Logic, Inc."
-           },
-           "version": "v4.1.7"
-       }
-   }
+    "type": "PLC",
+    "run_mode": "RUNNING",
+    "status": "Online",
+    "os": {
+        "full": "Autonomy Logic, Inc. OpenPLC Runtime v4 v4.1.7",
+        "name": "OpenPLC Runtime v4",
+        "vendor": {
+            "name": "Autonomy Logic, Inc."
+        },
+        "version": "v4.1.7"
+    }
 
 2. User Information
 -------------------
 
-The ``users`` array contains all registered accounts and their respective access levels pulled from the runtime.
+The ``users`` array contains all registered accounts pulled from the runtime.
 
 .. code-block:: json
 
-   {
-       "users": [
-           {
-               "id": "1",
-               "name": "admin"
-           }
-       ]
-   }
+    "users": [
+        {
+            "id": "1",
+            "name": "admin"
+        }
+    ]
 
 3. Timing Statistics
 --------------------
@@ -162,26 +161,26 @@ When statistics are included in the status pull, PEAT nests this performance dat
 
 .. code-block:: json
 
-   {
-       "timing_stats": {
-           "tasks": [
-               {
-                   "cycle_latency_avg": 87,
-                   "cycle_latency_max": 11507,
-                   "cycle_latency_min": 5,
-                   "cycle_time_avg": 19999,
-                   "cycle_time_max": 31405,
-                   "cycle_time_min": 8584,
-                   "name": "TASK0",
-                   "overruns": 0,
-                   "scan_count": 3598599,
-                   "scan_time_avg": 2,
-                   "scan_time_max": 376,
-                   "scan_time_min": 0
-               }
-           ]
-       }
-   }
+    "extra": {
+        "timing_stats": {
+            "tasks": [
+                {
+                    "cycle_latency_avg": 0,
+                    "cycle_latency_max": 0,
+                    "cycle_latency_min": 9223372036854775807,
+                    "cycle_time_avg": 0,
+                    "cycle_time_max": 0,
+                    "cycle_time_min": 9223372036854775807,
+                    "name": "TASK0",
+                    "overruns": 0,
+                    "scan_count": 1,
+                    "scan_time_avg": 0,
+                    "scan_time_max": 0,
+                    "scan_time_min": 9223372036854775807
+                }
+            ]
+        }
+    }
 
 4. File Extraction (Runtime, Compilation, & Plugin Logs)
 --------------------------------------------------------
@@ -190,26 +189,26 @@ The raw ``openplc_runtime.log``, ``compilation_status.log``, and ``plugin_comman
 
 .. code-block:: json
 
-   [
-       {
-           "description": "Last Compilation Status",
-           "device": "192.168.10.20",
-           "extension": "log",
-           "name": "compilation_status.log"
-       },
-       {
-           "description": "Output for ethercat plugin (status)",
-           "device": "192.168.10.20",
-           "extension": "json",
-           "mime_type": "application/json",
-           "name": "ethercat_status.json"
-       },
-       {
-           "description": "Runtime Logs",
-           "device": "192.168.10.20",
-           "extension": "log",
-           "name": "openplc_runtime.log"
-       }
+   "files": [
+        {
+            "description": "Last Compilation Status",
+            "device": "192.168.10.20",
+            "extension": "log",
+            "name": "compilation_status.log"
+        },
+        {
+            "description": "Output for ethercat plugin (status)",
+            "device": "192.168.10.20",
+            "extension": "json",
+            "mime_type": "application/json",
+            "name": "ethercat_status.json"
+        },
+        {
+            "description": "Runtime Logs",
+            "device": "192.168.10.20",
+            "extension": "log",
+            "name": "openplc_runtime.log"
+        }
    ]
 
 5. Runtime Events
@@ -219,19 +218,20 @@ PEAT parses the raw text logs from the runtime endpoint, standardizing them into
 
 .. code-block:: json
 
-   {
-       "created": "2026-07-02 19:11:08+00:00",
-       "dataset": "runtime",
-       "id": "29",
-       "kind": [
-           "event"
-       ],
-       "message": "Native plugin './build/plugins/libs7comm_plugin.so' symbols loaded successfully",
-       "module": "OpenPLCv4",
-       "provider": "192.168.10.20",
-       "severity": "INFO",
-       "timezone": "UTC"
-   }
+   "event": [
+        {
+            "created": "2026-07-02 19:11:08+00:00",
+            "dataset": "runtime",
+            "id": "29",
+            "kind": [
+                "event"
+            ],
+            "message": "Native plugin './build/plugins/libs7comm_plugin.so' symbols loaded successfully",
+            "module": "OpenPLCv4",
+            "provider": "192.168.10.20",
+            "severity": "INFO",
+            "timezone": "UTC"
+        }
 
 6. Plugin Status (e.g., ``ethercat``)
 -------------------------------------
@@ -240,34 +240,36 @@ Outputs from specific queried plugins (like ``ethercat``) are captured in their 
 
 .. code-block:: json
 
-   {
-       "ethercat": {
-           "masters": [
-               {
-                   "expected_wkc": 0,
-                   "metrics": {
-                       "avg_cycle_us": 0,
-                       "avg_latency_us": 0,
-                       "avg_period_us": 0,
-                       "consecutive_wkc_errors": 0,
-                       "cycle_count": 0,
-                       "exchange_skips": 0,
-                       "max_cycle_us": 0,
-                       "max_exchange_us": 0,
-                       "max_latency_us": 0,
-                       "max_period_us": 0,
-                       "min_cycle_us": 0,
-                       "min_exchange_us": 0,
-                       "min_latency_us": 0,
-                       "min_period_us": 0,
-                       "noframe_count": 0,
-                       "recovery_attempts": 0,
-                       "wkc_error_count": 0
-                   },
-                   "name": "default",
-                   "plugin_state": "IDLE",
-                   "slave_count": 0
-               }
-           ]
-       }
-   }
+   "extra": {
+       "plugin_status": {
+           "ethercat": {
+                "masters": [
+                    {
+                        "expected_wkc": 0,
+                        "metrics": {
+                            "avg_cycle_us": 0,
+                            "avg_latency_us": 0,
+                            "avg_period_us": 0,
+                            "consecutive_wkc_errors": 0,
+                            "cycle_count": 0,
+                            "exchange_skips": 0,
+                            "max_cycle_us": 0,
+                            "max_exchange_us": 0,
+                            "max_latency_us": 0,
+                            "max_period_us": 0,
+                            "min_cycle_us": 0,
+                            "min_exchange_us": 0,
+                            "min_latency_us": 0,
+                            "min_period_us": 0,
+                            "noframe_count": 0,
+                            "recovery_attempts": 0,
+                            "wkc_error_count": 0
+                        },
+                        "name": "default",
+                        "plugin_state": "IDLE",
+                        "slave_count": 0
+                    }
+                ]
+            }
+        }
+    }

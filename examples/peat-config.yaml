@@ -584,8 +584,9 @@ device_options:
   openplcv4:
     # --- Credentials and Pull Settings ---
     username: ""
-    password: "" # Always use a secure password
-    pull_methods: ["https"]
+    password: ""
+    pull_methods:
+      - https
     # --- Push Behavior ---
     # Set to true to force a clean recompile when pushing a new program.
     clean_upload: true

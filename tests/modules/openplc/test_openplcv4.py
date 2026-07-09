@@ -6,24 +6,28 @@ from peat import datastore
 from peat.modules.openplc.openplcv4 import OpenPLCv4
 
 # -----------------------------------------------------------------------------
+# Module-level Marker
+# -----------------------------------------------------------------------------
+# This marks every test case in this file as a 'live' test, meaning they will
+# be skipped by default in local runs and the core CI suite.
+pytestmark = pytest.mark.live
+
+
+# -----------------------------------------------------------------------------
 # Setup
 # -----------------------------------------------------------------------------
-"""Creates a DeviceData object configured to point to the live Docker container."""
-
-
 @pytest.fixture
 def live_dev(mocker):
+    """Creates a DeviceData object configured to point to the live Docker container."""
     mocker.patch.object(datastore, "objects", [])
     dev = datastore.get("127.0.0.1")
     dev._runtime_options["openplcv4"] = {"username": "admin", "password": "admin"}
     return dev
 
 
-"""Locates the production Relay_Blink_PLC.zip file."""
-
-
 @pytest.fixture
 def production_plc_zip():
+    """Locates the production Relay_Blink_PLC.zip file."""
     zip_path = Path("tests/modules/openplc/data_files/Relay_Blink_PLC.zip")
     if not zip_path.exists():
         raise FileNotFoundError(
@@ -37,41 +41,37 @@ def production_plc_zip():
 # -----------------------------------------------------------------------------
 # Test Cases
 # -----------------------------------------------------------------------------
-"""
-Tests SCAN functionality.
-Verifies the registered IPMethod can successfully probe and fingerprint
-the live Docker container using PEAT's registration schema.
-"""
-
-
 def test_scan_and_fingerprint(live_dev):
-    scan_method = next(m for m in OpenPLCv4.ip_methods if m.name == "openplc_v4_https_api_check")
+    """
+    Tests SCAN functionality.
+    Verifies the registered IPMethod can successfully probe and fingerprint
+    the live Docker container using PEAT's registration schema.
+    """
+    scan_method = next(
+        m for m in OpenPLCv4.ip_methods if m.name == "OpenPLC Runtime v4 HTTPS REST API"
+    )
     result = scan_method.identify_function(live_dev)
     assert result is True, "PEAT scan identity check failed."
     assert live_dev.os.name == "OpenPLC Runtime v4"
     assert any(s.protocol == "openplc_api" and s.port == 8443 for s in live_dev.service)
 
 
-"""
-Tests successful PUSH.
-Pushes a valid program zip
-"""
-
-
 def test_push_valid_file(live_dev, production_plc_zip):
+    """
+    Tests successful PUSH.
+    Pushes a valid program zip
+    """
     result = OpenPLCv4._push(live_dev, production_plc_zip, "")
     assert result is True, "Failed to push a valid PLC program."
     assert any(e.action == "file_push" and e.outcome == "success" for e in live_dev.event)
 
 
-"""
-Tests PULL functionality on an empty container.
-Verifies authentication, parser extraction, database state initialization,
-and output file creation in the workspace. Check compile success
-"""
-
-
 def test_pull_and_validate(live_dev):
+    """
+    Tests PULL functionality on an empty container.
+    Verifies authentication, parser extraction, database state initialization,
+    and output file creation in the workspace. Check compile success
+    """
     result = OpenPLCv4._pull(live_dev)
     assert result is True, "Failed to run data pull."
     assert len(live_dev.users) > 0, "No users were extracted from OpenPLC container."

@@ -730,11 +730,12 @@ norecursedirs = [
 markers = [
     "slow: lower-importance tests that take an excessive amount of time",
     "gitlab_ci_only: run tests that are intended to be run only in the GitLab CI environment",
-    "broadcast_ci: run live broadcast tests intended to be used in GitLab CI on PEAT rack"
+    "broadcast_ci: run live broadcast tests intended to be used in GitLab CI on PEAT rack",
+    "live: integration tests requiring a running OpenPLC instance or PHENIX environment",
 ]
 # This is apparently the only straightforward to exclude a file from collection in pytest in 2025...sigh
 # The other option is to add a hook to conftest.py...
-addopts = "--ignore-glob='*forked_telnetlib.py'"
+addopts = "--ignore-glob='*forked_telnetlib.py' -m 'not live'"
 
 
 # Configuration for coverage.py

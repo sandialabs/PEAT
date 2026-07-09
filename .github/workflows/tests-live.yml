@@ -18,10 +18,8 @@ jobs:
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
-
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
-
       - name: Start OpenPLC Container & Seed Data
         run: |
           # 1. Start the container with required real-time capabilities
@@ -45,7 +43,7 @@ jobs:
             -d "$CREDENTIALS"
 
           # 3. Check to make sure user was created
-          echo "Loggin in as user"
+          echo "Login as user"
           LOGIN_RESPONSE=$(curl -k -s -X POST https://127.0.0.1:8443/api/login \
             -H "Content-Type: application/json" \
             -d "$CREDENTIALS")
@@ -56,22 +54,17 @@ jobs:
             exit 1
           fi
           echo "Login Successfull"
-
       - name: Setup PDM
         uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.12"
           cache: true
-
       - name: Install dependencies
         run: pdm sync -G test
-
       - name: Run OpenPLC Tests
         run: |
-          pdm run pytest --basetemp=./pytest_files -s -v ./tests/modules/openplc/test_openplcv4.py
-
+          pdm run pytest --basetemp=./pytest_files -s -v --run-live -m "live" ./tests/modules/openplc/test_openplcv4.py
       - name: Upload Test Results
-        if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: openplcv4-test-results

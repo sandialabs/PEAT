@@ -73,9 +73,6 @@ def portscan(
 
         options = dev.options.setdefault(meth.protocol, {})
         original_port = options.get("port")
-        log.debug(
-            f"protocol: {meth.protocol}: original_port: {original_port} target_port: {target_port}"
-        )
         options["port"] = target_port
         timeout = options.get("timeout", 5.0)
         success = False
@@ -429,8 +426,6 @@ def check_host_unicast_ip(ip: str, modules: list[type[DeviceModule]]) -> bool:
             f"{dev.ip} has no open ports but INTENSIVE_SCAN is enabled, "
             f"continuing to check all potential services..."
         )
-        # In intensive scan, we don't filter the methods.
-        pass
     else:
         open_protocols = {s[0] for s in open_service_pairs}
         _log.info(
@@ -446,7 +441,7 @@ def check_host_unicast_ip(ip: str, modules: list[type[DeviceModule]]) -> bool:
     methods = [m for m in methods if m[0].identify_function]
 
     if not methods:
-        _log.info(f"No fingerprinting methods match the open ports/protocols for {dev.ip}")
+        _log.warning(f"No fingerprinting methods match the open ports/protocols for {dev.ip}")
         return False
 
     id_tbl = _methods_table(methods, dev)

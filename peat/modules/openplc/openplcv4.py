@@ -8,9 +8,9 @@ Usage Examples:
 # 1. Scan for OpenPLC Runtime v4 instances
 pdm run peat scan -i 192.168.1.0/24
 # 2. Pull data from a discovered OpenPLC instance
-pdm run peat pull -i 192.168.1.50 -c ./config.yaml
+pdm run peat pull -i 192.168.1.50 -c ./examples/openplc-config.yaml
 # 3. Push a new PLC program to the device
-pdm run peat push -d openplcv4 -i 192.168.1.50 -c ./config.yaml -- ./program.zip
+pdm run peat push -d openplcv4 -i 192.168.1.50 -c ./examples/openplc-config.yaml -- ./program.zip
 """
 
 import json
@@ -25,6 +25,7 @@ from peat import (
     DeviceModule,
     Event,
     File,
+    Interface,
     IPMethod,
     Service,
     User,
@@ -34,14 +35,14 @@ from peat import (
 # Suppress warnings from urllib3 for insecure/self-signed SSL connections
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-"""PEAT Module for interacting with the OpenPLC Runtime v4 API over HTTPS."""
-
 
 class OpenPLCv4(DeviceModule):
+    """PEAT Module for interacting with the OpenPLC Runtime v4 API over HTTPS."""
+
     device_type = "PLC"
     vendor_id = "Autonomy"
     vendor_name = "Autonomy Logic, Inc."
-    module_aliases = ["open", "openplc", "openplcv4", "autonomy"]
+    module_aliases = ["open", "openplc"]
     default_options = {
         "openplcv4": {
             "username": "",
@@ -56,23 +57,23 @@ class OpenPLCv4(DeviceModule):
         },  # Hardcoded default https port for OpenPLC Runtime v4
     }
 
-    """Logs into the OpenPLC API via HTTPS and stores the access token."""
-
     @classmethod
     def _login(cls, dev: DeviceData, session: requests.Session) -> bool:
+        """Logs into the OpenPLC API via HTTPS and stores the access token."""
         username = dev.options["openplcv4"]["username"]
         password = dev.options["openplcv4"]["password"]
-        port = dev.options.get("https", {}).get("port", 8443)
+        port = dev.options["https"]["port"]
         api_url = f"https://{dev.ip}:{port}/api"
 
         # Avoid redundant login if session is already established and valid
-        if dev.extra.get("api_session") and dev.extra.get("api_url") == api_url:
+        if dev._cache.get("api_session") and dev._cache.get("api_url") == api_url:
             cls.log.debug("Using existing authenticated session.")
             return True
 
         cls.log.debug(f"Using API URL: {api_url}")
         cls.log.debug(f"Attempting login with username: '{username}'")
         login_payload = {"username": username, "password": password}
+
         try:
             cls.log.info(f"Attempting to log in to {dev.ip} over HTTPS as '{username}'...")
             response = session.post(
@@ -83,8 +84,8 @@ class OpenPLCv4(DeviceModule):
                 if access_token:
                     cls.log.debug("Login successful, access token received.")
                     session.headers.update({"Authorization": f"Bearer {access_token}"})
-                    dev.extra["api_session"] = session
-                    dev.extra["api_url"] = api_url
+                    dev._cache["api_session"] = session
+                    dev._cache["api_url"] = api_url
                     return True
                 else:
                     cls.log.warning(
@@ -94,8 +95,7 @@ class OpenPLCv4(DeviceModule):
                     return False
             else:
                 cls.log.warning(
-                    f"Login failed for {dev.ip}. HTTP {response.status_code}. \
-                    Check credentials."
+                    f"Login failed for {dev.ip}. HTTP {response.status_code}. Check credentials."
                 )
                 cls.log.debug(f"Failed login response: {response.text}")
                 return False
@@ -103,28 +103,30 @@ class OpenPLCv4(DeviceModule):
             cls.log.error(f"Error during login to {dev.ip}: {e}")
             return False
 
-    """Helper to make authenticated API requests (GET and POST) over HTTPS."""
-
     @classmethod
     def _make_api_request(
         cls,
         dev: DeviceData,
         method: str,
         endpoint: str,
-        params=None,
-        files=None,
-        json_payload=None,
+        params: dict[str, object] | None = None,
+        files: dict[str, object] | None = None,
+        json_payload: dict[str, object] | None = None,
         **kwargs,
-    ) -> dict | None:
-        session = dev.extra.get("api_session")
-        api_url = dev.extra.get("api_url")
+    ) -> dict[str, object] | None:
+        """Helper to make authenticated API requests (GET and POST) over HTTPS."""
+        session = dev._cache.get("api_session")
+        api_url = dev._cache.get("api_url")
+
         if not session or not api_url:
             cls.log.error("API session not initialized. Cannot make request.")
             return None
+
         url = f"{api_url}/{endpoint}"
         cls.log.debug(f"Making {method} request to: {url}")
         kwargs.setdefault("timeout", 60 if method.upper() == "POST" else 10)
         kwargs.setdefault("verify", False)
+
         try:
             if method.upper() == "GET":
                 response = session.get(url, params=params, **kwargs)
@@ -144,16 +146,18 @@ class OpenPLCv4(DeviceModule):
             cls.log.error(f"Network error for {method} request to '{endpoint}' on {dev.ip}: {e}")
             return None
 
-    """Pushes a program to the OpenPLC runtime."""
-
     @classmethod
     def _push(cls, dev: DeviceData, file: Path, _push_type: str) -> bool:
+        """Pushes a program to the OpenPLC runtime."""
         session = requests.Session()
+
         if not cls._login(dev, session):
             cls.log.error(f"Push failed for {dev.ip}: Could not authenticate to the API.")
             return False
-        cls.log.info(f"Initiating push of program '{file.name}' to {dev.ip}.")
-        clean_upload = dev.options["openplcv4"].get("clean_upload", False)
+
+        cls.log.info(f"Initiating push of program '{file.name}' to {dev.ip}")
+        clean_upload = dev.options["openplcv4"]["clean_upload"]
+
         try:
             with open(file, "rb") as f:
                 response = cls._make_api_request(
@@ -165,24 +169,24 @@ class OpenPLCv4(DeviceModule):
                     timeout=60,
                 )
                 if response:
-                    cls.log.info(f"Successfully pushed program '{file.name}' to {dev.ip}.")
+                    cls.log.info(f"Successfully pushed program '{file.name}' to {dev.ip}")
                     dev.store(
                         "event",
                         Event(
                             action="file_push",
                             outcome="success",
-                            message=f"Pushed PLC program '{file.name}'.",
+                            message=f"Pushed PLC program '{file.name}'",
                         ),
                     )
                     return True
                 else:
-                    cls.log.error(f"Failed to push program '{file.name}' to {dev.ip}.")
+                    cls.log.error(f"Failed to push program '{file.name}' to {dev.ip}")
                     dev.store(
                         "event",
                         Event(
                             action="file_push",
                             outcome="failure",
-                            message=f"Failed to push PLC program '{file.name}'.",
+                            message=f"Failed to push PLC program '{file.name}'",
                         ),
                     )
                     return False
@@ -193,14 +197,15 @@ class OpenPLCv4(DeviceModule):
             cls.log.error(f"An unexpected error occurred during file push: {e}")
             return False
 
-    """Pulls and parses data from the OpenPLCv4 API."""
-
     @classmethod
     def _pull(cls, dev: DeviceData) -> bool:
+        """Pulls and parses data from the OpenPLCv4 API."""
         if "https" not in dev.options["openplcv4"]["pull_methods"]:
             cls.log.info("Skipping OpenPLC pull: 'https' not in pull_methods.")
             return True
+
         session = requests.Session()
+
         if not cls._login(dev, session):
             cls.log.error(f"Pull failed for {dev.ip}: Could not authenticate to the API.")
             return False
@@ -210,6 +215,7 @@ class OpenPLCv4(DeviceModule):
         users_data = cls._make_api_request(dev, "GET", "get-users-info")
         logs_data = cls._make_api_request(dev, "GET", "runtime-logs")
         compilation_data = cls._make_api_request(dev, "GET", "compilation-status")
+        serial_data = cls._make_api_request(dev, "GET", "serial-ports")
 
         if status_data:
             status_string = status_data.get("status", "Unknown")
@@ -272,11 +278,27 @@ class OpenPLCv4(DeviceModule):
             )
             cls.log.info("Successfully retrieved PLC program compilation log file")
 
+        # Pull available serial ports from device and store as interfaces
+        if serial_data and isinstance(serial_data.get("ports"), list):
+            ports = serial_data.get("ports", [])
+            for port_info in ports:
+                port_name = port_info.get("device")
+                if port_name:
+                    serial = Interface(
+                        type="serial",
+                        serial_port=port_name,
+                        name=port_info.get("description"),
+                    )
+                    dev.store("interface", serial)
+            cls.log.info("Successfully retrieved available serial ports")
+
         plugins_to_query = dev.options.get("openplcv4", {}).get("plugins_to_query", {})
         if plugins_to_query:
             cls.log.info(f"Querying plugins: {', '.join(plugins_to_query.keys())}")
+
             if "plugin_status" not in dev.extra:
                 dev.extra["plugin_status"] = {}
+
             for plugin_name, command in plugins_to_query.items():
                 cls.log.debug(f"Sending command: '{command}' to plugin: '{plugin_name}'...")
                 payload = {"plugin": plugin_name, "command": command, "params": {}}
@@ -285,7 +307,7 @@ class OpenPLCv4(DeviceModule):
                 )
                 if plugin_data:
                     cls.log.info(
-                        f"Successfully retrieved plugin data: '{plugin_name}' ({command})."
+                        f"Successfully retrieved plugin data: '{plugin_name}' ({command})"
                     )
                     dev.extra["plugin_status"][plugin_name] = plugin_data
                     file_content = json.dumps(plugin_data, indent=2)
@@ -301,19 +323,19 @@ class OpenPLCv4(DeviceModule):
                 else:
                     cls.log.warning(
                         f"Failed to execute command '{command}' \
-                        on plugin '{plugin_name}'."
+                        on plugin '{plugin_name}'"
                     )
 
         dev.successful_pulls["openplc_api"] = True
         return True
 
-    """Verifies the device is an OpenPLCv4 instance by checking the /api/version endpoint."""
-
     @classmethod
     def _verify_https_api(cls, dev: DeviceData) -> bool:
-        port = dev.options.get("https", {}).get("port", 8443)
+        """Verifies the device is an OpenPLCv4 instance by checking the /api/version endpoint."""
+        port = dev.options["https"]["port"]
         url = f"https://{dev.ip}:{port}/api/version"
         cls.log.debug(f"Checking for OpenPLCv4 API at {url}")
+
         try:
             response = requests.get(url, verify=False, timeout=5)
             if response.status_code == 200:
@@ -348,7 +370,7 @@ class OpenPLCv4(DeviceModule):
 # --- Identification Methods ---
 OpenPLCv4.ip_methods = [
     IPMethod(
-        name="openplc_v4_https_api_check",
+        name="OpenPLC Runtime v4 HTTPS REST API",
         description="Checks for the OpenPLCv4 /api/version endpoint over HTTPS.",
         type="unicast_ip",
         identify_function=OpenPLCv4._verify_https_api,
