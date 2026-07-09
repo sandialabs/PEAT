@@ -28,7 +28,7 @@ jobs:
       # endpoints from StepSecurity report, update list of endpoints, then change back
       # to "block".
       - name: Harden Runner
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -43,7 +43,7 @@ jobs:
             motd.ubuntu.com:443
             packages.microsoft.com:443
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
         with:
             fetch-tags: true
             fetch-depth: 0  # checkout full history
@@ -54,7 +54,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends graphviz
           dot -V
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@v4
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
         with:
           python-version: "3.12"
           cache: true
@@ -64,7 +64,7 @@ jobs:
         run: pdm run dep-doc
       - name: Build docs
         run: pdm run docs-html
-      - uses: actions/upload-pages-artifact@v4
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5
         with:
           path: _docs_html/
   deploy:
@@ -80,4 +80,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5

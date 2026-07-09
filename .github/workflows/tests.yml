@@ -13,13 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: block
           allowed-endpoints: >
             api.github.com:443
       - name: Conventional Commits
-        uses: taskmedia/action-conventional-commits@443b9cf07a7c453dfd92533a7f0d0c67fb4d8140 # v1.1.25
+        uses: taskmedia/action-conventional-commits@e611e6d5471dc1853d7ab1642ed07c6abe28eb1d # v1.1.26
         with:
           types: >
             build|chore|ci|docs|doc|feat|fix|bug|minor|patch|perf|style|refactor|test|tests|revert|deps|dependencies|sec|security|deprecate
@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: block
           allowed-endpoints: >
@@ -40,9 +40,9 @@ jobs:
             pypi.org:443
             raw.githubusercontent.com:443
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@v4
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
         with:
           python-version: "3.12"
           cache: true
@@ -67,13 +67,13 @@ jobs:
         platform: ["ubuntu-24.04", "windows-latest", "windows-2022", "macos-latest"]
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@f808768d1510423e83855289c910610ca9b43176 # v2.17.0
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
           egress-policy: audit
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
       - name: Setup PDM
-        uses: pdm-project/setup-pdm@v4
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: true
@@ -83,7 +83,7 @@ jobs:
         run: |
           pdm run pytest --basetemp=./pytest_files --run-slow --durations=10 --cov-report term-missing:skip-covered --cov-report html --cov=peat --no-cov-on-fail --xdoctest -n 8 ${{ env.PYTEST_IGNORE_ARGS }} ./tests ./peat
       - name: Upload Test Results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: test-results-python${{ matrix.python-version }}-${{ matrix.platform }}
           path: |

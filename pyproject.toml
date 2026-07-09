@@ -553,6 +553,15 @@ composite = [
     "docs-man",
 ]
 
+[tool.pdm.scripts.update-actions]
+help = "Update pinned actions in GitHub workflows"
+shell = """
+docker run --rm \
+  -e GITHUB_TOKEN="" \
+  -v "$(pwd):/workflows" \
+  mheap/pin-github-action .github/workflows
+"""
+
 
 [tool.doc8]
 ignore = ["D001"]
