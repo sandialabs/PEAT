@@ -735,7 +735,7 @@ markers = [
 ]
 # This is apparently the only straightforward to exclude a file from collection in pytest in 2025...sigh
 # The other option is to add a hook to conftest.py...
-addopts = "--ignore-glob='*forked_telnetlib.py' -m 'not live'"
+addopts = "--ignore-glob='*forked_telnetlib.py'"
 
 
 # Configuration for coverage.py

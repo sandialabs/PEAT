@@ -1,0 +1,2357 @@
+{
+    "peat_version": "0.0.1",
+    "peat_run_id": "178457822067",
+    "pull_duration": 0.5118277980363928,
+    "pull_modules": [
+        "OpenPLCv4"
+    ],
+    "pull_targets": [
+        "192.168.10.20"
+    ],
+    "pull_original_targets": [
+        "192.168.10.20"
+    ],
+    "pull_devices": [
+        "192.168.10.20"
+    ],
+    "pull_comm_type": "unicast_ip",
+    "num_pull_results": 1,
+    "pull_results": [
+        {
+            "successful_pulls": {
+                "openplc_api": true
+            },
+            "description": {
+                "full": "Autonomy Logic, Inc. OpenPLC Runtime v4",
+                "model": "v4.1.8",
+                "product": "OpenPLC Runtime v4",
+                "vendor": {
+                    "id": "Autonomy",
+                    "name": "Autonomy Logic, Inc."
+                }
+            },
+            "id": "192.168.10.20",
+            "ip": "192.168.10.20",
+            "mac": "18:62:E4:64:F1:04",
+            "mac_vendor": "Texas Instruments",
+            "type": "PLC",
+            "run_mode": "STOPPED",
+            "status": "Offline",
+            "os": {
+                "full": "Autonomy Logic, Inc. OpenPLC Runtime v4 v4.1.8",
+                "name": "OpenPLC Runtime v4",
+                "vendor": {
+                    "name": "Autonomy Logic, Inc."
+                },
+                "version": "v4.1.8"
+            },
+            "files": [
+                {
+                    "description": "Last Compilation Status",
+                    "device": "192.168.10.20",
+                    "extension": "log",
+                    "name": "compilation_status.log"
+                },
+                {
+                    "description": "Output for ethercat plugin (status)",
+                    "device": "192.168.10.20",
+                    "extension": "json",
+                    "mime_type": "application/json",
+                    "name": "ethercat_status.json"
+                },
+                {
+                    "description": "Runtime Logs",
+                    "device": "192.168.10.20",
+                    "extension": "log",
+                    "name": "openplc_runtime.log"
+                }
+            ],
+            "interface": [
+                {
+                    "type": "ethernet",
+                    "mac": "18:62:E4:64:F1:04",
+                    "mac_vendor": "Texas Instruments",
+                    "ip": "192.168.10.20",
+                    "services": [
+                        {
+                            "port": 8443,
+                            "protocol": "https",
+                            "status": "verified",
+                            "transport": "tcp"
+                        }
+                    ]
+                },
+                {
+                    "name": "ttyS0",
+                    "type": "serial",
+                    "serial_port": "/dev/ttyS0"
+                }
+            ],
+            "service": [
+                {
+                    "port": 8443,
+                    "protocol": "https",
+                    "status": "verified",
+                    "transport": "tcp"
+                }
+            ],
+            "related": {
+                "ip": [
+                    "192.168.10.20"
+                ],
+                "mac": [
+                    "18:62:E4:64:F1:04"
+                ],
+                "ports": [
+                    8443
+                ],
+                "protocols": [
+                    "https",
+                    "openplc_api"
+                ],
+                "user": [
+                    "1",
+                    "admin"
+                ]
+            },
+            "event": [
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "1",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": ".env file not found, creating one...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "2",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": ".env file created at /var/lib/openplc-runtime/.env",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "3",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Starting PLC runtime core...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "4",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Log server started at /run/runtime/log_runtime.socket",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "5",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "UNIX socket server setup at /run/runtime/plc_runtime.socket",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "6",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[PLUGIN]: Plugin driver system created",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "7",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Config file ./plugins.conf not found, copying from plugins_default.conf",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "8",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Client connected",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "9",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Successfully copied default config to ./plugins.conf",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "10",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Using venv for modbus_slave: ./venvs/modbus_slave/lib/python3.10/site-packages",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "11",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Python plugin 'simple_modbus' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "12",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "13",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "14",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "15",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:51+00:00",
+                    "dataset": "runtime",
+                    "id": "16",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Using venv for modbus_master: ./venvs/modbus_master/lib/python3.10/site-packages",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "17",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Python plugin 'modbus_master_plugin' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "18",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "19",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "20",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "21",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "22",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Using venv for opcua: ./venvs/opcua/lib/python3.10/site-packages",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "23",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Python plugin 'plugin' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "24",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "25",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "26",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "27",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "28",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "'execute_command' function not found in native plugin './build/plugins/libs7comm_plugin.so' (optional)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "WARNING",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "29",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Native plugin './build/plugins/libs7comm_plugin.so' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "30",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "31",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "32",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "33",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cycle_start: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "34",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cycle_end: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "35",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "36",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- execute_command: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "37",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- get_stats: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "38",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Unix socket client connected",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "39",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "'cycle_start' function not found in native plugin './build/plugins/libethercat_plugin.so' (optional)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "WARNING",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "40",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "'cycle_end' function not found in native plugin './build/plugins/libethercat_plugin.so' (optional)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "WARNING",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "41",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Native plugin './build/plugins/libethercat_plugin.so' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "42",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "43",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "44",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "45",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cycle_start: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "46",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cycle_end: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "47",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "48",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- execute_command: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "49",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- get_stats: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "50",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_SLAVE] Runtime arguments extracted successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "51",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_MASTER] Runtime arguments extracted successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "52",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "OPC UA Plugin initialized successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "53",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[S7COMM] Initializing S7Comm plugin...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "54",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[S7COMM] Buffer size: 1024",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "55",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Buffer size: 1024",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "56",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Loading config: ./core/src/drivers/plugins/native/ethercat/ethercat_config.json",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "57",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Configuration loaded: 1 master(s) found",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "58",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Master[0] 'ethercat_master': interface=ens37, cycle_time=1000 us, slaves=3",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "59",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] EtherCAT plugin initialized [1 master(s), state: IDLE]",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "60",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[PLUGIN]: All plugins initialized (not started)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "61",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[PLUGIN]: Released Python GIL",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "62",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "No libplc_*.so file found in ./build",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "ERROR",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "63",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Failed to find libplc file",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "ERROR",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "64",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "State transition to RUNNING failed",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "ERROR",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "65",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Debug WebSocket endpoint initialized at /api/debug",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-16 17:39:52+00:00",
+                    "dataset": "runtime",
+                    "id": "66",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Generating https certificate...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "67",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Loading PLC application",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "68",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "PLC State: INIT",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "69",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_SLAVE] Plugin cleaned up",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "70",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Plugin modbus_slave cleaned up successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "71",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_MASTER] Cleaning up...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "72",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_MASTER] Stopping main loop...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "73",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_MASTER] No threads to stop",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "74",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_MASTER] Cleanup completed successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "75",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Plugin modbus_master cleaned up successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "76",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Cleaning up OPC UA plugin...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "77",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Stopping OPC UA server...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "78",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "OPC UA server stopped",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "79",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Cleanup completed",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "80",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Plugin opcua cleaned up successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "81",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[S7COMM] Cleaning up S7Comm plugin...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "82",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[S7COMM] S7Comm plugin cleanup complete",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "83",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Cleaning up EtherCAT plugin...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "84",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] EtherCAT plugin cleanup complete",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "85",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Using venv for modbus_slave: ./venvs/modbus_slave/lib/python3.10/site-packages",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "86",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Python plugin 'simple_modbus' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "87",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "88",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "89",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "90",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "91",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Using venv for modbus_master: ./venvs/modbus_master/lib/python3.10/site-packages",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "92",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Python plugin 'modbus_master_plugin' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "93",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "94",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "95",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "96",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "97",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Using venv for opcua: ./venvs/opcua/lib/python3.10/site-packages",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "98",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Python plugin 'plugin' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "99",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "100",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "101",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "102",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "103",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "'execute_command' function not found in native plugin './build/plugins/libs7comm_plugin.so' (optional)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "WARNING",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "104",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Native plugin './build/plugins/libs7comm_plugin.so' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "105",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "106",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "107",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "108",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cycle_start: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "109",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cycle_end: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "110",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "111",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- execute_command: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "112",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- get_stats: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "113",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "'cycle_start' function not found in native plugin './build/plugins/libethercat_plugin.so' (optional)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "WARNING",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "114",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "'cycle_end' function not found in native plugin './build/plugins/libethercat_plugin.so' (optional)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "WARNING",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "115",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Native plugin './build/plugins/libethercat_plugin.so' symbols loaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "116",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- init: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "117",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- start_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "118",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- stop_loop: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "119",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cycle_start: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "120",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cycle_end: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "121",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- cleanup: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "122",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- execute_command: (PASS)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "123",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "- get_stats: (FAIL)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "124",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_SLAVE] Runtime arguments extracted successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "125",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[MODBUS_MASTER] Runtime arguments extracted successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "126",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "OPC UA Plugin initializing...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "127",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "OPC UA Plugin initialized successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "128",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[S7COMM] Initializing S7Comm plugin...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "129",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[S7COMM] Buffer size: 1024",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "130",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Buffer size: 1024",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "131",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Loading config: ./build/plugins/ethercat.json",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "132",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] No valid EtherCAT configs found (result=-1, count=0), using defaults",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "WARNING",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "133",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Master[0] 'default': interface=eth0, cycle_time=1000 us, slaves=0",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "134",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] EtherCAT plugin initialized [1 master(s), state: IDLE]",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "135",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[PLUGIN]: Plugins re-initialized with updated config",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "136",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Memory locked successfully (MCL_CURRENT | MCL_FUTURE)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "137",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[strucpp] execution model: threaded process-image",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "138",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[python] loader logging callbacks initialized",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "139",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[strucpp] symbols resolved (config=0x7f2fed938220, debug=hier)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "140",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[image_tables] 0 located var(s) via copy-in/out (0 program-local, 0 config-scope shared globals)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "141",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[image_tables] filled 35840 NULL slots with backing buffers",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "142",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[JOURNAL] lock-free double-buffer mode (capacity=4096 entries/cycle/bank)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "143",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Journal buffer initialized",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "144",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Skipping disabled plugin during start: modbus_slave",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "145",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Skipping disabled plugin during start: modbus_master",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "146",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Skipping disabled plugin during start: opcua",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "147",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Skipping disabled plugin during start: s7comm",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "148",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] Master 'default': No slaves configured - skipping",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "WARNING",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "149",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[ETHERCAT] No EtherCAT masters started successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "ERROR",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "150",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Native plugin ethercat failed to start (returned -1)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "ERROR",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "151",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[PLUGIN]: Enabled plugins started",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "152",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Scheduler set to SCHED_FIFO, priority 20",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "153",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Timer slack reduced to 1ns for PLC thread",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "154",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Starting main loop",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "155",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "PLC State: RUNNING",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "156",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "PLC base tick: 20000000 ns across 1 task(s)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "157",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "PLC: fastest task is TASK0 (interval=20000000 ns, priority=0)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "158",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Spawned 1 PLC task thread(s)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "159",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "GCD master-tick dispatcher running (base tick 20000000 ns)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:26:10+00:00",
+                    "dataset": "runtime",
+                    "id": "160",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[task TASK0] SCHED_FIFO priority 1",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "161",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Stopping 1 PLC task thread(s)",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "162",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[task TASK0] stopped after 11785 scans",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "163",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Journal buffer cleaned up",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "164",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "Stopping all plugins...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "165",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[image_tables] cleared all pointers",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "166",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[Python loader] Cleaning up 0 Python function block(s)...",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "167",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "[Python loader] Cleanup complete",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "168",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "PLC program unloaded successfully",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                },
+                {
+                    "created": "2026-07-20 17:30:06+00:00",
+                    "dataset": "runtime",
+                    "id": "169",
+                    "kind": [
+                        "event"
+                    ],
+                    "message": "PLC State: STOPPED",
+                    "module": "OpenPLCv4",
+                    "provider": "192.168.10.20",
+                    "severity": "INFO",
+                    "timezone": "UTC"
+                }
+            ],
+            "users": [
+                {
+                    "id": "1",
+                    "name": "admin"
+                }
+            ],
+            "extra": {
+                "plugin_status": {
+                    "ethercat": {
+                        "masters": [
+                            {
+                                "expected_wkc": 0,
+                                "metrics": {
+                                    "avg_cycle_us": 0,
+                                    "avg_latency_us": 0,
+                                    "avg_period_us": 0,
+                                    "consecutive_wkc_errors": 0,
+                                    "cycle_count": 0,
+                                    "exchange_skips": 0,
+                                    "max_cycle_us": 0,
+                                    "max_exchange_us": 0,
+                                    "max_latency_us": 0,
+                                    "max_period_us": 0,
+                                    "min_cycle_us": 0,
+                                    "min_exchange_us": 0,
+                                    "min_latency_us": 0,
+                                    "min_period_us": 0,
+                                    "noframe_count": 0,
+                                    "recovery_attempts": 0,
+                                    "wkc_error_count": 0
+                                },
+                                "name": "default",
+                                "plugin_state": "IDLE",
+                                "slave_count": 0
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    ]
+}

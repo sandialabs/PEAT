@@ -36,6 +36,113 @@ from peat import (
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 
+# --- Standalone Data Processors ---
+def process_status_data(status_data: dict[str, object], dev: DeviceData) -> None:
+    """Processes PLC status and timing stats data."""
+    status_string = status_data.get("status", "Unknown")
+    dev.run_mode = (
+        status_string.replace("STATUS:", "").strip().upper()
+        if "STATUS:" in status_string
+        else status_string.upper()
+    )
+    dev.status = "Online" if dev.run_mode == "RUNNING" else "Offline"
+
+    if status_data.get("plc_file"):
+        dev.logic.name = Path(status_data["plc_file"]).name
+        dev.store(
+            "files",
+            File(
+                name=Path(status_data["plc_file"]).name,
+                description="Currently loaded PLC program",
+            ),
+        )
+
+    if "timing_stats" in status_data:
+        dev.extra["timing_stats"] = status_data["timing_stats"]
+        program_name = status_data["timing_stats"].get("name")
+        if program_name:
+            dev.logic.name = program_name
+
+
+def process_users_data(users_data: list[dict[str, object]], dev: DeviceData) -> None:
+    """Processes user information data."""
+    for user_info in users_data:
+        peat_user = User(
+            name=user_info.get("username"),
+            roles={user_info.get("role")} if user_info.get("role") else set(),
+            id=str(user_info.get("id")),
+        )
+        dev.store("users", peat_user)
+
+
+def process_logs_data(logs_data: dict[str, object], dev: DeviceData) -> None:
+    """Processes runtime logs data."""
+    log_content = ""
+    for log_entry in logs_data["runtime-logs"]:
+        peat_event = Event(
+            created=utils.parse_date(log_entry.get("timestamp")),
+            message=log_entry.get("message"),
+            severity=log_entry.get("level"),
+            id=str(log_entry.get("id")),
+            dataset="runtime",
+        )
+        dev.store("event", peat_event)
+
+        log_content += (
+            f"[{log_entry.get('level')}][ID: {log_entry.get('id')}] "
+            f"{log_entry.get('timestamp')}: {log_entry.get('message')}\n"
+        )
+
+    dev.write_file(log_content, "openplc_runtime.log")
+    dev.store("files", File(name="openplc_runtime.log", description="Runtime Logs"))
+
+
+def process_compilation_data(compilation_data: dict[str, object], dev: DeviceData) -> None:
+    """Processes compilation status data."""
+    comp_content = f"Status: {compilation_data.get('status', 'N/A')}\n"
+    comp_content += f"Exit Code: {compilation_data.get('exit_code', 'N/A')}\n---\n"
+    comp_content += "\n".join(compilation_data.get("logs", []))
+
+    dev.write_file(comp_content, "compilation_status.log")
+    dev.store("files", File(name="compilation_status.log", description="Last Compilation Status"))
+
+
+def process_serial_data(serial_data: dict[str, object], dev: DeviceData) -> None:
+    """Processes serial ports data."""
+    ports = serial_data.get("ports", [])
+    for port_info in ports:
+        port_name = port_info.get("device")
+        if port_name:
+            serial = Interface(
+                type="serial",
+                serial_port=port_name,
+                name=port_info.get("description"),
+            )
+            dev.store("interface", serial)
+
+
+def process_plugin_data(
+    plugin_name: str, command: str, plugin_data: dict[str, object], dev: DeviceData
+) -> None:
+    """Processes API plugin query data."""
+    if "plugin_status" not in dev.extra:
+        dev.extra["plugin_status"] = {}
+
+    dev.extra["plugin_status"][plugin_name] = plugin_data
+    file_content = json.dumps(plugin_data, indent=2)
+    filename = f"{plugin_name}_{command}.json"
+
+    dev.write_file(file_content, filename)
+    dev.store(
+        "files",
+        File(
+            name=filename,
+            description=f"Output for {plugin_name} plugin ({command})",
+        ),
+    )
+
+
+# --- Module Class ---
 class OpenPLCv4(DeviceModule):
     """PEAT Module for interacting with the OpenPLC Runtime v4 API over HTTPS."""
 
@@ -218,86 +325,28 @@ class OpenPLCv4(DeviceModule):
         serial_data = cls._make_api_request(dev, "GET", "serial-ports")
 
         if status_data:
-            status_string = status_data.get("status", "Unknown")
-            dev.run_mode = (
-                status_string.replace("STATUS:", "").strip().upper()
-                if "STATUS:" in status_string
-                else status_string.upper()
-            )
-            dev.status = "Online" if dev.run_mode == "RUNNING" else "Offline"
-            if status_data.get("plc_file"):
-                dev.logic.name = Path(status_data["plc_file"]).name
-                dev.store(
-                    "files",
-                    File(
-                        name=Path(status_data["plc_file"]).name,
-                        description="Currently loaded PLC program",
-                    ),
-                )
-            if "timing_stats" in status_data:
-                dev.extra["timing_stats"] = status_data["timing_stats"]
-                program_name = status_data["timing_stats"].get("name")
-                if program_name:
-                    dev.logic.name = program_name
+            process_status_data(status_data, dev)
             cls.log.info("Successfully retrieved PLC status with stats")
 
         if users_data and isinstance(users_data, list):
-            for user_info in users_data:
-                peat_user = User(
-                    name=user_info.get("username"),
-                    roles={user_info.get("role")} if user_info.get("role") else set(),
-                    id=str(user_info.get("id")),
-                )
-                dev.store("users", peat_user)
+            process_users_data(users_data, dev)
             cls.log.info("Successfully retrieved users")
 
         if logs_data and "runtime-logs" in logs_data:
-            log_content = ""
-            for log_entry in logs_data["runtime-logs"]:
-                peat_event = Event(
-                    created=utils.parse_date(log_entry.get("timestamp")),
-                    message=log_entry.get("message"),
-                    severity=log_entry.get("level"),
-                    id=str(log_entry.get("id")),
-                    dataset="runtime",
-                )
-                dev.store("event", peat_event)
-                log_content += f"[{log_entry.get('level')}][ID: {log_entry.get('id')}] \
-                    {log_entry.get('timestamp')}: {log_entry.get('message')}\n"
-            dev.write_file(log_content, "openplc_runtime.log")
-            dev.store("files", File(name="openplc_runtime.log", description="Runtime Logs"))
+            process_logs_data(logs_data, dev)
             cls.log.info("Successfully retrieved PLC log file")
 
         if compilation_data:
-            comp_content = f"Status: {compilation_data.get('status', 'N/A')}\n"
-            comp_content += f"Exit Code: {compilation_data.get('exit_code', 'N/A')}\n---\n"
-            comp_content += "\n".join(compilation_data.get("logs", []))
-            dev.write_file(comp_content, "compilation_status.log")
-            dev.store(
-                "files", File(name="compilation_status.log", description="Last Compilation Status")
-            )
+            process_compilation_data(compilation_data, dev)
             cls.log.info("Successfully retrieved PLC program compilation log file")
 
-        # Pull available serial ports from device and store as interfaces
         if serial_data and isinstance(serial_data.get("ports"), list):
-            ports = serial_data.get("ports", [])
-            for port_info in ports:
-                port_name = port_info.get("device")
-                if port_name:
-                    serial = Interface(
-                        type="serial",
-                        serial_port=port_name,
-                        name=port_info.get("description"),
-                    )
-                    dev.store("interface", serial)
+            process_serial_data(serial_data, dev)
             cls.log.info("Successfully retrieved available serial ports")
 
         plugins_to_query = dev.options.get("openplcv4", {}).get("plugins_to_query", {})
         if plugins_to_query:
             cls.log.info(f"Querying plugins: {', '.join(plugins_to_query.keys())}")
-
-            if "plugin_status" not in dev.extra:
-                dev.extra["plugin_status"] = {}
 
             for plugin_name, command in plugins_to_query.items():
                 cls.log.debug(f"Sending command: '{command}' to plugin: '{plugin_name}'...")
@@ -306,24 +355,13 @@ class OpenPLCv4(DeviceModule):
                     dev, "POST", "plugin-command", json_payload=payload
                 )
                 if plugin_data:
+                    process_plugin_data(plugin_name, command, plugin_data, dev)
                     cls.log.info(
                         f"Successfully retrieved plugin data: '{plugin_name}' ({command})"
                     )
-                    dev.extra["plugin_status"][plugin_name] = plugin_data
-                    file_content = json.dumps(plugin_data, indent=2)
-                    filename = f"{plugin_name}_{command}.json"
-                    dev.write_file(file_content, filename)
-                    dev.store(
-                        "files",
-                        File(
-                            name=filename,
-                            description=f"Output for {plugin_name} plugin ({command})",
-                        ),
-                    )
                 else:
                     cls.log.warning(
-                        f"Failed to execute command '{command}' \
-                        on plugin '{plugin_name}'"
+                        f"Failed to execute command '{command}' on plugin '{plugin_name}'"
                     )
 
         dev.successful_pulls["openplc_api"] = True

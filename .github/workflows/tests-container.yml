@@ -1,4 +1,4 @@
-name: Live Tests
+name: Container Tests
 
 on:
   push:
@@ -30,7 +30,7 @@ jobs:
             --cap-add=SYS_RESOURCE \
             -v openplc-runtime-data:/var/run/runtime \
             ghcr.io/autonomy-logic/openplc-runtime:latest
-          
+
           echo "Waiting for OpenPLC API to initialize..."
           timeout 60 bash -c 'until curl -k -s https://127.0.0.1:8443/api/version > /dev/null; do echo "Waiting..."; sleep 2; done'
           echo "OpenPLC container is ready!"
@@ -63,7 +63,7 @@ jobs:
         run: pdm sync -G test
       - name: Run OpenPLC Tests
         run: |
-          pdm run pytest --basetemp=./pytest_files -s -v --run-live -m "live" ./tests/modules/openplc/test_openplcv4.py
+          pdm run pytest --basetemp=./pytest_files -s -v --run-container ./tests/modules/openplc/test_openplcv4_container.py
       - name: Upload Test Results
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

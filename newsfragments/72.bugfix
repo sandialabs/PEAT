@@ -1,0 +1,1 @@
+Fixed a bug in the core scanning API that caused default port state pollution. The scanner now strictly maps open services by `(protocol, port)` pairs and safely reverts transient configuration changes, ensuring modules with custom port assignments do not overwrite or pollute global port states during fingerprinting.

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 
 from peat import datastore
@@ -8,9 +6,9 @@ from peat.modules.openplc.openplcv4 import OpenPLCv4
 # -----------------------------------------------------------------------------
 # Module-level Marker
 # -----------------------------------------------------------------------------
-# This marks every test case in this file as a 'live' test, meaning they will
+# This marks every test case in this file as a container test, they will
 # be skipped by default in local runs and the core CI suite.
-pytestmark = pytest.mark.live
+pytestmark = pytest.mark.container
 
 
 # -----------------------------------------------------------------------------
@@ -23,19 +21,6 @@ def live_dev(mocker):
     dev = datastore.get("127.0.0.1")
     dev._runtime_options["openplcv4"] = {"username": "admin", "password": "admin"}
     return dev
-
-
-@pytest.fixture
-def production_plc_zip():
-    """Locates the production Relay_Blink_PLC.zip file."""
-    zip_path = Path("tests/modules/openplc/data_files/Relay_Blink_PLC.zip")
-    if not zip_path.exists():
-        raise FileNotFoundError(
-            f"Expected PLC program zip file not found at: {zip_path.resolve()}.\n"
-            "Please ensure the file is committed to your repository in the \
-                'data_files/' directory."
-        )
-    return zip_path
 
 
 # -----------------------------------------------------------------------------
@@ -56,12 +41,13 @@ def test_scan_and_fingerprint(live_dev):
     assert any(s.protocol == "openplc_api" and s.port == 8443 for s in live_dev.service)
 
 
-def test_push_valid_file(live_dev, production_plc_zip):
+def test_push_valid_file(live_dev, datapath):
     """
     Tests successful PUSH.
     Pushes a valid program zip
     """
-    result = OpenPLCv4._push(live_dev, production_plc_zip, "")
+    zip_path = datapath("Relay_Blink_PLC.zip")
+    result = OpenPLCv4._push(live_dev, zip_path, "")
     assert result is True, "Failed to push a valid PLC program."
     assert any(e.action == "file_push" and e.outcome == "success" for e in live_dev.event)
 

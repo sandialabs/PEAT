@@ -23,6 +23,8 @@ For initial setup of the runtime environment, please refer to the official Auton
    * `OpenPLC Runtime v4 GitHub <https://github.com/Autonomy-Logic/openplc-runtime>`__
    * `OpenPLC Editor GitHub <https://github.com/Autonomy-Logic/openplc-editor>`__
    * `Autonomy Edge OpenPLC Documentation <https://edge.autonomylogic.com/docs/>`__
+   * `OpenPLC Runtime v4 Documentation <https://github.com/Autonomy-Logic/openplc-runtime/tree/main/docs>`__
+   * `OpenPLC Editor Documentation <https://github.com/Autonomy-Logic/openplc-editor/tree/main/docs>`__
 
 PEAT Module Configuration
 =========================

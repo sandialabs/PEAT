@@ -41,7 +41,7 @@ config.RESOLVE_HOSTNAME = False
 atexit.unregister(exit_handler.run_handlers)
 
 
-# This adds "--run-slow", "--run-ci", "--run-broadcast-ci", and "-run-live" as pytest CLI arguments
+# This adds "--run-slow", "--run-ci", "--run-broadcast-ci", and "--run-container" pytest arguments
 # https://docs.pytest.org/en/latest/example/simple.html
 def pytest_addoption(parser):
     parser.addoption("--run-slow", action="store_true", default=False, help="run slow tests")
@@ -58,10 +58,10 @@ def pytest_addoption(parser):
         help="run live broadcast tests intended to be used in GitLab CI on PEAT rack",
     )
     parser.addoption(
-        "--run-live",
+        "--run-container",
         action="store_true",
         default=False,
-        help="run live integration and OpenPLC tests targeting a local instance or PHENIX",
+        help="run container integration tests targeting a docker instance",
     )
 
 
@@ -86,7 +86,7 @@ def pytest_collection_modifyitems(config, items):
     # arguments (e.g. IP addresses).
     # The "GITLAB_CI" variable is automatically set by GitLab CI runners.
     if not config.getoption("--run-ci") and (
-        "live-tests" not in os.environ.get("CI_JOB_STAGE", "")
+        "container-tests" not in os.environ.get("CI_JOB_STAGE", "")
     ):
         skip_ci = pytest.mark.skip(
             reason="only run when run on a GitLab CI runner in "
@@ -109,15 +109,15 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_broadcast_ci)
 
     # -------------------------------------------------------------
-    # Live Tests Handling
+    # Container Tests Handling
     # -------------------------------------------------------------
-    # Tests marked with "pytest.mark.live()" will be skipped by default
-    # unless the CLI argument "--run-live" is explicitly provided.
-    if not config.getoption("--run-live"):
-        skip_live = pytest.mark.skip(reason="only run when --run-live is specified")
+    # Tests marked with "pytest.mark.container()" will be skipped by default
+    # unless the CLI argument "--run-container" is explicitly provided.
+    if not config.getoption("--run-container"):
+        skip_container = pytest.mark.skip(reason="only run when --run-container is specified")
         for item in items:
-            if "live" in item.keywords:
-                item.add_marker(skip_live)
+            if "container" in item.keywords:
+                item.add_marker(skip_container)
 
 
 def pytest_assertrepr_compare(op, left, right):  # noqa: ARG001
