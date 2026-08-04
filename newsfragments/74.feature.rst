@@ -1,0 +1,1 @@
+Added a ``CODEOWNERS`` file to provide clear ownership of the codebase and automatically request reviews from maintainers on pull requests.

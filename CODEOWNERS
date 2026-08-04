@@ -1,0 +1,15 @@
+# CODEOWNERS
+#
+# Each line is a file pattern followed by one or more owners, using their
+# GitHub usernames. These owners will be requested for review when a pull
+# request changes matching code, and are the point of contact for questions
+# about that area of the codebase.
+#
+# This is used in addition to AUTHORS, which tracks the list of all
+# contributors to the project.
+#
+# For more info, see:
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owner for everything in the repo, unless a later match takes precedence
+* @GhostofGoes
