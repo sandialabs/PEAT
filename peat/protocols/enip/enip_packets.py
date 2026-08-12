@@ -187,7 +187,7 @@ class EncapData(Packet):
 # Bugfix (cegoes, 01/10/2025): Scapy 2.6.0 changed dissection behavior.
 # Previously, if the bytes passed were too short to fully dissect, then
 # the dissection would end between fields. Remaining fields would be kept
-# with default values. The new behavior requires these points to be explictly
+# with default values. The new behavior requires these points to be explicitly
 # defined, using MayEnd.
 # Details: https://github.com/secdev/scapy/pull/4012
 class GetAttributesAllResponse(Packet):

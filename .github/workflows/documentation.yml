@@ -22,7 +22,7 @@ jobs:
     name: Build documentation (HTML)
     runs-on: ubuntu-24.04
     steps:
-      # This will block outbound connections that aren't explictly allowed
+      # This will block outbound connections that aren't explicitly allowed
       # If this causes a pipeline to fail, investigate what endpoints were blocked.
       # If they are legitimate, then change to audit mode, run pipeline and collect
       # endpoints from StepSecurity report, update list of endpoints, then change back
