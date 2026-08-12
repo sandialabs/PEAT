@@ -75,12 +75,14 @@ Here is how you can get started:
    - **Pre-commit validation**: Ensures fragments are properly formatted before commit
    - **Flexible configuration**: Fragment types can be customized in ``pyproject.toml``
 
-   Instead of manually editing CHANGELOG.rst, you need to create a "news fragment" file in the ``newsfragments/`` directory.
+   Instead of manually editing CHANGELOG.rst, you need to create at least one "news fragment" file in the ``newsfragments/`` directory.
+   You can manually create these files manually or use `pdm run towncrier create`. *Note that you must provide the Pull Request number 
+   when towncrier asks for an issue number in the prompt.* You can skip the prompt by running something like `pdm run towncrier create 1234.feature`.
 
    **News Fragment Format:**
 
-   - Filename: ``<PR_NUMBER>.<TYPE>.rst``
-   - Where ``<PR_NUMBER>`` is your Pull Request number (or issue number)
+   - Filename: ``<PR_NUMBER>.<TYPE>``
+   - Where ``<PR_NUMBER>`` is your Pull Request number
    - Where ``<TYPE>`` is one of: ``feature``, ``bugfix``, ``doc``, ``removal``, or ``misc``
 
    **Example:** ``newsfragments/1234.feature.rst``
@@ -129,7 +131,7 @@ Here is how you can get started:
    .. code-block:: bash
 
       # Preview what the changelog will look like for version X.Y.Z
-      towncrier build --draft --version X.Y.Z
+      pdm run towncrier build --draft --version X.Y.Z
 
       # Or use the convenience script
       ./scripts/build_changelog.sh X.Y.Z

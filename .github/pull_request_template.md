@@ -20,8 +20,6 @@ Completion of all checklist items signals to maintainers that a PR is fully read
 - [ ] I have performed a self-review of my code
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
 - [ ] I have tested my code
-- [ ] I have added a description of my changes to the changelog in `CHANGELOG.rst`
-- [ ] Apply appropriate Tags to this PR, if any (e.g. bugfix, enhancement(feature), documentation, etc.)
-- [ ] Removing "Draft" status from the PR (if applicable).
+- [ ] I have removed the "Draft" status from the PR (if applicable).
+- [ ] I have created the appropriate towncrier news fragments for my PR (See `Update the CHANGELOG` in the [Contributing Guide](https://github.com/sandialabs/peat/tree/main/.github/CONTRIBUTING.md))

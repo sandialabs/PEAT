@@ -309,6 +309,7 @@ dev = [
     "pylint",
     # Used for pre-commit hooks (https://pre-commit.com)
     "pre-commit",
+    "towncrier",
 ]
 docs = [
     # Sphinx is the primary tool that builds the docs
@@ -780,7 +781,7 @@ package_dir = "peat"
 # which does not exist, so ``towncrier build``/``check`` silently find nothing.
 directory = "newsfragments"
 filename = "CHANGELOG.rst"
+create_add_extension = false
 title_format = "{version} ({project_date})"
 issue_format = "`#{issue} <https://github.com/sandialabs/PEAT/issues/{issue}>`_"
 all_bullets = true
-

@@ -29,15 +29,40 @@ jobs:
       - name: Harden Runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
         with:
-          egress-policy: audit
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            raw.githubusercontent.com:443
+            pdm-project.org:443
+            pdm.fming.dev:443
+            pypi.org:443
+            files.pythonhosted.org:443
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with: 
+            persist-credentials: true
+            fetch-depth: 0
+            ref: main
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
         with:
-            fetch-tags: true
-            fetch-depth: 0  # checkout full history
-
-      # - name: Build changelog
-      #  run: towncrier build --yes
+          python-version: "3.12"
+          cache: true
+      - name: Install dependencies
+        run: pdm sync -G towncrier
+      - name: Build draft changelog
+        run: pdm run towncrier build --yes
+      - name: Update CHANGELOG.rst & push
+        run: |
+          # GITHUB_REF is "refs/tags/v1.2.3", strip the prefix:
+          TAG=${GITHUB_REF#refs/tags/}
+          echo "- $TAG: automated release entry on $(date +'%Y-%m-%d')" >> ChangeLog.rst
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.rst
+          git commit -m "docs: Updated CHANGELOG for tag $TAG [skip ci]"
+          git push
 
       - name: Install apt dependencies
         uses: awalsh128/cache-apt-pkgs-action@553a35bb8ebd9fcabcb1c9451aa4c98e1b4ca8a9 # v1.6.3

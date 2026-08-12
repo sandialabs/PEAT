@@ -24,6 +24,73 @@ jobs:
           types: >
             build|chore|ci|docs|doc|feat|fix|bug|minor|patch|perf|style|refactor|test|tests|revert|deps|dependencies|sec|security|deprecate
 
+  check-newsfragments:
+    name: Changelog Fragment Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0s
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            raw.githubusercontent.com:443
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - name: News Fragments Added
+        shell: bash
+        run: |
+          set -euo pipefail
+          
+          PR_NUM=${{ github.event.pull_request.number }}
+
+          # require at least one fragment file named PR.<category>
+          if ! ls newsfragments/${PR_NUM}.* >/dev/null 2>&1; then
+            echo "::error ::Missing newsfragment file: newsfragments/${PR_NUM}.*"
+            echo "Please add at least one fragment (e.g. newsfragments/${PR_NUM}.feature or newsfragments/${PR_NUM}.bugfix) so towncrier can pick it up for the changelog. It's now required for all PRs, even minor changes."
+            echo "Refer to the 'Update the CHANGELOG' section in CONTRIBUTING.rst"
+            exit 1
+          else
+            echo -e "Found fragment(s):"
+            ls newsfragments/${PR_NUM}.*
+          fi
+
+  # This verifies that the release.yml version will pass too
+  check-changelog: 
+    name: Changelog Construction Check
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      discussions: write
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0s
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            github.com:443
+            api.github.com:443
+            raw.githubusercontent.com:443
+            pdm-project.org:443
+            pdm.fming.dev:443
+            pypi.org:443
+            files.pythonhosted.org:443
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
+        with:
+          python-version: "3.12"
+          cache: true
+      - name: Install dependencies
+        run: pdm sync -G towncrier
+      - name: Build draft changelog
+        run: pdm run towncrier build --draft
+
   code-quality:
     name: Code Quality Checks
     runs-on: ubuntu-24.04
