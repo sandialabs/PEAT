@@ -55,8 +55,8 @@ hidden_imports = [
 
 
 excludes = [
-    'matplotlib', 'IPython', 'jedi', 'Cryptodome',
-    'zmq', 'pydoc', 'setuptools', 'pycryptodomex',
+    'matplotlib', 'IPython', 'jedi',
+    'zmq', 'pydoc', 'setuptools',
     'pygments', 'traitlets', 'tcl', 'Tkinter',
     'Cython', 'cython', 'ipython', 'tox', 'wheel', 'virtualenv',
     'requests-toolbelt', 'fire', 'coverage', 'mypy', 'pip', 'PyGObject',

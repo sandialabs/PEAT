@@ -1,0 +1,6 @@
+{
+  "ip": "192.0.2.10",
+  "device_type": "example-device",
+  "hostname": "example-plc",
+  "pull_success": true
+}

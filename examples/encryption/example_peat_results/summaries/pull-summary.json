@@ -1,0 +1,11 @@
+{
+  "command": "pull",
+  "device_count": 1,
+  "devices": [
+    {
+      "ip": "192.0.2.10",
+      "device_type": "example-device",
+      "pull_success": true
+    }
+  ]
+}

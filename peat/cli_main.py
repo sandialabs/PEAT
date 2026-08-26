@@ -15,8 +15,10 @@ from peat import (
     config,
     consts,
     datastore,
-    decrypt,
-    encrypt,
+    decrypt_config_api,
+    decrypt_results_api,
+    encrypt_config_api,
+    encrypt_results_api,
     exit_handler,
     heat_main,
     initialize_peat,
@@ -183,8 +185,8 @@ def oneshot_main(args: dict[str, Any]) -> bool:
     if args["func"] == "heat":
         return heat_main()
 
-    if args["func"] == "encrypt":
-        result = encrypt(args["filepath"], args["user-password"])
+    if args["func"] == "encrypt_config":
+        result = encrypt_config_api(args["filepath"], args["user-password"])
         if result:
             log.info("Done encrypting file, exiting...")
             sys.exit(0)
@@ -192,8 +194,8 @@ def oneshot_main(args: dict[str, Any]) -> bool:
             log.critical("Error encountered while encrypting file, exiting...")
             sys.exit(1)
 
-    if args["func"] == "decrypt":
-        result = decrypt(
+    if args["func"] == "decrypt_config":
+        result = decrypt_config_api(
             config_path=args["filepath"],
             output_path=args["write-path"],
             user_password=args["user-password"],
@@ -203,6 +205,30 @@ def oneshot_main(args: dict[str, Any]) -> bool:
             sys.exit(0)
         else:
             log.critical("Error encountered while decrypting file, exiting...")
+            sys.exit(1)
+
+    if args["func"] == "encrypt_results":
+        filepath = args["filepath"]
+        writepath = args["write-path"]
+        user_password = args["user-password"]
+        result = encrypt_results_api(filepath, writepath, user_password)
+        if result:
+            log.info("Done encrypting results, exiting...")
+            sys.exit(0)
+        else:
+            log.critical("Error encountered while encrypting results, exiting...")
+            sys.exit(1)
+
+    if args["func"] == "decrypt_results":
+        filepath = args["filepath"]
+        writepath = args["write-path"]
+        user_password = args["user-password"]
+        result = decrypt_results_api(filepath, writepath, user_password)
+        if result:
+            log.info("Done decrypting results archive, exiting...")
+            sys.exit(0)
+        else:
+            log.critical("Error encountered while decrypting results archive, exiting...")
             sys.exit(1)
 
     targets = []  # type: list[str]
