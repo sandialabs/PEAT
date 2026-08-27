@@ -110,6 +110,7 @@ from peat import (
     state,
     utils,
 )
+from peat.file_signature import FileSignature
 from peat.protocols import FTP, check_tcp_port
 
 from .relay_parse import (
@@ -189,6 +190,16 @@ class SELRelay(DeviceModule):
         # *.CID (e.g. SET_61850.CID)
         "*.CID",
         "*.cid",
+    ]
+    file_signatures = [
+        FileSignature(
+            "sel_relay.rdb",
+            magic_number=olefile.MAGIC.hex(),  # "d0cf11e0a1b11ae1"
+        ),
+        FileSignature(
+            "cfg.txt",
+            substrings=["[INFO]", "FID"],
+        ),
     ]
 
     # These are what's known to work. Others may work as well

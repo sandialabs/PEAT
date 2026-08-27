@@ -21,6 +21,7 @@ from scp import SCPClient
 
 from peat import DeviceData, DeviceModule, datastore, exit_handler
 from peat.api.identify_methods import IPMethod
+from peat.file_signature import FileSignature
 from peat.protocols import HTTP, SSH
 
 from .fortigate_conf import fg_conf_to_dict, process_fg_conf
@@ -46,6 +47,20 @@ class Fortigate(DeviceModule):
         "fortianalyzer-event*.log",
         "memory-event-*.log",
         "sys_config",
+    ]
+    file_signatures = [
+        FileSignature(
+            "fortigate.conf",
+            substrings=["config-version=", "config system global", "vdom"],
+        ),
+        FileSignature(
+            "debug.log",
+            substrings=["FortiGate", "Diagnose output"],
+        ),
+        FileSignature(
+            "event.log",
+            substrings=["date=", "time=", "eventtime=", "tz=", "logid=", "vd="],
+        ),
     ]
     can_parse_dir: bool = True
     module_aliases = ["fg100", "fg"]

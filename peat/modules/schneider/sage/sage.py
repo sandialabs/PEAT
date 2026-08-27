@@ -42,6 +42,7 @@ from peat import (
 )
 from peat.data.data_utils import merge_models
 from peat.data.models import Memory
+from peat.file_signature import FileSignature
 from peat.parsing.command_parsers import ArpParser, IfconfigParser
 from peat.protocols import FTP, HTTP
 
@@ -83,6 +84,117 @@ class Sage(DeviceModule):
         "*_firmware*.tar.gz",
         "rtusetup.xml",
         "ACCESS.XML",
+    ]
+    file_signatures = [
+        FileSignature(
+            "rtusetup.xml",
+            xml_tags=["RTU_SETUP"],
+        ),
+        FileSignature(
+            "features.xml",
+            xml_tags=["FEATURES"],
+        ),
+        FileSignature(
+            "c3835.xml",
+            xml_tags=["C3835_CARDS"],
+        ),
+        FileSignature(
+            "dcana.xml",
+            xml_tags=["DCANA"],
+        ),
+        FileSignature(
+            "timing.xml",
+            xml_tags=["ROOT", "TIMERS"],
+        ),
+        FileSignature(
+            "calc.xml",
+            xml_tags=["CALC_ROOT"],
+        ),
+        FileSignature(
+            "rtu_sts.xml",
+            xml_tags=["ROOT", "RTU_STS"],
+        ),
+        FileSignature(
+            "sfb.xml",
+            xml_tags=["SFB_CARDS"],
+        ),
+        FileSignature(
+            "acc_rate.xml",
+            xml_tags=["ACC_RATE"],
+        ),
+        FileSignature(
+            "alarms.xml",
+            xml_tags=["ROOT", "ALARMS", "DI"],
+        ),
+        FileSignature(
+            "alarming.xml",
+            xml_tags=["ROOT", "ALARMS", "AI_MAP"],
+        ),
+        FileSignature(
+            "almdev.xml",
+            xml_tags=["ROOT", "DEVICE_ATTRIBUTES"],
+        ),
+        FileSignature(
+            "bbdi.xml",
+            xml_tags=["BBDI"],
+        ),
+        FileSignature(
+            "cbcconf.xml",
+            xml_tags=["CBC", "CBC_PARAM"],
+        ),
+        FileSignature(
+            "astconf.xml",
+            xml_tags=["AST", "AST_DB"],
+        ),
+        FileSignature(
+            "anunctor.xml",
+            xml_tags=["ANNUNCIATOR", "CELLS"],
+        ),
+        FileSignature(
+            "cmdlog.xml",
+            xml_tags=["CMDLOG", "CMDLOG_PARAM"],
+        ),
+        FileSignature(
+            "comasign.xml",
+            xml_tags=["COM_ASSIGN", "PORT"],
+        ),
+        FileSignature(
+            "sprcodes.xml",
+            xml_tags=["ROOT", "CODE"],
+            strings=["PNT="],
+        ),
+        FileSignature(
+            "soelog.xml",
+            xml_tags=["SOELOG", "SOELOG_PARAM"],
+        ),
+        FileSignature(
+            "leds.xml",
+            xml_tags=["ROOT", "LEDS", "LED"],
+        ),
+        FileSignature(
+            "relays.xml",
+            xml_tags=["ROOT", "RELAYS", "RLY"],
+        ),
+        FileSignature(
+            "nrgcalc.xml",
+            xml_tags=["NRGCALC", "NRGCALC_PARAM"],
+        ),
+        FileSignature(
+            "bbrelay.xml",
+            xml_tags=["RELAYS", "BB"],
+        ),
+        FileSignature(
+            "btstconf.xml",
+            xml_tags=["BTEST", "BTEST_RECORD"],
+        ),
+        FileSignature(
+            "aci.xml",
+            xml_tags=["ACI_DB", "FMR"],
+        ),
+        FileSignature(
+            "aci1250.xml",
+            xml_tags=["ACI_DB", "FMR", "NOMINAL"],
+        ),
     ]
     can_parse_dir = True
     annotate_fields = {

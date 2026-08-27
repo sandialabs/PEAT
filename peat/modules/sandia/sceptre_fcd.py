@@ -67,6 +67,7 @@ from peat import (
     config,
     datastore,
 )
+from peat.file_signature import FileSignature
 from peat.protocols import FTP
 
 
@@ -81,6 +82,12 @@ class SCEPTRE(DeviceModule):
     model = "SCEPTRE"
     brand = "SCEPTRE"
     filename_patterns = ["*.xml", "config.xml"]
+    file_signatures = [
+        FileSignature(
+            "config.xml",
+            xml_tags=["SCEPTRE"],
+        ),
+    ]
     default_options = {
         "ftp": {
             "user": "sceptre",
