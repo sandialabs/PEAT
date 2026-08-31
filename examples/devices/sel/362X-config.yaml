@@ -1,0 +1,44 @@
+metadata:
+  name: "3622-test-config"
+  description: "Configuration file for the SEL-3622 used for testing"
+  author: "fsantan"
+  created: "July 16th, 2026"
+  updated: "July 23rd, 2026"
+
+device_options:
+  web:
+    user: "admin"
+    pass: "Admin123!"
+    timeout: 30.0
+
+hosts:
+  - label: "SEL-3620"
+    comment: "SEL-3620 Security Gateway"
+    identifiers:
+      ip: "127.0.0.1"
+    peat_module: "sel-362x"
+    options:
+      https:
+        port: 443
+        timeout: 30.0
+      
+      # ---------------------------------------------------------------------------- #
+      #                      Settings related to the 362x module                     #
+      # ---------------------------------------------------------------------------- #
+
+      # Log-in timeout; defaults to 10s.
+      login_timeout: 10
+
+      # Settings related to how to pull the system settings
+      system_settings_backup:
+        # Password used to encrypt the system settings backup file(s)
+        password: "Peat!123"
+
+        # Maximum number of attempts for pulling the system settings backup before forcing a pull
+        #
+        # This is necessary because the "last-generated backup file hash" value won't change until
+        # the backup file is generated (assuming that the configuration changed between generations)
+        pull_attempts: 10
+
+        # How long to wait, in seconds, between attempts to pull the system settings backup file
+        pull_attempt_delay: 10 
