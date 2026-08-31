@@ -14,6 +14,7 @@ from peat import (
     log,
     utils,
 )
+from peat.file_signature import FileSignature
 
 
 class DeviceModule:
@@ -83,6 +84,18 @@ class DeviceModule:
     Patterns are a literal name (``*SET_ALL.TXT``) or a Unix shell glob
     (``*.rdb``), are case-insensitive, and must start with a wildcard
     character (``*``). Globs can be anything accepted by :mod:`glob`.
+    """
+
+    file_signatures: list[FileSignature] = []
+    """
+    Signatures to determine if file data is parsable by this module,
+    and what type of file it is, e.g. config vs log vs firmware.
+
+    It uses a ``FileSignature`` object, which contains the expected or
+    targeted filename as well as the associated signatures that must ALL
+    match. The signatures can be magic bytes, XML tags, substrings, or
+    a custom function (named or lambda) which receives the ``BinaryIO``
+    to check and returns a True (matches) or False (does not match).
     """
 
     can_parse_dir: bool = False
@@ -290,13 +303,12 @@ class DeviceModule:
             else:
                 cls.log.debug(f"Parsing raw data with type '{to_parse.__class__.__name__}'")
 
-            # TODO: use "magic" fingerprinting to determine type
-            #   Implement using a "file_magic_methods" class
-            #   attribute with list of functions
-            #   sceptre: check for a string in XML file to "fingerprint" the file
             label = "raw-unparsed-data"
             ext = ""
 
+            # NOTE: Use as initial check for naming
+            # - Modules have existing uncovered pattern logic; wildcard names
+            # - Modules need more signature data; uniqueness, greater coverage, etc.
             for pat in cls.filename_patterns:
                 if label in pat and "." in pat:
                     ext = f".{pat.partition('.')[2]}"
@@ -305,8 +317,19 @@ class DeviceModule:
             if ext and not ext.startswith("."):
                 ext = f".{ext}"
 
+            # Attempt to use signatures to label if no prior pattern matches
+            # - Defaults to prior behavior if no signature match
+            if label == "raw-unparsed-data" and not ext:
+                cls.log.debug("Signature checking data")
+                for signature in cls.file_signatures:
+                    if signature.matches(to_parse):
+                        cls.log.debug("File signature match found, updating label.")
+                        label = signature.default_filename
+                        break
+
             file = config.TEMP_DIR / consts.sanitize_filename(f"{label}{ext}")
 
+            # NOTE: `utils.write_file()` handles filename conflict type issues
             if not utils.write_file(data=to_parse, file=file):
                 cls.log.error("Parse failed due to an error during file writing")
                 return None

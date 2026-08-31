@@ -47,6 +47,7 @@ from peat import (
     datastore,
     utils,
 )
+from peat.file_signature import FileSignature
 from peat.parsing.tc6 import TC6
 from peat.protocols import FTP, SNMP
 
@@ -85,6 +86,12 @@ class M340(DeviceModule):
     brand = "Modicon"
     model = "M340"
     filename_patterns = ["*.apx"]
+    file_signatures = [
+        FileSignature(
+            "project.apx",
+            magic_number="415058",  # APX
+        ),
+    ]
     default_options = {
         "ftp": {"creds": [["loader", "fwdownload"]]},
         "m340": {"use_network_for_config": True, "generate_openplc_project": None},
