@@ -1,1 +1,0 @@
-Add MySQL/MariaDB protocol class (``peat/protocols/mysql.py``) with unauthenticated server fingerprinting via TCP greeting packet, PyMySQL-backed query helpers, and ``on_connected``/``enumerate`` subclass hooks for device-specific extensions.
