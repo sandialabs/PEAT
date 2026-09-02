@@ -11,6 +11,8 @@ permissions:
 jobs:
   commits:
     runs-on: ubuntu-latest
+    # Conventional Commits does not work on workflow_dispatch from release.yml
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
