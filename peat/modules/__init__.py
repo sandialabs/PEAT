@@ -8,7 +8,7 @@ from peat.modules.openplc import OpenPLCv4
 from peat.modules.rockwell import L5X, ControlLogix
 from peat.modules.sandia import SCEPTRE
 from peat.modules.schneider import M340, Sage
-from peat.modules.sel import SEL3620, SELRTAC, SELRelay
+from peat.modules.sel import SEL362X, SEL3620, SELRTAC, SELRelay
 from peat.modules.siemens import Siprotec
 from peat.modules.uefi import UEFI
 from peat.modules.windows import WindowsCE

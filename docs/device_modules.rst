@@ -214,6 +214,12 @@ SEL 3620 Gateway
    :members:
    :no-undoc-members:
 
+SEL 362X Family of Security Gateways
+------------------------------------
+.. automodule:: peat.modules.sel.sel.sel_362X
+   :members:
+   :no-undoc-members:
+
 Internal APIs
 -------------
 
