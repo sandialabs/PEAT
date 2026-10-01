@@ -1,12 +1,19 @@
 import json
 import os
-from collections import ChainMap
+from collections.abc import Iterator, MutableMapping
 from pathlib import Path
 from types import UnionType  # NOTE: won't be needed once minimum python is 3.14
-from typing import Any, Union, get_args, get_origin, get_type_hints
+from typing import Any, Union, get_args, get_origin
 
 import yaml
 from loguru import logger as log
+from pydantic import PrivateAttr, ValidationInfo, field_validator
+from pydantic_settings import (
+    BaseSettings,
+    JsonConfigSettingsSource,
+    SettingsConfigDict,
+    YamlConfigSettingsSource,
+)
 
 from .consts import PeatError, convert, lower_dict, str_to_bool
 
@@ -58,7 +65,82 @@ yaml.SafeLoader.add_constructor("!ENV", _env_var_constructor)
 yaml.SafeLoader.add_constructor("!JOIN", _join_var_constructor)
 
 
-class SettingsManager(dict):
+# These helpers determine PEAT coercion from resolved annotations before Pydantic validation.
+def _unwrap_optional_type(annotation: Any) -> Any:
+    """
+    Return the non-``None`` member of an ``Optional``/``Union`` annotation.
+
+    Any other annotation is returned unchanged.
+    """
+    origin = get_origin(annotation)
+    if origin is Union or origin is UnionType:
+        remaining = [arg for arg in get_args(annotation) if arg is not type(None)]
+        if len(remaining) == 1:
+            return remaining[0]
+    return annotation
+
+
+def _is_container_type(annotation: Any) -> bool:
+    """If a already ``Optional``-unwrapped annotation is a plain or subscripted list/dict/set."""
+    return annotation in (list, dict, set) or get_origin(annotation) in (list, dict, set)
+
+
+def _annotation_includes_path(annotation: Any) -> bool:
+    """
+    If an annotation is :class:`~pathlib.Path`, or a ``Union`` that includes it, e.g.
+    ``Path | None`` or ``Path | Literal[""]``.
+
+    This ensures path conversion still applies when sentinel values are allowed
+    (see ``DEVICE_DIR``, ``LOG_DIR``, etc. in :mod:`peat.settings`).
+    """
+    if annotation is Path:
+        return True
+    origin = get_origin(annotation)
+    if origin is Union or origin is UnionType:
+        return Path in get_args(annotation)
+    return False
+
+
+def _decode_json_string(value: Any) -> Any:
+    """
+    Parses string values into lists, dicts, or sets if they look like JSON.
+
+    This allows environment variables such as ``PEAT_HASH_ALGORITHMS='["md5", "sha1"]'``
+    to be parsed as a real list, rather than as a single string.
+    """
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except ValueError:
+            return value
+    return value
+
+
+def _coerce_bool_string(value: Any) -> Any:
+    """
+    Accept the extended set of truthy/falsy words PEAT has always supported,
+    e.g. "enable"/"disable"/"up"/"down", in addition to pydantic's own built-in
+    boolean parsing. Non-string values are returned unchanged.
+    """
+    if isinstance(value, str):
+        return str_to_bool(value)
+    return value
+
+
+def _coerce_path_string(value: Any) -> Any:
+    """
+    Expand ``~`` and resolve a path string to an absolute path.
+    An empty string is passed through as-is, since it's
+    a documented sentinel meaning the path/directory setting is disabled.
+
+    Non-string values are returned unchanged.
+    """
+    if isinstance(value, str) and value != "":
+        return Path(os.path.realpath(os.path.expanduser(value)))
+    return value
+
+
+class SettingsManager(BaseSettings):
     """
     Stores and manages configuration values from multiple sources.
 
@@ -66,9 +148,9 @@ class SettingsManager(dict):
     variables and default values as class attributes, much like :mod:`dataclasses`.
 
     .. warning::
-       All class attributes MUST have a type! Otherwise, they will
-       be skipped over and not appear in the list of defaults. This is
-       due to the implementation being a hack on top of ``__annotations__``.
+       All class attributes MUST have a type! Otherwise, they will be skipped over and
+       not appear in the list of defaults, since this is built directly from pydantic's
+       own ``model_fields``.
 
     Order of precedence for configurations
 
@@ -77,7 +159,13 @@ class SettingsManager(dict):
     - Configuration file (YAML or JSON)
     - Default values set in subclasses of this class (example: ``DEBUG: int = 0``)
 
-    Precedence is managed by a :class:`collections.ChainMap`.
+    Each of the first three is tracked in its own internal dict (populated whenever
+    :meth:`load_from_dict`/:meth:`load_from_environment`/:meth:`load_from_file` is
+    called, or a value is assigned directly, e.g. ``config.DEBUG = 2``), so precedence
+    stays fixed regardless of the order those sources actually get loaded in.
+
+    Validation and typecasting of values is powered directly by
+    :mod:`pydantic`/:mod:`pydantic_settings`.
 
     Args:
         label: The type of information being stored
@@ -85,42 +173,118 @@ class SettingsManager(dict):
         init_env: Load values from environment variables during object initialization
     """
 
+    model_config = SettingsConfigDict(
+        extra="ignore",
+        case_sensitive=False,
+        arbitrary_types_allowed=True,
+        validate_assignment=True,
+    )
+
+    env_prefix: str = ""
+    """Prefix used when loading values from environment variables, e.g. ``"PEAT_"``."""
+
+    _label: str = PrivateAttr(default="")
+    _runtime_configs: dict[str, Any] = PrivateAttr(default_factory=dict)
+    _env_configs: dict[str, Any] = PrivateAttr(default_factory=dict)
+    _file_configs: dict[str, Any] = PrivateAttr(default_factory=dict)
+    _scratch: Any = PrivateAttr(default=None)
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls,
+        init_settings,
+        env_settings,
+        dotenv_settings,
+        file_secret_settings,
+    ):
+        # This class handles its own env vars/files/runtime overrides,
+        # so only `init_settings` is used. Other sources are ignored.
+        #
+        # NOTE: must be spelled "customise" (British) or this silently fails to override
+        # `BaseSettings.settings_customise_sources`.
+        del settings_cls, env_settings, dotenv_settings, file_secret_settings
+        return (init_settings,)
+
+    @field_validator("*", mode="wrap")
+    @classmethod
+    def _coerce_raw_value(cls, value: Any, handler, info: ValidationInfo) -> Any:
+        """
+        Preprocess raw field values before Pydantic validation.
+
+        - :obj:`None` is always accepted as-is, bypassing further validation.
+          This is a universal "no value"/"disabled" sentinel PEAT honors for every
+          field regardless of its annotation.
+        - :class:`bool` fields accept the extended set of truthy/falsy words
+          :func:`~peat.consts.str_to_bool` supports (e.g. "yes", "enable", "up"),
+          not just pydantic's own built-in boolean parsing.
+        - :class:`~pathlib.Path` fields (including ``Path | Literal[""]``) get ``~``
+          expanded and are resolved to an absolute path, except for an empty string.
+        - :class:`list`/:class:`dict`/:class:`set` fields decode JSON-encoded strings
+          (e.g. from env vars like ``PEAT_HASH_ALGORITHMS='["md5", "sha1"]'``).
+
+        A single wildcard ("*") validator handles all of this, since
+        ``SettingsManager`` subclasses are Pydantic models with fully
+        resolved annotations (available via ``cls.model_fields``).
+        """
+        if value is None:
+            return None
+
+        field = cls.model_fields.get(info.field_name)
+        if field is not None:
+            annotation = field.annotation
+            unwrapped = _unwrap_optional_type(annotation)
+            if unwrapped is bool:
+                value = _coerce_bool_string(value)
+            elif _annotation_includes_path(annotation):
+                value = _coerce_path_string(value)
+            elif _is_container_type(unwrapped):
+                value = _decode_json_string(value)
+
+        return handler(value)
+
     def __init__(self, label: str, env_prefix: str, init_env: bool = True) -> None:
-        # Initialize the "dict" parent class
         super().__init__()
 
-        # Label is used to refer to this instance
-        self["label"] = label
+        self._label = label
+        self._scratch = type(self).model_construct()
 
-        # NOTE(cegoes): dict preserves order in CPython 3.6+ and Python 3.7+
-        self["runtime_configs"] = {}
-        self["env_configs"] = {}
-        self["file_configs"] = {}
+        self._runtime_configs["env_prefix"] = env_prefix
+        self._rebuild()
 
-        # Use the class's variable attributes and annotations for defaults,
-        # much like a dataclass (In fact, it's exactly what a dataclass does!).
-        # https://github.com/python/cpython/blob/3.7/Lib/dataclasses.py#L828
-        annotations: dict = getattr(self, "__annotations__", {})
-        defaults: dict = {
-            anno_name: dict.__getattribute__(self, anno_name) for anno_name in annotations.keys()
-        }
-        self["default_configs"] = defaults
-
-        # Set the environment variable prefix
-        self.env_prefix: str = env_prefix
-
-        # ChainMap dynamically manages the lookup order. Changes to the
-        # underlying objects will be immediately reflected in the map.
-        self["CONFIG"] = ChainMap(
-            self["runtime_configs"],
-            self["env_configs"],
-            self["file_configs"],
-            self["default_configs"],
-        )
-
-        # NOTE: this must occur AFTER the ChainMap (self["CONFIG"]) has been set
+        # NOTE: must run after _rebuild() so env vars are validated against (and take
+        # precedence over) the new defaults.
         if init_env:
             self.load_from_environment(env_prefix=env_prefix)
+
+    def _field_defaults(self) -> dict[str, Any]:
+        """Resets all fields to a fresh default state."""
+        return {
+            name: field.get_default(call_default_factory=True)
+            for name, field in type(self).model_fields.items()
+        }
+
+    def _rebuild(self) -> None:
+        """
+        Recompute every field by combining the class
+        defaults, file layer, environment layer, and runtime layer.
+
+        Bypass custom :meth:`__setattr__` (and therefore pydantic's validation),
+        since values are already validated on load (see `typecast`/`_load_values`).
+
+        Triggered by bulk updates (:meth:`load_from_dict`, :meth:`load_from_environment`,
+        :meth:`load_from_file`), so a lower-precedence layer changing later
+        (e.g. a config file loaded after environment variables in :meth:`__init__`)
+        never overrides higher-precedence values.
+        """
+        merged = {
+            **self._field_defaults(),
+            **self._file_configs,
+            **self._env_configs,
+            **self._runtime_configs,
+        }
+        for name, value in merged.items():
+            object.__setattr__(self, name, value)
 
     def _load_values(self, conf: dict[str, Any], load_to: str, key_prefix: str = "") -> None:
         """
@@ -131,9 +295,8 @@ class SettingsManager(dict):
 
         Args:
             conf: Configuration to load
-            load_to: Where in the Settings object the loaded configuration
-                should be stored. Valid options are: ``runtime_configs``,
-                ``env_configs``, and ``file_configs``.
+            load_to: Which layer the loaded configuration should be stored in. Valid
+                options are: ``runtime_configs``, ``env_configs``, and ``file_configs``.
             key_prefix: Optional value to prepend to the keys being looked up.
                 Example use case is for loading environment variables
                 prefixed with ``PEAT_``, where ``config=dict(os.environ)``.
@@ -142,24 +305,28 @@ class SettingsManager(dict):
         # for consistent case-insensitive key lookups.
         upper_conf = {k.upper(): v for k, v in conf.items()}  # type: dict[str, Any]
 
+        target: dict[str, Any] = getattr(self, f"_{load_to}")
+
         # Check if each possible option is in the input object,
         # since the input set is likely larger than the default set.
         # Furthermore, we do NOT want to accidentally add new
         # options that are not in the defaults to the object.
-        for set_key in self["default_configs"].keys():
+        for set_key in type(self).model_fields:
             key = f"{key_prefix}{set_key}".upper()
 
             # Skip values that are None
             if upper_conf.get(key) is not None:
                 try:
-                    self[load_to][set_key] = self.typecast(set_key, upper_conf[key])
+                    target[set_key] = self.typecast(set_key, upper_conf[key])
                 except Exception as ex:
                     log.critical(f"Failed to load config '{key}': {ex}")
 
+        self._rebuild()
+
         # !! Hack to make metadata directory configuration seamless and flexible !!
-        if self["label"] == "configuration" and upper_conf.get("OUT_DIR"):
+        if self._label == "configuration" and upper_conf.get("OUT_DIR"):
             self.OUT_DIR = self.OUT_DIR
-        if self["label"] == "configuration" and upper_conf.get("RUN_DIR"):
+        if self._label == "configuration" and upper_conf.get("RUN_DIR"):
             self.RUN_DIR = self.RUN_DIR
 
     def load_from_dict(self, conf: dict[str, Any]) -> None:
@@ -208,7 +375,8 @@ class SettingsManager(dict):
 
         Raises:
             AttributeError: If a configuration option loaded from the file
-                is not already defined on the class
+                is not already defined on the class, or if the file doesn't
+                contain a mapping/dictionary at all (e.g. an encrypted config)
         """
         log.info(f"Loading configuration from file '{file.name}'...")
 
@@ -216,21 +384,34 @@ class SettingsManager(dict):
             log.error(f"Configuration file '{file.name}' is not a file or does not exist")
             return False
 
-        if file.suffix.lower() in [".yml", ".yaml"]:
-            log.debug(f"Loading configuration from YAML file '{file.name}'")
-            with file.open(encoding="utf-8") as yaml_file:
-                file_config = yaml.safe_load(yaml_file)
-        elif file.suffix.lower() == ".json":
-            log.debug(f"Loading configuration from JSON file '{file.name}'")
-            with file.open(encoding="utf-8") as json_file:
-                file_config = json.load(json_file)
-        else:
-            log.error(
-                f"Unknown extension '{file.suffix}' for configuration file "
-                f"'{file.name}', it should be '.json', '.yaml', or '.yml'. "
-                f"You might have accidentally selected the wrong file."
+        try:
+            if file.suffix.lower() in [".yml", ".yaml"]:
+                log.debug(f"Loading configuration from YAML file '{file.name}'")
+                file_config = YamlConfigSettingsSource(type(self), yaml_file=file)()
+            elif file.suffix.lower() == ".json":
+                log.debug(f"Loading configuration from JSON file '{file.name}'")
+                file_config = JsonConfigSettingsSource(type(self), json_file=file)()
+            else:
+                log.error(
+                    f"Unknown extension '{file.suffix}' for configuration file "
+                    f"'{file.name}', it should be '.json', '.yaml', or '.yml'. "
+                    f"You might have accidentally selected the wrong file."
+                )
+                return False
+        except json.JSONDecodeError:  # Invalid JSON syntax
+            raise
+        except (TypeError, ValueError) as ex:
+            # Content isn't a mapping (e.g. an encrypted/non-PEAT file). Normalize to
+            # AttributeError so callers (e.g. the encrypted-config fallback in
+            # `peat.init.initialize_peat`) can detect and handle it, same as before.
+            raise AttributeError(
+                f"Configuration file '{file.name}' does not contain a valid mapping/dictionary"
+            ) from ex
+
+        if not isinstance(file_config, dict):
+            raise AttributeError(
+                f"Configuration file '{file.name}' does not contain a valid mapping/dictionary"
             )
-            return False
 
         # Legacy config structure that allowed multi-app configs (other tools)
         if "PEAT" in file_config:
@@ -253,12 +434,12 @@ class SettingsManager(dict):
             raise PeatError("Either save_yaml or save_json must be true for save_to_file")
 
         if save_yaml:
-            yaml_file = outdir / f"peat_{self['label']}.yaml"
+            yaml_file = outdir / f"peat_{self._label}.yaml"
         else:
             yaml_file = None
 
         if save_json:
-            json_file = outdir / f"peat_{self['label']}.json"
+            json_file = outdir / f"peat_{self._label}.json"
         else:
             json_file = None
 
@@ -280,7 +461,7 @@ class SettingsManager(dict):
         if yaml_file:
             if yaml_file.is_file():
                 log.warning(
-                    f"YAML {self['label'].capitalize()} file already exists "
+                    f"YAML {self._label.capitalize()} file already exists "
                     f"at {yaml_file.name}, overwriting existing data..."
                 )
             elif not yaml_file.parent.exists():
@@ -296,7 +477,7 @@ class SettingsManager(dict):
 
             if json_file.is_file():
                 log.warning(
-                    f"JSON {self['label'].capitalize()} file already exists "
+                    f"JSON {self._label.capitalize()} file already exists "
                     f"at {json_file.name}, overwriting existing data..."
                 )
             elif not json_file.parent.exists():
@@ -338,11 +519,12 @@ class SettingsManager(dict):
             The current setting values as a JSON-serializable
             :class:`dict` with uppercase keys.
         """
-        return {
-            key.upper(): self._serialize_value(value)
-            for key, value in self["CONFIG"].items()
-            if include_none_vals or value is not None  # Strip Nones
-        }
+        result: dict[str, Any] = {}
+        for key in type(self).model_fields:
+            value = getattr(self, key)
+            if include_none_vals or value is not None:  # Strip Nones
+                result[key.upper()] = self._serialize_value(value)
+        return result
 
     def get_serialized_value(self, item: str) -> Any:
         """
@@ -357,7 +539,9 @@ class SettingsManager(dict):
         Raises:
             KeyError: If the attribute named by ``item`` doesn't exist
         """
-        return self._serialize_value(self["CONFIG"][item])
+        if item not in type(self).model_fields:
+            raise KeyError(item)
+        return self._serialize_value(getattr(self, item))
 
     @staticmethod
     def _serialize_value(value: Any) -> Any:
@@ -369,16 +553,20 @@ class SettingsManager(dict):
 
     def typecast(self, key: str, value: Any) -> Any:
         """
-        Convert and store a value as the appropriate Python data type.
+        Convert a value to the appropriate Python data type using Pydantic.
 
-        Store the variable as the appropriate Python data type,
-        such as bool, int, float, str, Path, list, etc.
-        This converts "0.5" to 0.5, "/home/" to Path("/home/"), etc.
+        Validates and coerces a value to match the class attribute
+        annotation for ``key`` (e.g. ``bool``, ``int``, ``float``, ``str``,
+        :class:`~pathlib.Path`, :class:`list`, etc.), the same way any other
+        :class:`~pydantic_settings.BaseSettings` field would be, but with
+        PEAT-specific behaviors:
 
-        If the type is properly annotated (e.g. VAR: str = 'stuff'),
-        then we use the annotation, otherwise try to infer the
-        type from the default value. However, the backup method
-        does not work if the default value is :obj:`None`.
+        - :class:`bool` fields accept the extended set of truthy/falsy words
+          :func:`~peat.consts.str_to_bool` supports (e.g. "yes", "enable", "up"),
+          not just pydantic's own built-in boolean parsing.
+        - :class:`~pathlib.Path` fields have ``~`` expanded and are resolved to an
+          absolute path (e.g. "/home/" becomes ``Path("/home")``), except for an
+          empty string (``""``).
 
         Args:
             key: Case-sensitive name of the value
@@ -391,57 +579,16 @@ class SettingsManager(dict):
 
         Raises:
             KeyError: If the attribute named by ``key`` doesn't exist
+            pydantic.ValidationError: If ``value`` isn't valid/convertible for the
+                annotated type of ``key``
         """
-        fallback: type = type(self["default_configs"][key])
-        typecast: type = get_type_hints(self.__class__).get(key, fallback)
+        if key not in type(self).model_fields:
+            raise KeyError(key)
 
-        # Handle complex types, e.g. typing.Union, typing.List, typing.Set, etc.
-        # Resolves the type to it's container class, e.g:
-        #   get_origin(typing.List) => list
-        #   get_origin(typing.Union[str, Path]) => typing.Union
-        og = get_origin(typecast)
+        scratch = self._scratch
+        type(self).__pydantic_validator__.validate_assignment(scratch, key, value)
 
-        # Resolves arguments to the type, e.g:
-        #   get_args(Union[str, Path]) => (str, Path)
-        #   get_args(Optional[Union[Path, str]]) => (Path, str, None)
-        args = get_args(typecast)
-
-        if og and (og is Union or og is UnionType):
-            if type(None) in args and value is None:
-                # Value is None, don't accidentally return the string "None"
-                return None
-            elif Path in args:  # If Path is in a Union, make it the typecast
-                typecast = Path
-            else:
-                # Set typecast to the first type class in a Union that isn't "None"
-                typecast = next(iter(filter(lambda x: not isinstance(x, type(None)), args)))
-        # The typing container is a base Python type, e.g. list, set, dict, etc.
-        elif og and isinstance(og, type):
-            # TODO: typecast items in a container, e.g. a list of path strings
-            #   should be type-casted to a list of Path objects
-            typecast = og
-        elif og:
-            log.warning(
-                f"Unknown type container '{og}' for setting '{key}', "
-                f"type casting to '{fallback}' as a fallback "
-                f"(value being typecast: '{repr(value)}')"
-            )
-            typecast = fallback
-
-        # Expand paths
-        if typecast is Path and isinstance(value, str):
-            if value == "":  # If value is empty string, don't set the path
-                casted = ""
-            else:
-                casted = Path(os.path.realpath(os.path.expanduser(value)))
-        # Handle boolean strings (e.g environment variable "true")
-        elif typecast is bool and isinstance(value, str):
-            # Accepts: yes, no, true, false, 0, 1 (case-insensitive)
-            casted = str_to_bool(value)
-        else:
-            casted = typecast(value)  # type: ignore
-
-        return casted
+        return getattr(scratch, key)
 
     def non_default(self, key: str) -> bool:
         """
@@ -454,7 +601,9 @@ class SettingsManager(dict):
             If the item has a value that *overrides* the default value. Note that
             this method will also return :class:`False` if the key isn't valid.
         """
-        return any(key in self[k] for k in ["runtime_configs", "env_configs", "file_configs"])
+        return (
+            key in self._runtime_configs or key in self._env_configs or key in self._file_configs
+        )
 
     def is_default_value(self, key: str) -> bool:
         """
@@ -469,7 +618,9 @@ class SettingsManager(dict):
         Raises:
             AttributeError: If the attribute named by ``key`` doesn't exist
         """
-        return getattr(self, key) == self["default_configs"][key]
+        value = getattr(self, key)
+        default = type(self).model_fields[key].get_default(call_default_factory=True)
+        return value == default
 
     def fixup_dirs(
         self,
@@ -505,27 +656,81 @@ class SettingsManager(dict):
             if new_parent is None:
                 new_path = None
             else:
-                old = getattr(self, d)  # type: Path
+                old = getattr(self, d)
+                if not isinstance(old, Path):
+                    # Keep disabled sentinels as-is instead of treating them as real paths.
+                    continue
                 new_path = Path(os.path.realpath(Path(new_parent, old.name)))
 
             setattr(self, d, new_path)
 
-    def __getattribute__(self, item: str) -> Any:
-        if not item.startswith("__") and item in self["CONFIG"]:
-            return self["CONFIG"][item]
-        else:
-            return dict.__getattribute__(self, item)
+    def __setattr__(self, name: str, value: Any) -> None:
+        if name not in type(self).model_fields:
+            super().__setattr__(name, value)
+            return
 
-    def __setattr__(self, key: str, value: Any) -> None:
         # !! Hack to make metadata directory configuration seamless and flexible !!
-        if self["label"] == "configuration":
-            if key in ["OUT_DIR", "RUN_DIR"]:
-                self.fixup_dirs(value, key)
+        if self._label == "configuration" and name in ("OUT_DIR", "RUN_DIR"):
+            self.fixup_dirs(value, name)
 
-        # This makes class attribute assignments put stuff in the
-        # runtime configs, which makes "config.DEBUG = 1" equivalent
-        # to "config["runtime_configs"]["DEBUG"] = 1".
-        self["runtime_configs"][key] = value
+        # Assignments are validated and recorded as a
+        # runtime override, i.e. "config.DEBUG = 1" == "config['runtime_configs']['DEBUG'] = 1".
+        super().__setattr__(name, value)
+        self._runtime_configs[name] = getattr(self, name)
+
+    def __getitem__(self, key: str) -> Any:
+        # Back-compat: Keep `instance["CONFIG"]` as a live view (`_ConfigView`)
+        # so `mocker.patch.dict(config["CONFIG"], {...})` keeps working.
+        if key == "CONFIG":
+            return _ConfigView(self)
+        raise KeyError(key)
+
+
+class _ConfigView(MutableMapping):
+    """
+    Live, mutable mapping view returned by ``instance["CONFIG"]``.
+
+    Bypasses validation on item assignment, ensuring legacy tests using
+    ``unittest.mock.patch.dict(config["CONFIG"], {...})`` keep working like it
+    did when ``instance["CONFIG"]`` was a raw, unvalidated :class:`~collections.ChainMap`.
+    """
+
+    def __init__(self, owner: SettingsManager) -> None:
+        self._owner = owner
+
+    def __getitem__(self, key: str) -> Any:
+        if key not in type(self._owner).model_fields:
+            raise KeyError(key)
+        return getattr(self._owner, key)
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        if key not in type(self._owner).model_fields:
+            raise KeyError(key)
+        object.__setattr__(self._owner, key, value)
+        self._owner._runtime_configs[key] = value
+
+    def __delitem__(self, key: str) -> None:
+        # Fields always "exist", so "delete" means reset to the class default
+        # this exists so `mock.patch.dict`'s reset-then-restore teardown behaves sanely (`clear`).
+        field = type(self._owner).model_fields[key]
+        default = field.get_default(call_default_factory=True)
+        object.__setattr__(self._owner, key, default)
+        self._owner._runtime_configs.pop(key, None)
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(type(self._owner).model_fields)
+
+    def __len__(self) -> int:
+        return len(type(self._owner).model_fields)
+
+    def copy(self) -> dict[str, Any]:
+        return {key: self[key] for key in self}
+
+    def clear(self) -> None:
+        # NOTE: MutableMapping's default `clear()` calls `popitem()` until the mapping
+        # shrinks, which never happens here.
+        for key in list(self):
+            del self[key]
 
 
 __all__ = ["SettingsManager"]

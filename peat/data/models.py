@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from pathlib import Path, PurePath
 from typing import Any, AnyStr, Literal
 
-from pydantic import (
+from pydantic.v1 import (
     Field,
     PositiveInt,
     PrivateAttr,
@@ -75,6 +75,24 @@ def __pathlib_modify_schema__(
 
 
 PurePath.__modify_schema__ = __pathlib_modify_schema__
+
+
+# NOTE: this v2 counterpart to `__modify_schema__` is required, not just forward-compat:
+# `PurePath.__modify_schema__` (a pydantic v1-only hook) is inherited by `pathlib.Path`,
+# so pydantic v2 models with `Path` fields (e.g. `Configuration`/`State` in peat.settings*)
+# hit `PydanticUserError` during schema generation unless this is also defined.
+@classmethod
+def __pathlib_get_pydantic_json_schema__(
+    cls,  # noqa: ARG001
+    core_schema: dict[str, Any],
+    handler,
+) -> dict[str, Any]:
+    field_schema = handler(core_schema)
+    field_schema.update(type="string", format="path")
+    return field_schema
+
+
+PurePath.__get_pydantic_json_schema__ = __pathlib_get_pydantic_json_schema__
 
 
 class Vendor(BaseModel):
