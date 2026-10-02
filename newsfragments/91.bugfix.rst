@@ -1,0 +1,3 @@
+Config encryption now derives its key from a per-file random salt instead of a fixed
+constant, so the same password no longer yields the same key material on every install.
+Configs encrypted with the previous format still decrypt.

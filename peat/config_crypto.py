@@ -16,8 +16,12 @@ from peat import log, utils
 
 # create header for encrypted PEAT config (this is a hex value of 504541545f4352595054)
 _encrypted_header = b"PEAT_CRYPT".hex()
-# salt used for file crypto
-salt = b"9001"
+# header for configs carrying a per-file salt, written as hex right after it
+_salted_header = b"PEAT_CRYPT2".hex()
+# length in bytes of the per-file salt
+_salt_size = 16
+# salt used by the original format, kept so older configs still decrypt
+_legacy_salt = b"9001"
 
 
 def encrypt_config(file_path: Path, user_password: str) -> bool:
@@ -36,7 +40,8 @@ def encrypt_config(file_path: Path, user_password: str) -> bool:
         user_password = getpass.getpass(prompt="Enter a password: ")
 
     user_password = user_password.encode()
-    fernet_key = generate_key(user_password)
+    salt = os.urandom(_salt_size)
+    fernet_key = generate_key(user_password, salt)
     encrypted_cfg = ""
 
     if not file_path.is_file():
@@ -44,7 +49,9 @@ def encrypt_config(file_path: Path, user_password: str) -> bool:
         return False
 
     cfg_data = file_path.read_text(encoding="utf-8")
-    encrypted_cfg = _encrypted_header.encode() + fernet_key.encrypt(cfg_data.encode())
+    encrypted_cfg = (
+        _salted_header.encode() + salt.hex().encode() + fernet_key.encrypt(cfg_data.encode())
+    )
 
     return write_encrypted_file(encrypted_cfg, file_path)
 
@@ -91,7 +98,6 @@ def decrypt_config(filepath: Path, user_password: str) -> str:
 
     user_password = user_password.encode()
 
-    fernet_key = generate_key(user_password)
     encrypted_cfg = filepath.read_text(encoding="utf-8")
     if not encrypt_config:
         log.error(f"PEAT decrypt encountered an error attempting to read the file: {filepath}")
@@ -100,9 +106,23 @@ def decrypt_config(filepath: Path, user_password: str) -> str:
     if not check_header(encrypted_cfg):
         log.error("Invalid header")
         return None
+
+    if encrypted_cfg.startswith(_salted_header):
+        offset = len(_salted_header) + _salt_size * 2
+        try:
+            salt = bytes.fromhex(encrypted_cfg[len(_salted_header) : offset])
+        except ValueError:
+            log.error(f"PEAT decrypt found a malformed salt in {filepath}")
+            return None
+    else:
+        # config written before per-file salts were added
+        offset = len(_encrypted_header)
+        salt = _legacy_salt
+
+    fernet_key = generate_key(user_password, salt)
     # To decrypt, need to remove the header
     try:
-        decrypted_msg = fernet_key.decrypt(encrypted_cfg[len(_encrypted_header) :])
+        decrypted_msg = fernet_key.decrypt(encrypted_cfg[offset:])
     except InvalidToken:
         return None
 
@@ -131,12 +151,13 @@ def convert_to_dict(decrypted_data: str) -> dict:
         log.error(f"PEAT encountered an error while parsing config file, exiting...: {err}")
 
 
-def generate_key(password: str) -> Fernet:
+def generate_key(password: str, salt: bytes = _legacy_salt) -> Fernet:
     """
     Function to generate a new fernet key
 
     Args:
         password: the password used to create the key, provided by user input
+        salt: the salt read from (or written to) the encrypted config
 
     Returns:
         the fernet key used to decrypt/encrypt a file
