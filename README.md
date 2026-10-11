@@ -2,6 +2,7 @@
 
 [![GitHub Actions Pipeline Status](https://github.com/sandialabs/PEAT/actions/workflows/tests.yml/badge.svg)](https://github.com/sandialabs/PEAT/actions)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11835/badge)](https://www.bestpractices.dev/projects/11835)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sandialabs/PEAT/badge)](https://scorecard.dev/viewer/?uri=github.com/sandialabs/PEAT)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/sandialabs/PEAT)
 
