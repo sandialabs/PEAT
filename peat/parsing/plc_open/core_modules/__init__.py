@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # This file is part of Beremiz, a Integrated Development Environment for
 # programming IEC 61131-3 automates supporting plcopen standard and CanFestival.
 #
@@ -20,5 +23,10 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 # Package initialisation
-# !! plcopen module dynamically creates its classes !!
-from .plcopen import PLCOpenParser, LoadProject, rect
+
+# plcopen module dynamically creates its classes
+
+
+from . plcopen import \
+    PLCOpenParser, LoadProject, SaveProject, LoadPou, \
+    LoadPouInstances, VarOrder, QualifierList, rect

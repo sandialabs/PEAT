@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # This file is part of Beremiz, a Integrated Development Environment for
 # programming IEC 61131-3 automates supporting plcopen standard and CanFestival.
 #
@@ -20,6 +23,13 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 # Package initialisation
-from .xmlclass import ClassFactory, GenerateParser, \
-    DefaultElementClass, GetAttributeValue, time_model
-from .xsdschema import XSDClassFactory, GenerateParserFromXSD
+
+from .xmlclass import (ClassFactory,
+                       GenerateParser,
+                       DefaultElementClass,
+                       GetAttributeValue,
+                       time_model,
+                       CreateNode,
+                       NodeSetAttr,
+                       NodeRenameAttr)
+from .xsdschema import XSDClassFactory, GenerateParserFromXSD, GenerateParserFromXSDstring
