@@ -90,8 +90,14 @@ dependencies = [
     # Awesome logging library enabling all of PEAT's fancy output
     "loguru>=0.7.2",
 
-    # Data model machinery
-    "pydantic==1.10.22",
+    # Data model machinery.
+    # NOTE: peat.data.base_model (and everything built on it) is still written
+    # against the pydantic v1 API, but via pydantic v2's bundled `pydantic.v1`
+    # compatibility models NOT a real pydantic v1 install, which lacks that
+    # module entirely. `peat.settings_manager` also needs real pydantic v2 (see
+    # `pydantic-settings` below). So, despite the v1-style code, the actual floor
+    # here is v2.
+    "pydantic>=2.7",
 
     # YAML parsing and writing
     "PyYAML==6.0.2",
@@ -228,6 +234,7 @@ dependencies = [
     "scp>=0.15.0",
     "textual>=6.1.0",
     "pyzipper>=0.4.0",
+    "pydantic-settings>=2.14.2",
 ]
 
 [project.scripts]
@@ -336,8 +343,12 @@ docs = [
     # Adds a button to copy any code blocks to the clipboard
     "sphinx-copybutton",
 
-    # Required for PEAT to document the Pydantic models
-    "autodoc-pydantic",
+    # Required for PEAT to document the Pydantic models.
+    # NOTE: must stay on the 2.x line, which requires (real, not `pydantic.v1`)
+    # pydantic v2 autodoc-pydantic <2.0.0 unconditionally imports `BaseSettings`
+    # from the top-level `pydantic` package, which no longer exists there now that
+    # PEAT depends on pydantic v2 (it moved to the `pydantic-settings` package).
+    "autodoc-pydantic>=2",
 
     # For PDF building
     "rinohtype",

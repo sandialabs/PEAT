@@ -30,3 +30,15 @@ def test_simple_example_yaml_config_matches_settings(examples_path):
     exported = lower_dict(conf.json_dict(include_none_vals=True))
     yml_config = yaml.safe_load(examples_path("peat-config-simple.yaml").read_text())
     assert sorted(exported.keys()) == sorted(yml_config.keys())
+
+
+def test_fixup_dirs_preserves_disabled_directory(tmp_path):
+    conf = Configuration("configuration", env_prefix="TEST_CONF_", init_env=False)
+    conf.load_from_dict({"LOG_DIR": ""})
+    assert conf.LOG_DIR == ""
+
+    new_run_dir = tmp_path / "custom-run-dir"
+    conf.fixup_dirs(new_run_dir, "RUN_DIR", override_all=True)
+
+    assert conf.LOG_DIR == ""
+    assert conf.DEVICE_DIR == new_run_dir / "devices"

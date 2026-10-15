@@ -75,7 +75,7 @@ def update_local_interface_cache():
                     state.local_networks.append(obj.network)
                     # Add to list of networks associated with this interface
                     # NOTE: interfaces can have multiple networks associated with them!
-                    state.local_interface_networks[if_name].append(obj.network)
+                    state.local_interface_networks.setdefault(if_name, []).append(obj.network)
 
         link = if_addresses.get(netifaces.AF_LINK)
         if link is not None:

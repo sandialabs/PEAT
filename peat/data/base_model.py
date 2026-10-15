@@ -5,8 +5,8 @@ from datetime import timedelta
 from ipaddress import IPv4Interface, IPv6Interface
 from pathlib import Path, PurePath
 
-from pydantic import BaseModel as PydanticBaseModel
-from pydantic import PrivateAttr
+from pydantic.v1 import BaseModel as PydanticBaseModel
+from pydantic.v1 import PrivateAttr
 
 
 def bytes_to_base64(value: bytes) -> str:
