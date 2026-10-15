@@ -1,0 +1,770 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<FEFExchangeFile>
+	<fileHeader company="Schneider Automation" product="Control Expert V15.0 - 201016B" dateTime="date_and_time#2021-4-1-17:47:9" content="Fichier source projet" DTDVersion="41"></fileHeader>
+	<contentHeader name="Projet" version="1.1.11" dateTime="date_and_time#2021-3-30-22:52:10"></contentHeader>
+	<commParameters>
+		<PLCAddress address="SYS" media="USB" nbTries="3" timeout="3000" highSpeed="0"></PLCAddress>
+		<simulatorAddress address="127.0.0.1" media="TCPIP" nbTries="3" timeout="3000"></simulatorAddress>
+		<bandwith animation="70" PLCMonitor="10" PLCScreen="10" diagnostic="10"></bandwith>
+	</commParameters>
+	<IOConf>
+		<PLC autoRun="false" MWInitZero="true" ColdStartOnly="false" ccotfActive="false" numberInternalWord="1024" numberConstantWord="256" numberInternalBit="512" CPU_DoNotSupportQtmDROP="0">
+			<partItem family="Micro Basic" partNumber="BMXP342000" vendorName="Schneider Automation" version="03.20"></partItem>
+			<equipInfo topoAddress="\0.0\0.0" position="0" NodeGuid="{CBABDE02-2831-4D3B-BB59-22CC619C6992}"></equipInfo>
+			<configATS>
+				<busATS name="XBusMicro">
+					<equipInfo topoAddress="\0" position="0" NodeGuid="{5CC9DB9B-BB1C-4ED4-99D9-645E042872EC}"></equipInfo>
+					<rackATS>
+						<partItem family="Rack" partNumber="BMXXBP0800" vendorName="Schneider Automation" version="01.00"></partItem>
+						<equipInfo topoAddress="\0.0\0" position="0" NodeGuid="{EF3974D7-6C70-4F39-AF67-542BB90FB579}"></equipInfo>
+						<powerSupply>
+							<partItem family="Supply" partNumber="BMXCPS2000" vendorName="Schneider Automation" version="01.00"></partItem>
+							<equipInfo topoAddress="\0.0\0.(P) (P)" position="-1" NodeGuid="{BA538C2D-378F-4C0F-9BC5-FBF2E44EFED5}"></equipInfo>
+						</powerSupply>
+						<moduleATS UCMod="true">
+							<partItem family="Micro Basic" partNumber="BMXP342000" vendorName="Schneider Automation" version="03.20"></partItem>
+							<equipInfo topoAddress="\0.0\0.0" position="0" NodeGuid="{CBABDE02-2831-4D3B-BB59-22CC619C6992}"></equipInfo>
+							<configModule>
+								<channelATS ASFCatKey="ModbusSerialPort" task="MAST" number="0">
+									<descFB code="0" version="255"></descFB>
+									<descIOB IOBFileName="IOB_3_0010000_32S" version="1"></descIOB>
+									<paramKW>
+										<hexaValue hexaValue="0x7"></hexaValue>
+										<hexaValue hexaValue="0xb04"></hexaValue>
+										<hexaValue hexaValue="0x2"></hexaValue>
+										<hexaValue hexaValue="0x1"></hexaValue>
+										<hexaValue hexaValue="0x0"></hexaValue>
+										<hexaValue hexaValue="0x0"></hexaValue>
+										<hexaValue hexaValue="0x0"></hexaValue>
+										<hexaValue hexaValue="0x0"></hexaValue>
+									</paramKW>
+								</channelATS>
+							</configModule>
+						</moduleATS>
+					</rackATS>
+				</busATS>
+			</configATS>
+		</PLC>
+	</IOConf>
+	<EFBSource nameOfEFBType="TON" version="1.00" dateTime="dt#2020-10-16-14:32:27">
+		<comment>On delay</comment>
+		<attribute name="TypeDescriptiveForm" value="  The function block is used as the On delay.  When the function block is called for the first time, the initial state of ET is &quot;0&quot;.&#xA;"></attribute>
+		<attribute name="IsTypeHidden" value="FALSE"></attribute>
+		<attribute name="IsTypeDiagnostic" value="FALSE"></attribute>
+		<attribute name="TypeCodeCheckSumString" value="B257"></attribute>
+		<attribute name="TypeSignatureCheckSumString" value="16D2"></attribute>
+		<ExternalToolsOnly>
+			<inputParameters>
+				<variables name="IN" typeName="BOOL">
+					<comment>Start delay</comment>
+					<attribute name="PositionPin" value="1"></attribute>
+					<attribute name="IsPinDiagnosticable" value="0"></attribute>
+				</variables>
+				<variables name="PT" typeName="TIME">
+					<comment>Preset delay time</comment>
+					<attribute name="PositionPin" value="2"></attribute>
+				</variables>
+			</inputParameters>
+			<outputParameters>
+				<variables name="Q" typeName="BOOL">
+					<comment>Delayed output</comment>
+					<attribute name="PositionPin" value="1"></attribute>
+				</variables>
+				<variables name="ET" typeName="TIME">
+					<comment>Internal time</comment>
+					<attribute name="PositionPin" value="2"></attribute>
+				</variables>
+			</outputParameters>
+		</ExternalToolsOnly>
+	</EFBSource>
+	<FBSource nameOfFBType="DFBTYPE2" version="0.03" dateTime="dt#2021-04-01-17:45:07">
+		<comment>Dfb type 2</comment>
+		<attribute name="TypeCodeCheckSumString" value="272B"></attribute>
+		<attribute name="TypeSignatureCheckSumString" value="83AB"></attribute>
+		<attribute name="UseNewTplSignAlgo" value="TRUE"></attribute>
+		<publicLocalVariables>
+			<variables name="Par1" typeName="INT">
+				<attribute name="Save" value="-1"></attribute>
+				<variableInit value="78"></variableInit>
+			</variables>
+			<variables name="Par2" typeName="INT">
+				<attribute name="Save" value="-1"></attribute>
+				<variableInit value="89"></variableInit>
+			</variables>
+		</publicLocalVariables>
+	</FBSource>
+	<FBSource nameOfFBType="DFBTYPE1" version="0.06" dateTime="dt#2021-04-01-17:40:52">
+		<comment>Dfb type 1</comment>
+		<attribute name="TypeCodeCheckSumString" value="CA7A"></attribute>
+		<attribute name="TypeSignatureCheckSumString" value="980D"></attribute>
+		<attribute name="UseNewTplSignAlgo" value="TRUE"></attribute>
+		<inputParameters>
+			<variables name="IN1" typeName="BOOL">
+				<comment>Input 1</comment>
+				<attribute name="PositionPin" value="1"></attribute>
+			</variables>
+		</inputParameters>
+		<inOutParameters>
+			<variables name="INOUT1" typeName="BOOL">
+				<comment>InOutput 1</comment>
+				<attribute name="PositionPin" value="2"></attribute>
+			</variables>
+		</inOutParameters>
+		<outputParameters>
+			<variables name="OUT1" typeName="BOOL">
+				<comment>Output 1</comment>
+				<attribute name="PositionPin" value="1"></attribute>
+			</variables>
+		</outputParameters>
+		<publicLocalVariables>
+			<variables name="Pub1" typeName="DDTTYPE1">
+				<comment>Public var 1</comment>
+				<attribute name="Save" value="-1"></attribute>
+			</variables>
+			<variables name="Pub2" typeName="TOD">
+				<comment>Public var 2</comment>
+				<attribute name="Save" value="-1"></attribute>
+			</variables>
+			<variables name="Param1" typeName="DINT">
+				<variableInit value="12"></variableInit>
+			</variables>
+			<variables name="SavedParam1" typeName="DINT">
+				<attribute name="Save" value="-1"></attribute>
+				<variableInit value="45"></variableInit>
+			</variables>
+		</publicLocalVariables>
+		<privateLocalVariables>
+			<variables name="_priv1" typeName="DATE">
+				<comment>Private field 1</comment>
+			</variables>
+			<variables name="_ton1" typeName="TON">
+				<comment>Private TON1</comment>
+				<instanceElementDesc name="PT">
+					<value>t#3s</value>
+				</instanceElementDesc>
+			</variables>
+			<variables name="_obj1" typeName="DFBTYPE2">
+				<comment>Private object 1</comment>
+			</variables>
+			<variables name="_obj2" typeName="DFBTYPE2">
+				<comment>Private object 2</comment>
+			</variables>
+		</privateLocalVariables>
+		<FBProgram name="code1">
+			<comment>Main code 1</comment>
+			<STSource>(*  *)
+</STSource>
+		</FBProgram>
+		<FBProgram name="code2">
+			<comment>Main code 2</comment>
+			<FBDSource nbRows="24" nbColumns="36">
+				<networkFBD></networkFBD>
+			</FBDSource>
+		</FBProgram>
+	</FBSource>
+	<DDTSource DDTName="DDTTYPE1" version="0.01" dateTime="dt#2021-03-29-22:39:37">
+		<comment>Ddt type 1</comment>
+		<attribute name="TypeSignatureCheckSumString" value="5A87"></attribute>
+		<structure>
+			<variables name="Var1" typeName="BOOL"></variables>
+			<variables name="Var2" typeName="REAL"></variables>
+			<variables name="Var3" typeName="ARRAY[0..10] OF DINT"></variables>
+		</structure>
+	</DDTSource>
+	<EFSource nameOfEFType="OR_BOOL" version="1.00" dateTime="dt#2020-10-16-14:49:34">
+		<comment>OR function</comment>
+		<attribute name="TypeDescriptiveForm" value=""></attribute>
+		<attribute name="IsTypeHidden" value="FALSE"></attribute>
+		<attribute name="TypeCodeCheckSumString" value="0000"></attribute>
+		<attribute name="TypeSignatureCheckSumString" value="DD29"></attribute>
+		<ExternalToolsOnly>
+			<inputParameters>
+				<variables name="IN1" typeName="BOOL">
+					<comment>Input bit sequence (Extensible)</comment>
+					<attribute name="PositionPin" value="1"></attribute>
+				</variables>
+				<variables name="nin" typeName="DWORD">
+					<comment></comment>
+					<attribute name="PositionPin" value="0"></attribute>
+					<attribute name="IsVariableHidden" value="-1"></attribute>
+				</variables>
+			</inputParameters>
+			<outputParameters>
+				<variables name="OUT" typeName="BOOL">
+					<comment>Output bit sequence</comment>
+					<attribute name="PositionPin" value="1"></attribute>
+				</variables>
+			</outputParameters>
+		</ExternalToolsOnly>
+	</EFSource>
+	<EFSource nameOfEFType="OR" version="1.00" dateTime="dt#2020-10-16-14:49:34">
+		<comment>OR function</comment>
+		<attribute name="TypeDescriptiveForm" value=""></attribute>
+		<attribute name="IsTypeHidden" value="FALSE"></attribute>
+		<attribute name="TypeCodeCheckSumString" value="0000"></attribute>
+		<attribute name="TypeSignatureCheckSumString" value="198D"></attribute>
+		<ExternalToolsOnly>
+			<inputParameters>
+				<variables name="IN1" typeName="ANY_BIT">
+					<comment>Input bit sequence (Extensible)</comment>
+					<attribute name="PositionPin" value="1"></attribute>
+				</variables>
+				<variables name="nin" typeName="DWORD">
+					<comment></comment>
+					<attribute name="PositionPin" value="0"></attribute>
+					<attribute name="IsVariableHidden" value="-1"></attribute>
+				</variables>
+			</inputParameters>
+			<outputParameters>
+				<variables name="OUT" typeName="ANY_BIT">
+					<comment>Output bit sequence</comment>
+					<attribute name="PositionPin" value="1"></attribute>
+				</variables>
+			</outputParameters>
+		</ExternalToolsOnly>
+	</EFSource>
+	<dataBlock>
+		<variables name="OBJ1" typeName="DFBTYPE1">
+			<comment>Object 1</comment>
+			<attribute name="IsVariableHMI" value="-1"></attribute>
+			<attribute name="CustomerString" value="CustStr"></attribute>
+			<attribute name="VarDescriptor" value="Descr1"></attribute>
+			<attribute name="VarDescriptor1" value="Descr2"></attribute>
+			<attribute name="VarDescriptor2" value="Descr3"></attribute>
+			<attribute name="VarDescriptor3" value="Descr4"></attribute>
+			<attribute name="VarDescriptor4" value="Descr6"></attribute>
+			<attribute name="VarDescriptor5" value="Descr6"></attribute>
+			<attribute name="VarDescriptor6" value="Descr7"></attribute>
+			<attribute name="VarDescriptor7" value="Descr8"></attribute>
+			<attribute name="VarDescriptor8" value="Descr9"></attribute>
+			<instanceElementDesc name="_obj1">
+				<instanceElementDesc name="Par1">
+					<value>78</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Par2">
+					<value>89</value>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="_obj2">
+				<instanceElementDesc name="Par1">
+					<value>78</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Par2">
+					<value>89</value>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="Pub1">
+				<instanceElementDesc name="Var1">
+					<value>FALSE</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Var2">
+					<value>0.0</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Var3">
+					<instanceElementDesc name="[0]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[1]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[2]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[3]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[4]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[5]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[6]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[7]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[8]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[9]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[10]">
+						<value>0</value>
+					</instanceElementDesc>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="Pub2">
+				<value>tod#00:00:00</value>
+			</instanceElementDesc>
+			<instanceElementDesc name="SavedParam1">
+				<value>45</value>
+			</instanceElementDesc>
+		</variables>
+		<variables name="OBJ2" typeName="DFBTYPE1">
+			<comment>Object 2</comment>
+			<attribute name="IsVariableHMI" value="-1"></attribute>
+			<instanceElementDesc name="Param1">
+				<value>120</value>
+			</instanceElementDesc>
+			<instanceElementDesc name="SavedParam1">
+				<value>450</value>
+			</instanceElementDesc>
+			<instanceElementDesc name="_obj1">
+				<instanceElementDesc name="Par1">
+					<value>78</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Par2">
+					<value>89</value>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="_obj2">
+				<instanceElementDesc name="Par1">
+					<value>78</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Par2">
+					<value>89</value>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="Pub1">
+				<instanceElementDesc name="Var1">
+					<value>FALSE</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Var2">
+					<value>0.0</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Var3">
+					<instanceElementDesc name="[0]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[1]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[2]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[3]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[4]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[5]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[6]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[7]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[8]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[9]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[10]">
+						<value>0</value>
+					</instanceElementDesc>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="Pub2">
+				<value>tod#00:00:00</value>
+			</instanceElementDesc>
+		</variables>
+		<variables name="BIT0" typeName="BOOL">
+			<comment>Bit 0</comment>
+		</variables>
+		<variables name="BIT1" typeName="BOOL">
+			<comment>Bit 1</comment>
+		</variables>
+		<variables name="BIT2" typeName="BOOL">
+			<comment>Bit 2</comment>
+		</variables>
+		<variables name="BIT3" typeName="BOOL">
+			<comment>Bit 3</comment>
+		</variables>
+		<variables name="BIT4" typeName="BOOL">
+			<comment>Bit 4</comment>
+		</variables>
+		<variables name="BIT5" typeName="BOOL">
+			<comment>Bit 5</comment>
+		</variables>
+		<variables name="TON_1" typeName="TON"></variables>
+		<variables name="PARAM1" typeName="REAL">
+			<variableInit value="123.4"></variableInit>
+		</variables>
+		<variables name="PARAM2" typeName="REAL">
+			<variableInit value="456.7"></variableInit>
+		</variables>
+		<variables name="PARAM3" typeName="INT">
+			<variableInit value="89"></variableInit>
+		</variables>
+		<variables name="SAVEDPARAM1" typeName="REAL">
+			<attribute name="Save" value="-1"></attribute>
+			<variableInit value="123.4"></variableInit>
+		</variables>
+		<variables name="SAVEDPARAM2" typeName="REAL">
+			<attribute name="Save" value="-1"></attribute>
+			<variableInit value="456.7"></variableInit>
+		</variables>
+		<variables name="SAVEDPARAM3" typeName="INT">
+			<attribute name="Save" value="-1"></attribute>
+			<variableInit value="89"></variableInit>
+		</variables>
+		<variables name="OBJ3" typeName="DFBTYPE1">
+			<comment>Object 3</comment>
+			<instanceElementDesc name="_obj1">
+				<instanceElementDesc name="Par1">
+					<value>780</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Par2">
+					<value>890</value>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="_obj2">
+				<instanceElementDesc name="Par1">
+					<value>78</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Par2">
+					<value>89</value>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="Pub1">
+				<instanceElementDesc name="Var1">
+					<value>FALSE</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Var2">
+					<value>0.0</value>
+				</instanceElementDesc>
+				<instanceElementDesc name="Var3">
+					<instanceElementDesc name="[0]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[1]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[2]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[3]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[4]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[5]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[6]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[7]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[8]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[9]">
+						<value>0</value>
+					</instanceElementDesc>
+					<instanceElementDesc name="[10]">
+						<value>0</value>
+					</instanceElementDesc>
+				</instanceElementDesc>
+			</instanceElementDesc>
+			<instanceElementDesc name="Pub2">
+				<value>tod#00:00:00</value>
+			</instanceElementDesc>
+			<instanceElementDesc name="SavedParam1">
+				<value>45</value>
+			</instanceElementDesc>
+		</variables>
+	</dataBlock>
+	<Motion></Motion>
+	<logicConf>
+		<resource resName="Micro Basic" resIdent="BMX P34 2000 03.20">
+			<taskDesc task="MAST" taskType="cyclic" valueType="0" maxExecTime="250">
+				<sectionDesc name="Progr1" FMName="MF1" FMId="e3K" FMOrder="0x0001" SectionOrder="1"></sectionDesc>
+				<sectionDesc name="Progr2" FMName="MF1_1" FMId="e7K" FMOrder="0x0001" SectionOrder="2"></sectionDesc>
+			</taskDesc>
+			<taskDesc task="FAST" taskType="periodic" valueType="5" maxExecTime="100">
+				<sectionDesc name="ProgrFast1" FMName="MF2" FMId="ebK" FMOrder="0x0001" SectionOrder="1"></sectionDesc>
+				<sectionDesc name="ProgrFast2" SectionOrder="2"></sectionDesc>
+			</taskDesc>
+			<FMDesc name="Projet Fonctionnel" FMId="ROOT">
+				<FMDesc name="MF1" FMId="e3K">
+					<FMDesc name="MF1_1" FMId="e7K"></FMDesc>
+				</FMDesc>
+				<FMDesc name="MF2" FMId="ebK"></FMDesc>
+			</FMDesc>
+		</resource>
+	</logicConf>
+	<program>
+		<identProgram name="Progr1" type="section" task="MAST" SectionOrder="1"></identProgram>
+		<STSource>OBJ1 (IN1 := BIT0,
+      OUT1 =&gt; BIT1);
+</STSource>
+	</program>
+	<program>
+		<identProgram name="Progr2" type="section" task="MAST" SectionOrder="2"></identProgram>
+		<FBDSource nbRows="24" nbColumns="36">
+			<networkFBD>
+				<FFBBlock instanceName="OBJ2" typeName="DFBTYPE1" additionnalPinNumber="0" enEnO="false" width="7" height="6">
+					<objPosition posX="13" posY="2"></objPosition>
+					<descriptionFFB execAfter="">
+						<inputVariable invertedPin="false" formalParameter="EN"></inputVariable>
+						<inputVariable invertedPin="false" formalParameter="IN1" effectiveParameter="BIT2"></inputVariable>
+						<inputVariable invertedPin="false" formalParameter="INOUT1"></inputVariable>
+						<outputVariable invertedPin="false" formalParameter="ENO"></outputVariable>
+						<outputVariable invertedPin="false" formalParameter="OUT1" effectiveParameter="BIT3"></outputVariable>
+						<outputVariable invertedPin="false" formalParameter="INOUT1"></outputVariable>
+					</descriptionFFB>
+				</FFBBlock>
+				<FFBBlock instanceName="TON_1" typeName="TON" additionnalPinNumber="0" enEnO="false" width="7" height="6">
+					<objPosition posX="13" posY="11"></objPosition>
+					<descriptionFFB execAfter="">
+						<inputVariable invertedPin="false" formalParameter="EN"></inputVariable>
+						<inputVariable invertedPin="false" formalParameter="IN" effectiveParameter="OBJ2.OUT1"></inputVariable>
+						<inputVariable invertedPin="false" formalParameter="PT" effectiveParameter="t#30m"></inputVariable>
+						<outputVariable invertedPin="false" formalParameter="ENO"></outputVariable>
+						<outputVariable invertedPin="false" formalParameter="Q"></outputVariable>
+						<outputVariable invertedPin="false" formalParameter="ET"></outputVariable>
+					</descriptionFFB>
+				</FFBBlock>
+				<FFBBlock instanceName=".1" typeName="OR" additionnalPinNumber="0" enEnO="false" width="7" height="6">
+					<objPosition posX="30" posY="11"></objPosition>
+					<descriptionFFB execAfter="">
+						<inputVariable invertedPin="false" formalParameter="EN"></inputVariable>
+						<inputVariable invertedPin="false" formalParameter="IN1"></inputVariable>
+						<inputVariable invertedPin="false" formalParameter="IN2" effectiveParameter="%S6"></inputVariable>
+						<outputVariable invertedPin="false" formalParameter="ENO"></outputVariable>
+						<outputVariable invertedPin="false" formalParameter="OUT"></outputVariable>
+					</descriptionFFB>
+				</FFBBlock>
+				<linkFB>
+					<linkSource parentObjectName="TON_1" pinName="Q">
+						<objPosition posX="19" posY="15"></objPosition>
+					</linkSource>
+					<linkDestination parentObjectName=".1" pinName="IN1">
+						<objPosition posX="30" posY="15"></objPosition>
+					</linkDestination>
+				</linkFB>
+			</networkFBD>
+		</FBDSource>
+	</program>
+	<program>
+		<identProgram name="ProgrFast1" type="section" task="FAST" SectionOrder="1"></identProgram>
+		<STSource>BIT4 := BIT5;
+</STSource>
+	</program>
+	<program>
+		<identProgram name="ProgrFast2" type="section" task="FAST" SectionOrder="2"></identProgram>
+		<FBDSource nbRows="24" nbColumns="36">
+			<networkFBD></networkFBD>
+		</FBDSource>
+	</program>
+	<IOScreen version="V1.0"></IOScreen>
+	<Documentation version="V1.0">
+		<Station bDocumentationSave="0"></Station>
+		<Program_ST nMode="0" bXRef="0" bVariableUsed="0"></Program_ST>
+		<Program_IL nMode="0"></Program_IL>
+		<Program_FBD nMode="0"></Program_FBD>
+		<Program_LD nMode="0" bXRef="0" bVariableUsed="0"></Program_LD>
+		<Program_SFC nMode="0"></Program_SFC>
+		<OperatorScreens nSort="0" bMessageList="0" bGraphic="1" bVariable="0"></OperatorScreens>
+		<Variables_FBInstances nSort="0" bExpandArray="0" bExpandStructure="0" nProfile="0" b984Address="0"></Variables_FBInstances>
+		<TitlePage sDesigner="" sProject=""></TitlePage>
+		<General sGeneralInfo=""></General>
+		<Footer sAuthor="" sDepartment="" sBitmapPath="" sFreeText1="" sFreeText2="" sIndustrialProperty=""></Footer>
+	</Documentation>
+	<settings version="410">
+		<!--group unity.Settings-->
+		<!--group unity.General-->
+		<!--group unity.ManageBuildMessages-->
+		<entryvalue ident="unity.variableNotUsed" value="0"></entryvalue>
+		<entryvalue ident="unity.multiWritingOfVar" value="0"></entryvalue>
+		<entryvalue ident="unity.paramNotAssign" value="0"></entryvalue>
+		<entryvalue ident="unity.multiFBInstance" value="0"></entryvalue>
+		<entryvalue ident="unity.ddtMappingCompat" value="0"></entryvalue>
+		<entryvalue ident="unity.overlOfAdd" value="1"></entryvalue>
+		<entryvalue ident="unity.missingGatewayIPaddress" value="1"></entryvalue>
+		<entryvalue ident="unity.WarningsActif" value="1"></entryvalue>
+		<entryvalue ident="unity.NbWarnings" value="500"></entryvalue>
+		<entryvalue ident="unity.ErrorsActif" value="1"></entryvalue>
+		<entryvalue ident="unity.NbErrors" value="500"></entryvalue>
+		<!--group unity.BuildSettings-->
+		<entryvalue ident="unity.createNewDataBlockOnline" value="1"></entryvalue>
+		<entryvalue ident="unity.freeKbytes" value="1"></entryvalue>
+		<entryvalue ident="unity.virtCodeGenEnable" value="0"></entryvalue>
+		<entryvalue ident="unity.ldLink" value="1"></entryvalue>
+		<entryvalue ident="unity.ldOptCode" value="0"></entryvalue>
+		<entryvalue ident="unity.ApplyOnLineModif" value="1"></entryvalue>
+		<entryvalue ident="unity.IOScanningMode" value="0"></entryvalue>
+		<!--group unity.SaveOnDownload-->
+		<entryvalue ident="unity.SaveOnDownloadSTA" value="1"></entryvalue>
+		<entryvalue ident="unity.SaveOnDownloadSTU" value="0"></entryvalue>
+		<entryvalue ident="unity.SaveOnDownloadXVM" value="0"></entryvalue>
+		<!--group unity.PLCEmbeddedData-->
+		<entryvalue ident="unity.dataDictionary" value="0"></entryvalue>
+		<entryvalue ident="unity.dataDictionaryPreload" value="0"></entryvalue>
+		<entryvalue ident="unity.dataDictionaryChangeTimeOut" value="40"></entryvalue>
+		<entryvalue ident="unity.dataDictionaryOnlyHMIvariables" value="0"></entryvalue>
+		<entryvalue ident="unity.dataDictionaryWithProcessNamespace" value="0"></entryvalue>
+		<entryvalue ident="unity.dataDictionaryDFBPrivateVariables" value="0"></entryvalue>
+		<entryvalue ident="unity.actif" value="1"></entryvalue>
+		<entryvalue ident="unity.comment" value="1"></entryvalue>
+		<entryvalue ident="unity.animTable" value="0"></entryvalue>
+		<entryvalue ident="unity.ETSManagementMode" value="1"></entryvalue>
+		<entryvalue ident="unity.OptimizeOnlineChange" value="0"></entryvalue>
+		<entryvalue ident="unity.dataMemoryProtect" value="0"></entryvalue>
+		<!--group unity.PLCdiagnostics-->
+		<entryvalue ident="unity.application" value="0"></entryvalue>
+		<entryvalue ident="unity.applevel" value="0"></entryvalue>
+		<entryvalue ident="unity.system" value="1"></entryvalue>
+		<entryvalue ident="unity.language" value="4"></entryvalue>
+		<entryvalue ident="unity.RackViewerDiag" value="1"></entryvalue>
+		<entryvalue ident="unity.RackViewerVariableNames" value="0"></entryvalue>
+		<entryvalue ident="unity.ProgViewerDiag" value="0"></entryvalue>
+		<entryvalue ident="unity.PLCEventLogging" value="0"></entryvalue>
+		<entryvalue ident="unity.SYSLOGServerAddress" value="0.0.0.0"></entryvalue>
+		<entryvalue ident="unity.SYSLOGServerPort" value="601"></entryvalue>
+		<entryvalue ident="unity.SYSLOGServerProtocol" value="0"></entryvalue>
+		<!--group unity.PLCBehaviour-->
+		<entryvalue ident="unity.Reset_M_Stop_Run" value="0"></entryvalue>
+		<!--group unity.Path-->
+		<entryvalue ident="unity.HyperlinkRootPath" value=""></entryvalue>
+		<!--group unity.Time-->
+		<entryvalue ident="unity.TimeStampingMode" value="1"></entryvalue>
+		<entryvalue ident="unity.MaxEventsSored" value="0"></entryvalue>
+		<entryvalue ident="unity.CustomTimeZone" value="0"></entryvalue>
+		<entryvalue ident="unity.TimeZone" value="35"></entryvalue>
+		<entryvalue ident="unity.TimeZoneOffset" value="60"></entryvalue>
+		<entryvalue ident="unity.AdjustClock" value="0"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingStartMonth" value="2"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingStartDay" value="0"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingStartOccurrence" value="5"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingStartHour" value="2"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingStartMinute" value="0"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingStartSecond" value="0"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingStartOffset" value="60"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingEndMonth" value="9"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingEndDay" value="0"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingEndOccurrence" value="5"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingEndHour" value="3"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingEndMinute" value="0"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingEndSecond" value="0"></entryvalue>
+		<entryvalue ident="unity.DaylightSavingEndOffset" value="0"></entryvalue>
+		<!--group unity.Configuration-->
+		<entryvalue ident="unity.PreferredIOVision" value="0"></entryvalue>
+		<entryvalue ident="unity.PreferredIOVision_Q_EIO" value="0"></entryvalue>
+		<!--group unity.Variables-->
+		<entryvalue ident="unity.leadingDigit" value="0"></entryvalue>
+		<entryvalue ident="unity.CharSet" value="0"></entryvalue>
+		<entryvalue ident="unity.EBoolEdge" value="1"></entryvalue>
+		<entryvalue ident="unity.intDIntAsWordDWord" value="1"></entryvalue>
+		<entryvalue ident="unity.extractAnyBit" value="1"></entryvalue>
+		<entryvalue ident="unity.directRepArray" value="0"></entryvalue>
+		<entryvalue ident="unity.dynamicArray" value="0"></entryvalue>
+		<entryvalue ident="unity.arraySizeCompCheck" value="0"></entryvalue>
+		<entryvalue ident="unity.FastScanningForTrending" value="0"></entryvalue>
+		<entryvalue ident="unity.ForceReferenceInit" value="1"></entryvalue>
+		<entryvalue ident="unity.SaveRestoreDataRequest" value="0"></entryvalue>
+		<entryvalue ident="unity.DisplayPrivateVariables" value="0"></entryvalue>
+		<!--group unity.Program-->
+		<!--group unity.Languages-->
+		<entryvalue ident="unity.withFBD" value="1"></entryvalue>
+		<entryvalue ident="unity.withLD" value="1"></entryvalue>
+		<entryvalue ident="unity.withSFC" value="1"></entryvalue>
+		<entryvalue ident="unity.withIL" value="1"></entryvalue>
+		<entryvalue ident="unity.withST" value="1"></entryvalue>
+		<entryvalue ident="unity.with984" value="1"></entryvalue>
+		<!--group unity.languagecommon-->
+		<entryvalue ident="unity.generalProc" value="1"></entryvalue>
+		<entryvalue ident="unity.generalSub" value="1"></entryvalue>
+		<entryvalue ident="unity.nestedComment" value="0"></entryvalue>
+		<entryvalue ident="unity.multiAssign" value="0"></entryvalue>
+		<entryvalue ident="unity.emptyParam" value="1"></entryvalue>
+		<entryvalue ident="unity.STExpressions" value="1"></entryvalue>
+		<entryvalue ident="unity.RemanentLink" value="0"></entryvalue>
+		<entryvalue ident="unity.LDStructComment" value="0"></entryvalue>
+		<entryvalue ident="unity.implicitTypeConv" value="0"></entryvalue>
+		<!--group unity.FBD-->
+		<entryvalue ident="unity.FBDNbRow" value="240"></entryvalue>
+		<entryvalue ident="unity.FBDNbColumn" value="360"></entryvalue>
+		<!--group unity.LD-->
+		<entryvalue ident="unity.LDRightJustify" value="0"></entryvalue>
+		<entryvalue ident="unity.LDNbColumn" value="11"></entryvalue>
+		<entryvalue ident="unity.LDCellWidth" value="0"></entryvalue>
+		<entryvalue ident="unity.SingleScanEdgeDetectionEBool" value="0"></entryvalue>
+		<!--group unity.MixedDisplay-->
+		<entryvalue ident="unity.LDNbLinesCmt" value="1"></entryvalue>
+		<entryvalue ident="unity.LDNbLinesSym" value="1"></entryvalue>
+		<entryvalue ident="unity.LDNbLinesAdr" value="1"></entryvalue>
+		<!--group unity.SFC-->
+		<entryvalue ident="unity.macroSections" value="1"></entryvalue>
+		<entryvalue ident="unity.multiToken" value="0"></entryvalue>
+		<!--group unity.SFCmultiToken-->
+		<entryvalue ident="unity.nbActiveStep" value="32"></entryvalue>
+		<entryvalue ident="unity.nbActiveActions" value="96"></entryvalue>
+		<entryvalue ident="unity.setStep" value="1"></entryvalue>
+		<entryvalue ident="unity.parallelBranches" value="1"></entryvalue>
+		<entryvalue ident="unity.multiEvolution" value="1"></entryvalue>
+		<!--group unity.SFCSingleToken-->
+		<entryvalue ident="unity.ActionSection" value="0"></entryvalue>
+		<!--group unity.ST-->
+		<entryvalue ident="unity.jumpAndLabel" value="0"></entryvalue>
+		<!--group unity.LL984-->
+		<entryvalue ident="unity.SKPenabled" value="1"></entryvalue>
+		<!--group unity.NetworkDisplay-->
+		<!--group unity.View1-->
+		<entryvalue ident="unity.View1Line1" value="0"></entryvalue>
+		<entryvalue ident="unity.View1Line2" value="0"></entryvalue>
+		<entryvalue ident="unity.View1Line3" value="0"></entryvalue>
+		<entryvalue ident="unity.View1Line4" value="0"></entryvalue>
+		<entryvalue ident="unity.View1Line5" value="0"></entryvalue>
+		<entryvalue ident="unity.View1Line6" value="0"></entryvalue>
+		<entryvalue ident="unity.View1Line7" value="1"></entryvalue>
+		<entryvalue ident="unity.View1FontHeight" value="10"></entryvalue>
+		<!--group unity.View2-->
+		<entryvalue ident="unity.View2Line1" value="0"></entryvalue>
+		<entryvalue ident="unity.View2Line2" value="0"></entryvalue>
+		<entryvalue ident="unity.View2Line3" value="0"></entryvalue>
+		<entryvalue ident="unity.View2Line4" value="0"></entryvalue>
+		<entryvalue ident="unity.View2Line5" value="0"></entryvalue>
+		<entryvalue ident="unity.View2Line6" value="3"></entryvalue>
+		<entryvalue ident="unity.View2Line7" value="1"></entryvalue>
+		<entryvalue ident="unity.View2FontHeight" value="10"></entryvalue>
+		<!--group unity.View3-->
+		<entryvalue ident="unity.View3Line1" value="0"></entryvalue>
+		<entryvalue ident="unity.View3Line2" value="0"></entryvalue>
+		<entryvalue ident="unity.View3Line3" value="0"></entryvalue>
+		<entryvalue ident="unity.View3Line4" value="0"></entryvalue>
+		<entryvalue ident="unity.View3Line5" value="0"></entryvalue>
+		<entryvalue ident="unity.View3Line6" value="2"></entryvalue>
+		<entryvalue ident="unity.View3Line7" value="1"></entryvalue>
+		<entryvalue ident="unity.View3FontHeight" value="10"></entryvalue>
+		<!--group unity.View4-->
+		<entryvalue ident="unity.View4Line1" value="0"></entryvalue>
+		<entryvalue ident="unity.View4Line2" value="0"></entryvalue>
+		<entryvalue ident="unity.View4Line3" value="0"></entryvalue>
+		<entryvalue ident="unity.View4Line4" value="0"></entryvalue>
+		<entryvalue ident="unity.View4Line5" value="4"></entryvalue>
+		<entryvalue ident="unity.View4Line6" value="3"></entryvalue>
+		<entryvalue ident="unity.View4Line7" value="1"></entryvalue>
+		<entryvalue ident="unity.View4FontHeight" value="10"></entryvalue>
+		<entryvalue ident="unity.LL984PrintingView" value="3"></entryvalue>
+		<entryvalue ident="unity.LL984ColumnWidth" value="1.000000"></entryvalue>
+		<!--group unity.OperatorScreens-->
+		<entryvalue ident="unity.fullScreen" value="0"></entryvalue>
+		<!--group unity.ControlledScreen-->
+		<entryvalue ident="unity.varCtrlScreen" value=""></entryvalue>
+		<entryvalue ident="unity.displayScreenControl" value="0"></entryvalue>
+		<entryvalue ident="unity.displayScreenNumber" value="0"></entryvalue>
+		<!--group unity.LastOpenedScreen-->
+		<entryvalue ident="unity.varDispScreen" value=""></entryvalue>
+	</settings>
+</FEFExchangeFile>

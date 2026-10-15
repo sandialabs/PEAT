@@ -146,6 +146,20 @@ UMAS protocol
 .. automodule:: peat.modules.schneider.m340.umas_codes
    :members:
 
+Unity Pro/Control Expert XEF file parsing
+-----------------------------------------
+.. automodule:: peat.modules.schneider.xef.xef
+   :members:
+   :no-undoc-members:
+
+XEF parsing
+^^^^^^^^^^^
+.. automodule:: peat.modules.schneider.xef.xef_parse
+   :members:
+
+.. automodule:: peat.modules.schneider.xef.xef_lang
+   :members:
+
 .. ION power meter
 .. ---------------
 .. .. automodule:: peat.modules.schneider.ion.ion

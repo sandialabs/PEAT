@@ -19,6 +19,8 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+from functools import cmp_to_key
+
 from .core_modules.plcopen import *
 from .core_modules.structures import *
 
@@ -247,7 +249,17 @@ class ProgramGenerator:
                 pou_program = PouProgramGenerator(self, pou.getname(),
                                                   pouTypeNames[pou_type],
                                                   self.Errors, self.Warnings)
-                program = pou_program.GenerateProgram(pou)
+                try:
+                    program = pou_program.GenerateProgram(pou)
+                except PLCGenException as e:
+                    # NOTE(PEAT): name the POU, so the error can be attributed to it
+                    if pou_name in str(e):
+                        raise
+                    raise PLCGenException(
+                        "%s (in \"%s\" POU)" % (e, pou_name)) from e
+                except Exception as e:
+                    raise PLCGenException(
+                        "Error generating \"%s\" POU: %r" % (pou_name, e)) from e
                 self.Program += program
             else:
                 raise PLCGenException(_("Undefined pou type \"%s\"") % pou_type)
@@ -587,6 +599,10 @@ class PouProgramGenerator:
                             if element["Name"] == name:
                                 current_type = element["Type"]
                                 break
+                    else:
+                        # NOTE(PEAT): unknown type, or a bit of a variable (e.g. "x.3").
+                        # This looped forever before.
+                        current_type = None
         return current_type
 
     # Return connectors linked by a connection to the given connector
@@ -958,8 +974,8 @@ class PouProgramGenerator:
                 elif isinstance(instance, CoilClass):
                     otherInstances["outVariables&coils"].append(instance)
             orderedInstances.sort()
-            otherInstances["outVariables&coils"].sort(SortInstances)
-            otherInstances["blocks"].sort(SortInstances)
+            otherInstances["outVariables&coils"].sort(key=cmp_to_key(SortInstances))
+            otherInstances["blocks"].sort(key=cmp_to_key(SortInstances))
             instances = [instance for (executionOrderId, instance) in orderedInstances]
             instances.extend(otherInstances["outVariables&coils"] + otherInstances["blocks"] + otherInstances["connectors"])
             for instance in instances:
@@ -1108,7 +1124,9 @@ class PouProgramGenerator:
                             all_input_connected = False
                     else:
                         all_input_connected = False
-                if len(output_variables) > 1 or not all_input_connected:
+                # NOTE(PEAT): EN can't be passed as a positional (non-formal) argument
+                if len(output_variables) > 1 or not all_input_connected or (
+                        input_connected.get("EN") is not None):
                     vars = [name + value for name, value in connected_vars]
                 else:
                     vars = [value for name, value in connected_vars]

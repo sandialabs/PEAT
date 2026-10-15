@@ -136,7 +136,7 @@ device_options:
       - ssh
       - https
     log_pull_timeout: 30.0
-  sceptre_plc_compatible_st_logic: false
+  openplc_compatible_st_logic: false
   sceptre:
     ftp_testing: false
     bennu_filename: "bennu-field-deviced.firmware"

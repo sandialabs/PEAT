@@ -99,7 +99,7 @@ class TC6:
         self.configs = SubElement(self.instances, "configurations")
 
     def __str__(self) -> str:
-        return self.generate_st(sceptre=False)
+        return self.generate_st(openplc=False)
 
     def __repr__(self) -> str:
         str_file = io.BytesIO()
@@ -161,12 +161,13 @@ class TC6:
         """
         self.pous.append(pou)
 
-    def generate_xml_string(self, sceptre: bool = False) -> str:
+    def generate_xml_string(self, openplc: bool = False) -> str:
         """
         Generates TC6-XML compliant XML-formatted text from the tree.
 
         Args:
-            sceptre: Ensure the XML is compatible with the SCEPTRE PLC (OpenPLC)
+            openplc: Make the XML compatible with OpenPLC v3 and v4, by adding the
+                configuration, resource and task OpenPLC requires to run a program
 
         Returns:
             XML-formatted text string of the tree
@@ -174,19 +175,24 @@ class TC6:
         log.info("Generating string with formatted TC6 XML")
         root = self.root
 
-        if sceptre:
-            log.info("The generated ST will be compatible with the SCEPTRE PLC (OpenPLC)")
+        if openplc:
+            log.info("The generated ST will be compatible with OpenPLC")
 
             # We don't want to contaminate the tree with modifications made for OpenPLC
             # This enables pure logic to still be generated separately,
             # with only a minor hit to performance
             log.debug(
-                "Copying tree to prevent contamination by SCEPTRE compatibility modifications"
+                "Copying tree to prevent contamination by OpenPLC compatibility modifications"
             )
 
-            sceptre_root = copy.deepcopy(self.root)
+            if self.configs.find("configuration") is not None:
+                # The project already has a configuration, resource and tasks
+                log.debug("Using the existing configuration for OpenPLC compatibility")
+                return self.prettify_xml(root)
+
+            openplc_root = copy.deepcopy(self.root)
             log.debug("Finished copying tree")
-            configs = sceptre_root.find(".//configurations")
+            configs = openplc_root.find(".//configurations")
             if configs is not None:
                 config_element = SubElement(configs, "configuration", {"name": "Config0"})
                 resource = SubElement(config_element, "resource", {"name": "Res0"})
@@ -196,7 +202,7 @@ class TC6:
                     {"name": "TaskMain", "priority": "0", "interval": "T#50ms"},
                 )
                 prog_name = None
-                for pou in sceptre_root.find(".//pous"):
+                for pou in openplc_root.find(".//pous"):
                     name = pou.get("name")
                     if name == self.main_name:
                         prog_name = name
@@ -207,13 +213,13 @@ class TC6:
                         "pouInstance",
                         {"name": "MainProgram", "typeName": prog_name},
                     )
-                    root = sceptre_root
+                    root = openplc_root
                 else:
                     log.error("Could not find main program POU")
             else:
                 log.error(
                     'Could not find the "configurations" element in '
-                    "the tree. The ST will not be SCEPTRE-compatible."
+                    "the tree. The ST will not be OpenPLC-compatible."
                 )
 
         # Convert XML to text and format it
@@ -222,7 +228,7 @@ class TC6:
         log.debug("Finished generating formatted TC6 XML")
         return generated_xml
 
-    def generate_st(self, generated_xml: str | None = None, sceptre: bool = False) -> str:
+    def generate_st(self, generated_xml: str | None = None, openplc: bool = False) -> str:
         """
         Generates IEC 61131-3 compliant Structured Text logic.
 
@@ -231,7 +237,7 @@ class TC6:
 
         Args:
             generated_xml: Generated TC6 XMl string
-            sceptre: Make the resulting logic compatible with the SCEPTRE PLC (OpenPLC)
+            openplc: Make the resulting logic compatible with OpenPLC v3 and v4
 
         Returns:
             The generated Structured Text
@@ -239,7 +245,7 @@ class TC6:
         log.info("Generating Structured Text")
 
         if generated_xml is None:
-            generated_xml = self.generate_xml_string(sceptre=sceptre)
+            generated_xml = self.generate_xml_string(openplc=openplc)
 
         # Convert to ST
         try:
@@ -278,14 +284,21 @@ class TC6:
 
     def logic_is_empty(self) -> bool:
         """
-        If there is no logic or variables present in main POU.
+        If there is no logic or variables present in any POU or configuration.
         """
-        if not self.element_empty(self.main_pou.find("body")):
-            return False
+        for pou in self.pous:
+            body = pou.find("body")
+            if body is not None and not self.element_empty(body):
+                return False
 
-        for child in list(self.main_pou.find("interface")):
-            # interface -> localVars
-            if not self.element_empty(child):
+            interface = pou.find("interface")
+            for child in list(interface) if interface is not None else []:
+                # interface -> localVars
+                if not self.element_empty(child):
+                    return False
+
+        for global_vars in self.configs.iter("globalVars"):
+            if list(global_vars):
                 return False
 
         log.warning("TC6 logic is empty")

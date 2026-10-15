@@ -444,8 +444,9 @@ device_options:
     # This may need to be increased for very large log files.
     log_pull_timeout: 30.0
 
-  # Enable SCEPTRE/OpenPLC compatibility changes to Structured Text logic output
-  sceptre_plc_compatible_st_logic: false
+  # Make generated TC6 XML and Structured Text logic compatible with OpenPLC v3 and v4
+  # by adding the configuration, resource and task OpenPLC needs to run the program
+  openplc_compatible_st_logic: false
 
   # Configuration specific to the SCEPTRE module
   sceptre:

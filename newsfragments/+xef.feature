@@ -1,0 +1,4 @@
+Add the :class:`~peat.modules.schneider.xef.xef.XEF` module, which parses ``.xef`` project files exported from Schneider Electric Unity Pro or EcoStruxure Control Expert (Modicon M340, M580, Premium, Quantum and Momentum PLCs), and ``.zef`` files (a ZIP archive containing the same XML).
+It extracts the PLC and module hardware configuration, the variables (as tags and I/O points), and project metadata, and converts the program sections in all five languages (ST, IL, FBD, LD and SFC), user-defined function blocks (DFBs) and structure data types (DDTs) to TC6 XML and Structured Text that OpenPLC can compile.
+Each section becomes a program that runs in the task of its Unity task, subroutine sections become function blocks, and timer event sections run in their own periodic task.
+Generated Structured Text now also uses ``TRUE``/``FALSE`` for BOOL initial values and adds a decimal point to whole-number REAL initial values, which MatIEC requires.

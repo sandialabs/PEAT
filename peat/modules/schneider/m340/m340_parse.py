@@ -9,10 +9,11 @@ Authors
 
 import re
 import zlib
+from collections.abc import Collection
 from pprint import pformat
 from typing import Final
 from xml.etree import ElementTree
-from xml.etree.ElementTree import SubElement
+from xml.etree.ElementTree import Element, SubElement
 
 from peat import log, utils
 from peat.parsing.plc_open.core_modules.definitions import TypeHierarchy_list
@@ -21,6 +22,19 @@ from peat.parsing.tc6 import TC6
 ChunksType = dict[int, dict[str, int | str | bytes]]
 # IEC 61131-3 types
 ALLOWED_TYPES: Final[set[str]] = {type_pair[0] for type_pair in TypeHierarchy_list}
+
+# Location used for an I/O variable of each IEC 61131-3 type that can be located.
+# The size of the location (X, B, W, D or L) must match the size of the type,
+# otherwise MatIEC fails to compile the logic. These are areas that OpenPLC v3
+# and v4 map to I/O and memory. The other types (STRING, TIME and the date types)
+# can't be located.
+LOCATION_PREFIXES: Final[dict[str, str]] = {
+    "BOOL": "%QX",
+    **dict.fromkeys(["BYTE", "SINT", "USINT"], "%QB"),
+    **dict.fromkeys(["WORD", "INT", "UINT"], "%MW"),
+    **dict.fromkeys(["DWORD", "DINT", "UDINT", "REAL"], "%MD"),
+    **dict.fromkeys(["LWORD", "LINT", "ULINT", "LREAL"], "%ML"),
+}
 
 # TODO: process FBD blocks to TC6
 # TODO: process LD blocks to TC6
@@ -550,119 +564,30 @@ def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
     return device_info
 
 
-def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> None:
+def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, derived_types: Collection[str] = ()) -> None:
     """
     Adds the M340-specific logic portions to a TC6 instance.
 
-    Currently, this is the variables and Structured Text.
+    Currently, this is the variables and Structured Text. I/O variables are
+    located at addresses OpenPLC can use (see :func:`add_located_variables`).
 
     Args:
         logic_blocks: Logic and variables
         tc6: TC6 class instance (NOTE: this will be modified!)
-        sceptre: Make the resulting logic compatible with OpenPLC/SCEPTRE PLC
+        derived_types: Names of user-defined types, such as function blocks,
+            that variables may use in addition to the IEC 61131-3 types
     """
-    # TODO: this function needs some cleanup work, lots of duplicate logic
     log.info("Adding logic and variables to TC6 tree...")
 
     interface = tc6.main_pou.find("interface")
-    # Note: All variables must be treated as locals for OpenPLC/SCEPTRE PLC
+    # Note: All variables must be treated as locals for OpenPLC
     io_vars = SubElement(interface, "localVars")
     local_vars = SubElement(interface, "localVars")
-    w_addr = 0
-    x_addr = 1
 
-    # TODO: combine data type processing logic for local and I/O variables
     if not logic_blocks["vars"]:
         log.warning("Couldn't find variables in the decompressed logic")
 
-    for var_name, var_values in logic_blocks["vars"].items():
-        var_name = str(var_name)
-        is_array = False
-        arr_start = 0
-        arr_end = 0
-
-        # Local variables
-        if var_values["address"] == "" or "%M" in var_values["address"]:
-            if "ARRAY" in var_values["type"]:
-                m = re.match(r"ARRAY\[(\d+)\.\.(\d+)] OF (\w+)", var_values["type"])
-
-                if not m:
-                    log.warning(
-                        f"ARRAY regex failed for local variable {var_name}, '{var_values['type']}'"
-                    )
-                    continue
-
-                res = m.groups()
-                arr_start = int(res[0])
-                arr_end = int(res[1])
-
-                var = SubElement(local_vars, "variable", {"name": var_name})
-                var_type = SubElement(var, "type")
-                arr_type = SubElement(var_type, "array")
-                SubElement(arr_type, "dimension", {"lower": res[0], "upper": res[1]})
-                base_type = SubElement(arr_type, "baseType")
-                SubElement(base_type, get_type_string(res[2], sceptre))
-                is_array = True
-            else:
-                type_str = get_type_string(var_values["type"], sceptre)
-
-                if not type_str:
-                    log.warning(
-                        f"Skipping local variable {var_name} with "
-                        f"unimplemented type '{var_values['type']}'"
-                    )
-                    continue
-
-                var = SubElement(local_vars, "variable", {"name": var_name})
-                var_type = SubElement(var, "type")
-                SubElement(var_type, type_str)
-
-        # I/O variables
-        # TODO: implement for all IEC 61131-3 types
-        # TODO: implement ARRAY types
-        else:
-            if var_values["type"] == "INT":
-                new_addr = f"%MD{w_addr}"
-                type_str = var_values["type"]
-
-                if sceptre:
-                    # OpenPLC can only use REALs
-                    type_str = "REAL"
-
-                w_addr += 1
-            elif var_values["type"] in ["EBOOL", "BOOL"]:
-                # NOTE: EBOOL is a Schneider custom type
-                # not supported by TC6 or IEC 61131-3.
-                new_addr = f"%QX0.{x_addr}"
-                type_str = "BOOL"
-                x_addr += 1
-            else:
-                log.warning(
-                    f"Skipping I/O variable {var_name} with "
-                    f"unimplemented type '{var_values['type']}'"
-                )
-                continue
-
-            var = SubElement(io_vars, "variable", {"name": var_name, "address": new_addr})
-            var_type = SubElement(var, "type")
-            SubElement(var_type, type_str)
-
-        if "value" in var_values:
-            # NOTE(cegoes): XML attributes must be strings
-            init_val = str(var_values["value"])
-
-            if sceptre and var_values["type"] == "INT":
-                # INTs are REALs in OpenPLC-land
-                init_val = str(float(init_val))
-
-            var_init = SubElement(var, "initialValue")
-            if is_array:
-                arr_val = SubElement(var_init, "arrayValue")
-                for _ in range(arr_start, arr_end + 1):
-                    aval_ele = SubElement(arr_val, "value")
-                    SubElement(aval_ele, "simpleValue", {"value": init_val})
-            else:
-                SubElement(var_init, "simpleValue", {"value": init_val})
+    add_located_variables(logic_blocks["vars"], io_vars, local_vars, derived_types)
 
     # Add the Structured Text to the tree
     try:
@@ -673,11 +598,185 @@ def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> Non
     log.debug("Finished adding logic and variables to TC6 tree")
 
 
-def get_type_string(var_type: str, sceptre: bool) -> str:
-    if sceptre and var_type == "INT":
-        # OpenPLC can only use REALs
-        return "REAL"
-    elif var_type in ["EBOOL", "BOOL"]:
+def add_located_variables(
+    variables: dict[str, dict],
+    io_vars: Element,
+    local_vars: Element,
+    derived_types: Collection[str] = (),
+) -> dict[str, tuple[str, tuple[str, str] | None]]:
+    """
+    Add variables to TC6 variable lists, assigning located addresses to I/O variables.
+
+    I/O variables are assigned located addresses that are valid for MatIEC,
+    which OpenPLC v3 and v4 both use to compile Structured Text. The location
+    size must match the size of the type (see :data:`LOCATION_PREFIXES`).
+    I/O variables that can't be located (ARRAY, STRING, TIME and date types)
+    are declared without an address.
+
+    Args:
+        variables: Variables to add, keyed by name. Each has a ``type`` and
+            ``address``, and optionally an initial ``value``.
+        io_vars: Variable list for I/O variables (``%I`` and ``%Q`` addresses)
+        local_vars: Variable list for the other variables
+        derived_types: Names of user-defined types, such as function blocks,
+            that variables may use in addition to the IEC 61131-3 types
+
+    Returns:
+        The resolved type and array bounds of each variable that was added
+    """
+    added = {}
+
+    # Next free location for each location prefix.
+    # %QX starts at bit 1 for compatibility with previous PEAT versions.
+    next_locations = dict.fromkeys(set(LOCATION_PREFIXES.values()), 0)
+    next_locations["%QX"] = 1
+
+    for var_name, var_values in variables.items():
+        var_name = str(var_name)
+        var_type = var_values["type"]
+        address = var_values["address"].upper()
+        is_local = address == "" or "%M" in address
+        kind = "local" if is_local else "I/O"
+
+        resolved = resolve_type(var_type, derived_types)
+        if not resolved:
+            log.warning(
+                f"Skipping {kind} variable {var_name} with unimplemented type '{var_type}'"
+            )
+            continue
+        type_str, arr_bounds = resolved
+
+        new_addr = None
+        if not is_local:
+            if arr_bounds or type_str not in LOCATION_PREFIXES:
+                log.warning(
+                    f"I/O variable {var_name} with type '{var_type}' can't be "
+                    f"located by OpenPLC, declaring it without an address"
+                )
+            else:
+                new_addr = _next_location(type_str, next_locations)
+
+        add_tc6_variable(
+            parent=local_vars if is_local else io_vars,
+            name=var_name,
+            type_str=type_str,
+            arr_bounds=arr_bounds,
+            value=var_values.get("value"),
+            address=new_addr,
+            derived=type_str in derived_types,
+        )
+        added[var_name] = resolved
+
+    return added
+
+
+def resolve_type(
+    var_type: str, derived_types: Collection[str] = ()
+) -> tuple[str, tuple[str, str] | None] | None:
+    """
+    Resolve a variable's type to the type to use in TC6 XML.
+
+    Args:
+        var_type: Type of the variable, e.g. ``INT`` or ``ARRAY[0..3] OF EBOOL``
+        derived_types: Names of user-defined types the type may refer to
+
+    Returns:
+        Tuple of the type name and the array bounds (:obj:`None` if the type
+        isn't an array), or :obj:`None` if the type isn't supported.
+    """
+    arr_bounds = None
+    if "ARRAY" in var_type:
+        m = re.match(r"ARRAY\s*\[(\d+)\.\.(\d+)\]\s+OF\s+(\w+)", var_type, re.IGNORECASE)
+        if not m:
+            return None
+        arr_bounds = (m.group(1), m.group(2))
+        var_type = m.group(3)
+
+    type_str = var_type if var_type in derived_types else get_type_string(var_type)
+    if not type_str:
+        return None
+    return type_str, arr_bounds
+
+
+def add_tc6_variable(
+    parent: Element,
+    name: str,
+    type_str: str,
+    arr_bounds: tuple[str, str] | None = None,
+    value: str | int | float | None = None,
+    address: str | None = None,
+    derived: bool = False,
+) -> Element:
+    """
+    Add a variable to a TC6 variable list, such as ``localVars`` or ``inputVars``.
+
+    Args:
+        parent: Variable list element to add the variable to
+        name: Name of the variable
+        type_str: Type name, from :func:`resolve_type`
+        arr_bounds: Lower and upper bounds, if the variable is an array
+        value: Initial value. Arrays have every element set to this value.
+        address: Located address, e.g. ``%MW0``
+        derived: If the type is a user-defined type, such as a function block
+
+    Returns:
+        The XML element of the variable
+    """
+    attribs = {"name": name}
+    if address:
+        attribs["address"] = address
+    var = SubElement(parent, "variable", attribs)
+
+    type_ele = SubElement(var, "type")
+    if arr_bounds:
+        arr_type = SubElement(type_ele, "array")
+        SubElement(arr_type, "dimension", {"lower": arr_bounds[0], "upper": arr_bounds[1]})
+        type_ele = SubElement(arr_type, "baseType")
+    if derived:
+        SubElement(type_ele, "derived", {"name": type_str})
+    else:
+        SubElement(type_ele, _tc6_type_tag(type_str))
+
+    if value is not None:
+        # NOTE(cegoes): XML attributes must be strings
+        init_val = str(value).strip()
+        if type_str == "BOOL" and init_val in ["0", "1"]:
+            # MatIEC requires BOOL literals to be TRUE/FALSE
+            init_val = "TRUE" if init_val == "1" else "FALSE"
+        elif type_str in ["REAL", "LREAL"] and re.fullmatch(r"[+-]?\d+", init_val):
+            # MatIEC requires REAL literals to have a decimal point
+            init_val += ".0"
+        var_init = SubElement(var, "initialValue")
+        if arr_bounds:
+            arr_val = SubElement(var_init, "arrayValue")
+            for _ in range(int(arr_bounds[0]), int(arr_bounds[1]) + 1):
+                aval_ele = SubElement(arr_val, "value")
+                SubElement(aval_ele, "simpleValue", {"value": init_val})
+        else:
+            SubElement(var_init, "simpleValue", {"value": init_val})
+
+    return var
+
+
+def _tc6_type_tag(type_str: str) -> str:
+    """TC6 XML tag for an IEC 61131-3 type. TC6 uses lowercase tags for strings."""
+    return type_str.lower() if type_str in ["STRING", "WSTRING"] else type_str
+
+
+def _next_location(type_str: str, next_locations: dict[str, int]) -> str:
+    """Allocate the next free located address for an IEC 61131-3 type."""
+    prefix = LOCATION_PREFIXES[type_str]
+    index = next_locations[prefix]
+    next_locations[prefix] += 1
+
+    if prefix == "%QX":
+        # Bit index must be 0-7, so roll over to the next byte
+        return f"%QX{index // 8}.{index % 8}"
+    return f"{prefix}{index}"
+
+
+def get_type_string(var_type: str) -> str:
+    if var_type in ["EBOOL", "BOOL"]:
         # NOTE: EBOOL is a Schneider custom type
         # not supported by TC6 or IEC 61131-3.
         return "BOOL"

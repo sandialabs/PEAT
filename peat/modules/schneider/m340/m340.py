@@ -29,6 +29,7 @@ import binascii
 import re
 import socket
 import traceback
+from collections.abc import Callable, Collection
 from copy import copy
 from datetime import datetime
 from pathlib import Path, PureWindowsPath
@@ -569,32 +570,7 @@ class M340(DeviceModule):
         # Parse out the Structured Text logic and save the TC6 tree as well
         logic_blocks = m340_parse.extract_logic_blocks(raw_data)
         if logic_blocks:
-            # Create the TC6 object with the skeleton of the TC6 XML
             dev.logic.name = metadata.get("project_name", "").strip()
-            if not dev.logic.name:
-                dev.logic.name = dev.logic.file.name
-            if not dev.logic.name:  # Fallback if neither value is known
-                dev.logic.name = "PEAT-generated project"
-
-            # TODO: is there a project modification timestamp embedded in APX?
-            # TODO: this code could use some cleanup
-            mtime = ""
-            if dev.logic.file.mtime:
-                mtime = dev.logic.file.mtime.strftime("%Y-%m-%dT%H:%M:%S")
-            elif dev.firmware.file.mtime:
-                mtime = dev.firmware.file.mtime.strftime("%Y-%m-%dT%H:%M:%S")
-            elif file is not None:
-                m_ts = datetime.fromtimestamp(file.stat().st_mtime)
-                mtime = m_ts.strftime("%Y-%m-%dT%H:%M:%S")
-
-            ctime = ""
-            if dev.logic.file.created:
-                ctime = dev.logic.file.created.strftime("%Y-%m-%dT%H:%M:%S")
-            elif dev.firmware.file.created:
-                ctime = dev.firmware.file.created.strftime("%Y-%m-%dT%H:%M:%S")
-            elif file is not None:
-                c_ts = datetime.fromtimestamp(file.stat().st_ctime)
-                ctime = c_ts.strftime("%Y-%m-%dT%H:%M:%S")
 
             prod_ver = ""
             if metadata.get("unity_version"):
@@ -602,50 +578,7 @@ class M340(DeviceModule):
             elif dev.firmware.version:
                 prod_ver = f"Device firmware version {dev.firmware.version}"
 
-            dev._cache["tc6"] = TC6(
-                project_name=dev.logic.name,
-                product_name=dev.description.product,
-                product_version=prod_ver,
-                modification_time=mtime,
-                creation_time=ctime,
-                company_name=dev.description.vendor.name,
-                author=dev.logic.author,
-                content_description=dev.logic.description,
-            )
-            try:
-                # Build the TC6 XML tree and add to the TC6 object
-                m340_parse.add_logic_to_tc6(
-                    logic_blocks,
-                    dev._cache["tc6"],
-                    dev.options["sceptre_plc_compatible_st_logic"],
-                )
-            except Exception:
-                cls.log.error(
-                    "Exception while generating the TC6 XML. Perhaps the variable region is wrong?"
-                )
-                cls.log.debug(f"** Traceback **\n{traceback.format_exc()}")
-            else:
-                # Don't store tc6 if there are no variables or logic
-                if dev._cache["tc6"].logic_is_empty():
-                    cls.log.warning("TC6 logic is empty, not saving...")
-                else:
-                    xml_string = dev._cache["tc6"].generate_xml_string(
-                        dev.options["sceptre_plc_compatible_st_logic"]
-                    )
-
-                    if not xml_string:
-                        cls.log.error("Failed to generate TC6 XML string for non-empty logic")
-                    else:
-                        dev.logic.formats["tc6"] = xml_string
-                        st_logic = dev._cache["tc6"].generate_st(
-                            xml_string, dev.options["sceptre_plc_compatible_st_logic"]
-                        )
-                        if st_logic:
-                            dev.logic.original = st_logic
-                            dev.logic.parsed = st_logic
-                            dev.logic.formats["structured_text"] = st_logic
-                        else:
-                            cls.log.warning("No structured text was generated")
+            cls.generate_logic(dev, logic_blocks, prod_ver, file)
         else:
             cls.log.warning("Failed to process logic: no blocks were extracted")
 
@@ -758,6 +691,104 @@ class M340(DeviceModule):
         return dev
 
     @classmethod
+    def generate_logic(
+        cls,
+        dev: DeviceData,
+        logic_blocks: dict | None,
+        product_version: str = "",
+        file: Path | None = None,
+        derived_types: Collection[str] = (),
+        add_extra_logic: Callable[[TC6], None] | None = None,
+    ) -> None:
+        """
+        Generate TC6 XML and Structured Text from extracted logic and variables.
+
+        The results are saved to ``dev.logic``. This is also used by the
+        :class:`~peat.modules.schneider.xef.xef.XEF` module.
+
+        Args:
+            dev: Device the logic belongs to. ``dev.logic.name`` is used as the
+                project name, if set.
+            logic_blocks: Logic and variables, in the format used by
+                :func:`~peat.modules.schneider.m340.m340_parse.add_logic_to_tc6`.
+                If :obj:`None`, ``add_extra_logic`` adds all of the logic.
+            product_version: Version of the software that created the logic
+            file: File the logic was parsed from, if any
+            derived_types: Names of user-defined types the variables may use
+            add_extra_logic: Function that adds more logic to the TC6 instance,
+                such as POUs for user-defined function blocks
+        """
+        # Create the TC6 object with the skeleton of the TC6 XML
+        if not dev.logic.name:
+            dev.logic.name = dev.logic.file.name
+        if not dev.logic.name:  # Fallback if neither value is known
+            dev.logic.name = "PEAT-generated project"
+
+        # TODO: is there a project modification timestamp embedded in APX?
+        # TODO: this code could use some cleanup
+        mtime = ""
+        if dev.logic.file.mtime:
+            mtime = dev.logic.file.mtime.strftime("%Y-%m-%dT%H:%M:%S")
+        elif dev.firmware.file.mtime:
+            mtime = dev.firmware.file.mtime.strftime("%Y-%m-%dT%H:%M:%S")
+        elif file is not None:
+            m_ts = datetime.fromtimestamp(file.stat().st_mtime)
+            mtime = m_ts.strftime("%Y-%m-%dT%H:%M:%S")
+
+        ctime = ""
+        if dev.logic.file.created:
+            ctime = dev.logic.file.created.strftime("%Y-%m-%dT%H:%M:%S")
+        elif dev.firmware.file.created:
+            ctime = dev.firmware.file.created.strftime("%Y-%m-%dT%H:%M:%S")
+        elif file is not None:
+            c_ts = datetime.fromtimestamp(file.stat().st_ctime)
+            ctime = c_ts.strftime("%Y-%m-%dT%H:%M:%S")
+
+        dev._cache["tc6"] = TC6(
+            project_name=dev.logic.name,
+            product_name=dev.description.product,
+            product_version=product_version,
+            modification_time=mtime,
+            creation_time=ctime,
+            company_name=dev.description.vendor.name,
+            author=dev.logic.author,
+            content_description=dev.logic.description,
+        )
+        try:
+            # Build the TC6 XML tree and add to the TC6 object
+            if logic_blocks is not None:
+                m340_parse.add_logic_to_tc6(logic_blocks, dev._cache["tc6"], derived_types)
+            if add_extra_logic:
+                add_extra_logic(dev._cache["tc6"])
+        except Exception:
+            cls.log.error(
+                "Exception while generating the TC6 XML. Perhaps the variable region is wrong?"
+            )
+            cls.log.debug(f"** Traceback **\n{traceback.format_exc()}")
+        else:
+            # Don't store tc6 if there are no variables or logic
+            if dev._cache["tc6"].logic_is_empty():
+                cls.log.warning("TC6 logic is empty, not saving...")
+            else:
+                xml_string = dev._cache["tc6"].generate_xml_string(
+                    openplc=dev.options["openplc_compatible_st_logic"]
+                )
+
+                if not xml_string:
+                    cls.log.error("Failed to generate TC6 XML string for non-empty logic")
+                else:
+                    dev.logic.formats["tc6"] = xml_string
+                    st_logic = dev._cache["tc6"].generate_st(
+                        xml_string, openplc=dev.options["openplc_compatible_st_logic"]
+                    )
+                    if st_logic:
+                        dev.logic.original = st_logic
+                        dev.logic.parsed = st_logic
+                        dev.logic.formats["structured_text"] = st_logic
+                    else:
+                        cls.log.warning("No structured text was generated")
+
+    @classmethod
     def parse_logic_to_text(cls, logic_blocks: dict) -> str:
         """
         Parse device project file blob into a printable string for debugging.
@@ -843,7 +874,7 @@ class M340(DeviceModule):
             content_element = SubElement(logic_element, "xhtml:p")
             content_element.text = "(* No logic was extracted by PEAT *)"
 
-            tc6_xml = tc6.generate_xml_string(dev.options["sceptre_plc_compatible_st_logic"])
+            tc6_xml = tc6.generate_xml_string(openplc=dev.options["openplc_compatible_st_logic"])
         else:
             tc6_xml = dev.logic.formats["tc6"]
 
