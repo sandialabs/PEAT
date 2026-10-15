@@ -580,6 +580,15 @@ device_options:
     # Telnet on the GE D25 RTU.
     menu_sleep_seconds: 5.0
 
+  # Configuration specific to the OpenPLC Runtime v3 Module
+  # (web interface login, e.g. "openplc"/"openplc" on GRFICSv3).
+  # The web interface port is set with the "http" options (default: 8080).
+  openplcv3:
+    username: ""
+    password: ""
+    pull_methods:
+      - http
+
   # Configuration specific to the OpenPLC Runtime v4 Module
   openplcv4:
     # --- Credentials and Pull Settings ---

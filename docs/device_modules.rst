@@ -104,6 +104,12 @@ iDirect Modem
 OpenPLC
 =======
 
+OpenPLC Runtime v3
+------------------
+.. automodule:: peat.modules.openplc.openplcv3
+   :members:
+   :no-undoc-members:
+
 OpenPLC Runtime v4
 ------------------
 .. automodule:: peat.modules.openplc.openplcv4
