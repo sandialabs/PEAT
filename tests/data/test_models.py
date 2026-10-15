@@ -55,6 +55,119 @@ def test_device_data_purge_duplicates():
     assert data.service == deduped
 
 
+def test_device_data_purge_duplicates_all_lists():
+    dev = DeviceData(
+        registers=[
+            Register(address="2", protocol="modbus"),
+            Register(address="1", protocol="modbus", name="a"),
+            Register(address="1", protocol="modbus"),
+            Register(address="2", protocol="modbus"),
+        ],
+        tag=[Tag(name="t", type="binary"), Tag(name="t")],
+        interface=[
+            Interface(ip="192.0.2.1", services=[Service(port=80)]),
+            Interface(ip="192.0.2.1", name="eth0", services=[Service(port=80)]),
+        ],
+        module=[
+            DeviceData(name="io", slot="2"),
+            DeviceData(name="cpu", slot="1"),
+            DeviceData(name="io", slot="2", type="I/O"),
+        ],
+    )
+
+    dev.purge_duplicates()
+    assert dev.registers == [
+        Register(address="1", protocol="modbus", name="a"),
+        Register(address="2", protocol="modbus"),
+    ]
+    assert dev.tag == [Tag(name="t", type="binary")]
+    assert dev.interface == [
+        Interface(ip="192.0.2.1", name="eth0", services=[Service(port=80)]),
+    ]
+    assert dev.module == [
+        DeviceData(name="cpu", slot="1"),
+        DeviceData(name="io", slot="2", type="I/O"),
+    ]
+
+    # Duplicates aren't purged again unless forced
+    assert dev._is_deduplicated is True
+    dev.registers.append(Register(address="1", protocol="modbus"))
+    dev.purge_duplicates()
+    assert len(dev.registers) == 3
+    dev.purge_duplicates(force=True)
+    assert len(dev.registers) == 2
+
+
+def test_device_data_purge_duplicates_large():
+    # Large lists used to be skipped instead of deduplicated
+    dev = DeviceData(
+        registers=[Register(address=str(i), protocol="modbus") for i in range(6000)] * 2
+    )
+    dev.purge_duplicates()
+    assert len(dev.registers) == 6000
+
+
+def test_device_data_populate_fields_dedupes():
+    dev = DeviceData(
+        ip="192.0.2.1",
+        interface=[
+            Interface(
+                ip="192.0.2.1", services=[Service(port=80), Service(port=80, protocol="http")]
+            ),
+        ],
+        service=[Service(port=80), Service(port=80, protocol="http"), Service(port=22)],
+    )
+    dev.populate_fields(network_only=True)
+    assert dev.service == [Service(port=80, protocol="http"), Service(port=22)]
+    assert dev.interface[0].services == [Service(port=80, protocol="http")]
+
+
+def test_device_data_store_merges():
+    dev = DeviceData(name="test_store_merges")
+
+    # Lookup by a single attribute
+    dev.store("interface", Interface(ip="192.0.2.1", name="eth0"))
+    dev.store("interface", Interface(ip="192.0.2.1", mac="00:00:5e:00:53:01"))
+    assert len(dev.interface) == 1
+    assert dev.interface[0].name == "eth0"
+    assert dev.interface[0].ip == "192.0.2.1"
+    assert dev.interface[0].mac == "00:00:5E:00:53:01"
+
+    # Lookup by a list of attributes (any match)
+    dev.store("service", Service(port=80, protocol="http"), lookup=["port", "protocol"])
+    dev.store("service", Service(port=80, transport="tcp"), lookup=["port", "protocol"])
+    dev.store("service", Service(port=443, protocol="https"), lookup=["port", "protocol"])
+    # NOTE: store() annotates services, which may populate other fields
+    assert [(s.port, s.protocol) for s in dev.service] == [(80, "http"), (443, "https")]
+    assert dev.service[0].transport == "tcp"
+
+    # Lookup by a dict of attributes (all must match)
+    dev.store("registers", Register(address="1", protocol="modbus"), lookup={"address": "1"})
+    dev.store(
+        "registers",
+        Register(address="1", protocol="modbus", name="r"),
+        lookup={"address": "1", "protocol": "dnp3"},
+    )
+    assert len(dev.registers) == 2
+    dev.store(
+        "registers",
+        Register(address="1", group="g"),
+        lookup={"address": "1", "protocol": "modbus"},
+    )
+    assert dev.registers[0] == Register(address="1", protocol="modbus", group="g")
+
+    # Modules are merged by slot, with their contents combined
+    dev.store("module", DeviceData(slot="1", registers=[Register(address="1")]), lookup="slot")
+    dev.store(
+        "module",
+        DeviceData(slot="1", name="cpu", registers=[Register(address="2")]),
+        lookup="slot",
+    )
+    assert len(dev.module) == 1
+    assert dev.module[0].name == "cpu"
+    assert dev.module[0].registers == [Register(address="1"), Register(address="2")]
+
+
 def test_device_data_export(mocker, tmp_path, assert_glob_path):
     mocker.patch.dict(config["CONFIG"], {"DEVICE_DIR": tmp_path})
 

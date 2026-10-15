@@ -172,8 +172,11 @@ def parse(
 
     # * Push results to Elasticsearch *
     if state.elastic:
+        # NOTE: compare by identity, since comparing models with "in" or "=="
+        # converts both devices to a dict, which is very slow for large devices.
+        parsed_ids = {id(dev) for dev in parsed_devices if dev}
         for d_dev in datastore.objects:
-            if d_dev not in parsed_devices:  # skip any not part of this parse
+            if id(d_dev) not in parsed_ids:  # skip any not part of this parse
                 log.trace(f"Skipping device not part of parse: {d_dev.get_id()}")
                 continue
             d_dev.export_to_elastic()

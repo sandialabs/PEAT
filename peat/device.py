@@ -363,7 +363,10 @@ class DeviceModule:
                 f"or a bug in PEAT."
             )
 
-        if parse_dev not in datastore.objects:
+        # NOTE: compare by identity, since comparing models with "in" or "=="
+        # converts every device in the datastore to a dict, which is very slow
+        # for devices with a lot of data.
+        if not any(obj is parse_dev for obj in datastore.objects):
             cls.log.debug(f"Parsed device {parse_dev.get_id()} not in datastore, adding it now...")
             datastore.objects.append(parse_dev)
 
