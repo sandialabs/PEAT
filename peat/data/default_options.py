@@ -7,7 +7,7 @@ ConfigVal = list | str | bool | float | int
 DEFAULT_OPTIONS: dict[str, dict[str, ConfigVal] | ConfigVal] = {
     "baudrates": [],
     "timeout": config.DEFAULT_TIMEOUT,
-    "sceptre_plc_compatible_st_logic": False,
+    "openplc_compatible_st_logic": False,
     "ftp": {"port": 21, "timeout": config.DEFAULT_TIMEOUT},
     "telnet": {
         "port": 23,
