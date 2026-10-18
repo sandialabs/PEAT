@@ -176,7 +176,7 @@ class FTPExtractor(HeatProtocol):
             return None
 
         log_json = []
-        with open(file) as log_fp:
+        with open(file, encoding="utf-8") as log_fp:
             for line in log_fp.readlines():
                 log_json.insert(0, json.loads(line))
 
@@ -330,7 +330,7 @@ class FTPExtractor(HeatProtocol):
 
             # if the file is a text file, use the utils to write the file
             if txtRegex.search(artifact.artifact_name):
-                with open(artifact.zeek_name) as zeek_file:
+                with open(artifact.zeek_name, encoding="utf-8", errors="replace") as zeek_file:
                     content = zeek_file.read()
                     utils.write_file(content, artifact.file_path, overwrite_existing=False)
             else:
@@ -394,7 +394,7 @@ class FTPExtractor(HeatProtocol):
         from peat import SELRelay
 
         if cserRegex.search(artifact.artifact_name):
-            with open(artifact.file_path) as f:
+            with open(artifact.file_path, encoding="utf-8", errors="replace") as f:
                 cser_data = f.read().strip()
                 events, info = parse_cser(cser_data.splitlines())
 
@@ -406,7 +406,7 @@ class FTPExtractor(HeatProtocol):
                     process_events(events, dev, dataset="cser")
 
         elif serRegex.search(artifact.artifact_name):
-            with open(artifact.file_path) as f:
+            with open(artifact.file_path, encoding="utf-8", errors="replace") as f:
                 ser_data = f.read().strip()
                 events, info = parse_ser(ser_data.splitlines())
 

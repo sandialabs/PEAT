@@ -67,7 +67,7 @@ def test_import_module_path_invalid_modules(tmp_path):
     empty_module_dir.mkdir()
     assert module_api.import_module_path(empty_module_dir) is False
     empty_module_file = empty_module_dir / "somemodule.py"
-    empty_module_file.write_text("#nothing here\n")
+    empty_module_file.write_text("#nothing here\n", encoding="utf-8")
     assert module_api.import_module_path(empty_module_file) is False
     with pytest.raises(AttributeError):
         module_api.import_module_path(None)

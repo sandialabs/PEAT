@@ -20,12 +20,16 @@ Supported platforms
       - 2018+ : ``peat`` executable
    - Other distributions: Debian, Debian-based distributions, and RHEL-based distributions (e.g. Fedora and CentOS) should work with the ``peat`` executable, but are not regularly tested. It has been known to work under Debian 9.
 - Windows
-   - Windows 7 SP2+: While Windows 7 has been tested with the pre-built executable, it's not regularly tested and support is not maintained. Your Mileage May Vary.
-   - Windows 10 1809+/Windows Server 2019+ (build 17763): ``peat.exe`` executable, development, and Python API are fully supported and regularly tested on Windows desktop and server build 17763 and newer. 1703+ may work, but hasn't been tested in a while.
-   - Windows 11: Windows 11 is not currently tested or formally supported. It may not work with the executable, but it may work with a direct Python install.
+   - Windows 10 and Windows 11 (x64): ``peat.exe`` executable, development, and Python API are fully supported. Windows Server 2022 and 2025 are also fully supported. See :ref:`windows-ci-section` for the exact versions tested.
+   - Windows 11 on ARM (e.g. Snapdragon PCs): ``peat.exe`` and the x64 build of Python run under Windows' built-in x64 emulation, and are tested in CI. Native ARM64 Python is not supported, since several of PEAT's dependencies don't publish ARM64 Windows packages.
+   - Windows 10 1809+/Windows Server 2019 (build 17763) and newer should work, but older builds are no longer tested.
+   - Windows 8.1 and older: not supported or tested. Microsoft no longer supports them, and Python 3.9 and newer don't run on Windows 7.
+   - 32-bit (x86) Windows is not supported.
+   - Refer to :ref:`windows-limitations-section` for features that work differently or aren't available on Windows.
 - `Windows Subsystem for Linux (WSL) <https://docs.microsoft.com/en-us/windows/wsl/>`__
-   - PEAT will work in any WSL Linux distro that's supported by PEAT (e.g. Ubuntu, Kali), listed above.
-   - Certain network-related features will not work in WSL, notably MAC address lookups, and a few other functions may not work fully.
+   - PEAT will work in any WSL Linux distro that's supported by PEAT (e.g. Ubuntu, Kali), listed above, in both WSL 1 and WSL 2.
+   - Certain network-related features will not work fully in WSL. MAC address lookups use the Windows host's ``arp.exe`` (or the Linux ARP cache if Windows interop is disabled), and mounting disk images with ``peat pillage`` isn't supported.
+   - WSL 2 uses a virtual NAT network by default, so broadcast scans and ARP-based host checks won't reach the Windows host's local network. Use `mirrored networking mode <https://learn.microsoft.com/en-us/windows/wsl/networking#mirrored-mode-networking>`__ or run ``peat.exe`` directly on Windows if you need those.
 - :term:`Docker`
    - Docker 18.03+, Linux host: PEAT is fully supported on Linux-based Docker hosts. PEAT is regularly tested on Docker 20+.
    - Windows and OSX Docker hosts should work but are untested.
@@ -35,11 +39,50 @@ Supported platforms
 - MacOS/OSX
    - OSX is supported on a best-effort basis. There are known issues with some networking components when running on OSX and issues with system dependencies.
 
+.. _windows-ci-section:
+
+Windows versions tested in CI
+-----------------------------
+Every pull request and push runs the full unit test suite with Python 3.11, 3.12, and 3.13, and runs the built ``peat.exe`` and ``sneakypeat.exe``, on the following GitHub-hosted runners. The unit tests are part of the ``All Tests Passed`` check, which pull requests must pass before they are merged.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Runner
+     - Windows version
+     - Corresponding desktop release
+   * - ``windows-2022``
+     - Windows Server 2022 (build 20348), x64
+     - Windows 10 and 11 21H2 era (between Windows 10 21H2, build 19044, and Windows 11 21H2, build 22000)
+   * - ``windows-2025``
+     - Windows Server 2025 (build 26100), x64
+     - Windows 11 24H2 (same build and code base)
+   * - ``windows-11-arm``
+     - Windows 11 (build 26100), ARM64, running x64 Python and ``peat.exe`` under emulation
+     - Windows 11 24H2
+
+.. note::
+   GitHub doesn't provide x64 runners with the Windows 10 or Windows 11 desktop editions, so those exact editions are not tested in CI. Windows Server 2025 shares its kernel and networking stack with Windows 11 24H2, Windows Server 2022 is the closest available release to Windows 10, and the ``windows-11-arm`` runner is a Windows 11 desktop image. Windows 10 22H2 itself is supported but only tested manually.
+
+.. _windows-limitations-section:
+
+Windows limitations
+-------------------
+Most of PEAT works the same on Windows as on Linux. These are the known differences, most of which are inherent to Windows.
+
+- **Administrator recommended for active scanning**: :term:`ICMP` pings, :term:`ARP` requests, and other raw socket features require running PEAT from an Administrator terminal. Without it, PEAT falls back to TCP SYN checks, which are slower. Passive commands (``parse``, and ``pillage`` of a directory) don't need Administrator.
+- **Npcap is required for Layer 2 features**: ARP requests, broadcast discovery, and packet sniffing use Scapy, which requires `Npcap <https://npcap.com/>`__ on Windows. Install Npcap (or Wireshark or Nmap, which include it) to use these. Everything else works without it.
+- **MAC address lookups**: Linux reads MAC addresses from the local ARP cache. On Windows, if the ``RESOLVE_MAC`` configuration option is enabled, PEAT sends an ARP request (which requires Npcap), and otherwise reads the ARP cache with ``arp.exe``.
+- **Disk images in pillage**: ``peat pillage`` mounts VHD, VHDX, and ISO images natively, but other formats (raw, VMDK, qcow2) must be converted with ``qemu-img`` first, which PEAT does automatically if it's installed. Mounting VHD and VHDX images requires Administrator, and only filesystems Windows can read (NTFS, FAT, exFAT, ReFS) are searched. Refer to :ref:`pillage` for details.
+- **No YMODEM serial transfers**: SEL relay serial pulls with ``sel.force_ymodem`` require the ``rz``/``sz`` commands, which aren't available on Windows. Regular serial pulls work. Serial ports are named ``COM1``, ``COM2``, and so on.
+- **No promiscuous mode check**: PEAT doesn't warn if the network interface is in promiscuous mode on Windows.
+- **Output encoding**: when PEAT's console output is redirected to a file or pipe, Windows uses the legacy code page (usually cp1252). Characters it can't represent are escaped (e.g. ``\u2013``) instead of causing an error. Output files PEAT writes (results, logs, JSON) are UTF-8.
+
 Hardware
 ========
 The system hardware requirements for running PEAT are minimal. The limits vary slightly by system.
 
-- Minimum 64-bit x86 CPU (Linux) or 32-bit x86 CPU (Windows); Dual-core 2.4Ghz 64-bit x86 CPU is recommended. Additional cores will not noticeably improve performance.
+- Minimum 64-bit x86 CPU, or a 64-bit ARM CPU running Windows 11; Dual-core 2.4Ghz 64-bit x86 CPU is recommended. Additional cores will not noticeably improve performance.
 - Minimum of 64MB available memory (RAM); 256MB is recommended for scanning very large networks or when running PEAT as a container.
 - Minimum of 50MB disk space in the platform's temporary directory (``/tmp`` on Linux or ``AppData`` on Windows). This is needed to extract and execute the Python code.
 - Minimum of ~100MB disk space in the configured output directory; 1Gb is recommended for storing multiple runs and increased output verbosity, 5-10GB is recommended if pulling from 100+ devices, especially if those devices have significant amounts of logic or configuration.

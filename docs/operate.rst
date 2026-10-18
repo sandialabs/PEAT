@@ -98,6 +98,8 @@ Note about Windows usage
 ------------------------
 We recommend running in an Administrator-level PowerShell terminal or script. Running as a standard user will reduce performance slightly, since certain Windows networking APIs are restricted. This will affect some network features, such as the ability to do :term:`ICMP` pings, :term:`ARP` pings, or network sniffing. PEAT will run fine in a CMD terminal but some terminal functionality may not work as well (e.g. terminal output colors and formatting).
 
+Layer 2 features such as :term:`ARP` requests and broadcast discovery also require `Npcap <https://npcap.com/>`__. Refer to :ref:`windows-limitations-section` for the full list of differences on Windows, and :ref:`windows-ci-section` for the Windows versions PEAT is tested on.
+
 .. _output-structure:
 
 Output
@@ -671,14 +673,31 @@ Refer to :ref:`pillage-config` for the available options and examples.
 
 Requirements
 ------------
-- Must be run on a Linux host system (Currently only tested on Ubuntu 18+)
+Pillage can search directories on any platform PEAT runs on, including a live Windows system (e.g. ``C:\``) or a mounted drive. Searching a directory doesn't require root or Administrator, but files the current user can't read will be skipped.
+
+Mounting disk images is supported on Linux and Windows. It isn't supported in :term:`WSL` or on macOS; in WSL, use ``peat.exe`` on Windows instead.
+
+Linux
+^^^^^
+- Currently only tested on Ubuntu 18+
 - Must be run as ``root``.  This is specifically needed if mounting an image.
 - ``qemu-nbd``, a part of the ``qemu-utils`` package. Installation: ``sudo apt install qemu-utils``
 - ``kmodpy`` Python package. This should be automatically installed with PEAT.
+- If the first partition is encrypted with BitLocker, pillage stops with an error. To search it, unlock and mount it yourself (e.g. with ``cryptsetup open --type bitlk --readonly`` or ``dislocker``), then pillage the mount point.
 - If pillaging a raw disk image, the host system must support the filesystem. The filesystems supported by the host can be found by:
 
   - Opening the file ``/proc/filesystems`` on the host system
   - Running ``ls -1 /lib/modules/$(uname -r)/kernel/fs`` on the host system
+
+Windows
+^^^^^^^
+- Tested on the Windows versions listed in :ref:`windows-ci-section`.
+- Disk images are mounted read-only with the built-in ``Mount-DiskImage`` PowerShell command. Every volume on the image that Windows can read (NTFS, FAT32, exFAT, ReFS) is searched. Volumes with other filesystems, such as ext4, are skipped; use Linux to pillage those.
+- VHD and VHDX images must be mounted as Administrator. ISO images can be mounted as a standard user.
+- Other image formats (raw, VMDK, qcow2, etc.) are converted to a temporary VHDX file in a ``pillage_temp_<random>`` directory before mounting, which requires ``qemu-img.exe`` from `QEMU for Windows <https://qemu.weilnetz.de/w64/>`__ to be in the ``PATH``. The conversion makes a copy of the image, so there must be enough free disk space in the current directory to hold it. Alternatively, convert the image yourself (``qemu-img convert -O vhdx disk.vmdk disk.vhdx``) or mount it with another tool and pillage its drive letter.
+- Images that were already attached before pillage started are searched as they are, and left attached when it finishes.
+- Volumes encrypted with BitLocker are skipped with a warning, since they're locked. To search one, attach the image with ``Mount-DiskImage``, unlock the volume (e.g. in File Explorer or with ``manage-bde -unlock``), then run pillage again.
+- Directory junctions (e.g. ``Documents and Settings``) aren't followed, since they point to other directories that may be searched twice. To search where a junction points, pillage that directory.
 
 Running Pillage
 ---------------
@@ -713,6 +732,14 @@ Results can also be pushed to Elasticsearch
 
    peat pillage -e http://192.0.2.21:9200 -c examples/peat-config.yaml -P /home/peat/pillage_this
 
+On Windows, pillage a VHDX image, the live system drive, or a mounted drive (run from an Administrator PowerShell terminal to mount images)
+
+.. code-block:: powershell
+
+   peat.exe pillage -c peat-config.yaml -P C:\images\eng_workstation.vhdx
+   peat.exe pillage -c peat-config.yaml -P C:\
+   peat.exe pillage -c peat-config.yaml -P E:\
+
 Command line arguments
 ^^^^^^^^^^^^^^^^^^^^^^
 - ``-c`` The PEAT configuration file to use. Refer to :ref:`pillage-config`.
@@ -737,10 +764,18 @@ If there is a critical failure and PEAT is unable to cleanup, run the following 
    sudo qemu-nbd -d /dev/nbd1
    sudo rmmod nbd
 
+On Windows, unmount the image (or the converted image in ``pillage_temp_<random>``) and delete the ``pillage_temp_<random>`` directory from an Administrator PowerShell terminal:
+
+.. code-block:: powershell
+
+   Dismount-DiskImage -ImagePath C:\full\path\to\image.vhdx
+   Remove-Item -Recurse -Force pillage_temp_*
+
 Notes
 -----
-- If a disk image is used as the source it must be a raw disk image.  Pillage does not support any other image formats.  To use unsupported images with pillage either convert it to a raw disk image or mount it to the host filesystem manually and provide the mount point as the input source to Pillage.
-- If a disk image is used as a source Pillager will mount it (read only) to a directory prior to searching called ``pillage_temp``.  It will be located in the current working directory when Pillage is ran.  Once Pillager is complete the image will be unmounted and this directory will be removed.
+- When the source is the root of a drive, a mounted filesystem, or a disk image, Windows system directories in its root (e.g. ``Windows``, ``$Recycle.Bin``, ``System Volume Information``) are skipped, since they won't have project files in them. These directories aren't skipped when searching other directories.
+- On Linux, disk images must be in a format ``qemu-nbd`` can read (raw, VMDK, qcow2, VHD, VHDX, etc.), and only the first partition is searched. On Windows, all readable volumes are searched. To use unsupported images with pillage either convert it to a raw disk image or mount it to the host filesystem manually and provide the mount point as the input source to Pillage.
+- If a disk image is used as a source on Linux, Pillager will mount it (read only) to a directory prior to searching called ``pillage_temp``.  It will be located in the current working directory when Pillage is ran.  Once Pillager is complete the image will be unmounted and this directory will be removed.
 - There have been times during development and testing when the host OS would not mount the image, but if the same Pillage command was tried again after waiting a few seconds it would mount just fine.
 - If running in a VMware Workstation VM, pillage can run on a disk image or file system loaded in a shared folder. See the VMware documentation for details on how to set this up. If you run into issues, this askubuntu answer may be helpful: `How do I mount shared folders in Ubuntu using VMware tools? <https://askubuntu.com/a/1051620>`__
 - To manually mount an image in the same manner as pillage:

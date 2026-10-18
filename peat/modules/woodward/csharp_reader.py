@@ -785,7 +785,7 @@ if __name__ == '__main__':
     op = Path("./test_output.txt").resolve()
     with open(sys.argv[1], 'rb') as streamfile:
         streamfile.seek(10)  # .wset
-        with op.open('w') as of:
+        with op.open('w', encoding='utf-8') as of:
             while True:
                 # json.dump(read_stream(streamfile), sys.stdout, cls=JSONEncoder, indent=4)
                 json.dump(read_stream(streamfile), of, cls=JSONEncoder, indent=4)

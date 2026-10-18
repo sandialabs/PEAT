@@ -56,8 +56,8 @@ class PLCControler:
                 self.ProgramChunks = GenerateCurrentProgram(self, self.Project, errors, warnings)
                 program_text = "".join([item[0] for item in self.ProgramChunks])
                 if filepath is not None:
-                    with open(filepath, 'w') as programfile:
-                        programfile.write(program_text.encode('utf-8'))
+                    with open(filepath, 'w', encoding='utf-8') as programfile:
+                        programfile.write(program_text)
                 return program_text, errors, warnings
             except PLCGenException as e:
                 errors.append(str(e))

@@ -122,10 +122,18 @@ jobs:
     name: Unit Tests
     runs-on: ${{ matrix.platform }}
     strategy:
+      fail-fast: false
       # OS images: https://github.com/actions/runner-images
+      # Windows: windows-2022 (Windows Server 2022, build 20348) and windows-2025
+      # (Windows Server 2025, build 26100, the same base as Windows 11 24H2).
+      # windows-11-arm is the Windows 11 client OS. It runs x64 Python under
+      # emulation, the same way peat.exe runs on ARM-based Windows 11 PCs.
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
-        platform: ["ubuntu-24.04", "windows-latest", "windows-2022", "macos-latest"]
+        platform: ["ubuntu-24.04", "windows-2025", "windows-2022", "windows-11-arm", "macos-latest"]
+        include:
+          - platform: windows-11-arm
+            architecture: x64
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
@@ -137,6 +145,7 @@ jobs:
         uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
         with:
           python-version: ${{ matrix.python-version }}
+          architecture: ${{ matrix.architecture }}
           cache: true
       - name: Install dependencies
         run: pdm sync -G test
@@ -151,3 +160,27 @@ jobs:
             htmlcov/
             pytest_files/
           if-no-files-found: error
+
+  # Single check that can be marked as required in branch protection,
+  # instead of requiring each job and matrix entry individually.
+  all-tests-passed:
+    name: All Tests Passed
+    if: always()
+    needs: [commits, check-newsfragments, check-changelog, code-quality, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+      - name: Check results of required jobs
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS_JSON"
+          if ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}; then
+            echo "::error ::One or more required jobs failed or were cancelled"
+            exit 1
+          fi

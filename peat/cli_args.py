@@ -365,6 +365,12 @@ peat pillage -c peat-config.json -P raw_disk.vmdk -e
 
 # Pillage files from a qcow2 image and upload results to a remote Elasticsearch server
 peat pillage -c peat-config.json -P raw_disk.qcow2 -e http://192.0.2.33:9200/
+
+# Windows: pillage files from a VHDX image (requires Administrator)
+peat.exe pillage -c peat-config.json -P C:\\images\\eng_workstation.vhdx
+
+# Windows: pillage files from the C: drive of the local system
+peat.exe pillage -c peat-config.json -P C:\\
 """  # End pillage examples
 
 
@@ -1114,8 +1120,8 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
         required=False,
         metavar="SOURCE",
         dest="pillage_source",
-        help="Source to pillage either a raw image file or directory "
-        "location. Defaults to local directory if nothing "
+        help="Source to pillage, either a disk image file (raw, VMDK, qcow2, "
+        "VHD, VHDX, ISO, etc.) or a directory location. Defaults to local directory if nothing "
         'specified. If the source is a "split" VMware VMDK disk '
         "(e.g. multiple VMDK files that make up a single disk), "
         'use the file without the "-sXXX" in the name as the source.',

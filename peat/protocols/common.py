@@ -1,5 +1,6 @@
 import os.path
 import re
+import shutil
 import socket
 import subprocess
 from collections import namedtuple
@@ -227,7 +228,8 @@ def ip_to_mac(ip: str) -> str:
         if consts.WSL:
             mac_address = _get_mac_from_ip_arpexe(ip)
         elif consts.POSIX:
-            mac_address = _search_arptable(re.escape(ip) + r".*" + MAC_RE_COLON)
+            # Anchor the IP so "192.0.2.1" doesn't match the line for "192.0.2.10"
+            mac_address = _search_arptable(r"(?<![\d.])" + re.escape(ip) + r"\s.*" + MAC_RE_COLON)
         elif consts.WINDOWS:
             mac_address = ""
 
@@ -320,7 +322,7 @@ def _search_arptable(regex: str) -> str:
         )
         return ""
 
-    with open("/proc/net/arp") as arpfile:
+    with open("/proc/net/arp", encoding="utf-8") as arpfile:
         arp_table = arpfile.read()
 
     if not arp_table:
@@ -350,6 +352,12 @@ def _get_ip_from_mac_arpexe(mac: str) -> str:
         log.debug(f"Running 'arp.exe -a' to find IP for {mac}")
 
     arp_output = _get_arpexe_output()
+
+    # arp.exe is missing or fails in WSL with Windows interop disabled,
+    # so use the Linux ARP cache instead
+    if consts.LINUX and not arp_output:
+        return _search_arptable(IPV4_RE + r".*" + re.escape(mac))
+
     if arp_output:
         regex = IPV4_RE + r".*" + re.escape(mac.replace(":", "-"))
         m = re.search(regex, arp_output)
@@ -368,8 +376,17 @@ def _get_mac_from_ip_arpexe(ip: str) -> str:
         log.debug(f"Running 'arp.exe -a' to find find MAC for IP {ip}")
 
     arp_output = _get_arpexe_output()
+
+    # arp.exe is missing or fails in WSL with Windows interop disabled,
+    # so use the Linux ARP cache instead
+    if consts.LINUX and not arp_output:
+        return _search_arptable(r"(?<![\d.])" + re.escape(ip) + r"\s.*" + MAC_RE_COLON)
+
     if arp_output:
-        m = re.search(MAC_RE_DASH, arp_output)
+        # Match the MAC on the same line as the IP. The lookbehind and whitespace
+        # prevent "192.0.2.1" from matching "192.0.2.10" or "10.192.0.2.1".
+        regex = r"(?<![\d.])" + re.escape(ip) + r"\s+" + MAC_RE_DASH
+        m = re.search(regex, arp_output)
         if m and m.groups():
             return m.groups()[0].replace("-", ":")
 
@@ -383,10 +400,18 @@ def _get_arpexe_output() -> str:
     #   224.0.0.22            00-00-00-00-00-01     static
     #   224.0.0.251           00-00-00-00-00-02     static
     #   239.255.255.250       00-00-00-00-00-03     static
-    proc = subprocess.run(["arp.exe", "-a"], stdout=subprocess.PIPE, check=False)
+    if consts.LINUX and not shutil.which("arp.exe"):
+        return ""
+
+    try:
+        proc = subprocess.run(["arp.exe", "-a"], stdout=subprocess.PIPE, check=False)
+    except OSError as ex:  # e.g. Windows executables can't run in WSL with interop disabled
+        log.debug(f"Failed to run arp.exe: {ex}")
+        return ""
 
     if proc.returncode == 0 and proc.stdout:
-        arp_output = proc.stdout.decode()
+        # arp.exe output is in the console's code page, and may be localized
+        arp_output = proc.stdout.decode(errors="replace")
         state.arp_table = arp_output
         return arp_output
 

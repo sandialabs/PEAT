@@ -63,7 +63,7 @@ Setting up a Windows development environment
 How to setup a local Python environment if you will be developing PEAT and need to edit and test the code.
 
 #. Install a version of Python supported by PEAT, currently 3.11 - 3.13 (download from `python.org <https://www.python.org/>`__). During install, ensure the option "Add Python to environment variables" or "Add Python to system PATH" is checked (you may need to click "Next" to see this option).
-#. Install `Npcap <https://nmap.org/npcap/>`_ 0.99 or newer (Skip this step if Wireshark, Nmap, or Winpcap is already installed)
+#. Install `Npcap <https://npcap.com/>`_ 0.99 or newer (Skip this step if Wireshark or Nmap is already installed). This is only needed to test Layer 2 features such as ARP requests.
 #. Open a PowerShell or Command Prompt window
 #. Run ``py -3 -V``, and verify it is a supported version (3.11 - 3.13).
 #. Install `PDM <https://pdm-project.org/en/stable/>`__

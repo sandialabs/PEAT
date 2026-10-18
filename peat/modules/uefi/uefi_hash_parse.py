@@ -26,7 +26,7 @@ def parse_hash(file_path: Path) -> list[UEFIHash]:
     files = []
 
     try:
-        with file_path.open("r") as reportobj:
+        with file_path.open("r", encoding="utf-8", errors="replace") as reportobj:
             for line in reportobj:
                 new_line = line.strip().split(":")
 
