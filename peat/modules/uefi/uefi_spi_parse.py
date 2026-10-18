@@ -92,7 +92,7 @@ def parse_file(file_path: Path) -> list[UEFIFile]:
     files = []
 
     try:
-        with file_path.open("r") as reportobj:
+        with file_path.open("r", encoding="utf-8", errors="replace") as reportobj:
             ti_c = os.path.getctime(file_path)
             x = datetime.fromtimestamp(ti_c)
             time_string = x

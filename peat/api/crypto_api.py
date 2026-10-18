@@ -60,13 +60,13 @@ def decrypt_config_api(
             log.error("The output filepath given does not exist, unable to save file")
             return False
         new_file_location = Path(output_path) / Path(new_filename)
-        with open(new_file_location, "w") as file:
+        with open(new_file_location, "w", encoding="utf-8") as file:
             yaml_data = yaml.safe_load(decrypted_str)
             yaml.dump(yaml_data, file, default_flow_style=False, sort_keys=False)
             log.info(f"Encrypted config saved to {new_file_location}")
             return True
     else:
-        with open(new_filename, "w") as file:
+        with open(new_filename, "w", encoding="utf-8") as file:
             yaml_data = yaml.safe_load(decrypted_str)
             yaml.dump(yaml_data, file, default_flow_style=False, sort_keys=False)
             log.info(f"Encrypted config saved to current directory as {new_filename}")

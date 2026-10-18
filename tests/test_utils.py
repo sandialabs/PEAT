@@ -44,7 +44,7 @@ def test_move_file(tmp_path):
     t_dir = tmp_path / "test_move_file_dir"
     t_dir.mkdir(exist_ok=True, parents=True)
     t_src = tmp_path / "test_move_file_file.txt"
-    t_src.write_text("some data")
+    t_src.write_text("some data", encoding="utf-8")
 
     assert t_src.is_file()
     assert t_dir.is_dir()
@@ -54,7 +54,7 @@ def test_move_file(tmp_path):
     assert res == Path(t_dir, t_src.name)
     assert res.is_file()
 
-    t_src.write_text("some data")
+    t_src.write_text("some data", encoding="utf-8")
     res = utils.move_file(t_src, t_dir)
 
     assert res == Path(t_dir, f"{t_src.name}.1")

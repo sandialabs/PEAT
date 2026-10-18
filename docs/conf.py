@@ -16,7 +16,7 @@ sys.setrecursionlimit(1500)
 
 
 def _clean_read(pth: Path) -> list:
-    return [x.strip() for x in pth.read_text().splitlines() if x]
+    return [x.strip() for x in pth.read_text(encoding="utf-8").splitlines() if x]
 
 
 def get_git_version() -> str:

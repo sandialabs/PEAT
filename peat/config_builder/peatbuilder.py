@@ -237,7 +237,7 @@ class PEATBuilder(App):
         if filename == "":
             filename = "peat_config.yaml"
 
-        with open(filename, "w") as yaml_file:
+        with open(filename, "w", encoding="utf-8") as yaml_file:
             yaml_file.write(yaml.dump(config))
 
     def on_button_pressed(self, event: Button.Pressed) -> None:

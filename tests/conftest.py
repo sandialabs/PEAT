@@ -13,7 +13,6 @@ import sys
 from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
-from platform import system, version
 from subprocess import PIPE, CompletedProcess, Popen, run
 
 import pytest
@@ -311,11 +310,6 @@ def exec_command() -> Callable[[str, bool], CompletedProcess]:
 
 
 @pytest.fixture
-def win_or_wsl() -> bool:
-    return bool(system() == "Windows" or (system() == "Linux" and "Microsoft" in version()))
-
-
-@pytest.fixture
 def examples_dir() -> Path:
     return Path(__file__).resolve().parents[1] / "examples"
 
@@ -516,8 +510,8 @@ def assert_meta_files(assert_glob_path, tmp_path) -> Callable:
 def mock_peat_results(tmp_path) -> Path:
     mock_peat_results: Path = tmp_path / "mock_peat_results"
     mock_peat_results.mkdir()
-    (mock_peat_results / "file1.txt").write_text("hello")
-    (mock_peat_results / "file2.txt").write_text("world")
+    (mock_peat_results / "file1.txt").write_text("hello", encoding="utf-8")
+    (mock_peat_results / "file2.txt").write_text("world", encoding="utf-8")
 
     return mock_peat_results
 

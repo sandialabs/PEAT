@@ -612,6 +612,10 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
+# Only enable preview rules that are explicitly selected by their full code
+preview = true
+explicit-preview-rules = true
+
 # Rules: https://docs.astral.sh/ruff/rules/
 # If you violate a rule, lookup the rule on the Rules page in ruff docs.
 # Many rules have links you can click with a explanation of the rule and how to fix it.
@@ -646,6 +650,11 @@ select = [
     "Q",    # flake8-quotes
     "UP",   # pyupgrade
     "I",    # isort
+
+    # Text-mode open() without an explicit encoding uses the locale's encoding,
+    # which is cp1252 on most Windows systems, not UTF-8.
+    # This is a preview rule, enabled by "explicit-preview-rules" below.
+    "PLW1514",  # unspecified-encoding
 
     # ** Things to potentially enable in the future **
     # DTZ requires all usage of datetime module to have timezone-aware

@@ -34,7 +34,9 @@ def test_awesome_module_load_and_parse(mocker, tmp_path, example_module_file):
     assert filecmp.cmp(parsed_device._out_dir / source_file.name, source_file)
 
     expected = json.loads(
-        example_module_file("awesome_output_expected_device-data-full.json").read_text()
+        example_module_file("awesome_output_expected_device-data-full.json").read_text(
+            encoding="utf-8"
+        )
     )
     assert parsed_device.export() == expected
 
@@ -57,7 +59,9 @@ def test_import_awesome_module_parse_cli(run_peat, tmp_path, example_module_file
 
     results = json.loads(run_peat(args)[0])["parse_results"][0]["results"]
     expected = json.loads(
-        example_module_file("awesome_output_expected_device-data-full.json").read_text()
+        example_module_file("awesome_output_expected_device-data-full.json").read_text(
+            encoding="utf-8"
+        )
     )
 
     assert results == expected
@@ -84,7 +88,9 @@ def test_import_awesome_module_parse_cli_no_device_type(run_peat, tmp_path, exam
 
     results = json.loads(run_peat(args)[0])["parse_results"][0]["results"]
     expected = json.loads(
-        example_module_file("awesome_output_expected_device-data-full.json").read_text()
+        example_module_file("awesome_output_expected_device-data-full.json").read_text(
+            encoding="utf-8"
+        )
     )
 
     assert results == expected

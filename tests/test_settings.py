@@ -8,7 +8,7 @@ from peat.settings import Configuration
 
 @pytest.fixture
 def yml_config(examples_path) -> dict:
-    return yaml.safe_load(examples_path("peat-config.yaml").read_text())
+    return yaml.safe_load(examples_path("peat-config.yaml").read_text(encoding="utf-8"))
 
 
 def test_example_yaml_config_matches_settings(yml_config):
@@ -28,5 +28,7 @@ def test_device_options_defaults(yml_config, deep_compare):
 def test_simple_example_yaml_config_matches_settings(examples_path):
     conf = Configuration("configuration", env_prefix="TEST_CONF_", init_env=False)
     exported = lower_dict(conf.json_dict(include_none_vals=True))
-    yml_config = yaml.safe_load(examples_path("peat-config-simple.yaml").read_text())
+    yml_config = yaml.safe_load(
+        examples_path("peat-config-simple.yaml").read_text(encoding="utf-8")
+    )
     assert sorted(exported.keys()) == sorted(yml_config.keys())

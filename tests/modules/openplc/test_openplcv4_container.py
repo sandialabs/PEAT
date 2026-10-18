@@ -65,6 +65,6 @@ def test_pull_and_validate(live_dev):
     assert (live_dev._out_dir / "openplc_runtime.log").exists()
     assert (live_dev._out_dir / "compilation_status.log").exists()
     # Validate that the compilation status log indicates a compiled/compiling state for test 3
-    comp_log = (live_dev._out_dir / "compilation_status.log").read_text()
+    comp_log = (live_dev._out_dir / "compilation_status.log").read_text(encoding="utf-8")
     assert "Status: " in comp_log
     assert any(f.name == "openplc_runtime.log" for f in live_dev.files)

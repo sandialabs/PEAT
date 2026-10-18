@@ -337,7 +337,7 @@ def oneshot_main(args: dict[str, Any]) -> bool:
             return export_device_data(args)
 
         elif args["func"] == "pillage":
-            return pillage(args["pillage_source"])
+            return pillage(args["pillage_source"], args.get("pillage_password_file"))
 
         else:
             log.critical(f"Unknown func: {args['func']}")
