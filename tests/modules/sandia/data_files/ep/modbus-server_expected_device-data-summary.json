@@ -1,0 +1,111 @@
+{
+    "created": "2026-10-25T23:49:33.708814",
+    "description": {
+        "brand": "SCEPTRE",
+        "full": "Sandia National Laboratories SCEPTRE",
+        "model": "SCEPTRE",
+        "product": "SCEPTRE",
+        "vendor": {
+            "id": "Sandia",
+            "name": "Sandia National Laboratories"
+        }
+    },
+    "id": "rtu-1",
+    "ip": "127.0.0.1",
+    "name": "rtu-1",
+    "type": "RTU",
+    "os": {
+        "full": "Canonical Ubuntu",
+        "name": "Ubuntu",
+        "vendor": {
+            "id": "Canonical",
+            "name": "Canonical"
+        }
+    },
+    "logic": {
+        "file": {
+            "created": "2026-10-25 23:47:40.035072",
+            "device": "127.0.0.1",
+            "directory": "tests/modules/sandia/data_files/ep/",
+            "extension": "xml",
+            "hash": {
+                "md5": "553F7636423388F0D6D30E97BDC5CDDF",
+                "sha1": "1E2FEACAEB5297CE76AE13C0879EA5E2C9C2D735",
+                "sha256": "FCFD20DD982D0FD5ACCF944148EBF34D7B026920A53995820F4E374A2D28DD81",
+                "sha512": "307A6AD7918347FD5EBF48087378D21087E64ED13FEB8FC2BC369C1579CC4274508869608E06323C1DD908A224602FE38A8D529EF9446AF3B3E2F709EB62CE42"
+            },
+            "local_path": "tests/modules/sandia/data_files/ep/modbus-server.xml",
+            "path": "tests/modules/sandia/data_files/ep/modbus-server.xml",
+            "group": "root",
+            "mime_type": "application/xml",
+            "mtime": "2026-10-25 23:47:40.035072",
+            "name": "modbus-server.xml",
+            "owner": "root",
+            "size": 4837,
+            "type": "file"
+        },
+        "hash": {
+            "md5": "9910B6BE601461084589F9C09DDFA0BC",
+            "sha1": "7DC54D76F2DF6499826B9D8812D1372317FF78B9",
+            "sha256": "FF0A06CD82B1E0EF9A00D5CFBB7D9DA7B777DFE9949D2B2D4F7AB5321A704A40",
+            "sha512": "DDBAA20F0D1B2E7439B070AF4F4402F9B69FA7FC11AFECC981157049C995009E1FE65E19B1CA14281591AACE7A95A71DC3B778667124AF52E27694CAF6DF84EF"
+        },
+        "parsed": "var_O0 = !(var_I1 >= 500.55)\nvar_O1 = var_O0,delay:10\ncounter = counter + (var_I1 < 500.55)\nvar_O11 = var_O1\nvar_O12 = counter**2 + 2*counter - 5\nvar_O13 = abs(var_O12)\nvar_O14 = sin(var_O13)\nvar_O15 = cos(var_O14)\nvar_O16 = tan(var_O15)"
+    },
+    "interface": [
+        {
+            "application": "modbus",
+            "enabled": true,
+            "type": "ethernet",
+            "ip": "127.0.0.1",
+            "services": [
+                {
+                    "enabled": true,
+                    "extra": {
+                        "event_logging": "rtu-1-modbus-server.log"
+                    },
+                    "port": 5502,
+                    "protocol": "modbus",
+                    "role": "server",
+                    "transport": "tcp"
+                }
+            ]
+        }
+    ],
+    "service": [
+        {
+            "enabled": true,
+            "extra": {
+                "event_logging": "rtu-1-modbus-server.log"
+            },
+            "port": 5502,
+            "protocol": "modbus",
+            "role": "server",
+            "transport": "tcp"
+        }
+    ],
+    "related": {
+        "hash": [
+            "1E2FEACAEB5297CE76AE13C0879EA5E2C9C2D735",
+            "307A6AD7918347FD5EBF48087378D21087E64ED13FEB8FC2BC369C1579CC4274508869608E06323C1DD908A224602FE38A8D529EF9446AF3B3E2F709EB62CE42",
+            "553F7636423388F0D6D30E97BDC5CDDF",
+            "7DC54D76F2DF6499826B9D8812D1372317FF78B9",
+            "9910B6BE601461084589F9C09DDFA0BC",
+            "DDBAA20F0D1B2E7439B070AF4F4402F9B69FA7FC11AFECC981157049C995009E1FE65E19B1CA14281591AACE7A95A71DC3B778667124AF52E27694CAF6DF84EF",
+            "FCFD20DD982D0FD5ACCF944148EBF34D7B026920A53995820F4E374A2D28DD81",
+            "FF0A06CD82B1E0EF9A00D5CFBB7D9DA7B777DFE9949D2B2D4F7AB5321A704A40"
+        ],
+        "ip": [
+            "127.0.0.1"
+        ],
+        "ports": [
+            5502
+        ],
+        "protocols": [
+            "modbus"
+        ]
+    },
+    "extra": {
+        "cycle_time": 1000
+    }
+}
