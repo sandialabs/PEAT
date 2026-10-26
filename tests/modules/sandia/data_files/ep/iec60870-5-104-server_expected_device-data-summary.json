@@ -1,0 +1,71 @@
+{
+    "created": "2026-10-25T23:49:23.466432",
+    "description": {
+        "brand": "SCEPTRE",
+        "full": "Sandia National Laboratories SCEPTRE",
+        "model": "SCEPTRE",
+        "product": "SCEPTRE",
+        "vendor": {
+            "id": "Sandia",
+            "name": "Sandia National Laboratories"
+        }
+    },
+    "id": "rtu-1",
+    "ip": "127.0.0.1",
+    "name": "rtu-1",
+    "type": "RTU",
+    "os": {
+        "full": "Canonical Ubuntu",
+        "name": "Ubuntu",
+        "vendor": {
+            "id": "Canonical",
+            "name": "Canonical"
+        }
+    },
+    "interface": [
+        {
+            "application": "iec60870_5_104",
+            "enabled": true,
+            "type": "ethernet",
+            "ip": "127.0.0.1",
+            "services": [
+                {
+                    "enabled": true,
+                    "extra": {
+                        "event_logging": "rtu-1-104-outstation.log"
+                    },
+                    "port": 2404,
+                    "protocol": "iec60870_5_104",
+                    "role": "server",
+                    "transport": "tcp"
+                }
+            ]
+        }
+    ],
+    "service": [
+        {
+            "enabled": true,
+            "extra": {
+                "event_logging": "rtu-1-104-outstation.log"
+            },
+            "port": 2404,
+            "protocol": "iec60870_5_104",
+            "role": "server",
+            "transport": "tcp"
+        }
+    ],
+    "related": {
+        "ip": [
+            "127.0.0.1"
+        ],
+        "ports": [
+            2404
+        ],
+        "protocols": [
+            "iec60870_5_104"
+        ]
+    },
+    "extra": {
+        "cycle_time": 500
+    }
+}

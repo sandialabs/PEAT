@@ -381,13 +381,23 @@ class SCEPTRE(DeviceModule):
                 # Parse protocol tags
                 section_names = {
                     "analog-input",
+                    "analog-output",
                     "binary-input",
                     "binary-output",
                     "coil",
                     "discrete-input",
+                    "holding-register",
                     "input-register",
                 }
+                # Servers list points directly under the module, clients
+                # list them under each <x-connection> to a server.
+                points = []
                 for child in list(mod):
+                    if "connection" in child.tag:
+                        points.extend(list(child))
+                    else:
+                        points.append(child)
+                for child in points:
                     if child.tag in section_names:
                         reg = Register(
                             protocol="_".join(mod.tag.split("-")[:-1]),

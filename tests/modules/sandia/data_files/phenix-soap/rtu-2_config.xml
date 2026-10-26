@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SCEPTRE>
+    <field-device>
+
+        <name>rtu-2</name>
+        <cycle-time>1000</cycle-time>
+        <tags>
+                
+            <external-tag>
+                <name>var_rtu-2_I0</name>
+                <io>rtu-2_I0</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I1</name>
+                <io>rtu-2_I1</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I2</name>
+                <io>rtu-2_I2</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I3</name>
+                <io>rtu-2_I3</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I4</name>
+                <io>rtu-2_I4</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I5</name>
+                <io>rtu-2_I5</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I6</name>
+                <io>rtu-2_I6</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I7</name>
+                <io>rtu-2_I7</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I8</name>
+                <io>rtu-2_I8</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_O0</name>
+                <io>rtu-2_O0</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I9</name>
+                <io>rtu-2_I9</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I10</name>
+                <io>rtu-2_I10</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I11</name>
+                <io>rtu-2_I11</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_O1</name>
+                <io>rtu-2_O1</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I12</name>
+                <io>rtu-2_I12</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I13</name>
+                <io>rtu-2_I13</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I14</name>
+                <io>rtu-2_I14</io>
+                <type>analog</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_I15</name>
+                <io>rtu-2_I15</io>
+                <type>binary</type>
+            </external-tag>
+                
+            <external-tag>
+                <name>var_rtu-2_O2</name>
+                <io>rtu-2_O2</io>
+                <type>binary</type>
+            </external-tag>
+        </tags>
+        <comms>
+            <dnp3-server>
+	        <endpoint>tcp://10.117.4.102:20000</endpoint>
+                <address>10</address>
+                <event-logging>rtu-2-dnp3-outstation.log</event-logging>
+                
+                <analog-input>
+                    <address>0</address>
+                    <tag>var_rtu-2_I0</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>1</address>
+                    <tag>var_rtu-2_I1</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>2</address>
+                    <tag>var_rtu-2_I2</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>3</address>
+                    <tag>var_rtu-2_I3</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>4</address>
+                    <tag>var_rtu-2_I4</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>5</address>
+                    <tag>var_rtu-2_I5</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>6</address>
+                    <tag>var_rtu-2_I6</tag>
+                </analog-input>
+                
+                <binary-input>
+                    <address>0</address>
+                    <tag>var_rtu-2_I7</tag>
+                </binary-input>
+                
+                <binary-input>
+                    <address>1</address>
+                    <tag>var_rtu-2_I8</tag>
+                </binary-input>
+                
+                <binary-output>
+                    <address>2</address>
+                    <tag>var_rtu-2_O0</tag>
+                </binary-output>
+                
+                <analog-input>
+                    <address>7</address>
+                    <tag>var_rtu-2_I9</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>8</address>
+                    <tag>var_rtu-2_I10</tag>
+                </analog-input>
+                
+                <binary-input>
+                    <address>3</address>
+                    <tag>var_rtu-2_I11</tag>
+                </binary-input>
+                
+                <binary-output>
+                    <address>4</address>
+                    <tag>var_rtu-2_O1</tag>
+                </binary-output>
+                
+                <analog-input>
+                    <address>9</address>
+                    <tag>var_rtu-2_I12</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>10</address>
+                    <tag>var_rtu-2_I13</tag>
+                </analog-input>
+                
+                <analog-input>
+                    <address>11</address>
+                    <tag>var_rtu-2_I14</tag>
+                </analog-input>
+                
+                <binary-input>
+                    <address>5</address>
+                    <tag>var_rtu-2_I15</tag>
+                </binary-input>
+                
+                <binary-output>
+                    <address>6</address>
+                    <tag>var_rtu-2_O2</tag>
+                </binary-output>
+            </dnp3-server>
+        </comms>
+        <input>
+            <endpoint>udp://172.16.1.5;239.0.0.1:40000</endpoint>
+                
+            <analog>
+                <id>rtu-2_I0</id>
+                <name>bus-243.voltage</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I1</id>
+                <name>bus-243.angle</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I2</id>
+                <name>bus-243.gen_mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I3</id>
+                <name>bus-243.gen_mvar</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I4</id>
+                <name>bus-243.load_mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I5</id>
+                <name>bus-243.load_mvar</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I6</id>
+                <name>bus-243.shunt_mvar</name>
+            </analog>
+                
+            <binary>
+                <id>rtu-2_I7</id>
+                <name>bus-243.active</name>
+            </binary>
+                
+            <binary>
+                <id>rtu-2_I8</id>
+                <name>bus-243.slack</name>
+            </binary>
+                                
+            <analog>
+                <id>rtu-2_I9</id>
+                <name>load-1_bus-243.mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I10</id>
+                <name>load-1_bus-243.mvar</name>
+            </analog>
+                
+            <binary>
+                <id>rtu-2_I11</id>
+                <name>load-1_bus-243.active</name>
+            </binary>
+                                
+            <analog>
+                <id>rtu-2_I12</id>
+                <name>generator-1_bus-243.voltage</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I13</id>
+                <name>generator-1_bus-243.mw</name>
+            </analog>
+                
+            <analog>
+                <id>rtu-2_I14</id>
+                <name>generator-1_bus-243.mvar</name>
+            </analog>
+                
+            <binary>
+                <id>rtu-2_I15</id>
+                <name>generator-1_bus-243.active</name>
+            </binary>
+                        </input>
+        <output>
+            <endpoint>tcp://172.16.1.2:5555</endpoint>
+                                                                                                                                                                
+            <binary>
+                <id>rtu-2_O0</id>
+                <name>bus-243.active</name>
+            </binary>
+                                                                
+            <binary>
+                <id>rtu-2_O1</id>
+                <name>load-1_bus-243.active</name>
+            </binary>
+                                                                                
+            <binary>
+                <id>rtu-2_O2</id>
+                <name>generator-1_bus-243.active</name>
+            </binary>
+        </output>
+    </field-device>
+</SCEPTRE>
+

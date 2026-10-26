@@ -1,0 +1,73 @@
+{
+    "created": "2026-10-25T23:49:42.259764",
+    "description": {
+        "brand": "SCEPTRE",
+        "full": "Sandia National Laboratories SCEPTRE",
+        "model": "SCEPTRE",
+        "product": "SCEPTRE",
+        "vendor": {
+            "id": "Sandia",
+            "name": "Sandia National Laboratories"
+        }
+    },
+    "id": "10.117.4.104",
+    "ip": "10.117.4.104",
+    "name": "rtu-4",
+    "type": "RTU",
+    "os": {
+        "full": "Canonical Ubuntu",
+        "name": "Ubuntu",
+        "vendor": {
+            "id": "Canonical",
+            "name": "Canonical"
+        }
+    },
+    "interface": [
+        {
+            "application": "dnp3",
+            "enabled": true,
+            "type": "ethernet",
+            "ip": "10.117.4.104",
+            "services": [
+                {
+                    "enabled": true,
+                    "extra": {
+                        "event_logging": "rtu-4-dnp3-outstation.log"
+                    },
+                    "port": 20000,
+                    "protocol": "dnp3",
+                    "protocol_id": "10",
+                    "role": "server",
+                    "transport": "tcp"
+                }
+            ]
+        }
+    ],
+    "service": [
+        {
+            "enabled": true,
+            "extra": {
+                "event_logging": "rtu-4-dnp3-outstation.log"
+            },
+            "port": 20000,
+            "protocol": "dnp3",
+            "protocol_id": "10",
+            "role": "server",
+            "transport": "tcp"
+        }
+    ],
+    "related": {
+        "ip": [
+            "10.117.4.104"
+        ],
+        "ports": [
+            20000
+        ],
+        "protocols": [
+            "dnp3"
+        ]
+    },
+    "extra": {
+        "cycle_time": 1000
+    }
+}
