@@ -70,7 +70,7 @@ def update_local_interface_cache():
                 obj = IPv4Interface(f"{item['addr']}/{item['netmask']}")
                 state.local_interface_objects.append(obj)
 
-                if str(obj.network.network_address) not in ["0.0.0.0", "169.254.0.0"]:
+                if str(obj.network.network_address) not in ["0.0.0.0", "169.254.0.0"]:  # noqa: S104 - comparison, not a bind
                     # Add to overall list of networks connected to this host
                     state.local_networks.append(obj.network)
                     # Add to list of networks associated with this interface

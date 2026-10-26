@@ -375,7 +375,7 @@ class OpenPLCv4(DeviceModule):
         cls.log.debug(f"Checking for OpenPLCv4 API at {url}")
 
         try:
-            response = requests.get(url, verify=False, timeout=5)
+            response = requests.get(url, verify=False, timeout=5)  # noqa: S501 - devices often use self-signed certs
             if response.status_code == 200:
                 version_data = response.json()
                 if "version" in version_data:

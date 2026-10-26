@@ -1173,12 +1173,24 @@ class Sage(DeviceModule):
                 file_basename = file.stem.replace(".tar", "").replace(".gz", "")
                 t_path = dev.get_sub_dir(f"{file_basename}_raw_files")
 
-                cls.log.debug(
-                    f"Extracting raw files from {file.name} to {t_path.parent.name}/{t_path.name}"
-                )
-
-                with tarfile.open(name=file, mode="r:gz", encoding="utf-8") as tar:
-                    tar.extractall(path=t_path)
+                if not hasattr(tarfile, "data_filter"):
+                    # Python before 3.11.4 can't filter out members that escape t_path
+                    cls.log.warning(
+                        f"Not extracting raw files from {file.name}: Python 3.11.4 or "
+                        "newer is needed to safely extract archives from devices"
+                    )
+                else:
+                    cls.log.debug(
+                        f"Extracting raw files from {file.name} to "
+                        f"{t_path.parent.name}/{t_path.name}"
+                    )
+                    with tarfile.open(name=file, mode="r:gz", encoding="utf-8") as tar:
+                        try:
+                            tar.extractall(path=t_path, filter="data")
+                        except tarfile.FilterError as ex:
+                            cls.log.warning(
+                                f"Refused to extract unsafe file from {file.name}: {ex}"
+                            )
             except Exception as ex:
                 cls.log.debug(f"Failed to extract raw files from {file.name}: {ex}")
 

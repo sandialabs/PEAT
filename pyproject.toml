@@ -646,6 +646,7 @@ select = [
     "Q",    # flake8-quotes
     "UP",   # pyupgrade
     "I",    # isort
+    "S",    # flake8-bandit
 
     # ** Things to potentially enable in the future **
     # DTZ requires all usage of datetime module to have timezone-aware
@@ -654,7 +655,6 @@ select = [
     # "PTH",  # flake8-use-pathlib
     # "SIM",  # flake8-simplify
     # "ANN",  # flake8-annotations
-    # "S",    # flake8-bandit
 
 ]
 
@@ -685,11 +685,16 @@ ignore = [
     "PLR0912",
     "PLR0913",
     "PLR0915",
+    # flake8-bandit (S) rules that flag swallowed exceptions. PEAT uses these on purpose
+    # for best-effort cleanup and optional parsing, and they aren't security issues here.
+    "S110",    # try-except-pass
+    "S112",    # try-except-continue
 ]
 
 # Linting error codes to ignore on a per-file basis
 [tool.ruff.lint.per-file-ignores]
 "distribution/sneakypeat.py" = ["T201", "T203"]
+"tests/**/*.py" = ["S101"]  # assert is how pytest works
 "tests/conftest.py" = ["RET503"]
 "tests/generate_test_data_files.py" = ["T201", "T203"]
 "__init__.py" = ["F401"]

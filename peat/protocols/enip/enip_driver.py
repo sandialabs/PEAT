@@ -80,7 +80,7 @@ class EnipDriver:
         self.vid = vid
         self.vsn = vsn
 
-        self.sequence = random.randint(ENIP_SEQ_MIN, ENIP_SEQ_MAX)
+        self.sequence = random.randint(ENIP_SEQ_MIN, ENIP_SEQ_MAX)  # noqa: S311 - ENIP sequence number, not security
         self.session = 0
         self.is_forward_opened = False
 

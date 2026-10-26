@@ -253,7 +253,8 @@ def modify_sel(dev, args: argparse.Namespace):
     set_data = dev._cache["all_files"][set_file]
     if isinstance(set_data, dict):
         set_data = set_data["data"]
-    assert set_data
+    if not set_data:
+        raise RuntimeError(f"({dev.ip}) failed to pull '{set_file}' via FTP")
 
     # Modify setting(s) in Group X (SET_X.TXT)
     log(f"({dev.ip}) editing '{args.modify}' (new value: '{args.new_value}')")
@@ -293,10 +294,13 @@ def modify_sel(dev, args: argparse.Namespace):
     with FTP(dev.ip) as ftp:
         log(f"({dev.ip}) logging in to FTP")
 
-        assert ftp.login(dev.options["ftp"]["user"], dev.options["ftp"]["pass"])
+        # Not asserts, since "python -O" would skip the login
+        if not ftp.login(dev.options["ftp"]["user"], dev.options["ftp"]["pass"]):
+            raise RuntimeError(f"({dev.ip}) FTP login failed")
 
         sleep(0.5)
-        assert ftp.getwelcome()
+        if not ftp.getwelcome():
+            raise RuntimeError(f"({dev.ip}) no FTP welcome message after login")
 
         log(f"({dev.ip}) finished FTP login")
 

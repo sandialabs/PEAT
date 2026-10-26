@@ -78,7 +78,7 @@ START_TIME: Final[str] = START_TIME_LOCAL.strftime(TIME_FMT)
 #: int: Unique "ID" to track all artifacts associated with a single run of PEAT
 #: RUN_ID := 12-digit integer (current UTC time + random 2-digit integer)
 #: NOTE: previously, the Run ID was 10 digits (changed 02/20/2020)
-RUN_ID: Final[int] = int(f"{int(START_TIME_UTC.timestamp()):10}{randint(0, 99):02}")
+RUN_ID: Final[int] = int(f"{int(START_TIME_UTC.timestamp()):10}{randint(0, 99):02}")  # noqa: S311 - not used for security
 
 NO_COLOR_LOGO: Final[str] = r"""
     ____  _________  ______
@@ -301,7 +301,7 @@ def gen_random_dev_id() -> str:
 
     Format: ``unknown-dev-<run-id>-<random-integer>``
     """
-    return f"unknown-dev-{RUN_ID}-{randint(0, 9999):04}"
+    return f"unknown-dev-{RUN_ID}-{randint(0, 9999):04}"  # noqa: S311 - not used for security
 
 
 def lower_dict(to_lower: dict[str, Any], children: bool = True) -> dict[str, Any]:

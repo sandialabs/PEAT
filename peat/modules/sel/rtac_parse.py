@@ -424,7 +424,7 @@ def parse_pous(pou: ET, device_info: dict) -> None:
     results[name] = {}
 
     # parse program logic
-    xml_root = ET.fromstring(pou[0].find("ArchivedContent").text)
+    xml_root = ET.fromstring(pou[0].find("ArchivedContent").text)  # noqa: S314 - expat ignores external entities
     results[name]["functions"] = {}
     for i in xml_root:
         func_name = i.items()[0][1]

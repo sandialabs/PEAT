@@ -13,12 +13,13 @@ def test_wrong_password(tmp_path, examples_dir):
     tmp_filepath.mkdir()
     shutil.copy(src=filepath.as_posix(), dst=f"{tmp_filepath.as_posix()}/example_config.yaml")
     config_crypto.encrypt_config(
-        file_path=tmp_filepath / "example_config.yaml", user_password="passw"
+        file_path=tmp_filepath / "example_config.yaml",
+        user_password="passw",  # noqa: S106 - dummy test credential
     )
     assert (
         config_crypto.decrypt_config(
             filepath=tmp_filepath / "encrypted_example_config.yaml",
-            user_password="wrongpassw",
+            user_password="wrongpassw",  # noqa: S106 - dummy test credential
         )
         is None
     )

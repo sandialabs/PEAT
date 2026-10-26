@@ -22,6 +22,17 @@ from peat.data.models import Event, Interface, User
 ElasticType = None | int | bool | str | float
 
 
+def _parse_xml(data: str | bytes) -> ET.Element:
+    """
+    Parse XML from a SAGE configuration file.
+
+    The files come from the device or from the user, so they're untrusted. The stdlib
+    parser (expat) doesn't resolve external entities, so the remaining risk is
+    entity expansion, which libexpat 2.4.1 and newer limit.
+    """
+    return ET.fromstring(data)  # noqa: S314 - expat ignores external entities
+
+
 def _convert_to_elastic(_input: str) -> ElasticType:
     """
     Cast input to inferred type (int, bool, None) for Elasticsearch.
@@ -66,7 +77,7 @@ def parse_access_xml(f_handle: IO[bytes], device_info: dict) -> None:
     """
     access_info = {}
 
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
 
     access_info["users"] = []
     for user in root:
@@ -130,7 +141,7 @@ def parse_rtu_setup(f_handle: IO[bytes], device_info: dict) -> None:
     """
     info = {}
 
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
 
     cpu = root.findall("CPU")
     if not cpu:
@@ -227,7 +238,7 @@ def parse_tte(f_handle: IO[bytes], device_info: dict) -> None:
         device_info: dictionary of keys and values for target device
     """
     tte_settings = {}
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     entry = 0
 
     for tte_elem in root:
@@ -293,7 +304,7 @@ def parse_time(f_handle: IO[bytes], device_info: dict) -> None:
         f_handle: file handler to read data from and parse xml
         device_info: dictionary of keys and values for target device
     """
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
 
     _time = root.findall("TIME")[0]
     parse_time_elements(_time, device_info)
@@ -380,7 +391,7 @@ def parse_bootline_xml(f_handle: IO[bytes], device_info: dict) -> None:
         f_handle: file handler to read data from and parse xml
         device_info: dictionary of keys and values for target device
     """
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     bootline = root.findall("BOOTLINE")[0]
     device_info["bootline_from_xml"] = bootline_parse(bootline.attrib)
 
@@ -443,7 +454,7 @@ def parse_ether(f_handle: IO[bytes], device_info: dict) -> None:
         device_info: dictionary of keys and values for target device
     """
     ether_settings = {}
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     entry = 0
 
     for ether_elem in root:
@@ -618,7 +629,7 @@ def parse_port(f_handle: IO[bytes], device_info: dict) -> None:
 
     port_settings = {}
 
-    port = ET.fromstring(f_handle.read())
+    port = _parse_xml(f_handle.read())
     proto = port.findall("PROTOCOL")[0]
 
     for item in port.items():
@@ -641,7 +652,7 @@ def parse_port(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_features(f_handle: IO[bytes], device_info: dict) -> None:
-    features = ET.fromstring(f_handle.read())
+    features = _parse_xml(f_handle.read())
     protocols = features.findall("PROTOCOLS")[0]
 
     device_info["feature_protocols"] = {}
@@ -652,7 +663,7 @@ def parse_features(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_3835(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     c3835 = root.findall("C3835")
     cards = {}
 
@@ -673,7 +684,7 @@ def parse_3835(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_dcana(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     dcana_settings = {}
 
     for child in root:
@@ -696,7 +707,7 @@ def parse_dcana(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_calc(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     calc = {}
 
     for child in root:
@@ -723,7 +734,7 @@ def parse_calc(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_rtu_sts(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     rtu_settings = {}
 
     for child in root:
@@ -746,7 +757,7 @@ def parse_rtu_sts(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_timing(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     timing_settings = {}
 
     for child in root:
@@ -760,7 +771,7 @@ def parse_timing(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_sfb(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     sfb_cards = {}
 
     for child in root:
@@ -775,7 +786,7 @@ def parse_sfb(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_acc_rate(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     acc_param = root.findall("ACC_PARAM")
 
     acc_rate = {}
@@ -792,7 +803,7 @@ def parse_acc_rate(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_alarming(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     alarm_child = root.findall("ALARMS")[0]
 
     alarms = {}
@@ -807,7 +818,7 @@ def parse_alarming(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_alarms(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     alarm_child = root.findall("ALARMS")[0]
 
     alarms = {}
@@ -824,7 +835,7 @@ def parse_alarms(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_almdev(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     dev_attrb = root.findall("DEVICE_ATTRIBUTES")[0]
     almdev = {}
 
@@ -843,7 +854,7 @@ def parse_almdev(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_bbdi(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     bbdi = {}
 
     for item in root.items():
@@ -870,7 +881,7 @@ def parse_bbdi(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_cbc(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     cbc = {}
 
     for child in root:
@@ -893,7 +904,7 @@ def parse_cbc(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_ast(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     ast = {}
 
     for child in root:
@@ -926,7 +937,7 @@ def parse_ast(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_anunctor(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     annunciator = {}
 
     for child in root:
@@ -943,7 +954,7 @@ def parse_anunctor(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_com_assignments(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     com_assignments = {}
 
     for port in root:
@@ -960,7 +971,7 @@ def parse_com_assignments(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_sprcodes(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     spr_codes = {}
 
     for spr_code in root:
@@ -974,7 +985,7 @@ def parse_sprcodes(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_leds(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     leds = {}
 
     for child in root:
@@ -993,7 +1004,7 @@ def parse_leds(f_handle: IO[bytes], device_info: dict) -> None:
 
 def parse_relays(f_handle: IO[bytes], device_info: dict) -> None:
     # TODO: may be losing items from Relay tree, double check from config again
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     relay_tree = root.findall("RELAYS")[0]
     relays = {}
 
@@ -1011,7 +1022,7 @@ def parse_relays(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_nrgcalc(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
 
     nrgcalc_tree = root.findall("NRGCALC_PARAM")[0]
     nrgcalcs = {}
@@ -1057,7 +1068,7 @@ def parse_nrgcalc(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_bbrelay(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
 
     for child in root:
         child_dict = {}
@@ -1078,7 +1089,7 @@ def parse_bbrelay(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_btstconf(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     btests = {}
 
     for child in root:
@@ -1105,7 +1116,7 @@ def parse_btstconf(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_aci(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
 
     fmr = root.findall("FMR")[0]
     fmr_dict = {}
@@ -1118,7 +1129,7 @@ def parse_aci(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_aci1250(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     aci = {}
 
     for child in root:
@@ -1165,7 +1176,7 @@ def parse_userlog_settings_xml(f_handle: IO[bytes], device_info: dict) -> None:
         device_info: dictionary of keys and values for target device
     """
     userlog_settings = {}
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
 
     userlog = root.findall("USRLOG_PARAM")[0]
     for item in userlog.items():
@@ -1178,7 +1189,7 @@ def parse_userlog_settings_xml(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_cmdlog_settings_xml(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     cmdlog_settings = {}
 
     for child in root:
@@ -1189,7 +1200,7 @@ def parse_cmdlog_settings_xml(f_handle: IO[bytes], device_info: dict) -> None:
 
 
 def parse_soelog_settings_xml(f_handle: IO[bytes], device_info: dict) -> None:
-    root = ET.fromstring(f_handle.read())
+    root = _parse_xml(f_handle.read())
     soelog_settings = {}
 
     for child in root:
@@ -1310,7 +1321,7 @@ def parse_logfiles(f_handle: IO[bytes], device_info: dict) -> None:
             #   PN: "MAX LOGIN FAILURES EXCEEDED"
             #   DN: "RTU Internal Status"
 
-            line_tag = ET.fromstring(raw_line)
+            line_tag = _parse_xml(raw_line)
             pairs = {k.strip(): v.strip() for k, v in line_tag.attrib.items()}
 
             event = {

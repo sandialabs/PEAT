@@ -11,7 +11,7 @@ def test_ftp_class():
         with FTP("127.0.0.1", 0, 0.01) as obj:
             obj.ftp.quit()
     inst = FTP("127.0.0.1")
-    inst.ftp = ftplib.FTP()
+    inst.ftp = ftplib.FTP()  # noqa: S321 - testing the FTP wrapper
     inst.disconnect()
     assert str(inst) == "127.0.0.1"
     assert "127.0.0.1" in repr(inst)

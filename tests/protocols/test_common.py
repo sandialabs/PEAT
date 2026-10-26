@@ -37,7 +37,7 @@ def test_mac_to_ip_none():
 
 def test_ip_to_mac_127_0_0_1():
     assert common.ip_to_mac("127.0.0.1") == ""
-    assert common.ip_to_mac("0.0.0.0") == ""
+    assert common.ip_to_mac("0.0.0.0") == ""  # noqa: S104 - comparison, not a bind
 
 
 def test_ip_to_mac_localhost():

@@ -68,7 +68,7 @@ class TestDataGenerator:
             f"-- {in_file.as_posix()}"
         )
 
-        res = run(cmd, shell=True, capture_output=True, check=False)
+        res = run(cmd, shell=True, capture_output=True, check=False)  # noqa: S602 - developer script
 
         if not res.returncode == 0:
             print(

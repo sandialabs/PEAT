@@ -145,7 +145,7 @@ def mount_image(source: Path, mount_point: Path) -> bool:
         NBD_ALREADY_LOADED = True
 
     nbd_args = ["qemu-nbd", "-r", "-c", "/dev/nbd1", str(source)]
-    nbd_result = subprocess.call(nbd_args)
+    nbd_result = subprocess.call(nbd_args)  # noqa: S603 - fixed args, no shell
     if nbd_result != 0:
         log.error(f"Failed to run '{' '.join(nbd_args)}' (return code: {nbd_result})")
         remove_nbd_module()
@@ -155,7 +155,7 @@ def mount_image(source: Path, mount_point: Path) -> bool:
     time.sleep(0.5)
 
     mnt_args = ["mount", "-o", "ro", "/dev/nbd1p1", str(mount_point)]
-    mnt_result = subprocess.call(mnt_args)
+    mnt_result = subprocess.call(mnt_args)  # noqa: S603 - fixed args, no shell
     if mnt_result != 0:
         log.error(f"Failed to run '{' '.join(mnt_args)}' (return code: {mnt_result})")
         remove_nbd_device()
@@ -169,7 +169,7 @@ def unmount_image(mount_point: Path) -> bool:
     result = True
 
     umount_args = ["umount", str(mount_point)]
-    retval = subprocess.call(umount_args)
+    retval = subprocess.call(umount_args)  # noqa: S603 - fixed args, no shell
     if retval != 0:
         log.error(f"Failed to run '{' '.join(umount_args)}' (return code: {retval})")
         result &= False
@@ -193,7 +193,7 @@ def remove_nbd_module() -> bool:
 
 def remove_nbd_device() -> bool:
     nbd_args = ["qemu-nbd", "-d", "/dev/nbd1"]
-    retval = subprocess.call(nbd_args)
+    retval = subprocess.call(nbd_args)  # noqa: S603 - fixed args, no shell
 
     if retval != 0:
         log.error(f"Failed to run '{' '.join(nbd_args)}' (return code: {retval})")

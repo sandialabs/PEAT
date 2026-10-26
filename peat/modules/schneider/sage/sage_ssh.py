@@ -142,7 +142,7 @@ class SageSSH(SSH, SageCommands):
         self.dev = dev  # type: Optional[DeviceData]
         self.resp_dir = None  # type: Optional[Path]
 
-    def login(self, user: str | None = "Admin", passwd: str | None = "Telvent1!") -> bool:
+    def login(self, user: str | None = "Admin", passwd: str | None = "Telvent1!") -> bool:  # noqa: S107 - vendor default credential
         """
         Login to the device's ssh interface.
 

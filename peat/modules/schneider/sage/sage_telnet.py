@@ -31,7 +31,7 @@ class SageTelnet(Telnet, SageCommands):
         self.dev: DeviceData | None = dev
         self.resp_dir: Path | None = None
 
-    def login(self, user: str = "Admin", passwd: str = "Telvent1!") -> bool:
+    def login(self, user: str = "Admin", passwd: str = "Telvent1!") -> bool:  # noqa: S107 - vendor default credential
         """
         Login to the device's telnet interface.
         """

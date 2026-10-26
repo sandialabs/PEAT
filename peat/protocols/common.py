@@ -213,7 +213,7 @@ def ip_to_mac(ip: str) -> str:
     if not ip:
         return ""
 
-    if ip in ["0.0.0.0", "127.0.0.1"]:
+    if ip in ["0.0.0.0", "127.0.0.1"]:  # noqa: S104 - comparison, not a bind
         return ""
 
     log.trace(f"Getting MAC address for {ip}")
@@ -383,7 +383,7 @@ def _get_arpexe_output() -> str:
     #   224.0.0.22            00-00-00-00-00-01     static
     #   224.0.0.251           00-00-00-00-00-02     static
     #   239.255.255.250       00-00-00-00-00-03     static
-    proc = subprocess.run(["arp.exe", "-a"], stdout=subprocess.PIPE, check=False)
+    proc = subprocess.run(["arp.exe", "-a"], stdout=subprocess.PIPE, check=False)  # noqa: S607 - arp.exe from PATH
 
     if proc.returncode == 0 and proc.stdout:
         arp_output = proc.stdout.decode()

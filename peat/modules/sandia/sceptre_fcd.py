@@ -330,11 +330,11 @@ class SCEPTRE(DeviceModule):
             raw_config = file
 
         # Get the root section and basic information
-        root = fromstring(raw_config).find("field-device")
+        root = fromstring(raw_config).find("field-device")  # noqa: S314 - expat ignores external entities
         name = _ele(root, "name")
         if not dev:
             if not name:
-                name = f"UNKNOWN_{randint(0, 9999)}"
+                name = f"UNKNOWN_{randint(0, 9999)}"  # noqa: S311 - not used for security
             dev = datastore.get(name, "name")
 
         if name and not dev.name:

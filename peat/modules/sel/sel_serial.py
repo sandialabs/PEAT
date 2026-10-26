@@ -1,9 +1,12 @@
 import shutil
 import subprocess
 import tempfile
+from collections.abc import Iterator
+from contextlib import contextmanager
 from functools import cached_property
 from pathlib import Path
 from time import sleep
+from typing import BinaryIO
 
 import serial  # PySerial
 
@@ -161,6 +164,20 @@ class SELSerial(SELAscii):
                 "you apt-installed 'lrzsz'?"
             )
         return rz_path
+
+    @contextmanager
+    def _open_port_stdio(self) -> Iterator[tuple[BinaryIO, BinaryIO]]:
+        """
+        Open the serial port as stdin and stdout for ``rz`` or ``sz``.
+
+        Same as the shell redirections ``> port < port``, without a shell.
+        stdout is opened first, in the same order as the shell does.
+        """
+        with (
+            open(self.address, "wb", buffering=0) as port_out,
+            open(self.address, "rb", buffering=0) as port_in,
+        ):
+            yield port_in, port_out
 
     def test_connection(self) -> bool:
         try:
@@ -338,10 +355,18 @@ class SELSerial(SELAscii):
             )
             return None
 
-        # shell out to rz command for YMODEM file retrieval
-        cmd = f"{self.rz_path} --ymodem --quiet > {self.address} < {self.address}"
-        self.log.debug(f"Starting 'rz' subprocess: {cmd}")
-        proc = subprocess.run(cmd, shell=True, cwd=out_dir, stderr=subprocess.PIPE, check=False)
+        # run rz for YMODEM file retrieval, with stdin and stdout on the serial port
+        cmd = [self.rz_path, "--ymodem", "--quiet"]
+        self.log.debug(f"Starting 'rz' subprocess: {' '.join(cmd)}")
+        with self._open_port_stdio() as (port_in, port_out):
+            proc = subprocess.run(  # noqa: S603 - fixed args, no shell
+                cmd,
+                stdin=port_in,
+                stdout=port_out,
+                stderr=subprocess.PIPE,
+                cwd=out_dir,
+                check=False,
+            )
         self.log.debug("Finished executing 'rz'")
 
         # rz writes files lowercase
@@ -417,23 +442,20 @@ class SELSerial(SELAscii):
             self.write(f"file write {conf_file}")
             sleep(1.5)
 
-            proc = subprocess.run(
-                f"{self.sz_path} --ymodem -vv -b {conf_file} > {self.address} < {self.address}",
-                shell=True,
-                cwd=configs_dir,
-                check=True,
-            )
+            sz_cmd = [self.sz_path, "--ymodem", "-vv", "-b", conf_file]
+            with self._open_port_stdio() as (port_in, port_out):
+                proc = subprocess.run(  # noqa: S603 - fixed args, no shell
+                    sz_cmd, stdin=port_in, stdout=port_out, cwd=configs_dir, check=True
+                )
             if proc.returncode != 0:
                 self.log.error(f"sz failed to push config {conf_file}")
                 return False
 
             # TODO: why do we call sz twice?
-            subprocess.run(
-                f"{self.sz_path} --ymodem -vv -b {conf_file} > {self.address} < {self.address}",
-                shell=True,
-                cwd=configs_dir,
-                check=True,
-            )
+            with self._open_port_stdio() as (port_in, port_out):
+                subprocess.run(  # noqa: S603 - fixed args, no shell
+                    sz_cmd, stdin=port_in, stdout=port_out, cwd=configs_dir, check=True
+                )
             sleep(2.5)
 
         if not self.restart_device():

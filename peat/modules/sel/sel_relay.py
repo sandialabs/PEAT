@@ -932,7 +932,7 @@ class SELRelay(DeviceModule):
             if not password:
                 password = dev.options["web"]["pass"]
             if not password:
-                password = "OTTER"
+                password = "OTTER"  # noqa: S105 - vendor default credential
 
             if not session.login(username, password, protocol):
                 cls.log.error(

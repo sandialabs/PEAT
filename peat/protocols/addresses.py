@@ -54,7 +54,7 @@ def resolve_ip_to_hostname(ip: str) -> str:
     if ip == "127.0.0.1":
         return "localhost"
 
-    if ip == "0.0.0.0":
+    if ip == "0.0.0.0":  # noqa: S104 - comparison, not a bind
         return ""
 
     try:

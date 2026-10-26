@@ -75,7 +75,7 @@ class SageHTTP(HTTP):
     def create_socket(self) -> socket.socket | None:
         try:
             if self.protocol == "https":
-                context = ssl._create_unverified_context()
+                context = ssl._create_unverified_context()  # noqa: S323 - devices often use self-signed certs
                 context.set_ciphers("DEFAULT")
 
                 with socket.create_connection(

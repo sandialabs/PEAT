@@ -1,0 +1,1 @@
+Enabled the flake8-bandit (``S``) Ruff lint rules. Each remaining finding has a ``noqa`` with the reason it's acceptable. SAGE tarballs are now extracted with the ``data`` filter, so a malicious archive can't write outside the results directory. The SEL serial ``rz``/``sz`` transfers no longer use a shell. ``sneakypeat.py`` no longer uses ``assert`` for its FTP login.

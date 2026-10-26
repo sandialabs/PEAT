@@ -73,7 +73,7 @@ class SELHTTP(HTTP):
     def login(
         self,
         user: str = "ACC",
-        passwd: str = "OTTER",
+        passwd: str = "OTTER",  # noqa: S107 - vendor default credential
         protocol: Literal["http", "https"] = "http",
     ) -> bool:
         """
@@ -269,7 +269,7 @@ class SELHTTP(HTTP):
     def login_rtac(
         self,
         user: str = "ACC",
-        passwd: str = "OTTER",
+        passwd: str = "OTTER",  # noqa: S107 - vendor default credential
         protocol: Literal["http", "https"] = "https",
     ) -> bool:
         """
@@ -1793,7 +1793,7 @@ class SELHTTP(HTTP):
     def login_3620(
         self,
         user: str = "admin",
-        passwd: str = "Admin123!",
+        passwd: str = "Admin123!",  # noqa: S107 - vendor default credential
     ) -> bool:
         """
         Login to the HTTPS web interface for the SEL-3620 Gateway.

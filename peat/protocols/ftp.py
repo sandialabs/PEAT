@@ -40,7 +40,7 @@ class FTP:
                 self.log.debug(
                     f"Attempting connection to {self.ip}:{self.port} (timeout: {self.timeout})"
                 )
-                self._ftp = ftplib.FTP()
+                self._ftp = ftplib.FTP()  # noqa: S321 - legacy OT devices only support FTP
                 self._ftp.connect(self.ip, self.port, self.timeout)
             except Exception as ex:
                 self._ftp = None

@@ -789,7 +789,7 @@ class Elastic:
             String in the format ``peat~<run-id>~<microsecond>~<random>``,
                 where ``<microsecond>`` and ``<random>`` are integers.
         """
-        return f"peat~{consts.RUN_ID}~{utils.utc_now().strftime('%f')}~{randint(0, 9999)}"
+        return f"peat~{consts.RUN_ID}~{utils.utc_now().strftime('%f')}~{randint(0, 9999)}"  # noqa: S311 - not used for security
 
 
 __all__ = ["Elastic"]
