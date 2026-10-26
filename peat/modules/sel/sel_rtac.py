@@ -545,7 +545,7 @@ class SELRTAC(DeviceModule):
             if not password:
                 password = dev.options["web"]["pass"]
             if not password:
-                password = "OTTER"
+                password = "OTTER"  # noqa: S105 - vendor default credential
             if not session.login_rtac(username, password, protocol):
                 cls.log.error(
                     f"Failed to login to web interface on {dev.ip} with user '{username}'"
@@ -647,7 +647,7 @@ class SELRTAC(DeviceModule):
 
         for table in RTAC_DB_TABLES:
             config[table] = {}
-            command = f"SELECT * from {table};"
+            command = f"SELECT * from {table};"  # noqa: S608 - table names are constants
             cls.execute(cursor, command)
             conn.commit()
 
@@ -948,7 +948,7 @@ class SELRTAC(DeviceModule):
 
     @classmethod
     def parse_xml(cls, data: str, filename: str, device_info: dict):
-        xml_root = ET.fromstring(data)
+        xml_root = ET.fromstring(data)  # noqa: S314 - expat ignores external entities
         tag = xml_root[0].tag
         if tag in cls._tag_to_parser_map:
             cls._tag_to_parser_map[tag](xml_root, device_info)

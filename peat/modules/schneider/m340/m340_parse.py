@@ -423,7 +423,7 @@ def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
                 )
                 continue  # Skip to the next block
 
-            root = ElementTree.fromstring(block["data"][index:].decode())
+            root = ElementTree.fromstring(block["data"][index:].decode())  # noqa: S314 - expat ignores external entities
             # TODO: generalize to multiple racks
             rack = next(root.iterfind(".//Rack"))
 

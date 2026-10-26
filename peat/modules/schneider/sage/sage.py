@@ -1178,7 +1178,22 @@ class Sage(DeviceModule):
                 )
 
                 with tarfile.open(name=file, mode="r:gz", encoding="utf-8") as tar:
-                    tar.extractall(path=t_path)
+                    # TODO: remove this branch once PEAT's minimum Python version is 3.12
+                    if not hasattr(tarfile, "data_filter"):
+                        # Python before 3.11.4 has no extraction filters, so members
+                        # can escape t_path. Accepted risk for compatibility.
+                        cls.log.warning(
+                            f"Extracting {file.name} without a filter, since this Python "
+                            "is older than 3.11.4. Upgrade Python to block unsafe files."
+                        )
+                        tar.extractall(path=t_path)  # noqa: S202 - Python < 3.11.4 fallback
+                    else:
+                        try:
+                            tar.extractall(path=t_path, filter="data")
+                        except tarfile.FilterError as ex:
+                            cls.log.warning(
+                                f"Refused to extract unsafe file from {file.name}: {ex}"
+                            )
             except Exception as ex:
                 cls.log.debug(f"Failed to extract raw files from {file.name}: {ex}")
 

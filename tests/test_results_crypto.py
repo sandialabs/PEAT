@@ -80,7 +80,7 @@ def test_unzip_decrypt_success(monkeypatch, tmp_path):
     result = results_crypto.unzip_decrypt_results(
         encrypted_dir_path=encrypted_file,
         write_path=tmp_path,
-        user_password="secret",
+        user_password="secret",  # noqa: S106 - dummy test credential
     )
 
     assert result is True
@@ -112,7 +112,7 @@ def test_encrypted_zip_cannot_be_opened_wrong_pwd(mock_encrypted_peat_results, t
     result = results_crypto.unzip_decrypt_results(
         encrypted_dir_path=mock_encrypted_peat_results,
         write_path=tmp_path,
-        user_password="wrongpass",
+        user_password="wrongpass",  # noqa: S106 - dummy test credential
     )
 
     assert result is False

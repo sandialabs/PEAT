@@ -1177,7 +1177,7 @@ class NetstatSocketsVxWorksParser(NixParserBase):
             # TCP and UDP
             # TODO: ipv6?
             if (
-                skt["foreign_address"] == "0.0.0.0"
+                skt["foreign_address"] == "0.0.0.0"  # noqa: S104 - comparison, not a bind
                 and skt["foreign_port"] == "*"
                 and skt["local_port"] != "*"
             ):
@@ -1199,7 +1199,7 @@ class NetstatSocketsVxWorksParser(NixParserBase):
                 )
 
                 # TODO: associate with all interfaces
-                if skt["local_address"] == "0.0.0.0":
+                if skt["local_address"] == "0.0.0.0":  # noqa: S104 - comparison, not a bind
                     # listening on all interfaces
                     pass
                 elif skt["local_address"] == "127.0.0.1":
@@ -1218,7 +1218,7 @@ class NetstatSocketsVxWorksParser(NixParserBase):
             # Add IPs and ports to related.ip and related.ports
             for key in ["local", "foreign"]:
                 addr = skt[f"{key}_address"]
-                if addr != "0.0.0.0" and utils.is_ip(addr):
+                if addr != "0.0.0.0" and utils.is_ip(addr):  # noqa: S104 - comparison, not a bind
                     dev.related.ip.add(addr)
 
                 port = skt[f"{key}_port"]

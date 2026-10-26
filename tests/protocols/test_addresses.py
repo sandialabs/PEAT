@@ -30,7 +30,7 @@ def test_resolve_hostname_to_ip():
 def test_resolve_ip_to_hostname():
     assert resolve_ip_to_hostname("") == ""
     assert resolve_ip_to_hostname("127.0.0.1") == "localhost"
-    assert resolve_ip_to_hostname("0.0.0.0") == ""
+    assert resolve_ip_to_hostname("0.0.0.0") == ""  # noqa: S104 - comparison, not a bind
 
 
 def test_expand_commas_to_hosts():
@@ -285,7 +285,7 @@ def test_ip_objs_to_ips_invalid_arguments():
 
 def test_ip_is_local_interface():
     assert ip_is_local_interface("127.0.0.1") is True
-    assert ip_is_local_interface("0.0.0.0") is False
+    assert ip_is_local_interface("0.0.0.0") is False  # noqa: S104 - comparison, not a bind
 
 
 def test_ip_in_local_subnet():

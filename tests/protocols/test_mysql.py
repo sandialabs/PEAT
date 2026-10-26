@@ -105,10 +105,10 @@ def test_init_defaults():
 
 
 def test_init_custom_args():
-    m = MySQL("10.0.0.1", port=3307, username="admin", password="secret", timeout=5.0)
+    m = MySQL("10.0.0.1", port=3307, username="admin", password="secret", timeout=5.0)  # noqa: S106 - dummy test credential
     assert m.port == 3307
     assert m.username == "admin"
-    assert m.password == "secret"
+    assert m.password == "secret"  # noqa: S105 - dummy test credential
     assert m.timeout == 5.0
 
 

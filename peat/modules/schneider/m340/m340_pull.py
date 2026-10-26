@@ -397,7 +397,7 @@ def _get_snmp_metadata(
 def _get_ftp_metadata(
     ip: str,
     user: str = "loader",
-    passwd: str = "fwdownload",
+    passwd: str = "fwdownload",  # noqa: S107 - vendor default credential
     port: int = 21,
     timeout: float = 5.0,
 ) -> dict:
