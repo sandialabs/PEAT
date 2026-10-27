@@ -162,11 +162,9 @@ def main():
     targets = hosts_to_ips(args.targets)
 
     if args.scan:
-        # Hack for FTP testing against SCEPTRE
-        # sudo twistd -n ftp --auth=anonymous -r examples/devices/sceptre/
+        # Test SCEPTRE against a local bennu VM (see scripts/run-bennu-vm.sh)
         device_options = {
-            "ftp": {"port": 2121, "user": "anonymous", "pass": "anonymous"},
-            "sceptre": {"ftp_testing": True},
+            "ftp": {"port": 2121, "user": "sceptre", "pass": "sceptre"},
         }
         # TODO: use config.DEVICE_OPTIONS
         datastore.global_options.update(device_options)

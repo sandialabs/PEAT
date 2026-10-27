@@ -2033,7 +2033,7 @@ class IO(BaseModel):
             other.type,
             other.direction,
             other.name,
-            self.id,
+            other.id,
             other.address,
         )
 
