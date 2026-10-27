@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SCEPTRE>
+    <field-device>
+        <name>fep-1</name>
+        <comms>
+            <modbus-tcp-client>
+                <modbus-connection>
+                    <ip>127.0.0.1</ip>
+                    <port>5502</port>
+                    <input-register>
+                        <address>30000</address>
+                        <max-value>1000</max-value>
+                        <min-value>0</min-value>
+                        <tag>tank1-temperature</tag>
+                    </input-register>
+                    <discrete-input>
+                        <address>10000</address>
+                        <tag>tank3-powered</tag>
+                    </discrete-input>
+                    <coil>
+                        <address>0</address>
+                        <tag>tank3-powered-toggle</tag>
+                    </coil>
+                    <holding-register>
+                        <address>40000</address>
+                        <max-value>1000</max-value>
+                        <min-value>0</min-value>
+                        <tag>tank1-temperature-setpoint</tag>
+                    </holding-register>
+                </modbus-connection>
+                <command-interface>tcp://127.0.0.1:1330</command-interface>
+            </modbus-tcp-client>
+        </comms>
+    </field-device>
+</SCEPTRE>

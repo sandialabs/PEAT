@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import copy
+import re
 from collections import ChainMap
 from collections.abc import Callable
 from operator import attrgetter
-from typing import Any
+from typing import Any, Final
 
 from peat import PeatError, config, log, utils
 
 from .base_model import BaseModel
+
+_DIGITS_RE: Final[re.Pattern] = re.compile(r"(\d+)")
 
 
 class DeepChainMap(ChainMap):
@@ -349,10 +352,34 @@ def dedupe_model_list(current: list[BaseModel]) -> list[BaseModel]:
     return deduped
 
 
+def natural_sort_key(value: str) -> tuple[tuple[int, int, str], ...]:
+    """
+    Key for sorting strings with numbers in them in "natural" order.
+
+    .. code-block:: python
+
+       >>> from peat.data.data_utils import natural_sort_key
+       >>> sorted(["I10", "I2", "I1"], key=natural_sort_key)
+       ['I1', 'I2', 'I10']
+       >>> sorted(["10", "9", "a"], key=natural_sort_key)
+       ['9', '10', 'a']
+    """
+    # Splitting on a capture group puts the numbers at the odd indices.
+    # Numbers are compared by length then digits, which avoids int()
+    # and its limit on the number of digits.
+    return tuple(
+        (0, len(part.lstrip("0")), part.lstrip("0")) if i % 2 else (1, 0, part)
+        for i, part in enumerate(_DIGITS_RE.split(value))
+        if part
+    )
+
+
 def none_aware_attrgetter(attrs: tuple[str]) -> Callable:
     """
     Variant of ``operator.attrgetter()`` that
     handles values that may be :obj:`None`.
+
+    Strings are compared in "natural" order, so ``"I2"`` sorts before ``"I10"``.
     """
 
     def g(obj) -> tuple:
@@ -361,7 +388,7 @@ def none_aware_attrgetter(attrs: tuple[str]) -> Callable:
         for attr in attrs:
             value = getattr(obj, attr)
             pairs.append(value is None)
-            pairs.append(value)
+            pairs.append(natural_sort_key(value) if isinstance(value, str) else value)
 
         return tuple(pairs)
 
