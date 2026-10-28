@@ -1,0 +1,1 @@
+Add the :class:`~peat.modules.openplc.openplcv3.OpenPLCv3` module for OpenPLC Runtime v3 (the PLC used by the GRFICSv3 lab). It is read-only and scans and pulls status, program history, users, slave devices, protocol settings, tags, and runtime logs from the web interface.

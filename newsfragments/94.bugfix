@@ -1,0 +1,1 @@
+``peat scan`` now reports the port it actually verified for HTTP services on alternate ports (e.g. ``8080``) when ``http.port`` is set to the default ``80`` in the config file, instead of ``80``.

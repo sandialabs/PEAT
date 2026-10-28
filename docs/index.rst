@@ -9,7 +9,7 @@ PEAT
 
 Quickstart
 ----------
-To get started, jump to :doc:`operate`.
+To get started, jump to :doc:`operate`. To try PEAT hands-on with a free, open-source ICS lab on your own machine, follow :doc:`grfics_tutorial`.
 
 
 Table of Contents
@@ -26,6 +26,7 @@ Table of Contents
    install
    configure
    operate
+   grfics_tutorial
    reference_documents
    design_documents
    developer_reference

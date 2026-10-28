@@ -1,0 +1,45 @@
+metadata:
+  name: "grfics-peat-config"
+  description: >-
+    PEAT configuration for the GRFICSv3 open-source ICS lab
+    (https://github.com/Fortiphyd/GRFICSv3). Contains the default
+    credentials for the lab's OpenPLC v3 PLC. See docs/grfics_tutorial.rst.
+  author: "PEAT"
+  created: "October 7th, 2026"
+  updated: ""
+
+# Results go to ./peat_results/ in the directory you run PEAT from.
+
+device_options:
+  # Default OpenPLC Runtime v3 credentials used by GRFICSv3.
+  # These are applied to any OpenPLC v3 device PEAT finds.
+  openplcv3:
+    username: "openplc"
+    password: "openplc"
+    pull_methods:
+      - http
+
+hosts:
+  # The GRFICSv3 PLC on the ICS network (b-ics-net, 192.168.95.0/24).
+  # Use "-i grfics-plc" or "-i 192.168.95.2" when running PEAT on a host
+  # that can reach the ICS network (for example the Linux Docker host).
+  - label: "grfics-plc"
+    comment: "GRFICSv3 OpenPLC v3 PLC (ICS network)"
+    identifiers:
+      ip: "192.168.95.2"
+    peat_module: "OpenPLCv3"
+    options:
+      http:
+        port: 8080
+
+  # The same PLC, published on the Docker host at localhost:8080.
+  # Use "-i grfics-plc-local" or "-i 127.0.0.1" when PEAT runs on the
+  # Docker host (works on Linux, macOS, and Windows/WSL2 Docker Desktop).
+  - label: "grfics-plc-local"
+    comment: "GRFICSv3 OpenPLC v3 PLC (published on localhost:8080)"
+    identifiers:
+      ip: "127.0.0.1"
+    peat_module: "OpenPLCv3"
+    options:
+      http:
+        port: 8080

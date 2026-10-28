@@ -1,0 +1,1 @@
+Add a hands-on tutorial (:doc:`grfics_tutorial`) for deploying the open-source GRFICSv3 ICS lab and running ``peat scan`` and ``peat pull`` against it with the pre-built ``examples/peat-config-grfics.yaml`` configuration.

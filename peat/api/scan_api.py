@@ -470,7 +470,7 @@ def check_host_unicast_ip(ip: str, modules: list[type[DeviceModule]]) -> bool:
         if successful:
             svc = Service(
                 protocol=method.protocol,
-                port=dev.options[method.protocol]["port"],
+                port=_determine_port(dev, method),
                 transport=method.transport,
                 status="verified",
             )
