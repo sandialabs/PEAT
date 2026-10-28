@@ -117,7 +117,7 @@ pillage:
 device_options:
   baudrates: []
   timeout: 5.0
-  sceptre_plc_compatible_st_logic: false
+  openplc_compatible_st_logic: false
   sceptre:
     ftp_testing: false
     bennu_filename: bennu-field-deviced.firmware

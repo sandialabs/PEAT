@@ -614,11 +614,7 @@ class M340(DeviceModule):
             )
             try:
                 # Build the TC6 XML tree and add to the TC6 object
-                m340_parse.add_logic_to_tc6(
-                    logic_blocks,
-                    dev._cache["tc6"],
-                    dev.options["sceptre_plc_compatible_st_logic"],
-                )
+                m340_parse.add_logic_to_tc6(logic_blocks, dev._cache["tc6"])
             except Exception:
                 cls.log.error(
                     "Exception while generating the TC6 XML. Perhaps the variable region is wrong?"
@@ -630,7 +626,7 @@ class M340(DeviceModule):
                     cls.log.warning("TC6 logic is empty, not saving...")
                 else:
                     xml_string = dev._cache["tc6"].generate_xml_string(
-                        dev.options["sceptre_plc_compatible_st_logic"]
+                        openplc=dev.options["openplc_compatible_st_logic"]
                     )
 
                     if not xml_string:
@@ -638,7 +634,7 @@ class M340(DeviceModule):
                     else:
                         dev.logic.formats["tc6"] = xml_string
                         st_logic = dev._cache["tc6"].generate_st(
-                            xml_string, dev.options["sceptre_plc_compatible_st_logic"]
+                            xml_string, openplc=dev.options["openplc_compatible_st_logic"]
                         )
                         if st_logic:
                             dev.logic.original = st_logic
@@ -843,7 +839,7 @@ class M340(DeviceModule):
             content_element = SubElement(logic_element, "xhtml:p")
             content_element.text = "(* No logic was extracted by PEAT *)"
 
-            tc6_xml = tc6.generate_xml_string(dev.options["sceptre_plc_compatible_st_logic"])
+            tc6_xml = tc6.generate_xml_string(openplc=dev.options["openplc_compatible_st_logic"])
         else:
             tc6_xml = dev.logic.formats["tc6"]
 

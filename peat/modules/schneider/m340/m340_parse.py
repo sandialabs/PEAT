@@ -550,7 +550,7 @@ def parse_config_to_dict(config_blob: bytes) -> dict[str, str | dict]:
     return device_info
 
 
-def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> None:
+def add_logic_to_tc6(logic_blocks: dict, tc6: TC6) -> None:
     """
     Adds the M340-specific logic portions to a TC6 instance.
 
@@ -559,13 +559,17 @@ def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> Non
     Args:
         logic_blocks: Logic and variables
         tc6: TC6 class instance (NOTE: this will be modified!)
-        sceptre: Make the resulting logic compatible with OpenPLC/SCEPTRE PLC
+
+    I/O variables are assigned located addresses that are valid for MatIEC,
+    which OpenPLC v3 and v4 both use to compile Structured Text:
+    INT variables are mapped to 16-bit memory words (``%MW``), and
+    BOOL/EBOOL variables are mapped to output coils (``%QX``).
     """
     # TODO: this function needs some cleanup work, lots of duplicate logic
     log.info("Adding logic and variables to TC6 tree...")
 
     interface = tc6.main_pou.find("interface")
-    # Note: All variables must be treated as locals for OpenPLC/SCEPTRE PLC
+    # Note: All variables must be treated as locals for OpenPLC
     io_vars = SubElement(interface, "localVars")
     local_vars = SubElement(interface, "localVars")
     w_addr = 0
@@ -601,10 +605,10 @@ def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> Non
                 arr_type = SubElement(var_type, "array")
                 SubElement(arr_type, "dimension", {"lower": res[0], "upper": res[1]})
                 base_type = SubElement(arr_type, "baseType")
-                SubElement(base_type, get_type_string(res[2], sceptre))
+                SubElement(base_type, get_type_string(res[2]))
                 is_array = True
             else:
-                type_str = get_type_string(var_values["type"], sceptre)
+                type_str = get_type_string(var_values["type"])
 
                 if not type_str:
                     log.warning(
@@ -622,18 +626,17 @@ def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> Non
         # TODO: implement ARRAY types
         else:
             if var_values["type"] == "INT":
-                new_addr = f"%MD{w_addr}"
-                type_str = var_values["type"]
-
-                if sceptre:
-                    # OpenPLC can only use REALs
-                    type_str = "REAL"
-
+                # INT is 16 bits, so it must be located at a word address.
+                # MatIEC rejects an INT at a double word address (%MD),
+                # and OpenPLC v3 and v4 map %MW to 16-bit integer memory.
+                new_addr = f"%MW{w_addr}"
+                type_str = "INT"
                 w_addr += 1
             elif var_values["type"] in ["EBOOL", "BOOL"]:
                 # NOTE: EBOOL is a Schneider custom type
                 # not supported by TC6 or IEC 61131-3.
-                new_addr = f"%QX0.{x_addr}"
+                # Bit index must be 0-7, so roll over to the next byte
+                new_addr = f"%QX{x_addr // 8}.{x_addr % 8}"
                 type_str = "BOOL"
                 x_addr += 1
             else:
@@ -650,10 +653,6 @@ def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> Non
         if "value" in var_values:
             # NOTE(cegoes): XML attributes must be strings
             init_val = str(var_values["value"])
-
-            if sceptre and var_values["type"] == "INT":
-                # INTs are REALs in OpenPLC-land
-                init_val = str(float(init_val))
 
             var_init = SubElement(var, "initialValue")
             if is_array:
@@ -673,11 +672,8 @@ def add_logic_to_tc6(logic_blocks: dict, tc6: TC6, sceptre: bool = False) -> Non
     log.debug("Finished adding logic and variables to TC6 tree")
 
 
-def get_type_string(var_type: str, sceptre: bool) -> str:
-    if sceptre and var_type == "INT":
-        # OpenPLC can only use REALs
-        return "REAL"
-    elif var_type in ["EBOOL", "BOOL"]:
+def get_type_string(var_type: str) -> str:
+    if var_type in ["EBOOL", "BOOL"]:
         # NOTE: EBOOL is a Schneider custom type
         # not supported by TC6 or IEC 61131-3.
         return "BOOL"
