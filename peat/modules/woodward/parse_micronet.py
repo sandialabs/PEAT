@@ -163,7 +163,7 @@ def parse_log(dev: DeviceData, filepath: Path) -> bool:
     log.info(f"Attempting to extract data from log file '{filepath}'")
 
     try:
-        data = filepath.read_text()
+        data = filepath.read_text(encoding="utf-8", errors="replace")
         file_lines = data.strip().splitlines()
         if not file_lines:  # check if log file actually has content
             log.warning(f"Unable to parse events from '{filepath}' - Empty Log File")

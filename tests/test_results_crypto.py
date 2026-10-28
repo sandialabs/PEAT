@@ -19,7 +19,7 @@ def test_zip_encrypt_missing_dir(tmp_path):
 
 def test_zip_encrypt_wrong_target(tmp_path):
     wrong_file = tmp_path / "wrong.txt"
-    wrong_file.write_text("hello there")
+    wrong_file.write_text("hello there", encoding="utf-8")
 
     result = results_crypto.zip_encrypt_results(wrong_file)
     assert result is False
@@ -66,7 +66,7 @@ def test_zip_encrypt_pwd_prompt(monkeypatch, mock_peat_results, tmp_path):
 
 def test_unzip_decrypt_success(monkeypatch, tmp_path):
     encrypted_file = tmp_path / "encrypted_peat_results.zip"
-    encrypted_file.write_text("fake zip content")
+    encrypted_file.write_text("fake zip content", encoding="utf-8")
 
     mock_zip_class = MagicMock()
     # need to return the mock zip in context manager to check for password
@@ -90,7 +90,7 @@ def test_unzip_decrypt_success(monkeypatch, tmp_path):
 
 def test_unzip_decrypt_requires_pwd(monkeypatch, tmp_path):
     encrypted_file = tmp_path / "encrypted_peat_results.zip"
-    encrypted_file.write_text("fake zip content")
+    encrypted_file.write_text("fake zip content", encoding="utf-8")
 
     mock_zip_class = MagicMock()
     # need to return the mock zip in context manager to check for password

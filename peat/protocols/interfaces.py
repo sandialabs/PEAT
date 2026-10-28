@@ -137,7 +137,7 @@ def is_promiscuous(iface: str) -> bool:
         flag_file = Path(f"/sys/class/net/{iface}/flags").resolve()
 
         if flag_file.exists():
-            flags = flag_file.read_text().strip()
+            flags = flag_file.read_text(encoding="utf-8").strip()
             if int(flags, 16) & 0x100:
                 log.debug(f"Interface '{iface}' is in promiscuous mode")
                 return True

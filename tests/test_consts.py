@@ -116,3 +116,50 @@ def test_sanitize_filename():
     assert consts.sanitize_filename("") == ""
     assert consts.sanitize_filename("hardware-info.html") == "hardware-info.html"
     assert consts.sanitize_filename("01:01:01-hardware-info.html") == "01_01_01-hardware-info.html"
+
+
+@pytest.mark.parametrize(
+    ("release", "version", "expected"),
+    [
+        ("4.4.0-19041-Microsoft", "#1237-Microsoft Sat Sep 11 14:32:00 PST 2021", True),  # WSL 1
+        ("5.15.153.1-microsoft-standard-WSL2", "#1 SMP Fri Mar 29 23:14:13 UTC 2024", True),
+        ("6.8.0-45-generic", "#45-Ubuntu SMP PREEMPT_DYNAMIC Fri Aug 30 12:02:04 UTC 2024", False),
+    ],
+)
+def test_is_wsl(mocker, release, version, expected):
+    mocker.patch.object(consts, "LINUX", True)
+    mocker.patch.object(consts, "_in_container", return_value=False)
+    uname = consts.platform.uname_result("Linux", "host", release, version, "x86_64")
+    mocker.patch.object(consts.platform, "uname", return_value=uname)
+    assert consts._is_wsl() is expected
+
+
+def test_is_wsl_container(mocker):
+    # Docker Desktop and Podman containers on Windows use the WSL 2 kernel
+    mocker.patch.object(consts, "LINUX", True)
+    mocker.patch.object(consts, "_in_container", return_value=True)
+    uname = consts.platform.uname_result(
+        "Linux", "host", "5.15.153.1-microsoft-standard-WSL2", "#1 SMP", "x86_64"
+    )
+    mocker.patch.object(consts.platform, "uname", return_value=uname)
+    assert consts._is_wsl() is False
+
+
+@pytest.mark.parametrize("marker", ["/.dockerenv", "/run/.containerenv"])
+def test_in_container(mocker, marker):
+    real_exists = consts.os.path.exists
+    mocker.patch.object(
+        consts.os.path, "exists", side_effect=lambda p: p == marker or real_exists(p)
+    )
+    assert consts._in_container() is True
+
+
+def test_is_wsl_not_linux(mocker):
+    mocker.patch.object(consts, "LINUX", False)
+    assert consts._is_wsl() is False
+
+
+def test_platform_flags_consistent():
+    assert consts.WINDOWS != consts.POSIX
+    if consts.WSL:
+        assert consts.LINUX

@@ -56,24 +56,28 @@ def test_save_to_file(settings_instance, tmp_path, assert_glob_path):
     settings_instance.save_to_file(outdir=tmp_path)
 
     json_path = assert_glob_path(tmp_path, "peat_configuration.json")
-    assert json.loads(json_path.read_text()) == settings_instance.export()
+    assert json.loads(json_path.read_text(encoding="utf-8")) == settings_instance.export()
 
     yaml_path = assert_glob_path(tmp_path, "peat_configuration.yaml")
-    assert yaml.safe_load(yaml_path.read_text()) == lower_dict(settings_instance.export())
+    assert yaml.safe_load(yaml_path.read_text(encoding="utf-8")) == lower_dict(
+        settings_instance.export()
+    )
 
 
 def test_save_to_file_no_yaml(settings_instance, tmp_path, assert_glob_path):
     settings_instance.save_to_file(outdir=tmp_path, save_yaml=False)
 
     json_path = assert_glob_path(tmp_path, "peat_configuration.json")  # only a JSON file
-    assert json.loads(json_path.read_text()) == settings_instance.export()
+    assert json.loads(json_path.read_text(encoding="utf-8")) == settings_instance.export()
 
 
 def test_save_to_file_no_json(settings_instance, tmp_path, assert_glob_path):
     settings_instance.save_to_file(outdir=tmp_path, save_json=False)
 
     yaml_path = assert_glob_path(tmp_path, "peat_configuration.yaml")
-    assert yaml.safe_load(yaml_path.read_text()) == lower_dict(settings_instance.export())
+    assert yaml.safe_load(yaml_path.read_text(encoding="utf-8")) == lower_dict(
+        settings_instance.export()
+    )
 
 
 def test_save_to_file_raises(settings_instance, tmp_path):

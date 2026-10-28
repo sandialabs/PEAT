@@ -15,6 +15,63 @@ from peat.protocols.snmp import SNMP
 CONN_REFUSED_CODES: Final[frozenset[int]] = frozenset({errno.ECONNREFUSED, 10061})
 
 
+def _disable_syn_retransmissions(sock: socket.socket) -> None:
+    """
+    Stop Windows from retrying a TCP SYN after the remote host refuses it.
+
+    By default, Windows retransmits a SYN twice after receiving a RST, so
+    connect() takes about 2 seconds to report "connection refused", even on
+    localhost. That is longer than the default SYN sweep timeout, which makes
+    hosts that are online but have the port closed appear to be offline.
+
+    The ``SIO_TCP_INITIAL_RTO`` ioctl with ``TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS``
+    (Windows 8 and Server 2012 or newer) turns off SYN retransmissions for a socket.
+    This also means a SYN that's lost in transit isn't retried, so with a long timeout
+    a host on a lossy network may be missed. With the default 1 second timeout this
+    costs nothing, since Windows' first retransmission happens after about 1 second.
+    It's only used for SYN sweeps, where several ports are tried per host.
+    Python's socket.ioctl() doesn't support this control code, so it's called via ctypes.
+    This is best-effort, failures are logged and otherwise ignored.
+
+    References:
+
+    - https://learn.microsoft.com/en-us/windows/win32/winsock/sio-tcp-initial-rto
+    - https://learn.microsoft.com/en-us/windows/win32/api/mstcpip/ns-mstcpip-tcp_initial_rto_parameters
+    """
+    if not consts.WINDOWS:
+        return
+
+    try:
+        import ctypes
+        from ctypes import wintypes
+
+        class TcpInitialRtoParameters(ctypes.Structure):
+            _fields_ = [("Rtt", ctypes.c_ushort), ("MaxSynRetransmissions", ctypes.c_ubyte)]
+
+        sio_tcp_initial_rto = 0x98000011  # _WSAIOW(IOC_VENDOR, 17)
+        params = TcpInitialRtoParameters(
+            Rtt=0xFFFF,  # TCP_INITIAL_RTO_UNSPECIFIED_RTT
+            MaxSynRetransmissions=0xFE,  # TCP_INITIAL_RTO_NO_SYN_RETRANSMISSIONS
+        )
+        bytes_returned = wintypes.DWORD(0)
+        res = ctypes.windll.ws2_32.WSAIoctl(  # type: ignore[attr-defined]
+            ctypes.c_size_t(sock.fileno()),
+            wintypes.DWORD(sio_tcp_initial_rto),
+            ctypes.byref(params),
+            wintypes.DWORD(ctypes.sizeof(params)),
+            None,
+            wintypes.DWORD(0),
+            ctypes.byref(bytes_returned),
+            None,
+            None,
+        )
+        if res != 0:
+            err = ctypes.windll.ws2_32.WSAGetLastError()  # type: ignore[attr-defined]
+            log.trace3(f"SIO_TCP_INITIAL_RTO ioctl failed (WSA error {err})")
+    except Exception as ex:
+        log.trace3(f"Failed to disable TCP SYN retransmissions: {ex}")
+
+
 def check_tcp_port(
     ip: str,
     port: int,
@@ -90,6 +147,9 @@ def check_tcp_port(
             # "Windows uses shorts in struct linger, where Linux uses ints"
             linger = struct.pack("hh" if consts.WINDOWS else "ii", 1, 0)
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_LINGER, linger)
+
+        if syn_sweep:
+            _disable_syn_retransmissions(sock)
 
         try:
             result = sock.connect_ex((ip, port))
@@ -196,6 +256,12 @@ def fingerprint(
                     f"Discovery packet succeeded, but fingerprint "
                     f"function timed out to device {ip}:{port}"
                 )
+            except ConnectionResetError:
+                # On Windows, an ICMP "port unreachable" reply to a UDP packet makes
+                # the next recv() raise WSAECONNRESET (10054). Linux and macOS ignore
+                # it on unconnected sockets, so they time out instead. Either way,
+                # nothing is listening on the port.
+                log.trace2(f"UDP port {port} on {ip} is unreachable (connection reset)")
             except Exception as err:
                 log.debug(
                     f"Failed to receive a response from an unknown device due to an error: {err}"

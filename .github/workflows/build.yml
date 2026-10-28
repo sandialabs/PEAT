@@ -212,6 +212,7 @@ jobs:
       - name: List executable contents
         run: pdm run pyi-archive_viewer --list dist/peat.exe
       - name: Check executable
+        shell: bash
         run: |
           ./dist/peat.exe --version
           ./dist/peat.exe --help
@@ -220,6 +221,7 @@ jobs:
       - name: Build Sneakypeat executable
         run: pdm run build-sneakypeat
       - name: Check Sneakypeat executable
+        shell: bash
         run: |
           ./dist/sneakypeat.exe --version
           ./dist/sneakypeat.exe --help
@@ -280,3 +282,52 @@ jobs:
           name: macos_exe_${{ matrix.arch }}
           path: dist/peat_macos_${{ matrix.arch }}
           if-no-files-found: error
+
+  # Run the Windows executables built above on each Windows version tested in CI.
+  # windows-11-arm runs the x64 executables under emulation, like ARM-based Windows 11 PCs do.
+  windows-exe-test:
+    name: Test Windows Executables
+    needs: windows-build
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ["windows-2022", "windows-2025", "windows-11-arm"]
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - name: Download executables
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: windows_exe
+          path: dist
+      - name: Show Windows version
+        run: |
+          Get-ComputerInfo -Property OsName, OsVersion, OsBuildNumber, OsArchitecture
+          $env:PROCESSOR_ARCHITECTURE
+      # bash stops on the first command that fails, PowerShell only checks the last one
+      - name: Check executable
+        shell: bash
+        run: |
+          ./dist/peat.exe --version
+          ./dist/peat.exe --help
+          ./dist/peat.exe parse --list-modules
+          ./dist/peat.exe parse -vVV -d AwesomeTool -I examples/example_peat_module/ -- examples/example_peat_module/awesome_output.json
+      # 127.0.0.1 skips the online check entirely, and runners are Administrator
+      # so PEAT would use ARP/ICMP, so force a TCP SYN check of another loopback address
+      - name: Check host discovery (TCP SYN to loopback)
+        shell: bash
+        env:
+          PEAT_FORCE_ONLINE_METHOD_TCP: "true"
+        run: |
+          ./dist/peat.exe scan -i 127.0.0.2 --sweep -q --print-results | tee sweep.json
+          grep -A1 '"hosts_online"' sweep.json | grep -q '127.0.0.2'
+      - name: Check Sneakypeat executable
+        shell: bash
+        run: |
+          ./dist/sneakypeat.exe --version
+          ./dist/sneakypeat.exe --scan -v localhost

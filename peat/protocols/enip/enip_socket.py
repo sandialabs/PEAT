@@ -201,8 +201,8 @@ class EnipSocket:
             if not self.raw_log_path.exists():
                 add_csv_header = True
 
-            self.fmt_log_fp = self.fmt_log_path.open("w")
-            self.raw_log_fp = self.raw_log_path.open("w")
+            self.fmt_log_fp = self.fmt_log_path.open("w", encoding="utf-8")
+            self.raw_log_fp = self.raw_log_path.open("w", encoding="utf-8")
 
             # Close files when peat exits
             exit_handler.register(self._close_log_files, "FILE")

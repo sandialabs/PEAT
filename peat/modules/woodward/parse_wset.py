@@ -35,7 +35,7 @@ def parse_wset(_file: Any):
             break
 
     for index, value in output_dict.items():
-        with open(f"out_{index}", "w") as outfile:
+        with open(f"out_{index}", "w", encoding="utf-8") as outfile:
             print(value, file=outfile)
 
     # TODO: call streamfile.close()?

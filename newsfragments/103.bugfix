@@ -1,0 +1,9 @@
+Fixed TCP SYN host checks reporting online hosts as offline on Windows (SYN retransmissions after a RST
+delayed "connection refused" past the timeout).
+Fixed WSL 2 not being detected as WSL, and MAC lookups via ``arp.exe`` on Windows and WSL returning the
+first MAC in the ARP table instead of the one for the requested IP. On Linux, looking up the MAC for
+an IP like ``192.0.2.1`` could return the MAC of ``192.0.2.10`` if that came first in ``/proc/net/arp``.
+Text files are now always read and written as UTF-8 instead of the Windows code page, and redirected console output on Windows escapes characters it can't encode
+instead of crashing.
+UDP fingerprinting on Windows no longer raises an error when the port is closed (Windows reports
+ICMP "port unreachable" as a connection reset), and treats it as no response, like Linux and macOS.

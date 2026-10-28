@@ -103,18 +103,18 @@ def test_device_data_export_to_files(mocker, tmp_path, assert_glob_path):
     dev_data_path = assert_glob_path(base, "device-data-summary.json")
 
     # load data from files as JSON and compare against exported data
-    fd_data = json.loads(fd_data_path.read_text())
+    fd_data = json.loads(fd_data_path.read_text(encoding="utf-8"))
 
     # check for timestamp and remove it
     assert fd_data.pop("created", None) is not None
     assert dev.export(include_original=True) == fd_data
 
-    dev_data = json.loads(dev_data_path.read_text())
+    dev_data = json.loads(dev_data_path.read_text(encoding="utf-8"))
     assert "original" not in dev_data["logic"]
 
     # test data model splitting
     jsonl_data_path = assert_glob_path(base, "device-data-interface.jsonl")
-    lines = jsonl_data_path.read_text().strip().split("\n")
+    lines = jsonl_data_path.read_text(encoding="utf-8").strip().split("\n")
     interface_json = json.loads(lines[0])
 
     assert interface_json["type"] == "ethernet"
@@ -138,7 +138,7 @@ def test_minified_device_data_export_to_files(mocker, tmp_path, assert_glob_path
     fd_data_path = assert_glob_path(base, "device-data-full.json")
 
     # load data from file and check for pretty printing
-    fd_data = fd_data_path.read_text()
+    fd_data = fd_data_path.read_text(encoding="utf-8")
 
     # default is minified
     assert "\n" not in fd_data
@@ -428,7 +428,7 @@ def test_device_data_validation_clean():
 
 def test_device_data_label_autopopulate(mocker, examples_path):
     """Hacky test but gets the job done."""
-    yml_config = yaml.safe_load(examples_path("peat-config.yaml").read_text())
+    yml_config = yaml.safe_load(examples_path("peat-config.yaml").read_text(encoding="utf-8"))
     mocker.patch.dict(config["CONFIG"], {"HOSTS": yml_config["hosts"]})
 
     dev = DeviceData(ip="192.168.0.1")

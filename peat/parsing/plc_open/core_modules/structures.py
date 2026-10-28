@@ -75,7 +75,7 @@ StdBlckLst = [{"name": libname, "list":
 def csv_file_to_table(filepath):
     """Take a .csv file and translate it it a 'csv_table'"""
     rows = []
-    with open(filepath, "r") as csvfile:
+    with open(filepath, encoding="utf-8") as csvfile:
         for line in csvfile:
             cols = []
             for col in line.split(';'):

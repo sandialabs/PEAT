@@ -98,6 +98,8 @@ Note about Windows usage
 ------------------------
 We recommend running in an Administrator-level PowerShell terminal or script. Running as a standard user will reduce performance slightly, since certain Windows networking APIs are restricted. This will affect some network features, such as the ability to do :term:`ICMP` pings, :term:`ARP` pings, or network sniffing. PEAT will run fine in a CMD terminal but some terminal functionality may not work as well (e.g. terminal output colors and formatting).
 
+Layer 2 features such as :term:`ARP` requests and broadcast discovery also require `Npcap <https://npcap.com/>`__. Refer to :ref:`windows-limitations-section` for the full list of differences on Windows, and :ref:`windows-ci-section` for the Windows versions PEAT is tested on.
+
 .. _output-structure:
 
 Output
