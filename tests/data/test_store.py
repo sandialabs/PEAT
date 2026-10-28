@@ -1,4 +1,5 @@
 from peat import Datastore, DeviceData
+from peat.data.models import Interface, Register, Service
 
 
 def test_datastore_create():
@@ -84,3 +85,44 @@ def test_datastore_properties():
     d3 = store.get("172.16.3.3")
     assert store.verified == [d1]
     assert store.objects == [d1, d2, d3]
+
+
+def test_datastore_deduplicate_merges_data():
+    store = Datastore()
+    module = DeviceData(name="io", type="I/O")
+    d1 = DeviceData(
+        ip="192.0.2.3",
+        registers=[Register(address="1", protocol="modbus")],
+        interface=[Interface(ip="192.0.2.3", services=[Service(port=80)])],
+        module=[module],
+    )
+    d2 = DeviceData(
+        ip="192.0.2.3",
+        hostname="relay",
+        registers=[
+            Register(address="1", protocol="modbus"),
+            Register(address="2", protocol="modbus"),
+        ],
+        interface=[Interface(ip="192.0.2.3", name="eth0", services=[Service(port=80)])],
+        module=[module, DeviceData(name="cpu", slot="1")],
+    )
+    store.objects.extend([d1, d2])
+
+    store.deduplicate(prune_inactive=False)
+    assert store.objects == [d1]
+    assert d1.hostname == "relay"
+    assert d1.registers == [
+        Register(address="1", protocol="modbus"),
+        Register(address="2", protocol="modbus"),
+    ]
+    assert d1.interface == [
+        Interface(ip="192.0.2.3", name="eth0", services=[Service(port=80)]),
+    ]
+    # Modules without a slot aren't duplicated by the merge
+    assert d1.module == [module, DeviceData(name="cpu", slot="1")]
+
+    # Deduplicating again changes nothing
+    before = d1.dict()
+    store.deduplicate(prune_inactive=False)
+    assert store.objects == [d1]
+    assert d1.dict() == before

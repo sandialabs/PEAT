@@ -4326,12 +4326,7 @@ class DeviceData(BaseModel):
         for list_attr in self.get_attr_names(list):
             val = getattr(self, list_attr, None)
 
-            # TODO: temporary hack to only deduplicate smaller lists
-            #   "Large" lists of even just 30,000 objects can take close
-            #   to an hour to dedupe!
-            #   Need to refactor how models are stored and how deduplication
-            #   occurs.
-            if val and len(val) < 5000:
+            if val:
                 deduped = dedupe_model_list(val)
                 sort_model_list(deduped)
                 setattr(self, list_attr, deduped)
