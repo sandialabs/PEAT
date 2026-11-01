@@ -12,7 +12,7 @@ Authors
 
 import struct
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from peat import DeviceData, DeviceModule, Interface, SerialMethod, datastore, log
 from peat.file_signature import FileSignature
@@ -25,15 +25,15 @@ from .wdw_svl import *
 from .wdw_tc import parse_tc, populate_device_from_tc, tc_signature_check
 
 # Track the Servlink sequence
-svl_seq_odd = True
+svl_seq_odd: bool = True
 
 # "Magic" bytes for Servlink "hello" for _servlink_raw_txn()
-SVL_HELLO_ACK = b"\x01\x60\x10\x21\x00\x80\x00\x80\x03\x33\x34"
+SVL_HELLO_ACK: Final[bytes] = b"\x01\x60\x10\x21\x00\x80\x00\x80\x03\x33\x34"
 
 # Data type specifiers for Servlink
 # This is probably not 2301E-specific
 # TODO: are these old?
-svl_data_type = {
+svl_data_type: Final[dict[type, bytes]] = {
     bool: b"\x81",
     float: b"\x82",
     int: b"\x84",

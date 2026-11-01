@@ -60,7 +60,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from functools import cache
 from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Final
 
 from peat import DeviceData, log
 
@@ -78,23 +78,23 @@ from .toolkit import (
 )
 
 #: Length of the proprietary header that precedes the first NRBF stream.
-WSET_HEADER_LEN = CONTAINER_HEADER_LEN
+WSET_HEADER_LEN: Final[int] = CONTAINER_HEADER_LEN
 
 #: Length of a NRBF SerializationHeaderRecord
-NRBF_HEADER_LEN = 17
+NRBF_HEADER_LEN: Final[int] = 17
 
 #: How far into a file to search for the first NRBF stream
-WSET_MAX_HEADER_SEARCH = 256
+WSET_MAX_HEADER_SEARCH: Final[int] = 256
 
 # NRBF SerializationHeaderRecord: RecordType 0, RootId (any), HeaderId -1,
 # MajorVersion 1, MinorVersion 0
-_NRBF_SIGNATURE_RE = re.compile(
+_NRBF_SIGNATURE_RE: Final[re.Pattern[bytes]] = re.compile(
     rb"\x00.{4}\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00", re.DOTALL
 )
 
 #: LogicsManager unary (per-input) operators, indexed by the enum value in the file.
 #: ``NoOperator`` passes the command variable through unchanged.
-LOGICS_MANAGER_UNARY_OPERATORS: dict[int, str] = {
+LOGICS_MANAGER_UNARY_OPERATORS: Final[dict[int, str]] = {
     0: "Not",
     1: "NoOperator",
     2: "True",
@@ -104,7 +104,7 @@ LOGICS_MANAGER_UNARY_OPERATORS: dict[int, str] = {
 #: LogicsManager binary operators, indexed by the enum value in the file.
 #: Only ``And`` (0) and ``Or`` (2) have been observed in files; the remaining
 #: values follow the operator order in the easYgen manuals and are unverified.
-LOGICS_MANAGER_BINARY_OPERATORS: dict[int, str] = {
+LOGICS_MANAGER_BINARY_OPERATORS: Final[dict[int, str]] = {
     0: "And",
     1: "Nand",
     2: "Or",
@@ -114,15 +114,33 @@ LOGICS_MANAGER_BINARY_OPERATORS: dict[int, str] = {
 }
 
 #: Group name used for internal variables that have no group or parameter number
-INTERNAL_GROUP = "(internal)"
+INTERNAL_GROUP: Final[str] = "(internal)"
 
-_PARAMETER_NAME_RE = re.compile(r"^(?:(?P<group>.*?)\.)?(?P<id>\d{3,6})\s+(?P<label>.*)$")
-_CAMEL_RE = re.compile(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
+_PARAMETER_NAME_RE: Final[re.Pattern[str]] = re.compile(
+    r"^(?:(?P<group>.*?)\.)?(?P<id>\d{3,6})\s+(?P<label>.*)$"
+)
+_CAMEL_RE: Final[re.Pattern[str]] = re.compile(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
 
 # Heuristics for the generic (unknown object layout) parameter extraction
-_GENERIC_ID_KEYS = {"id", "parameterid", "parameter_id", "paramid", "number", "parameternumber"}
-_GENERIC_VALUE_KEYS = ("value", "currentvalue", "current_value", "current", "settingvalue", "data")
-_GENERIC_NAME_KEYS = ("name", "parametername", "parameter_name", "label", "displayname", "text")
+_GENERIC_ID_KEYS: Final[frozenset[str]] = frozenset(
+    {"id", "parameterid", "parameter_id", "paramid", "number", "parameternumber"}
+)
+_GENERIC_VALUE_KEYS: Final[tuple[str, ...]] = (
+    "value",
+    "currentvalue",
+    "current_value",
+    "current",
+    "settingvalue",
+    "data",
+)
+_GENERIC_NAME_KEYS: Final[tuple[str, ...]] = (
+    "name",
+    "parametername",
+    "parameter_name",
+    "label",
+    "displayname",
+    "text",
+)
 
 
 # ---------------------------------------------------------------------------

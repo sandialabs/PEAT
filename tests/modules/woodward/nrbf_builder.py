@@ -9,46 +9,46 @@ https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nrbf/
 import io
 import struct
 from collections.abc import Callable
-from typing import Any
+from typing import Any, Final
 
 # PrimitiveTypeEnumeration
-BOOLEAN = 1
-BYTE = 2
-DOUBLE = 6
-INT16 = 7
-INT32 = 8
-INT64 = 9
-SINGLE = 11
-DATETIME = 13
-UINT32 = 15
-STRING = 18
+BOOLEAN: Final[int] = 1
+BYTE: Final[int] = 2
+DOUBLE: Final[int] = 6
+INT16: Final[int] = 7
+INT32: Final[int] = 8
+INT64: Final[int] = 9
+SINGLE: Final[int] = 11
+DATETIME: Final[int] = 13
+UINT32: Final[int] = 15
+STRING: Final[int] = 18
 
 # BinaryTypeEnumeration
-BT_PRIMITIVE = 0
-BT_STRING = 1
-BT_OBJECT = 2
-BT_SYSTEM_CLASS = 3
-BT_CLASS = 4
-BT_OBJECT_ARRAY = 5
-BT_STRING_ARRAY = 6
-BT_PRIMITIVE_ARRAY = 7
+BT_PRIMITIVE: Final[int] = 0
+BT_STRING: Final[int] = 1
+BT_OBJECT: Final[int] = 2
+BT_SYSTEM_CLASS: Final[int] = 3
+BT_CLASS: Final[int] = 4
+BT_OBJECT_ARRAY: Final[int] = 5
+BT_STRING_ARRAY: Final[int] = 6
+BT_PRIMITIVE_ARRAY: Final[int] = 7
 
 # RecordTypeEnumeration
-RT_HEADER = 0
-RT_CLASS_WITH_ID = 1
-RT_SYSTEM_CLASS_WITH_MEMBERS_AND_TYPES = 4
-RT_CLASS_WITH_MEMBERS_AND_TYPES = 5
-RT_BINARY_OBJECT_STRING = 6
-RT_MEMBER_PRIMITIVE_TYPED = 8
-RT_MEMBER_REFERENCE = 9
-RT_OBJECT_NULL = 10
-RT_MESSAGE_END = 11
-RT_BINARY_LIBRARY = 12
-RT_ARRAY_SINGLE_PRIMITIVE = 15
-RT_ARRAY_SINGLE_OBJECT = 16
-RT_ARRAY_SINGLE_STRING = 17
+RT_HEADER: Final[int] = 0
+RT_CLASS_WITH_ID: Final[int] = 1
+RT_SYSTEM_CLASS_WITH_MEMBERS_AND_TYPES: Final[int] = 4
+RT_CLASS_WITH_MEMBERS_AND_TYPES: Final[int] = 5
+RT_BINARY_OBJECT_STRING: Final[int] = 6
+RT_MEMBER_PRIMITIVE_TYPED: Final[int] = 8
+RT_MEMBER_REFERENCE: Final[int] = 9
+RT_OBJECT_NULL: Final[int] = 10
+RT_MESSAGE_END: Final[int] = 11
+RT_BINARY_LIBRARY: Final[int] = 12
+RT_ARRAY_SINGLE_PRIMITIVE: Final[int] = 15
+RT_ARRAY_SINGLE_OBJECT: Final[int] = 16
+RT_ARRAY_SINGLE_STRING: Final[int] = 17
 
-_FORMATS = {
+_FORMATS: Final[dict[int, str]] = {
     BOOLEAN: "<?",
     BYTE: "<B",
     DOUBLE: "<d",
@@ -61,7 +61,7 @@ _FORMATS = {
 }
 
 #: Constant bytes 1 to 7 of the ToolKit container header
-TOOLKIT_MAGIC = bytes.fromhex("3ab51fd46d59c2")
+TOOLKIT_MAGIC: Final[bytes] = bytes.fromhex("3ab51fd46d59c2")
 
 
 def container_header(type_code: int, version: int) -> bytes:
@@ -69,9 +69,9 @@ def container_header(type_code: int, version: int) -> bytes:
     return bytes([type_code]) + TOOLKIT_MAGIC + version.to_bytes(2, "little")
 
 
-WSET_HEADER = container_header(0x14, 0x14)
-WTOOL_HEADER = container_header(0x15, 0x31)
-SID_HEADER = container_header(0x16, 0x01)
+WSET_HEADER: Final[bytes] = container_header(0x14, 0x14)
+WTOOL_HEADER: Final[bytes] = container_header(0x15, 0x31)
+SID_HEADER: Final[bytes] = container_header(0x16, 0x01)
 
 
 class NrbfWriter:
@@ -323,16 +323,18 @@ def build_generic_wset(header: bytes = WSET_HEADER, trailing: bytes = b"") -> by
 # Woodward settings fixture: the real ``Woodward.Settings``/``Woodward.Sid`` layout
 # ---------------------------------------------------------------------------
 
-LIB_SETTINGS = 2
-LIB_SID = 3
-LIB_DATA_ACCESS = 4
+LIB_SETTINGS: Final[int] = 2
+LIB_SID: Final[int] = 3
+LIB_DATA_ACCESS: Final[int] = 4
 
-SETTINGS_LIBRARY = "Settings, Version=1.0.186.0, Culture=neutral, PublicKeyToken=null"
-SID_LIBRARY = "Sid, Version=1.0.190.0, Culture=neutral, PublicKeyToken=null"
-DATA_ACCESS_LIBRARY = "DataAccess, Version=1.0.192.0, Culture=neutral, PublicKeyToken=null"
+SETTINGS_LIBRARY: Final[str] = "Settings, Version=1.0.186.0, Culture=neutral, PublicKeyToken=null"
+SID_LIBRARY: Final[str] = "Sid, Version=1.0.190.0, Culture=neutral, PublicKeyToken=null"
+DATA_ACCESS_LIBRARY: Final[str] = (
+    "DataAccess, Version=1.0.192.0, Culture=neutral, PublicKeyToken=null"
+)
 
 #: Default synthetic parameters: ``(delimited name, kind, value, extras)``
-DEFAULT_PARAMETERS: list[dict[str, Any]] = [
+DEFAULT_PARAMETERS: Final[list[dict[str, Any]]] = [
     {
         "name": "PARAMETER.Configure system management.1702 Device number",
         "type": "integer",
@@ -774,7 +776,7 @@ def build_woodward_wtool(
 # SID fixture
 # ---------------------------------------------------------------------------
 
-SYNTHETIC_SID_XML = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+SYNTHETIC_SID_XML: Final[str] = """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <ServiceInterfaceDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="Sid21.xsd" Identifier="{identifier}" IdentifierAddress="974848" Specification="{identifier}" ApplicationDescription="{identifier}" IsMostSignificantByteFirst="true">
 \t<NonVolatileProtocol Type="ServlinkSaveValues" />
 \t<SecurityProtocols>

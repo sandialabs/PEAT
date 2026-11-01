@@ -20,7 +20,7 @@ tool file) but not exported.
 
 import re
 from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Final
 
 from peat import DeviceData, log
 
@@ -32,7 +32,7 @@ from .toolkit import (
     identify_application,
 )
 
-_SID_SPEC_RES = (
+_SID_SPEC_RES: Final[tuple[re.Pattern[bytes], ...]] = (
     # XT-style: EG3500XTP2 2.17-0_54728
     re.compile(rb"\b[A-Z]{2,4}\d{3,4}(?:XT)?(?:P\d|LT|LITE|RENTAL)?[ _]\d+\.\d+-\d+_\d+\b"),
     # Part number style: 5418-6722-NEW, 5418-4091A

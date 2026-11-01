@@ -27,16 +27,16 @@ belongs to. Application identifiers come in two styles:
 """
 
 import re
-from typing import Any
+from typing import Any, Final
 
 #: Length of the ToolKit container header
-CONTAINER_HEADER_LEN = 10
+CONTAINER_HEADER_LEN: Final[int] = 10
 
 #: Constant bytes 1 to 7 of the ToolKit container header
-CONTAINER_MAGIC = bytes.fromhex("3ab51fd46d59c2")
+CONTAINER_MAGIC: Final[bytes] = bytes.fromhex("3ab51fd46d59c2")
 
 #: Container type codes (byte 0 of the header)
-CONTAINER_TYPES: dict[int, str] = {
+CONTAINER_TYPES: Final[dict[int, str]] = {
     0x14: "wset",
     0x15: "wtool",
     0x16: "sid",
@@ -45,7 +45,7 @@ CONTAINER_TYPES: dict[int, str] = {
 #: Known ToolKit application part numbers (without revision) and their devices.
 #: Woodward publishes a SID per product, firmware release, and language, so
 #: this table is far from complete. Unknown part numbers are reported as-is.
-TOOLKIT_APPLICATIONS: dict[str, dict[str, str]] = {
+TOOLKIT_APPLICATIONS: Final[dict[str, dict[str, str]]] = {
     # easYgen-3500 (first generation, non-XT). Source: EPHCC project files
     # (github.com/PowerSystemsHIL/EPHCC) saved from a easYgen 3500,
     # Operating System v1.2102.
@@ -63,7 +63,7 @@ TOOLKIT_APPLICATIONS: dict[str, dict[str, str]] = {
 }
 
 #: ToolKit product short names (as used in XT-style identifiers) and their devices
-TOOLKIT_PRODUCT_NAMES: dict[str, dict[str, str]] = {
+TOOLKIT_PRODUCT_NAMES: Final[dict[str, dict[str, str]]] = {
     "EG": {"brand": "easYgen", "product": "easYgen"},
     "GC": {"brand": "easYgen", "product": "GC"},
     "LS": {"brand": "easYgen", "product": "LS"},
@@ -72,8 +72,10 @@ TOOLKIT_PRODUCT_NAMES: dict[str, dict[str, str]] = {
     "MSLC": {"brand": "MSLC", "product": "MSLC"},
 }
 
-_PART_NUMBER_RE = re.compile(r"(?P<part>\d{4}-\d{4})(?:-?(?P<rev>[A-Za-z0-9]+))?(?![\d-])")
-_XT_IDENTIFIER_RE = re.compile(
+_PART_NUMBER_RE: Final[re.Pattern[str]] = re.compile(
+    r"(?P<part>\d{4}-\d{4})(?:-?(?P<rev>[A-Za-z0-9]+))?(?![\d-])"
+)
+_XT_IDENTIFIER_RE: Final[re.Pattern[str]] = re.compile(
     r"(?P<prefix>[A-Z]{2,4})(?P<number>\d{1,4})(?P<xt>XT)?(?P<variant>P\d|LT|LITE|RENTAL)?"
     r"(?:[\s_]+(?P<version>\d+\.\d+(?:-\d+)?))?(?:_(?P<build>\d+))?",
 )

@@ -3,6 +3,7 @@
 import gzip
 import re
 from pathlib import Path
+from typing import Final
 
 import pytest
 
@@ -22,7 +23,7 @@ from peat.modules.woodward.easygen_logic import (
 )
 from peat.modules.woodward.parse_wset import parse_wset
 
-REAL_WSET_GZ = (
+REAL_WSET_GZ: Final[Path] = (
     Path(__file__).resolve().parents[3]
     / "examples"
     / "devices"

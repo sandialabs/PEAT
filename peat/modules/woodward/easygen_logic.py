@@ -39,14 +39,14 @@ options as the PLC logic PEAT parses.
 """
 
 import re
-from typing import Any
+from typing import Any, Final
 from xml.etree.ElementTree import SubElement
 
 from peat import DeviceData, log
 from peat.parsing.tc6 import TC6
 
 #: Structured Text for each LogicsManager binary operator
-ST_BINARY_OPERATORS: dict[str, str] = {
+ST_BINARY_OPERATORS: Final[dict[str, str]] = {
     "And": "{a} AND {b}",
     "Nand": "NOT ({a} AND {b})",
     "Or": "{a} OR {b}",
@@ -56,15 +56,15 @@ ST_BINARY_OPERATORS: dict[str, str] = {
 }
 
 #: Structured Text for each LogicsManager sign (per-input operator)
-ST_SIGNS: dict[str, str] = {
+ST_SIGNS: Final[dict[str, str]] = {
     "NoOperator": "{v}",
     "Not": "NOT {v}",
     "True": "TRUE",
     "False": "FALSE",
 }
 
-_CV_NUMBER_RE = re.compile(r"^(\d{2})\.(\d{2})\b")
-_IDENTIFIER_RE = re.compile(r"[^A-Za-z0-9_]+")
+_CV_NUMBER_RE: Final[re.Pattern[str]] = re.compile(r"^(\d{2})\.(\d{2})\b")
+_IDENTIFIER_RE: Final[re.Pattern[str]] = re.compile(r"[^A-Za-z0-9_]+")
 
 
 def st_identifier(text: str, prefix: str = "") -> str:

@@ -2,6 +2,7 @@
 
 import gzip
 import io
+from typing import Final
 
 import pytest
 
@@ -18,7 +19,7 @@ from peat.modules.woodward.parse_sid import (
 
 from .nrbf_builder import SID_HEADER, build_generic_wset, build_sid_file, build_sid_xml
 
-IDENTIFIER = "EG3200XTP1 2.12-0_50976"
+IDENTIFIER: Final[str] = "EG3200XTP1 2.12-0_50976"
 
 
 @pytest.fixture(scope="module")

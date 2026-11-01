@@ -29,11 +29,11 @@ module maps those records onto the device data model:
 
 import re
 from collections import defaultdict
-from typing import Any
+from typing import Any, Final
 
 from peat import IO, DeviceData, Interface, Register, Service, Tag, User, log
 
-_IO_GROUP_RE = re.compile(
+_IO_GROUP_RE: Final[re.Pattern[str]] = re.compile(
     r"(?:^|\.)(?P<kind>Discrete_In|Discrete_Out|Analog_In|Analog_Out|"
     r"External_DI|External_DO|External_AI|External_AO|"
     r"Discrete inputs?|Discrete outputs?|Relay outputs?|Analog inputs?|Analog outputs?|"
@@ -42,7 +42,7 @@ _IO_GROUP_RE = re.compile(
     r"[ ._]+(?:[A-Za-z ]+ )?(?P<number>\d{1,3})$",
     re.IGNORECASE,
 )
-_IO_KINDS: dict[str, tuple[str, str, str]] = {
+_IO_KINDS: Final[dict[str, tuple[str, str, str]]] = {
     "discrete_in": ("DI", "input", "binary"),
     "discrete_input": ("DI", "input", "binary"),
     "discrete_inputs": ("DI", "input", "binary"),
@@ -70,19 +70,25 @@ _IO_KINDS: dict[str, tuple[str, str, str]] = {
     "external_analog_output": ("External AO", "output", "analog"),
     "external_analog_outputs": ("External AO", "output", "analog"),
 }
-_SERIAL_GROUP_RE = re.compile(
+_SERIAL_GROUP_RE: Final[re.Pattern[str]] = re.compile(
     r"(?:^|\.)(?:Config_)?Serial[ _]?(?P<number>\d)(?:\.|$)", re.IGNORECASE
 )
-_CAN_GROUP_RE = re.compile(r"(?:^|\.)(?:Config_)?CAN[ _]?(?P<number>\d)(?:\.|$)", re.IGNORECASE)
-_BAUDRATE_RE = re.compile(
+_CAN_GROUP_RE: Final[re.Pattern[str]] = re.compile(
+    r"(?:^|\.)(?:Config_)?CAN[ _]?(?P<number>\d)(?:\.|$)", re.IGNORECASE
+)
+_BAUDRATE_RE: Final[re.Pattern[str]] = re.compile(
     r"(?P<value>\d+(?:[.,]\d+)?)\s*(?P<unit>k?)\s*(?:Bd|baud|bps|bit)", re.IGNORECASE
 )
-_PARITY = {"no": "none", "none": "none", "even": "even", "odd": "odd"}
-_STOP_BITS = {"one": 1, "1": 1, "two": 2, "2": 2}
-_ETHERNET_RE = re.compile(r"Ethernet\s+(?P<port>[A-Z])", re.IGNORECASE)
-_PART_RE = re.compile(r"part\s*(?P<part>[2-4])\s*$", re.IGNORECASE)
-_IP_BASE_LABELS = {"ip address": "ip", "subnet mask": "subnet_mask", "gateway ip": "gateway"}
-_TRUE_VALUES = {"yes", "on", "true", "enabled", "1"}
+_PARITY: Final[dict[str, str]] = {"no": "none", "none": "none", "even": "even", "odd": "odd"}
+_STOP_BITS: Final[dict[str, int]] = {"one": 1, "1": 1, "two": 2, "2": 2}
+_ETHERNET_RE: Final[re.Pattern[str]] = re.compile(r"Ethernet\s+(?P<port>[A-Z])", re.IGNORECASE)
+_PART_RE: Final[re.Pattern[str]] = re.compile(r"part\s*(?P<part>[2-4])\s*$", re.IGNORECASE)
+_IP_BASE_LABELS: Final[dict[str, str]] = {
+    "ip address": "ip",
+    "subnet mask": "subnet_mask",
+    "gateway ip": "gateway",
+}
+_TRUE_VALUES: Final[frozenset[str]] = frozenset({"yes", "on", "true", "enabled", "1"})
 
 
 # ---------------------------------------------------------------------------

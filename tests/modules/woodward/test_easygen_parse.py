@@ -8,6 +8,7 @@ import json
 import sys
 from pathlib import Path
 from subprocess import run
+from typing import Final
 
 import pytest
 
@@ -23,8 +24,10 @@ from .nrbf_builder import (
     build_woodward_wtool,
 )
 
-REAL_WSET_GZ = Path("devices", "woodward", "easygen-3500", "4_MVA_Diesel_20161116.wset.gz")
-TC_FIXTURE = "tunables_synthetic.tc"
+REAL_WSET_GZ: Final[Path] = Path(
+    "devices", "woodward", "easygen-3500", "4_MVA_Diesel_20161116.wset.gz"
+)
+TC_FIXTURE: Final[str] = "tunables_synthetic.tc"
 
 
 @pytest.fixture

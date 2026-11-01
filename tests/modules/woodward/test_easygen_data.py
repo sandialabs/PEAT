@@ -2,6 +2,7 @@
 
 import gzip
 from pathlib import Path
+from typing import Final
 
 import pytest
 
@@ -24,7 +25,7 @@ from peat.modules.woodward.parse_wset import parse_wset
 
 from .nrbf_builder import build_sid_file
 
-REAL_WSET_GZ = (
+REAL_WSET_GZ: Final[Path] = (
     Path(__file__).resolve().parents[3]
     / "examples"
     / "devices"

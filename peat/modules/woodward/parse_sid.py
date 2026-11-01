@@ -65,7 +65,7 @@ import xml.etree.ElementTree as ET
 import zlib
 from collections import Counter
 from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Final
 
 from peat import DeviceData, User, log
 
@@ -77,13 +77,13 @@ from .toolkit import (
     identify_application,
 )
 
-GZIP_MAGIC = b"\x1f\x8b"
-SID_ROOT_TAG = "ServiceInterfaceDefinition"
+GZIP_MAGIC: Final[bytes] = b"\x1f\x8b"
+SID_ROOT_TAG: Final[str] = "ServiceInterfaceDefinition"
 
 #: Enumerations with at most this many elements are included in parameter records
-SID_MAX_INLINE_OPTIONS = 32
+SID_MAX_INLINE_OPTIONS: Final[int] = 32
 
-_TYPE_TAGS = {
+_TYPE_TAGS: Final[dict[str, str]] = {
     "Integer": "integer",
     "Float": "float",
     "Boolean": "boolean",
@@ -92,18 +92,19 @@ _TYPE_TAGS = {
     "BitVector": "bit_vector",
     "WGTime": "time",
 }
-_ITEM_TAGS = ("DataItem", "LogicManager", "StructureItem")
-_COMMON_CHILD_TAGS = {
-    "CommunicationProperties",
-    "InitialValue",
-    "Minimum",
-    "Maximum",
-    "Security",
-    "Units",
-    "Description",
-}
-_INT_RE = re.compile(r"^[+-]?\d+$")
-_NAME_RE = re.compile(r"^(?P<id>\d{2,6})\s+(?P<label>.+)$")
+_COMMON_CHILD_TAGS: Final[frozenset[str]] = frozenset(
+    {
+        "CommunicationProperties",
+        "InitialValue",
+        "Minimum",
+        "Maximum",
+        "Security",
+        "Units",
+        "Description",
+    }
+)
+_INT_RE: Final[re.Pattern[str]] = re.compile(r"^[+-]?\d+$")
+_NAME_RE: Final[re.Pattern[str]] = re.compile(r"^(?P<id>\d{2,6})\s+(?P<label>.+)$")
 
 
 # ---------------------------------------------------------------------------

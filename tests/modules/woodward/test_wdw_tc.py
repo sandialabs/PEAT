@@ -2,6 +2,7 @@
 
 import io
 from datetime import datetime
+from typing import Final
 
 import pytest
 
@@ -19,7 +20,7 @@ from peat.modules.woodward.wdw_tc import (
 
 from .nrbf_builder import build_generic_wset
 
-FIXTURE = "tunables_synthetic.tc"
+FIXTURE: Final[str] = "tunables_synthetic.tc"
 
 
 @pytest.fixture(scope="module")

@@ -7,6 +7,7 @@ from array import array
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
+from typing import Final
 
 import pytest
 
@@ -38,7 +39,7 @@ from .nrbf_builder import (
 )
 
 #: Real easYgen-3500 settings file (see examples/devices/woodward/easygen-3500/README.md)
-REAL_WSET_GZ = (
+REAL_WSET_GZ: Final[Path] = (
     Path(__file__).resolve().parents[3]
     / "examples"
     / "devices"

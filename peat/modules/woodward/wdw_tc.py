@@ -30,15 +30,15 @@ common text encodings used by Windows tools (UTF-8, UTF-16, and Windows-1252).
 
 import re
 from pathlib import Path
-from typing import Any, BinaryIO
+from typing import Any, BinaryIO, Final
 
 from peat import DeviceData, log, utils
 
 #: Name of the first column of the header line. Used to detect the header.
-TC_HEADER_FIRST_COLUMN = "Mode"
+TC_HEADER_FIRST_COLUMN: Final[str] = "Mode"
 
 #: The columns Control Assistant writes to a tunable file, in order.
-TC_EXPECTED_COLUMNS = [
+TC_EXPECTED_COLUMNS: Final[list[str]] = [
     "Mode",
     "Category",
     "Block Name",
@@ -51,19 +51,21 @@ TC_EXPECTED_COLUMNS = [
 ]
 
 #: Columns that identify a tunable (used to build the nested ``config`` tree).
-TC_HIERARCHY_COLUMNS = TC_EXPECTED_COLUMNS[:4]
+TC_HIERARCHY_COLUMNS: Final[list[str]] = TC_EXPECTED_COLUMNS[:4]
 
 #: Columns holding values that are converted to Python types in ``parameters``.
-TC_NUMERIC_COLUMNS = ("Current", "Initial", "Low", "High")
+TC_NUMERIC_COLUMNS: Final[tuple[str, ...]] = ("Current", "Initial", "Low", "High")
 
 #: Maximum number of lines searched for the column header.
-TC_MAX_HEADER_SEARCH_LINES = 20
+TC_MAX_HEADER_SEARCH_LINES: Final[int] = 20
 
-_FILE_VERSION_RE = re.compile(r"File\s*Version\s*[:=]?\s*([0-9][0-9A-Za-z._-]*)", re.IGNORECASE)
-_INT_RE = re.compile(r"^[+-]?\d+$")
-_BOOL_TRUE = {"true", "t", "yes", "y", "on"}
-_BOOL_FALSE = {"false", "f", "no", "n", "off"}
-_BOOL_TYPES = {"bool", "boolean", "logical", "bit"}
+_FILE_VERSION_RE: Final[re.Pattern[str]] = re.compile(
+    r"File\s*Version\s*[:=]?\s*([0-9][0-9A-Za-z._-]*)", re.IGNORECASE
+)
+_INT_RE: Final[re.Pattern[str]] = re.compile(r"^[+-]?\d+$")
+_BOOL_TRUE: Final[frozenset[str]] = frozenset({"true", "t", "yes", "y", "on"})
+_BOOL_FALSE: Final[frozenset[str]] = frozenset({"false", "f", "no", "n", "off"})
+_BOOL_TYPES: Final[frozenset[str]] = frozenset({"bool", "boolean", "logical", "bit"})
 
 
 def decode_text(data: bytes | str) -> str:

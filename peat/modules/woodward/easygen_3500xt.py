@@ -28,7 +28,7 @@ Authors
 import functools
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, Final
 
 from peat import (
     DeviceData,
@@ -72,7 +72,7 @@ from .wdw_svl import (
 )
 from .wdw_tc import is_tc_data, parse_tc, populate_device_from_tc, tc_signature_check
 
-easygen_data_types: dict[str, dict] = {
+easygen_data_types: Final[dict[str, dict[str, Any]]] = {
     "prm_am": {"mask": b"\x0a", "len": 16},
     "prm_lm": {"mask": b"\x0a", "len": 16},
     "ezg_0a": {"mask": b"\x0a", "len": 0},
@@ -80,7 +80,11 @@ easygen_data_types: dict[str, dict] = {
 }
 
 #: Parsers for the supported file types: ``{type: (parse function, device populate function)}``
-WOODWARD_FILE_PARSERS: dict[str, tuple[Callable[[bytes], dict[str, Any]], Callable]] = {
+WOODWARD_FILE_PARSERS: Final[
+    dict[
+        str, tuple[Callable[[bytes], dict[str, Any]], Callable[[DeviceData, dict[str, Any]], None]]
+    ]
+] = {
     "wset": (parse_wset, populate_device_from_wset),
     "sid": (parse_sid, populate_device_from_sid),
     "wtool": (parse_wtool, populate_device_from_wtool),
