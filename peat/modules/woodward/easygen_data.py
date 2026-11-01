@@ -31,7 +31,7 @@ import re
 from collections import defaultdict
 from typing import Any, Final
 
-from peat import IO, DeviceData, Interface, Register, Service, Tag, User, log
+from peat import IO, DeviceData, Interface, Register, Service, Tag, User, consts, log
 
 _IO_GROUP_RE: Final[re.Pattern[str]] = re.compile(
     r"(?:^|\.)(?P<kind>Discrete_In|Discrete_Out|Analog_In|Analog_Out|"
@@ -88,7 +88,6 @@ _IP_BASE_LABELS: Final[dict[str, str]] = {
     "subnet mask": "subnet_mask",
     "gateway ip": "gateway",
 }
-_TRUE_VALUES: Final[frozenset[str]] = frozenset({"yes", "on", "true", "enabled", "1"})
 
 
 # ---------------------------------------------------------------------------
@@ -151,7 +150,11 @@ def _scalar(value: Any) -> Any:
 
 
 def _is_true(value: Any) -> bool:
-    return str(value).strip().lower() in _TRUE_VALUES
+    """Interpret a setting such as ``Yes``/``On``/``1`` as a boolean (anything else is false)."""
+    try:
+        return consts.str_to_bool(str(value))
+    except ValueError:
+        return False
 
 
 def _baudrate(value: Any) -> int | None:

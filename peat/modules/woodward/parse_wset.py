@@ -62,7 +62,7 @@ from functools import cache
 from pathlib import Path
 from typing import Any, BinaryIO, Final
 
-from peat import DeviceData, log
+from peat import DeviceData, consts, log
 
 from . import easygen_enums
 from .csharp_reader import serialization
@@ -458,12 +458,10 @@ def _descriptor_type(data_type: Any) -> str:
 def _to_bool(text: str | None) -> bool | str | None:
     if text is None:
         return None
-    lowered = text.strip().lower()
-    if lowered in ("true", "1"):
-        return True
-    if lowered in ("false", "0"):
-        return False
-    return text
+    try:
+        return consts.str_to_bool(text)
+    except ValueError:
+        return text
 
 
 def _convert(text: str | list[str] | None, type_name: str) -> Any:

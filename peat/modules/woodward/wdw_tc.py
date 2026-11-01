@@ -32,7 +32,7 @@ import re
 from pathlib import Path
 from typing import Any, BinaryIO, Final
 
-from peat import DeviceData, log, utils
+from peat import DeviceData, consts, log, utils
 
 #: Name of the first column of the header line. Used to detect the header.
 TC_HEADER_FIRST_COLUMN: Final[str] = "Mode"
@@ -63,8 +63,6 @@ _FILE_VERSION_RE: Final[re.Pattern[str]] = re.compile(
     r"File\s*Version\s*[:=]?\s*([0-9][0-9A-Za-z._-]*)", re.IGNORECASE
 )
 _INT_RE: Final[re.Pattern[str]] = re.compile(r"^[+-]?\d+$")
-_BOOL_TRUE: Final[frozenset[str]] = frozenset({"true", "t", "yes", "y", "on"})
-_BOOL_FALSE: Final[frozenset[str]] = frozenset({"false", "f", "no", "n", "off"})
 _BOOL_TYPES: Final[frozenset[str]] = frozenset({"bool", "boolean", "logical", "bit"})
 
 
@@ -145,9 +143,11 @@ def convert_tc_value(raw: str, type_name: str = "") -> Any:
     """
     Convert a tunable value string to a Python value.
 
-    Booleans are recognized by the ``Type`` column (``Boolean``, ``Bool``,
-    ``Logical``) or by ``TRUE``/``FALSE`` text, integers and floats by their
-    text, and anything else is returned as a stripped string.
+    Booleans are recognized with :func:`peat.consts.str_to_bool` when the
+    ``Type`` column says the field is a boolean (``Boolean``, ``Bool``,
+    ``Logical``) or, for untyped values, when the text is a boolean word
+    (``TRUE``, ``no``, ``on``, ...). Integers and floats are recognized by
+    their text, and anything else is returned as a stripped string.
 
     Args:
         raw: The value text from the file
@@ -157,18 +157,19 @@ def convert_tc_value(raw: str, type_name: str = "") -> Any:
         A :class:`bool`, :class:`int`, :class:`float`, or :class:`str`
     """
     value = raw.strip()
-    lowered = value.lower()
-    if type_name.strip().lower() in _BOOL_TYPES:
-        if lowered in _BOOL_TRUE or lowered == "1":
-            return True
-        if lowered in _BOOL_FALSE or lowered == "0":
-            return False
-    if lowered in _BOOL_TRUE:
-        return True
-    if lowered in _BOOL_FALSE:
-        return False
+    kind = type_name.strip().lower()
+    if kind in _BOOL_TYPES:
+        try:
+            return consts.str_to_bool(value)
+        except ValueError:
+            return value
     if _INT_RE.match(value):
         return int(value)
+    if not kind:
+        try:
+            return consts.str_to_bool(value)
+        except ValueError:
+            pass
     try:
         return float(value)
     except ValueError:

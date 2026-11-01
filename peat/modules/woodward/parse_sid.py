@@ -67,7 +67,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Any, BinaryIO, Final
 
-from peat import DeviceData, User, log
+from peat import DeviceData, User, consts, log
 
 from .easygen_data import populate_data_model_from_sid
 from .toolkit import (
@@ -206,7 +206,10 @@ def _bool_attr(element: ET.Element | None, name: str) -> bool | None:
     value = _attr(element, name, None)
     if value is None:
         return None
-    return value.strip().lower() == "true"
+    try:
+        return consts.str_to_bool(value)
+    except ValueError:
+        return None
 
 
 def _attrs(element: ET.Element | None) -> dict[str, str]:
