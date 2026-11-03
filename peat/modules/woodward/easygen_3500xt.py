@@ -115,18 +115,24 @@ EASYGEN_BRAND: Final[str] = "easYgen"
 
 def is_easygen_application(app: dict[str, Any]) -> bool:
     """
-    If an application, as identified by
-    :func:`~peat.modules.woodward.toolkit.identify_application`, is a
-    recognized easYgen application.
+    Check if an application is a recognized easYgen application.
+
+    Args:
+        app: The application, as identified by
+            :func:`~peat.modules.woodward.toolkit.identify_application`
+
+    Returns:
+        If the application is an easYgen application
     """
     return app.get("brand") == EASYGEN_BRAND
 
 
 def easygen_tc_signature_check(stream: BinaryIO) -> bool:
     """
-    :class:`~peat.file_signature.FileSignature` custom check for ``.tc``
-    files of recognized easYgen applications. Other tunable files are
-    claimed by the WDW2301E module.
+    :class:`~peat.file_signature.FileSignature` custom check for easYgen ``.tc`` files.
+
+    Only tunable files of recognized easYgen applications are claimed. Other
+    tunable files are claimed by the WDW2301E module.
     """
     app = tc_head_application_info(stream.read(TC_SNIFF_LEN))
     return app is not None and is_easygen_application(app)
@@ -134,10 +140,11 @@ def easygen_tc_signature_check(stream: BinaryIO) -> bool:
 
 def easygen_wset_signature_check(stream: BinaryIO) -> bool:
     """
-    :class:`~peat.file_signature.FileSignature` custom check for ToolKit
-    settings (``.wset``) files, except for those of recognized 2301E
-    applications (which are parsed by the WDW2301E module). Files of easYgen,
-    E3, and unknown applications are claimed.
+    :class:`~peat.file_signature.FileSignature` custom check for ``.wset`` files.
+
+    Settings files of easYgen, E3, and unknown applications are claimed.
+    Settings files of recognized 2301E applications are claimed by the
+    WDW2301E module.
     """
     app = wset_head_application_info(stream.read(WSET_SNIFF_LEN))
     return app is not None and not is_2301e_application(app)
@@ -183,8 +190,8 @@ class Easygen3500XT(DeviceModule):
     series controls sharing its firmware). Parsing supports the ToolKit files
     of any easYgen (3000XT, 3000, and 2000 series) and, since the file formats
     are shared, of other ToolKit-based Woodward controls such as the LS-5/LS-6
-    breaker controls and the E3 gas engine controls. Refer to the module
-    documentation for the supported file types.
+    breaker controls and the E3 gas engine controls. Refer to :doc:`woodward`
+    for the supported file types.
     """
 
     device_type = "Genset Controller"  # Engine/Generator control and protector
@@ -558,13 +565,14 @@ class Easygen3500XT(DeviceModule):
     @classmethod
     def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         """
-        Parse a ToolKit settings (``.wset``), Service Interface Definition
-        (``.sid``), or tool (``.wtool``) file, or a Control Assistant tunable
-        (``.tc``) file of an easYgen.
+        Parse a Woodward ToolKit or Control Assistant file.
 
-        Tunable files of other controls, whose application identifier isn't
-        a recognized easYgen application, and settings files of 2301E
-        applications are rejected: they're parsed by the
+        Supported files are ToolKit settings (``.wset``), Service Interface
+        Definition (``.sid``), and tool (``.wtool``) files, and Control
+        Assistant tunable (``.tc``) files of an easYgen. Tunable files of other
+        controls (whose application identifier isn't a recognized easYgen
+        application) and settings files of 2301E applications are rejected,
+        since they're parsed by the
         :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` module.
 
         The parsed data is saved as ``parsed-<type>.json`` in the device's

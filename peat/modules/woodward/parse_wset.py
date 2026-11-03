@@ -2,14 +2,12 @@
 Woodward ToolKit settings file (``*.wset``) parser.
 
 Woodward's *ToolKit* service tool is used to configure controls such as the
-easYgen genset controllers (easYgen-1000/2000/3000/3000XT series), the LS-5
+easYgen genset controllers (easYgen-2000/3000/3000XT series), the LS-5
 and LS-6 circuit breaker controls, the DTSC-200 transfer switch controller,
 and others. ToolKit saves the complete settings of a control to a binary
 "settings file" with a ``.wset`` extension, which can later be loaded back
 into a control of the same type or compared against another file.
 
-File format
------------
 A ``.wset`` file is a 10-byte proprietary header followed by two (or more)
 concatenated `.NET Remoting Binary Format
 <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nrbf/>`__
@@ -26,7 +24,7 @@ concatenated `.NET Remoting Binary Format
    the parameter's SID descriptor (data type, range, units, enumeration,
    security levels, communication handles) with its cached value.
 
-The parameter objects come in four kinds:
+The parameter objects come in these kinds:
 
 - ``BasicParameter``: a value stored directly (integer, enumeration, string,
   or a bit field container).
@@ -184,7 +182,9 @@ def find_nrbf_offset(data: bytes, limit: int = WSET_MAX_HEADER_SEARCH) -> int | 
 
 
 def is_nrbf_at(data: bytes, offset: int) -> bool:
-    """Check if a NRBF ``SerializationHeaderRecord`` starts at ``offset``."""
+    """
+    Check if a NRBF ``SerializationHeaderRecord`` starts at ``offset``.
+    """
     return _NRBF_SIGNATURE_RE.match(data, offset) is not None
 
 
@@ -219,7 +219,9 @@ def wset_signature_check(stream: BinaryIO) -> bool:
 
 
 def _short_nrbf_strings(data: bytes) -> list[str]:
-    """Values of the short ``BinaryObjectString`` records in NRBF data, in order."""
+    """
+    Values of the short ``BinaryObjectString`` records in NRBF data, in order.
+    """
     strings = []
     for match in _NRBF_SHORT_STRING_RE.finditer(data):
         start = match.end(1)
@@ -235,14 +237,13 @@ def _short_nrbf_strings(data: bytes) -> list[str]:
 
 def wset_head_application_info(data: bytes) -> dict[str, Any] | None:
     """
-    Identify the application of a ToolKit settings (``.wset``) file from the
-    start of the file, without decoding it.
+    Identify the application of a ToolKit settings (``.wset``) file from its start.
 
-    The application identifier and SID specification are strings in the
-    settings header, the first (and small) .NET serialization stream of the
-    file, so the data can be the first :data:`WSET_SNIFF_LEN` bytes of the
-    file. The strings of the first stream are matched against the known
-    application identifiers with
+    The file isn't decoded. The application identifier and SID specification
+    are strings in the settings header, the first (and small) .NET
+    serialization stream of the file, so the data can be the first
+    :data:`WSET_SNIFF_LEN` bytes of the file. The strings of the first stream
+    are matched against the known application identifiers with
     :func:`~peat.modules.woodward.toolkit.identify_application`. This is cheap
     and logs nothing, so it's suitable for file signature checks, which run
     for every candidate file when searching for files to parse.
@@ -334,12 +335,16 @@ def _class_name(obj: Any) -> str:
 
 
 def _is_record(obj: Any) -> bool:
-    """Check if ``obj`` is a decoded .NET object (a ``namedlist`` instance)."""
+    """
+    Check if ``obj`` is a decoded .NET object (a ``namedlist`` instance).
+    """
     return hasattr(obj, "_fields") and hasattr(obj, "_asdict")
 
 
 def _get(obj: Any, field: str, default: Any = None) -> Any:
-    """Get a field of a decoded .NET object (or key of a dict), if present."""
+    """
+    Get a field of a decoded .NET object (or key of a dict), if present.
+    """
     if obj is None:
         return default
     if isinstance(obj, dict):
@@ -350,7 +355,9 @@ def _get(obj: Any, field: str, default: Any = None) -> Any:
 
 
 def snake_case(name: str) -> str:
-    """Convert a .NET member name (``sidSpecification``, ``_isPartial``) to ``snake_case``."""
+    """
+    Convert a .NET member name (``sidSpecification``, ``_isPartial``) to ``snake_case``.
+    """
     name = name.strip("_")
     name = name.removesuffix("_k__BackingField")  # auto-property backing field
     return _CAMEL_RE.sub("_", name).lower()
@@ -422,7 +429,9 @@ def to_plain(
 
 
 def _snake_keys(plain: Any) -> Any:
-    """Recursively convert the keys of a plain object to snake_case, dropping ``_class``."""
+    """
+    Recursively convert the keys of a plain object to snake_case, dropping ``_class``.
+    """
     if isinstance(plain, dict):
         return {
             snake_case(key): _snake_keys(value) for key, value in plain.items() if key != "_class"
@@ -433,7 +442,9 @@ def _snake_keys(plain: Any) -> Any:
 
 
 def _hashtable_items(table: Any) -> list[tuple[Any, Any]]:
-    """Get the (key, value) pairs of a decoded ``Hashtable``/``Dictionary``."""
+    """
+    Get the (key, value) pairs of a decoded ``Hashtable``/``Dictionary``.
+    """
     if isinstance(table, dict):
         return list(table.items())
     keys = _get(table, "Keys")
@@ -447,7 +458,9 @@ def _hashtable_items(table: Any) -> list[tuple[Any, Any]]:
 
 
 def _text_value(text_value: Any) -> str | None:
-    """Get the text of a ``Woodward.Sid.TextValue`` (a list of strings)."""
+    """
+    Get the text of a ``Woodward.Sid.TextValue`` (a list of strings).
+    """
     if text_value is None:
         return None
     if isinstance(text_value, str):
@@ -539,7 +552,9 @@ def _to_float(text: str | None) -> float | str | None:
 
 
 def _descriptor_type(data_type: Any) -> str:
-    """Map a ``Woodward.Sid.Descriptors.*Descriptor`` class to a short type name."""
+    """
+    Map a ``Woodward.Sid.Descriptors.*Descriptor`` class to a short type name.
+    """
     class_name = _class_name(data_type) if data_type is not None else ""
     if "EnumeratedInteger" in class_name:
         return "enumerated"
@@ -570,7 +585,9 @@ def _to_bool(text: str | None) -> bool | str | None:
 
 
 def _convert(text: str | list[str] | None, type_name: str) -> Any:
-    """Convert a parameter's text value based on its descriptor type."""
+    """
+    Convert a parameter's text value based on its descriptor type.
+    """
     if text is None:
         return None
     if isinstance(text, list):
@@ -585,7 +602,9 @@ def _convert(text: str | list[str] | None, type_name: str) -> Any:
 
 
 def _scale(base: Any, multiplier: Any, offset: Any) -> Any:
-    """Compute ``base * multiplier + offset`` without floating point noise."""
+    """
+    Compute ``base * multiplier + offset`` without floating point noise.
+    """
     if base is None or not isinstance(base, (int, float)) or isinstance(base, bool):
         return None
     try:
@@ -620,7 +639,9 @@ def _enumeration_element(element: Any) -> dict[str, Any] | None:
 
 
 def _descriptor_fields(descriptor: Any) -> dict[str, Any]:
-    """Common fields of a ``ParameterDescriptor`` or ``LogicManagerDescriptor``."""
+    """
+    Common fields of a ``ParameterDescriptor`` or ``LogicManagerDescriptor``.
+    """
     comms = _get(descriptor, "communicationProperties")
     access = _get(descriptor, "access")
     fields: dict[str, Any] = {
@@ -640,7 +661,9 @@ def _descriptor_fields(descriptor: Any) -> dict[str, Any]:
 
 
 def _basic_value(parameter: Any) -> str | None:
-    """Cached text value of a ``BasicParameter``."""
+    """
+    Cached text value of a ``BasicParameter``.
+    """
     cache_obj = _get(parameter, "parameterValueCache")
     value = _get(cache_obj, "value")
     return None if value is None else str(value)
@@ -740,7 +763,9 @@ def _bit_field_record(parameter: Any, descriptor: Any) -> dict[str, Any]:
 
 
 def _array_record(array_parameter: Any) -> dict[str, Any]:
-    """Describe an ``ArrayParameter`` (one axis or column of a lookup table)."""
+    """
+    Describe an ``ArrayParameter`` (one axis or column of a lookup table).
+    """
     cache_obj = _get(array_parameter, "arrayParameterValueCache")
     descriptor = _get(cache_obj, "descriptor") or _get(array_parameter, "descriptor")
     data_type = _get(descriptor, "dataTypeDescriptor")
@@ -767,7 +792,9 @@ def _array_record(array_parameter: Any) -> dict[str, Any]:
 
 
 def _lookup_table_record(parameter: Any) -> dict[str, Any]:
-    """Record for a ``LookupTableParameter`` (a set of arrays) or an ``ArrayParameter``."""
+    """
+    Record for a ``LookupTableParameter`` (a set of arrays) or an ``ArrayParameter``.
+    """
     value = _get(parameter, "value")
     arrays = [_array_record(a) for a in (_get(value, "arrays") or []) if a is not None]
     if not arrays and _get(parameter, "arrayParameterValueCache") is not None:
@@ -854,8 +881,10 @@ def _logics_manager_record(parameter: Any, descriptor: Any) -> dict[str, Any]:
 
 def _analog_manager_inputs(records: list[dict[str, Any]]) -> dict[str, str]:
     """
-    The AnalogManager data source list: the enumeration used by the
-    ``Data source`` parameters (analog outputs, external power measurement, ...).
+    The AnalogManager data source list.
+
+    This is the enumeration used by the ``Data source`` parameters (analog
+    outputs, external power measurement, ...).
     """
     best: dict[str, str] = {}
     for record in records:
@@ -871,7 +900,9 @@ def _analog_manager_inputs(records: list[dict[str, Any]]) -> dict[str, str]:
 
 
 def _logics_manager_inputs(descriptor: Any) -> dict[str, str]:
-    """The LogicsManager command variable list from a ``LogicManagerDescriptor``."""
+    """
+    The LogicsManager command variable list from a ``LogicManagerDescriptor``.
+    """
     for enumeration in _get(descriptor, "inputEnumerations", None) or []:
         options = _enumeration_options(enumeration)
         if options:
@@ -962,7 +993,9 @@ def extract_settings(table: Any) -> tuple[list[dict[str, Any]], dict[str, str]]:
 
 
 def is_settings_table(obj: Any) -> bool:
-    """Check if a decoded object is a settings hashtable keyed by ``ParameterName``."""
+    """
+    Check if a decoded object is a settings hashtable keyed by ``ParameterName``.
+    """
     items = _hashtable_items(obj)
     if not items:
         return False
@@ -1221,7 +1254,9 @@ def parse_wset(source: Path | bytes | BinaryIO, include_raw: bool = False) -> di
 
 
 def summarize_wset(parsed: dict[str, Any]) -> dict[str, Any]:
-    """Compact summary of :func:`parse_wset` output, suitable for ``DeviceData.extra``."""
+    """
+    Compact summary of :func:`parse_wset` output, suitable for ``DeviceData.extra``.
+    """
     return {
         "header": parsed.get("header", {}),
         "nrbf": parsed.get("nrbf", {}),
@@ -1238,13 +1273,13 @@ def summarize_wset(parsed: dict[str, Any]) -> dict[str, Any]:
 
 def parameter_values(records: list[dict[str, Any]]) -> dict[str, Any]:
     """
-    Map parameter records to ``{name: value}`` (the LogicsManager expression
-    for LogicsManager equations).
+    Map parameter records to ``{name: value}``.
 
-    Records without a name (from the generic fallback extraction) are keyed by
-    their object path (or ``(unnamed N)`` if they have no path), and keys that
-    occur more than once get a ``#N`` suffix (``N`` is the record's index), so
-    no value is overwritten by another record from the same file.
+    The value of a LogicsManager equation is its expression. Records without
+    a name (from the generic fallback extraction) are keyed by their object
+    path (or ``(unnamed N)`` if they have no path), and keys that occur more
+    than once get a ``#N`` suffix (``N`` is the record's index), so no value
+    is overwritten by another record from the same file.
 
     Args:
         records: Parameter records, see :func:`parse_wset`
@@ -1323,13 +1358,13 @@ def populate_device_from_wset(dev: DeviceData, parsed: dict[str, Any]) -> None:
 
 def save_wset_logic(dev: DeviceData, file: Path | None) -> None:
     """
-    Save the LogicsManager logic added to a device by
-    :func:`populate_device_from_wset` (if any) to the device's output directory.
+    Save the LogicsManager logic of a device to the device's output directory.
 
+    The logic is added to the device by :func:`populate_device_from_wset`.
     The Structured Text is saved as ``logic.st``, the PLCopen TC6 XML as
-    ``logic-tc6.xml``, and the settings file is recorded as the source file of
-    the logic. If the settings file had no LogicsManager equations (e.g. files
-    of controls without a LogicsManager), it's recorded in the device's
+    ``logic-tc6.xml``, and the settings file is recorded as the source file
+    of the logic. If the settings file had no LogicsManager equations (e.g.
+    files of controls without a LogicsManager), it's recorded in the device's
     ``files`` instead (with its hashes), so the binary settings file isn't
     mistaken for a logic source file.
 

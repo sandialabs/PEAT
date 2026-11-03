@@ -44,7 +44,9 @@ _NATURAL_SPLIT_RE: Final[re.Pattern[str]] = re.compile(r"(\d+)")
 
 
 def is_wtool_data(data: bytes) -> bool:
-    """Check if data looks like a ToolKit tool file."""
+    """
+    Check if data looks like a ToolKit tool file.
+    """
     return container_type(data) == "wtool" and is_nrbf_at(data, CONTAINER_HEADER_LEN)
 
 
@@ -56,7 +58,9 @@ def wtool_signature_check(stream: BinaryIO) -> bool:
 
 
 def _natural_key(identifier: str) -> tuple[tuple[tuple[int, int, str], ...], str]:
-    """Sort key that compares the numbers in an identifier numerically."""
+    """
+    Sort key that compares the numbers in an identifier numerically.
+    """
     parts = tuple(
         (0, int(part), "") if part.isdigit() else (1, 0, part.lower())
         for part in _NATURAL_SPLIT_RE.split(identifier)
@@ -89,7 +93,9 @@ def find_sid_specifications(data: bytes) -> list[str]:
 
 
 def _device_names(plain: Any) -> list[str]:
-    """Collect the device names from a decoded ``DeviceNamesList``."""
+    """
+    Collect the device names from a decoded ``DeviceNamesList``.
+    """
     names: list[str] = []
 
     def _walk(node: Any) -> None:

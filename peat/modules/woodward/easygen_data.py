@@ -5,11 +5,11 @@ The parsers in :mod:`~peat.modules.woodward.parse_wset` and
 :mod:`~peat.modules.woodward.parse_sid` return flat parameter records. This
 module maps those records onto the device data model:
 
-- Every parameter with a ServLink handle or CANopen object address becomes a
-  :class:`~peat.data.models.Register` (``protocol`` ``servlink`` or ``canopen``).
-  Settings files and SIDs. The CANopen address is the SDO ``index:subindex``
-  (the multiplexor stored by ToolKit is ``index << 8 | subindex``, verified
-  against Woodward's EDS files).
+- Every parameter of a settings file or SID with a ServLink handle or CANopen
+  object address becomes a :class:`~peat.data.models.Register` (``protocol``
+  ``servlink`` or ``canopen``). The CANopen address is the SDO
+  ``index:subindex`` (the multiplexor stored by ToolKit is
+  ``index << 8 | subindex``, verified against Woodward's EDS files).
 - LogicsManager command variables and AnalogManager data sources become
   :class:`~peat.data.models.Tag` objects (``binary``/``analog``), from the
   lists embedded in settings files and SIDs.
@@ -28,7 +28,7 @@ module maps those records onto the device data model:
 
 Settings files of 2301E applications (parsed by the
 :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` module) only get registers,
-the rest of the mapping relies on the parameter names of the easYgen.
+since the rest of the mapping relies on the parameter names of the easYgen.
 """
 
 import re
@@ -121,7 +121,9 @@ def canopen_address(multiplexor: int) -> str:
 
 
 def register_data_type(record: dict[str, Any]) -> str:
-    """PEAT register data type (``int_16``, ``float_32``, ...) of a parameter record."""
+    """
+    PEAT register data type (``int_16``, ``float_32``, ...) of a parameter record.
+    """
     type_name = str(record.get("type") or "")
     size = record.get("size")
     if type_name in ("integer", "enumerated", "bit_fields", "bit_vector"):
@@ -145,7 +147,9 @@ def register_data_type(record: dict[str, Any]) -> str:
 
 
 def measurement_type(record: dict[str, Any]) -> str:
-    """PEAT measurement type (``analog``/``binary``) of a parameter record."""
+    """
+    PEAT measurement type (``analog``/``binary``) of a parameter record.
+    """
     type_name = str(record.get("type") or "")
     if type_name in ("boolean", "bit_field", "logics_manager"):
         return "binary"
@@ -155,14 +159,18 @@ def measurement_type(record: dict[str, Any]) -> str:
 
 
 def _scalar(value: Any) -> Any:
-    """Make a parameter value suitable for ``extra`` fields (scalars only)."""
+    """
+    Make a parameter value suitable for ``extra`` fields (scalars only).
+    """
     if value is None or isinstance(value, (bool, int, float, str)):
         return value
     return str(value)
 
 
 def _is_true(value: Any) -> bool:
-    """Interpret a setting such as ``Yes``/``On``/``1`` as a boolean (anything else is false)."""
+    """
+    Interpret a setting such as ``Yes``/``On``/``1`` as a boolean (anything else is false).
+    """
     try:
         return consts.str_to_bool(str(value))
     except ValueError:
@@ -170,7 +178,9 @@ def _is_true(value: Any) -> bool:
 
 
 def _baudrate(value: Any) -> int | None:
-    """Parse a baudrate setting such as ``19.2 kBd`` or ``250 kBd``."""
+    """
+    Parse a baudrate setting such as ``19.2 kBd`` or ``250 kBd``.
+    """
     match = _BAUDRATE_RE.search(str(value))
     if not match:
         return None
@@ -181,7 +191,9 @@ def _baudrate(value: Any) -> int | None:
 
 
 def _is_off(value: Any) -> bool:
-    """If a setting such as a device type or node ID selection is ``Off`` (not configured)."""
+    """
+    Check if a setting such as a device type or node ID selection is ``Off`` (not configured).
+    """
     return value is None or str(value).strip().lower() in _OFF_VALUES
 
 
@@ -209,7 +221,9 @@ def _by_group(records: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
 
 
 def _find(records: list[dict[str, Any]], *labels: str) -> dict[str, Any] | None:
-    """First record whose label matches one of ``labels`` (case-insensitive)."""
+    """
+    First record whose label matches one of ``labels`` (case-insensitive).
+    """
     wanted = {label.lower() for label in labels}
     for record in records:
         if str(record.get("label") or "").strip().lower() in wanted:
@@ -226,7 +240,7 @@ def _value(record: dict[str, Any] | None, default: Any = None) -> Any:
 
 def _same_parameter(name: str, other: str) -> bool:
     """
-    If two parameter names with the same address are the same parameter.
+    Check if two parameter names with the same address are the same parameter.
 
     Settings files qualify the names with their namespace (``Namespace.AI_CAL``),
     SIDs don't (``AI_CAL``).
@@ -241,7 +255,9 @@ def _same_parameter(name: str, other: str) -> bool:
 
 
 def _settings(records: list[dict[str, Any]]) -> dict[str, Any]:
-    """``{label: value}`` of the records, for ``extra`` fields."""
+    """
+    ``{label: value}`` of the records, for ``extra`` fields.
+    """
     settings: dict[str, Any] = {}
     for record in records:
         label = str(record.get("label") or record.get("name") or "")
@@ -483,7 +499,9 @@ def _can_interface(number: str, group_records: list[dict[str, Any]], group: str)
 
 
 def _ethernet_port(text: str) -> str:
-    """Port letter of the last ``Ethernet X`` in a label or group name, or ``""``."""
+    """
+    Port letter of the last ``Ethernet X`` in a label or group name, or ``""``.
+    """
     matches = list(_ETHERNET_RE.finditer(text))
     return matches[-1].group("port").upper() if matches else ""
 

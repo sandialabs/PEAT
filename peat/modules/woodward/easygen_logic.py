@@ -1,6 +1,5 @@
 """
-Woodward easYgen LogicsManager equations as IEC 61131-3 Structured Text and
-PLCopen TC6 XML.
+Convert Woodward easYgen LogicsManager equations to Structured Text and PLCopen TC6 XML.
 
 The LogicsManager is the programmable logic of the easYgen genset
 controllers: it decides when relays close, when the engine starts, which
@@ -23,18 +22,18 @@ The equations are chained left to right, matching the order of the
 LogicsManager "command chain" documented in the easYgen Modbus appendix
 (sign 1, operator 1, sign 2, operator 2, sign 3).
 
-The conversion produces one ``PROGRAM`` with a ``BOOL`` variable per
-command variable (``CV_03_05``) and per equation output (``LM_12110``), and
-``TON``/``TOF`` function block instances for the delays. Command variables
-that are the result of an equation (``00.01 LM: Flag 1`` is the output of
-``12230 Flag 1``) are assigned the equation output right after it
-(``CV_00_01 := LM_12230;``), like the cyclic evaluation of the device, so the
-equations stay linked. Constant command variables (``02.02 LM TRUE`` on the
-easYgen-XT) are assigned their value at the start. The PLCopen TC6
-XML is built with :class:`~peat.parsing.tc6.TC6`, the same class the
-Schneider M340 and Rockwell modules use, so the easYgen logic goes through
-the same Structured Text generation and SCEPTRE/OpenPLC compatibility
-options as the PLC logic PEAT parses.
+The equations are converted to IEC 61131-3 Structured Text: one ``PROGRAM``
+with a ``BOOL`` variable per command variable (``CV_03_05``) and per equation
+output (``LM_12110``), and ``TON``/``TOF`` function block instances for the
+delays. Command variables that are the result of an equation
+(``00.01 LM: Flag 1`` is the output of ``12230 Flag 1``) are assigned the
+equation output right after it (``CV_00_01 := LM_12230;``), like the cyclic
+evaluation of the device, so the equations stay linked. Constant command
+variables (``02.02 LM TRUE`` on the easYgen-XT) are assigned their value at
+the start. The PLCopen TC6 XML is built with :class:`~peat.parsing.tc6.TC6`,
+the same class the Schneider M340 and Rockwell modules use, so the easYgen
+logic goes through the same Structured Text generation and SCEPTRE/OpenPLC
+compatibility options as the PLC logic PEAT parses.
 
 .. note::
    Operator and sign semantics were verified against the easYgen-3400/3500
@@ -182,7 +181,9 @@ def time_literal(seconds: Any) -> str:
 
 
 def _equation(record: dict[str, Any]) -> dict[str, Any] | None:
-    """The equation of a LogicsManager record (its value, or its default from a SID)."""
+    """
+    The equation of a LogicsManager record (its value, or its default from a SID).
+    """
     value = record.get("value")
     if not isinstance(value, dict) or "input_1" not in value:
         value = record.get("initial")
@@ -192,7 +193,9 @@ def _equation(record: dict[str, Any]) -> dict[str, Any] | None:
 
 
 def _equation_delay(equation: dict[str, Any], key: str, output: str) -> float:
-    """A delay of an equation in seconds, ``0.0`` (no timer) if it's invalid."""
+    """
+    A delay of an equation in seconds, ``0.0`` (no timer) if it's invalid.
+    """
     value = equation.get(key)
     seconds = delay_seconds(value)
     if seconds is None:
@@ -202,7 +205,9 @@ def _equation_delay(equation: dict[str, Any], key: str, output: str) -> float:
 
 
 def _normalize_label(label: str) -> str:
-    """Normalize a label for comparisons, e.g. ``Stop req.. in AUTO`` -> ``stopreqinauto``."""
+    """
+    Normalize a label for comparisons, e.g. ``Stop req.. in AUTO`` -> ``stopreqinauto``.
+    """
     return _LABEL_IGNORED_RE.sub("", label).lower()
 
 

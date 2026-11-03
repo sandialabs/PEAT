@@ -3,8 +3,8 @@ Helpers shared by the parsers of Woodward ToolKit file formats.
 
 ToolKit is Woodward's PC service tool for the easYgen genset controllers and
 related products (LS-5/LS-6 breaker controls, DTSC-200, DSLC-2, MSLC-2,
-GC-3000XT, the 2301E speed control, and others). It works with three file types that share a common
-10-byte container header::
+GC-3000XT, the 2301E speed control, and others). It works with three file
+types that share a common 10-byte container header::
 
     <type> 3a b5 1f d4 6d 59 c2 <variant> 00
 
@@ -47,7 +47,7 @@ CONTAINER_TYPES: Final[dict[int, str]] = {
 #: this table is far from complete. Unknown part numbers are reported as-is.
 TOOLKIT_APPLICATIONS: Final[dict[str, dict[str, str]]] = {
     # easYgen-3500 (first generation, non-XT). Source: EPHCC project files
-    # (github.com/PowerSystemsHIL/EPHCC) saved from a easYgen 3500,
+    # (github.com/PowerSystemsHIL/EPHCC) saved from an easYgen-3500,
     # Operating System v1.2102.
     "5418-6722": {"brand": "easYgen", "model": "3500", "product": "easYgen-3500"},
     # easYgen-3000 series P1 (unit 8440-1831). Source: manual 37224A, which
@@ -94,11 +94,18 @@ _XT_IDENTIFIER_RE: Final[re.Pattern[str]] = re.compile(
 
 def is_2301e_application(app: dict[str, Any]) -> bool:
     """
-    If an application, as identified by :func:`identify_application`, is a
-    recognized 2301E application. ToolKit files of 2301E applications are
-    parsed by the :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` module,
-    all other ToolKit files by the
-    :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+    Check if an application is a recognized 2301E application.
+
+    ToolKit files of 2301E applications are parsed by the
+    :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` module, all other
+    ToolKit files by the :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT`
+    module.
+
+    Args:
+        app: The application, as identified by :func:`identify_application`
+
+    Returns:
+        If the application is a 2301E application
     """
     return app.get("brand") == "WDW" and app.get("model") == "2301E"
 
@@ -120,7 +127,9 @@ def container_type(data: bytes) -> str | None:
 
 
 def is_toolkit_container(data: bytes) -> bool:
-    """Check if data starts with a ToolKit container header."""
+    """
+    Check if data starts with a ToolKit container header.
+    """
     return container_type(data) is not None
 
 

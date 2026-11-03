@@ -13,7 +13,7 @@ Parsing supports:
   :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
 - Control Assistant ``*.tc`` tunable files, see
   :mod:`~peat.modules.woodward.wdw_tc`. This is the generic Control Assistant
-  parser: tunable files of any control except the easYgen are parsed.
+  parser, so tunable files of any control except the easYgen are parsed.
 
 Authors
 
@@ -68,9 +68,11 @@ svl_data_type: Final[dict[type, bytes]] = {
 
 def wdw_tc_signature_check(stream: BinaryIO) -> bool:
     """
-    :class:`~peat.file_signature.FileSignature` custom check for Control
-    Assistant tunable (``.tc``) files, except for those of recognized easYgen
-    applications (which are parsed by the easYgen module).
+    :class:`~peat.file_signature.FileSignature` custom check for ``.tc`` files.
+
+    Tunable files of all applications except recognized easYgen applications
+    are claimed. Tunable files of easYgen applications are claimed by the
+    easYgen module.
     """
     app = tc_head_application_info(stream.read(TC_SNIFF_LEN))
     return app is not None and not is_easygen_application(app)
@@ -78,9 +80,10 @@ def wdw_tc_signature_check(stream: BinaryIO) -> bool:
 
 def wdw_wset_signature_check(stream: BinaryIO) -> bool:
     """
-    :class:`~peat.file_signature.FileSignature` custom check for ToolKit
-    settings (``.wset``) files of recognized 2301E applications. Other
-    settings files are parsed by the easYgen module.
+    :class:`~peat.file_signature.FileSignature` custom check for 2301E ``.wset`` files.
+
+    Only settings files of recognized 2301E applications are claimed. Other
+    settings files are claimed by the easYgen module.
     """
     app = wset_head_application_info(stream.read(WSET_SNIFF_LEN))
     return app is not None and is_2301e_application(app)
@@ -184,21 +187,22 @@ class WDW2301E(DeviceModule):
     @classmethod
     def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         """
-        Parse a ToolKit settings (``.wset``) file of a 2301E application or a
-        Control Assistant tunable (``.tc``) file saved from a 2301E.
+        Parse a ToolKit settings (``.wset``) file or Control Assistant tunable (``.tc``) file.
 
-        Settings files of other applications are rejected, they're parsed by
-        the :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT`
-        module. The parsed settings are saved as ``parsed-wset.json``, refer
-        to :mod:`~peat.modules.woodward.parse_wset` for the file format.
-
-        For tunable files, this is the generic Control Assistant parser:
-        tunable files of other controls are parsed as well, and the brand and model are taken from
-        the application identifier in the file if it's known. Files of
-        recognized easYgen applications are rejected, they're parsed by the
+        Only settings files of 2301E applications are parsed. Settings files of
+        other applications are rejected, since they're parsed by the
         :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+        The parsed settings are saved as ``parsed-wset.json`` (refer to
+        :mod:`~peat.modules.woodward.parse_wset` for the file format).
 
-        Refer to :mod:`~peat.modules.woodward.wdw_tc` for the file format.
+        For tunable files, this is the generic Control Assistant parser.
+        Tunable files of other controls are parsed as well, and the brand and
+        model are taken from the application identifier in the file if it's
+        known. Tunable files of recognized easYgen applications are rejected,
+        since they're parsed by the
+        :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+        The parsed tunables are saved as ``parsed-tc.json`` (refer to
+        :mod:`~peat.modules.woodward.wdw_tc` for the file format).
         """
         data = file.read_bytes()
         kind = identify_woodward_file(data, file.suffix)
@@ -237,7 +241,9 @@ class WDW2301E(DeviceModule):
 
     @classmethod
     def _parse_wset(cls, file: Path, data: bytes, dev: DeviceData | None) -> DeviceData | None:
-        """Parse a ToolKit settings (``.wset``) file of a 2301E application."""
+        """
+        Parse a ToolKit settings (``.wset``) file of a 2301E application.
+        """
         cls.log.info(f"Parsing '{file.name}' as a Woodward wset file")
         try:
             parsed = parse_wset(data)

@@ -226,7 +226,9 @@ def unquote_tc_field(raw: str) -> str:
 
 
 def _to_float(value: str) -> float | str:
-    """Convert to a finite float, or return the text (NaN/inf aren't valid JSON)."""
+    """
+    Convert to a finite float, or return the text (NaN/inf aren't valid JSON).
+    """
     try:
         number = float(value)
     except ValueError:
@@ -281,7 +283,9 @@ def convert_tc_value(raw: str, type_name: str = "") -> Any:
 
 
 def _find_header(lines: list[str]) -> int | None:
-    """Index of the column header line, if it's in the first lines."""
+    """
+    Index of the column header line, if it's in the first lines.
+    """
     for index, line in enumerate(lines[:TC_MAX_HEADER_SEARCH_LINES]):
         if "\t" not in line:
             continue
@@ -292,7 +296,9 @@ def _find_header(lines: list[str]) -> int | None:
 
 
 def _parse_metadata(meta_lines: list[str]) -> dict[str, Any]:
-    """Interpret the lines that precede the column header."""
+    """
+    Interpret the lines that precede the column header.
+    """
     metadata: dict[str, Any] = {
         "file_version": "",
         "version": "",
@@ -318,7 +324,7 @@ def _parse_metadata(meta_lines: list[str]) -> dict[str, Any]:
 
 def _is_date_line(line: str) -> bool:
     """
-    If a metadata line is the timestamp line, e.g. ``2015-03-23 14:32:11 UTC``.
+    Check if a metadata line is the timestamp line, e.g. ``2015-03-23 14:32:11 UTC``.
 
     The check is strict, so application identifiers such as ``5418-1234 NEW``
     or ``5418-12 A`` aren't mistaken for dates.
@@ -512,8 +518,7 @@ def tc_application_info(parsed: dict[str, Any]) -> dict[str, Any]:
 
 def tc_head_application_info(data: bytes) -> dict[str, Any] | None:
     """
-    Identify the application of a Control Assistant tunable (``.tc``) file
-    from the start of the file.
+    Identify the application of a Control Assistant tunable (``.tc``) file from its start.
 
     Only the metadata lines at the top of the file are needed, so the data
     can be the first few kilobytes of the file (see :data:`TC_SNIFF_LEN`).

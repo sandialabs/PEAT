@@ -174,7 +174,7 @@ Glossary
       Laboratory-Directed Research and Development
 
    LogicsManager
-      The programmable logic of Woodward easYgen genset controllers: equations of three command variables, operators, and delays. Refer to :doc:`woodward`.
+      Programmable logic of Woodward easYgen genset controllers. Each LogicsManager equation combines three command variables with operators and delays. Refer to :doc:`woodward`.
 
    MAC
       Media Access Control. :term:`OSI Model` Layer 2 communication between devices on the same local network (e.g. the same switch). Example MAC address: ``01:02:03:FA:FB:FC``
@@ -192,7 +192,7 @@ Glossary
       Network Interface Card. Often used to refer generally to network interfaces on a host, both physical and virtual.
 
    NRBF
-      .NET Remoting Binary Format, the serialization format of the .NET ``BinaryFormatter``. Used inside Woodward ToolKit ``.wset`` and ``.wtool`` files. Refer to `MS-NRBF <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nrbf/>`__.
+      .NET Remoting Binary Format. Serialization format of the .NET ``BinaryFormatter``, used inside Woodward :term:`ToolKit` ``.wset`` and ``.wtool`` files. Refer to `MS-NRBF <https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-nrbf/>`__.
 
    NTP
       Network Time Protocol
@@ -287,11 +287,11 @@ Glossary
    SER
       Sequential Event Recorder
 
-   SID
-      Service Interface Definition, the description of all parameters of a Woodward control serviced with ToolKit (a ``.sid`` file). Refer to :doc:`woodward`.
-
    ServLink
-      Woodward's proprietary service protocol, used over serial and TCP (port 666) by ToolKit, Control Assistant, and PEAT.
+      Woodward proprietary service protocol, used over serial and :term:`TCP` (port 666) by :term:`ToolKit`, Control Assistant, and PEAT.
+
+   SID
+      Service Interface Definition. Description of all parameters of a Woodward control serviced with :term:`ToolKit` (a ``.sid`` file). Refer to :doc:`woodward`.
 
    SIS
       Safety Instrumented System
@@ -326,11 +326,11 @@ Glossary
    TC6
       TC6 XML. :term:`XML`-based standard for storing graphical representations of process logic in a portable and implementation-independent manner
 
-   ToolKit
-      Woodward's PC service tool for the easYgen genset controllers and other Woodward controls. Refer to :doc:`woodward`.
-
    TCP
       Transmission Control Protocol
+
+   ToolKit
+      Woodward PC service tool for configuring easYgen genset controllers and other Woodward controls. Refer to :doc:`woodward`.
 
    TRL
       Technology Readiness Level

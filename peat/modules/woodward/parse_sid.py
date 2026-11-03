@@ -10,8 +10,6 @@ language (as part of the ToolKit "configuration files" package, which also
 contains the ``.wtool`` tool file). ToolKit needs the SID to connect to a
 control and to create or edit ``.wset`` settings files.
 
-File format
------------
 A SID is an XML document (``<ServiceInterfaceDefinition>``, schema
 ``SidNN.xsd``). Woodward distributes it in two forms:
 
@@ -56,7 +54,7 @@ The XML layout (``Sid18.xsd`` to ``Sid21.xsd`` have been seen)::
 .. note::
    A SID holds the *definition* (and defaults) of the parameters, not the
    values configured on a device. The configured values are in ``.wset``
-   settings files, see :mod:`~peat.modules.woodward.parse_wset`.
+   settings files (refer to :mod:`~peat.modules.woodward.parse_wset`).
 """
 
 import re
@@ -247,7 +245,9 @@ def read_sid_xml(data: bytes) -> tuple[bytes, dict[str, Any]]:
 
 
 def _attr(element: ET.Element | None, name: str, default: Any = "") -> Any:
-    """Case-insensitive attribute lookup."""
+    """
+    Case-insensitive attribute lookup.
+    """
     if element is None:
         return default
     for key, value in element.attrib.items():
@@ -297,7 +297,9 @@ def _typed(text: str | None, type_name: str) -> Any:
 
 
 def _limit(element: ET.Element | None, type_name: str) -> Any:
-    """Value of a ``<Minimum>``/``<Maximum>`` element."""
+    """
+    Value of a ``<Minimum>``/``<Maximum>`` element.
+    """
     if element is None:
         return None
     constant = element.find("Constant")
@@ -361,7 +363,9 @@ def _security(element: ET.Element) -> dict[str, int | None]:
 def _type_fields(
     type_element: ET.Element | None, enumerations: dict[str, dict[str, Any]]
 ) -> dict[str, Any]:
-    """Describe the data type element (``<Integer>``, ``<Float>``, ...) of an item."""
+    """
+    Describe the data type element (``<Integer>``, ``<Float>``, ...) of an item.
+    """
     if type_element is None:
         return {"type": "unknown"}
     type_name = _TYPE_TAGS.get(type_element.tag, type_element.tag.lower())
@@ -450,10 +454,11 @@ def _logics_manager_initial(
     text: str, enumerations: dict[str, dict[str, Any]], enum_names: list[str]
 ) -> dict[str, Any]:
     """
-    Interpret a LogicManager ``<InitialValue>`` such as
-    ``0 0 False And True And True 201 201 201`` (delay on, delay off,
-    operator 1, binary operator 1, operator 2, binary operator 2,
-    operator 3, input 1, input 2, input 3).
+    Interpret a LogicManager ``<InitialValue>``.
+
+    For example, ``0 0 False And True And True 201 201 201`` is the delay on,
+    delay off, operator 1, binary operator 1, operator 2, binary operator 2,
+    operator 3, input 1, input 2, and input 3.
     """
     parts = text.split()
     if len(parts) != 10:
@@ -516,7 +521,9 @@ def logic_manager_record(
 
 
 def structure_item_record(element: ET.Element, path: str) -> dict[str, Any]:
-    """Build a record for a ``<StructureItem>`` element (an instance of a ``<Structure>``)."""
+    """
+    Build a record for a ``<StructureItem>`` element (an instance of a ``<Structure>``).
+    """
     name = _attr(element, "Name")
     number, label = split_item_name(name)
     record: dict[str, Any] = {
@@ -731,7 +738,9 @@ def parse_sid(
 
 
 def summarize_sid(parsed: dict[str, Any]) -> dict[str, Any]:
-    """Compact summary of :func:`parse_sid` output, suitable for ``DeviceData.extra``."""
+    """
+    Compact summary of :func:`parse_sid` output, suitable for ``DeviceData.extra``.
+    """
     keys = (
         "header",
         "compressed",

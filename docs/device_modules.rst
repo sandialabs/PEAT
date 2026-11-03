@@ -284,15 +284,6 @@ Refer to :doc:`woodward` for the supported file types and devices.
    :members:
    :no-undoc-members:
 
-Windows
-=======
-
-WindowsCE
----------
-.. automodule:: peat.modules.windows.wince
-   :members:
-   :no-undoc-members:
-
 Internal APIs
 -------------
 
@@ -340,3 +331,12 @@ easYgen LogicsManager logic conversion
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 .. automodule:: peat.modules.woodward.easygen_logic
    :members:
+
+Windows
+=======
+
+WindowsCE
+---------
+.. automodule:: peat.modules.windows.wince
+   :members:
+   :no-undoc-members:
