@@ -36,7 +36,7 @@ SEL,"3530, 3530-4, 3350 RTACs","Scan, Pull config, Parse project file","HTTP, Po
 3530-4 Firmware R144.V1 (D2019-01-11),
 3350 Firmware R152.V0 (D2023-11-07)","PEAT module: :class:`~peat.modules.sel.sel_rtac.SELRTAC`. Device OS: Linux (with custom kernel modules and whitelisting).",TRL 6
 SEL,"3620 Security Gateway","Scan, Pull config","HTTPS","SEL-3620 R212 V0 Z017006 (D2022-10-03)","PEAT module: :class:`~peat.modules.sel.sel_3620.SEL3620`","TRL 3"
-Sandia,SCEPTRE Virtual Field Device,"Scan, Pull config, Pull firmware, Push firmware, Push config, Parse config",FTP,,PEAT module: :class:`~peat.modules.sandia.sceptre_fcd.SCEPTRE`. Device OS: Ubuntu 14.04 LTS.,TRL 6
+Sandia,SCEPTRE Virtual Field Device,"Scan, Pull config, Pull firmware, Push firmware, Parse config",FTP,,PEAT module: :class:`~peat.modules.sandia.sceptre_fcd.SCEPTRE`. Device OS: Ubuntu 14.04 LTS.,TRL 6
 Siemens,Siprotec 4 relay,"Scan, Pull network config","HTTP, SNMP",,PEAT module: :class:`~peat.modules.siemens.siprotec.Siprotec`. Device OS: Unknown (TBD).,TRL 4
 Siemens,SIMATIC TP700 Comfort HMI,Parse,,"WindowsCE 6.0","Parsing of output from the ``wince_pillage.exe`` tool. The ``wince_pillage`` tool collects data from Windows CE devices and outputs a JSON file. The WindowsCE PEAT module simply parses the output of that tool. PEAT module: :class:`~peat.modules.windows.wince.WindowsCE`. Device OS: Windows CE 6.0.",TRL 4
 Schneider Electric,Modicon M340 PLC (BMXP 3020 Ethernet module),"Scan, Pull config, Pull logic, Parse config, Parse logic","FTP, SNMP, Modbus/TCP (:term:`UMAS`)","CPU v02.90 IR2,

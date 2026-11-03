@@ -49,10 +49,20 @@ def test_push_firmware_rejected(dev, mocker):
     upload.assert_not_called()
 
 
-def test_push_firmware_unreadable(dev, mocker, tmp_path):
+@pytest.mark.parametrize("source", ["directory", "missing"])
+def test_push_firmware_unreadable(dev, mocker, tmp_path, source):
     upload = mocker.patch.object(SCEPTRE, "_upload_ftp")
-    assert SCEPTRE._push(dev, tmp_path, "firmware") is False
+    path = tmp_path if source == "directory" else tmp_path / "missing.firmware"
+    assert SCEPTRE._push(dev, path, "firmware") is False
     upload.assert_not_called()
+
+
+def test_push_firmware_without_original(dev, mocker):
+    # The original binary can't be downloaded, so the upload isn't checked
+    mocker.patch.object(SCEPTRE, "_download_ftp", return_value=(None, None, ""))
+    upload = mocker.patch.object(SCEPTRE, "_upload_ftp", return_value=True)
+    assert SCEPTRE.push(dev, b"unchecked", "firmware") is True
+    upload.assert_called_once_with(dev, FIRMWARE_UPLOAD_NAME, b"unchecked")
 
 
 @pytest.mark.parametrize(
@@ -86,3 +96,47 @@ def test_push_firmware_upload_failed(dev, mocker):
 
 def test_upload_ftp_bad_type(dev):
     assert SCEPTRE._upload_ftp(dev, "x", 123) is False
+
+
+@pytest.fixture
+def ftp(mocker):
+    ftp_cls = mocker.patch("peat.modules.sandia.sceptre_fcd.FTP")
+    conn = ftp_cls.return_value.__enter__.return_value
+    conn.login.return_value = True
+    return conn
+
+
+@pytest.mark.parametrize(
+    ("content", "sent"),
+    [(b"\x00\r\n\xff", b"\x00\r\n\xff"), ("\u00b5s\n", "\u00b5s\n".encode())],
+)
+def test_upload_ftp(dev, ftp, content, sent):
+    ftp.file_size.return_value = len(sent)
+    assert SCEPTRE._upload_ftp(dev, "x", content) is True
+    ftp.upload_binary.assert_called_once_with("x", sent)
+    ftp.upload_text.assert_not_called()
+    assert "x" in dev.related.files
+
+
+@pytest.mark.parametrize(("remote_size", "result"), [(3, False), (None, True)])
+def test_upload_ftp_size_check(dev, ftp, remote_size, result):
+    # A SIZE mismatch fails the upload, a server without SIZE can't be checked
+    ftp.file_size.return_value = remote_size
+    assert SCEPTRE._upload_ftp(dev, "x", b"\x00" * 4) is result
+
+
+def test_upload_ftp_size_non_numeric(dev, ftp):
+    ftp.file_size.side_effect = ValueError
+    assert SCEPTRE._upload_ftp(dev, "x", b"data") is True
+
+
+def test_upload_ftp_login_failed(dev, ftp):
+    ftp.login.return_value = False
+    assert SCEPTRE._upload_ftp(dev, "x", b"data") is False
+    ftp.upload_binary.assert_not_called()
+
+
+def test_upload_ftp_error(dev, ftp):
+    ftp.upload_binary.side_effect = OSError("connection reset")
+    assert SCEPTRE._upload_ftp(dev, "x", b"data") is False
+    assert "x" not in dev.related.files
