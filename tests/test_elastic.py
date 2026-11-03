@@ -43,7 +43,7 @@ def test_str():
 
 
 def test_repr():
-    assert isinstance(eval(repr(Elastic())), Elastic)
+    assert isinstance(eval(repr(Elastic())), Elastic)  # noqa: S307 - testing repr round-trip
 
 
 @pytest.mark.gitlab_ci_only

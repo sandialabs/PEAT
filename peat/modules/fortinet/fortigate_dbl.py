@@ -50,7 +50,7 @@ def extract_ips(lines: list[str]) -> set[str]:
     for line in lines:
         # extract IPs from anywhere in the line
         for ip in re.findall(IPV4_RE, line):
-            if utils.is_ip(ip) and ip.count("255") <= 1 and ip not in ["255.0.0.0", "0.0.0.0"]:
+            if utils.is_ip(ip) and ip.count("255") <= 1 and ip not in ["255.0.0.0", "0.0.0.0"]:  # noqa: S104 - comparison, not a bind
                 ip_addrs.add(ip)
 
     return ip_addrs

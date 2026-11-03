@@ -398,7 +398,7 @@ class FileSignature(BaseModel):
         index_count = 0
         match_need_count = len(tags)
         try:
-            for _, elem in ET.iterparse(data, events=("start",)):
+            for _, elem in ET.iterparse(data, events=("start",)):  # noqa: S314 - expat ignores external entities
                 # well formed; iterparse should only return one tag per iteration, so one match
                 if elem.tag == tags[index_count]:
                     index_count += 1

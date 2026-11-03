@@ -414,7 +414,7 @@ class ClxHTTP(HTTP):
         for udp in info.get("udp_table", []):
             dev.related.ip.add(udp.get("Local Address"))
 
-            if udp.get("Local Address") == "0.0.0.0" and udp.get("Local Port"):
+            if udp.get("Local Address") == "0.0.0.0" and udp.get("Local Port"):  # noqa: S104 - comparison, not a bind
                 cls._make_svc(dev, udp, "udp")
             elif udp.get("Local Port"):
                 try:
@@ -427,7 +427,7 @@ class ClxHTTP(HTTP):
             dev.related.ip.add(conn.get("Local Address"))
             dev.related.ip.add(conn.get("Remote Address"))
 
-            if conn.get("State") == "LISTEN" and conn.get("Local Address") == "0.0.0.0":
+            if conn.get("State") == "LISTEN" and conn.get("Local Address") == "0.0.0.0":  # noqa: S104 - comparison, not a bind
                 cls._make_svc(dev, conn, "tcp")
             elif conn.get("Local Port"):
                 try:

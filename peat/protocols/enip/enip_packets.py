@@ -227,7 +227,7 @@ class ENIPListIdentityResponse(Packet):
         LEShortField("encapsulationVersion", 1),
         LEShortField("sinFamily", 2),
         ShortField("sinPort", 44818),
-        IPField("sinAddr", "0.0.0.0"),
+        IPField("sinAddr", "0.0.0.0"),  # noqa: S104 - field default, not a bind
         LELongField("sinZero", 0),
         # "VendCode" in EDS
         LEShortEnumField("vendor", 1, VENDOR_NAMES),

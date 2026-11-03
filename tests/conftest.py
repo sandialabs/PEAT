@@ -262,7 +262,7 @@ def run_peat() -> Callable[..., tuple[str, str]]:
         else:  # Otherwise, it should be a list
             command = PEAT_CMD + args
 
-        process = Popen(command, shell=shell, stdout=PIPE, stderr=PIPE)
+        process = Popen(command, shell=shell, stdout=PIPE, stderr=PIPE)  # noqa: S603 - trusted test commands
         stdout, stderr = process.communicate()
 
         if not process.returncode == 0:
@@ -297,7 +297,7 @@ def exec_peat() -> Callable[..., CompletedProcess]:
         if shell:  # In shell mode the command executed should be a string
             command = " ".join(command)
 
-        return run(command, shell=shell, capture_output=True, check=False)
+        return run(command, shell=shell, capture_output=True, check=False)  # noqa: S603 - trusted test commands
 
     return _exec_peat_wrapper
 
@@ -305,7 +305,7 @@ def exec_peat() -> Callable[..., CompletedProcess]:
 @pytest.fixture
 def exec_command() -> Callable[[str, bool], CompletedProcess]:
     def _exec_command_wrapper(command: str, shell: bool = True) -> CompletedProcess:
-        return run(command, shell=shell, capture_output=True, check=False)
+        return run(command, shell=shell, capture_output=True, check=False)  # noqa: S603 - trusted test commands
 
     return _exec_command_wrapper
 
