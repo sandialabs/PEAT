@@ -25,6 +25,10 @@ module maps those records onto the device data model:
   ``dev.name``, ``dev.geo.timezone``, and ``dev.extra``.
 - LogicsManager equations are converted to logic, see
   :mod:`~peat.modules.woodward.easygen_logic`.
+
+Settings files of 2301E applications (parsed by the
+:class:`~peat.modules.woodward.wdw_2301e.WDW2301E` module) only get registers,
+the rest of the mapping relies on the parameter names of the easYgen.
 """
 
 import re
@@ -33,6 +37,8 @@ from typing import Any, Final
 
 from peat import IO, DeviceData, Interface, Register, Service, Tag, User, consts, log, utils
 from peat.data.data_utils import merge_models
+
+from .toolkit import is_2301e_application
 
 _IO_GROUP_RE: Final[re.Pattern[str]] = re.compile(
     r"(?:^|\.)(?P<kind>Discrete_In|Discrete_Out|Analog_In|Analog_Out|"
@@ -811,6 +817,11 @@ def populate_data_model_from_wset(dev: DeviceData, parsed: dict[str, Any]) -> di
     """
     Populate the data model from a parsed settings file.
 
+    Registers are added for the communication handles of the parameters of
+    any application. The rest of the mapping (tags, I/O, interfaces,
+    services, users, and identity) relies on the parameter names of the
+    easYgen and isn't done for the settings of 2301E applications.
+
     Args:
         dev: The device
         parsed: Output of :func:`~peat.modules.woodward.parse_wset.parse_wset`
@@ -820,16 +831,17 @@ def populate_data_model_from_wset(dev: DeviceData, parsed: dict[str, Any]) -> di
         ``interfaces``, ``services``, ``users``
     """
     records = parsed.get("parameters", [])
-    counts = {
-        "registers": add_registers(dev, records),
-        "tags": add_tags(
+    counts = {"registers": add_registers(dev, records)}
+    if is_2301e_application(parsed.get("application", {})):
+        counts.update({"tags": 0, "io": 0, "interfaces": 0, "services": 0, "users": 0})
+    else:
+        counts["tags"] = add_tags(
             dev, parsed.get("logics_manager_inputs", {}), parsed.get("analog_manager_inputs", {})
-        ),
-        "io": add_io(dev, records),
-    }
-    counts["interfaces"], counts["services"] = add_interfaces_and_services(dev, records)
-    counts["users"] = add_users(dev, records)
-    add_identity(dev, records)
+        )
+        counts["io"] = add_io(dev, records)
+        counts["interfaces"], counts["services"] = add_interfaces_and_services(dev, records)
+        counts["users"] = add_users(dev, records)
+        add_identity(dev, records)
     for protocol in ("servlink", "canopen"):
         if any(r.protocol == protocol for r in dev.registers):
             dev.related.protocols.add(protocol)

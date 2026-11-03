@@ -63,6 +63,7 @@ from pathlib import Path
 from typing import Any, BinaryIO, Final
 
 from peat import DeviceData, consts, log
+from peat.data.models import File, process_file
 
 from . import easygen_enums
 from .csharp_reader import serialization
@@ -86,10 +87,21 @@ NRBF_HEADER_LEN: Final[int] = 17
 #: How far into a file to search for the first NRBF stream
 WSET_MAX_HEADER_SEARCH: Final[int] = 256
 
+#: How much of the start of a settings file is searched for the application
+#: identifier by :func:`wset_head_application_info`. The settings header
+#: stream that holds it is less than 1 KB in the files seen so far.
+WSET_SNIFF_LEN: Final[int] = 65536
+
 # NRBF SerializationHeaderRecord: RecordType 0, RootId (any), HeaderId -1,
 # MajorVersion 1, MinorVersion 0
 _NRBF_SIGNATURE_RE: Final[re.Pattern[bytes]] = re.compile(
     rb"\x00.{4}\xff\xff\xff\xff\x01\x00\x00\x00\x00\x00\x00\x00", re.DOTALL
+)
+# NRBF BinaryObjectString record (RecordType 6, ObjectId) with a string of
+# less than 128 bytes (a single byte length prefix). Matched with a lookahead,
+# so a false match can't hide a real record that starts within it.
+_NRBF_SHORT_STRING_RE: Final[re.Pattern[bytes]] = re.compile(
+    rb"(?=\x06.{4}([\x01-\x7f]))", re.DOTALL
 )
 
 #: LogicsManager unary (per-input) operators, indexed by the enum value in the file.
@@ -204,6 +216,57 @@ def wset_signature_check(stream: BinaryIO) -> bool:
     :class:`~peat.file_signature.FileSignature` custom check for ``.wset`` files.
     """
     return is_wset_data(stream.read(WSET_HEADER_LEN + NRBF_HEADER_LEN))
+
+
+def _short_nrbf_strings(data: bytes) -> list[str]:
+    """Values of the short ``BinaryObjectString`` records in NRBF data, in order."""
+    strings = []
+    for match in _NRBF_SHORT_STRING_RE.finditer(data):
+        start = match.end(1)
+        raw = data[start : start + match.group(1)[0]]
+        if len(raw) != match.group(1)[0]:
+            continue
+        try:
+            strings.append(raw.decode("utf-8"))
+        except UnicodeDecodeError:
+            continue
+    return strings
+
+
+def wset_head_application_info(data: bytes) -> dict[str, Any] | None:
+    """
+    Identify the application of a ToolKit settings (``.wset``) file from the
+    start of the file, without decoding it.
+
+    The application identifier and SID specification are strings in the
+    settings header, the first (and small) .NET serialization stream of the
+    file, so the data can be the first :data:`WSET_SNIFF_LEN` bytes of the
+    file. The strings of the first stream are matched against the known
+    application identifiers with
+    :func:`~peat.modules.woodward.toolkit.identify_application`. This is cheap
+    and logs nothing, so it's suitable for file signature checks, which run
+    for every candidate file when searching for files to parse.
+
+    Args:
+        data: The start of the file
+
+    Returns:
+        The :func:`~peat.modules.woodward.toolkit.identify_application`
+        :class:`dict` of the first string that is an application identifier
+        (all values are empty if none is found), or :obj:`None` if the data
+        isn't a settings file
+    """
+    if not is_wset_data(data):
+        return None
+    start = WSET_HEADER_LEN + NRBF_HEADER_LEN
+    # The settings header stream ends where the next stream (the settings) starts
+    next_stream = _NRBF_SIGNATURE_RE.search(data, start)
+    head = data[start : next_stream.start() if next_stream else len(data)]
+    for string in _short_nrbf_strings(head):
+        app = identify_application(string)
+        if app["part_number"] or app["model"]:
+            return app
+    return identify_application("")
 
 
 def read_nrbf_streams(data: bytes, offset: int = 0) -> tuple[list[Any], dict[str, Any]]:
@@ -1258,11 +1321,42 @@ def populate_device_from_wset(dev: DeviceData, parsed: dict[str, Any]) -> None:
         }
 
 
+def save_wset_logic(dev: DeviceData, file: Path | None) -> None:
+    """
+    Save the LogicsManager logic added to a device by
+    :func:`populate_device_from_wset` (if any) to the device's output directory.
+
+    The Structured Text is saved as ``logic.st``, the PLCopen TC6 XML as
+    ``logic-tc6.xml``, and the settings file is recorded as the source file of
+    the logic. If the settings file had no LogicsManager equations (e.g. files
+    of controls without a LogicsManager), it's recorded in the device's
+    ``files`` instead (with its hashes), so the binary settings file isn't
+    mistaken for a logic source file.
+
+    Args:
+        dev: The device populated by :func:`populate_device_from_wset`
+        file: The settings file that was parsed
+    """
+    if not dev.extra.get("wset", {}).get("logic"):
+        if file is not None:
+            source = process_file(File(local_path=file))
+            source.annotate(dev)
+            dev.store("files", source, lookup="local_path")
+        return
+    if file is not None:
+        dev.logic.file.local_path = file
+    if dev.logic.formats.get("structured_text"):
+        dev.write_file(dev.logic.formats["structured_text"], "logic.st")
+    if dev.logic.formats.get("tc6"):
+        dev.write_file(dev.logic.formats["tc6"], "logic-tc6.xml")
+
+
 __all__ = [
     "INTERNAL_GROUP",
     "LOGICS_MANAGER_BINARY_OPERATORS",
     "LOGICS_MANAGER_UNARY_OPERATORS",
     "WSET_HEADER_LEN",
+    "WSET_SNIFF_LEN",
     "application_info",
     "easygen_parameter_names",
     "extract_generic_parameters",
@@ -1274,8 +1368,10 @@ __all__ = [
     "parse_wset",
     "populate_device_from_wset",
     "read_nrbf_streams",
+    "save_wset_logic",
     "split_parameter_name",
     "summarize_wset",
     "to_plain",
+    "wset_head_application_info",
     "wset_signature_check",
 ]

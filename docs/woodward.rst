@@ -18,6 +18,9 @@ PEAT supports several Woodward controls: the easYgen genset controllers (:class:
    `easYgen-3400/3500 manual 37528 <https://wss.woodward.com/manuals/Legacy/easYgen-3x00/manual_easygen3400-3500_EN37528J.pdf>`__ and `easYgen-2000 configuration manual 37427 <https://www.dsf-technologies.com/wp-content/uploads/2017/04/WOODWARD_EASYGEN-2000_CONFIGURATION-MANUAL_EN_2017.pdf>`__
       Parameter lists and ToolKit file naming for the first generation easYgen-3000 and the easYgen-2000 series
 
+   `Woodward knowledge base: factory settings files for 2301E <https://support.woodward.com/kb/articles/factory-settings-files-for-2301e>`__
+      Factory default ToolKit settings files of the 2301E (application ``5418-6350``, revisions NEW to G)
+
    `Control Assistant manual 26775 <https://www.woodward.com/products/publication-asset/26775>`__
       Control Assistant and the tunable (``.tc``) files it saves
 
@@ -28,7 +31,7 @@ PEAT supports several Woodward controls: the easYgen genset controllers (:class:
       PEAT :class:`~peat.device.DeviceModule` for the easYgen genset controllers (scan, pull, and parse)
 
    :class:`~peat.modules.woodward.wdw_2301e.WDW2301E`
-      PEAT :class:`~peat.device.DeviceModule` for the 2301E speed controller (scan, pull, and parse)
+      PEAT :class:`~peat.device.DeviceModule` for the 2301E speed controller (scan, pull, and parse of ToolKit settings files and Control Assistant tunable files)
 
 Terminology
 -----------
@@ -54,7 +57,7 @@ File types
 
 Supported devices
 -----------------
-The ToolKit file formats are shared by every ToolKit-based Woodward control, so :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` parses files for all of them. The device model is identified from the ToolKit application identifier in the file (see :data:`~peat.modules.woodward.toolkit.TOOLKIT_APPLICATIONS` and :func:`~peat.modules.woodward.toolkit.identify_application`), and is reported as ``unknown`` if the identifier isn't recognized.
+The ToolKit file formats are shared by every ToolKit-based Woodward control, so :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` parses files for all of them, except for the settings files of the 2301E, which are parsed by :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` (see `Module selection`_). The device model is identified from the ToolKit application identifier in the file (see :data:`~peat.modules.woodward.toolkit.TOOLKIT_APPLICATIONS` and :func:`~peat.modules.woodward.toolkit.identify_application`), and is reported as ``unknown`` if the identifier isn't recognized.
 
 .. csv-table::
    :header: "Device", "Software", "Notes"
@@ -64,6 +67,7 @@ The ToolKit file formats are shared by every ToolKit-based Woodward control, so 
    "easYgen-3100XT, 3200XT, 3400XT, 3500XT (P1, P2, LT, LITE, and RENTAL variants); LS-6XT, GC-3400XT, DSLC-2XT, MSLC-2XT, RP-3000XT", "ToolKit 6.x/7.x", "XT-style application identifiers (``EG3500XTP2 2.17-0_54728``) are decoded into the model, release, and build. Verified with a published easYgen-3500XT-P2 SID and tool file. No public XT settings file was available for testing, and Woodward documents that XT settings files aren't compatible with earlier ones. The container format is expected to be the same."
    "easYgen-3100, 3200, 3400, 3500 (first generation); RP-3000, DSLC-2, MSLC-2", "ToolKit 3.x-6.x", "Verified with two published easYgen-3500 settings files (application ``5418-6722-NEW``, firmware 1.2102). Only known application part numbers are mapped to a model."
    "easYgen-2200, 2300, 2500; LS-5; DTSC-200; MFR 300", "ToolKit 3.x+", "Same file formats. Not tested, as no public files were found."
+   "2301E digital speed/load control (ToolKit settings files)", "ToolKit", "Settings files of application ``5418-6350`` are parsed by :class:`~peat.modules.woodward.wdw_2301e.WDW2301E`. Verified with the `factory default settings files <https://support.woodward.com/kb/articles/factory-settings-files-for-2301e>`__ Woodward publishes for revisions NEW to G of the application (365 to 376 parameters each, container format version 22). The parameters are mapped to ServLink registers only (see `Data model`_), and the files have no LogicsManager logic."
    "Woodward E3 gas engine controls (Full Authority, Fuel Blending, Lean Burn Trim)", "ToolKit 4.x", "Verified with the settings, SID, and tool files Woodward publishes in its E3 HMI packages. These files use additional parameter types (boolean and lookup table parameters) which are supported."
    "easYgen-1000, easYgen-300, LS-4, MFR 2/11/15", "LeoPC1", "Not supported. These devices don't use ToolKit."
    "easYgen-400, 600, 800, 1400, 1600, 1700, 1800", "ToolKit-SC", "Not supported. ToolKit-SC is a separate product, and its file formats haven't been researched."
@@ -84,17 +88,17 @@ Usage
    peat parse -d easygen "./EG3500XTP2 2.17-0_54728.sid"
    peat parse -d easygen ./8440-2088_M_EG3500XTP2_2.17-0_54728.wtool
 
-   # Parse a Control Assistant tunable file saved from a 2301E
+   # Parse a ToolKit settings file or a Control Assistant tunable file of a 2301E
+   peat parse -d wdw2301e ./5418-6350_Rev_G_default.wset
    peat parse -d wdw2301e ./2301e-tunables.tc
 
-   # Let PEAT pick the module by file name and signature. A .tc file goes to
-   # the easYgen module if it's from an easYgen, and to the 2301E module otherwise.
+   # Let PEAT pick the module by file contents (see "Module selection" below)
    peat parse ./toolkit-files/
 
    # Piped input works too, the file type is detected from its contents
    cat ./genset-1.wset | peat parse -d easygen -
 
-The parsed data is saved as ``parsed-wset.json``, ``parsed-sid.json``, ``parsed-wtool.json``, or ``parsed-tc.json`` in the device's output directory, next to the device data files. A summary of the file is added to the device data under ``extra.wset``, ``extra.sid``, ``extra.wtool``, or ``extra.tc``, the parameter values under ``extra.parameters`` (a :class:`dict` of ``{parameter name: value}``), and the application identity to the device description (brand, model, product) and firmware identifier. Settings files also populate the rest of the data model and the device logic (see below), and the LogicsManager logic is saved as ``logic.st`` (Structured Text) and ``logic-tc6.xml`` (PLCopen TC6 XML).
+The parsed data is saved as ``parsed-wset.json``, ``parsed-sid.json``, ``parsed-wtool.json``, or ``parsed-tc.json`` in the device's output directory, next to the device data files. A summary of the file is added to the device data under ``extra.wset``, ``extra.sid``, ``extra.wtool``, or ``extra.tc``, the parameter values under ``extra.parameters`` (a :class:`dict` of ``{parameter name: value}``), and the application identity to the device description (brand, model, product) and firmware identifier. Settings files also populate the rest of the data model and the device logic (see below), and the LogicsManager logic, if the file has LogicsManager equations, is saved as ``logic.st`` (Structured Text) and ``logic-tc6.xml`` (PLCopen TC6 XML).
 
 Python API:
 
@@ -115,6 +119,16 @@ Python API:
 
    sid = parse_sid(Path("EG3500XTP2 2.17-0_54728.sid"))
    print(sid["security"]["servlink"]["command_security_levels"])
+
+Module selection
+----------------
+When no module is given (``peat parse <directory>``), each file is parsed by exactly one module, chosen by its contents:
+
+- ``.wset`` settings files are parsed by :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` if the application identifier in the settings header (the start of the file, see :func:`~peat.modules.woodward.parse_wset.wset_head_application_info`) is a 2301E application (``5418-6350``), and by :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` otherwise (easYgen, E3, and unknown applications).
+- ``.tc`` tunable files are parsed by :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` if the application identifier is a recognized easYgen application, and by :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` otherwise.
+- ``.sid`` and ``.wtool`` files are parsed by :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT`.
+
+``.wset`` and ``.tc`` files are only selected by their contents, not by their extension, so a damaged file with one of these extensions is skipped in a directory (parse it with ``-d`` to see the error). Giving the wrong module with ``-d`` (e.g. ``-d easygen`` with a 2301E settings file, or ``-d wdw2301e`` with an easYgen settings or tunable file) is rejected with an error that names the right module.
 
 Settings file (``.wset``) output
 --------------------------------
@@ -152,7 +166,7 @@ Beyond the parameter list, the contents of a settings file are mapped onto the P
    "``name``, ``geo.timezone``, ``extra``", "``Device name``, ``Time zone``, ``Device number``, ``Language`` parameters", ""
    "``logic``", "LogicsManager equations", "See the next section."
 
-The counts of the objects stored are in ``extra.wset.data_model`` (``extra.sid.data_model`` for SIDs). Objects that already exist on the device (e.g. when the same file is parsed twice) are merged, not duplicated, and are included in the counts.
+Settings files of 2301E applications only get the registers (from the ServLink handles of the parameters): the rest of the mapping relies on the parameter names of the easYgen. The counts of the objects stored are in ``extra.wset.data_model`` (``extra.sid.data_model`` for SIDs). Objects that already exist on the device (e.g. when the same file is parsed twice) are merged, not duplicated, and are included in the counts.
 
 LogicsManager logic
 -------------------
@@ -194,12 +208,14 @@ Notes and limitations
 - The model of a device is only identified when the application identifier is recognized. XT-style identifiers are always decoded. Older part number identifiers are looked up in :data:`~peat.modules.woodward.toolkit.TOOLKIT_APPLICATIONS`, which only contains the applications that could be verified from public files and manuals. Add entries there for the applications of your devices (the part number is printed on the control's nameplate and in the ``.wtool``/``.sid`` file names Woodward publishes).
 - Woodward doesn't document the ``.wset`` format. PEAT's parser was reverse engineered from published files saved by ToolKit 4.x and 5.x. Unknown object layouts are still decoded and reported using a best-effort ``generic`` parameter extraction, and the full decoded object graph is available with ``parse_wset(..., include_raw=True)``.
 - The meaning of the LogicsManager operator numbers was derived empirically: pass-through (``NoOperator``), ``Not``, ``True``, and ``False`` for the per-input operators and ``And`` and ``Or`` for the binary operators were observed. The remaining binary operators (``Nand``, ``Nor``, ``Xor``, ``Nxor``) follow the order in the easYgen manuals and are unverified.
-- A ``.tc`` file is parsed by the easYgen module only if its application identifier is a recognized easYgen application (:func:`~peat.modules.woodward.toolkit.identify_application` returns the brand ``easYgen``). Every other ``.tc`` file is parsed by the 2301E module. ``-d easygen`` with a ``.tc`` file of another control, and ``-d wdw2301e`` with a ``.tc`` file of an easYgen, are rejected with an error that names the right module.
+- A ``.tc`` file is parsed by the easYgen module only if its application identifier is a recognized easYgen application (:func:`~peat.modules.woodward.toolkit.identify_application` returns the brand ``easYgen``), and a ``.wset`` file is parsed by the 2301E module only if its application identifier is a 2301E application (:func:`~peat.modules.woodward.toolkit.is_2301e_application`). See `Module selection`_.
+- Only settings files of the 2301E are parsed by the 2301E module. 2301E ``.sid`` and ``.wtool`` files (none are public) would be parsed by the easYgen module, which takes the brand and model from the application identifier.
 - In settings files, parameter numbers with 1 or 2 digits aren't split from the parameter name, so such parameters have no ``id``. easYgen-3000XT SIDs define a few of them (e.g. ``60 Data Protocol 1, Mux``), but none were found in the available settings files. The SID parser recognizes them.
 - Pulling settings from a live easYgen (``peat pull``) uses ServLink/TCP and FTP and doesn't produce a ``.wset`` file. Save the settings with ToolKit to parse them with PEAT.
 
 Example files
 -------------
-- ``examples/devices/woodward/easygen-3500/4_MVA_Diesel_20161116.wset.gz``: a real easYgen-3500 settings file (gzip compressed) from the MIT Lincoln Laboratory `EPHCC <https://github.com/PowerSystemsHIL/EPHCC>`__ project (MIT license).
+- ``examples/devices/woodward/easygen-3500/4_MVA_Diesel_20161116.wset.gz`` and ``3_5MVA_NGGenset20161116.wset.gz``: real easYgen-3500 settings files (gzip compressed) of a 4 MVA diesel genset and a 3.5 MVA natural gas genset, from the MIT Lincoln Laboratory `EPHCC <https://github.com/PowerSystemsHIL/EPHCC>`__ project (MIT license).
+- Woodward publishes `factory default settings files for the 2301E <https://support.woodward.com/kb/articles/factory-settings-files-for-2301e>`__ (``5418-6350_Rev_*_default.wset``). They aren't included in PEAT, as they're published without a license.
 - Woodward publishes ToolKit application packages (``.msi`` files containing the ``.wtool`` and ``.sid`` files) for the easYgen-3000XT series on its `easYgen-3000XT document site <https://wss.woodward.com/manuals/PGC/easYgen-3000XT_series/>`__, and ``.wset``, ``.sid``, and ``.wtool`` files for its E3 engine controls in the E3 HMI packages on `woodward.com <https://www.woodward.com/products/support/software-assets/service-tool/5418-4091-hmi_a/>`__.
 - No public ``.tc`` file is known. The unit tests use a hand written example (``tests/modules/woodward/data_files/tunables_synthetic.tc``).

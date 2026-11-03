@@ -3,7 +3,7 @@ Helpers shared by the parsers of Woodward ToolKit file formats.
 
 ToolKit is Woodward's PC service tool for the easYgen genset controllers and
 related products (LS-5/LS-6 breaker controls, DTSC-200, DSLC-2, MSLC-2,
-GC-3000XT, and others). It works with three file types that share a common
+GC-3000XT, the 2301E speed control, and others). It works with three file types that share a common
 10-byte container header::
 
     <type> 3a b5 1f d4 6d 59 c2 <variant> 00
@@ -13,9 +13,9 @@ GC-3000XT, and others). It works with three file types that share a common
 - ``0x16``: Service Interface Definition (``*.sid``), payload is gzip'd XML
 
 Bytes 1 to 7 are constant. Bytes 8 and 9 (a little-endian integer) vary by
-file type and ToolKit version (``0x0014`` for settings files, ``0x0031`` and
-``0x004a`` for tool files, ``0x0001`` for SIDs have been observed) and are
-assumed to be a format version.
+file type and ToolKit version (``0x0014`` and ``0x0016`` for settings files,
+``0x0031`` and ``0x004a`` for tool files, ``0x0001`` for SIDs have been
+observed) and are assumed to be a format version.
 
 This module also identifies the ToolKit *application* (the SID) a file
 belongs to. Application identifiers come in two styles:
@@ -56,6 +56,11 @@ TOOLKIT_APPLICATIONS: Final[dict[str, dict[str, str]]] = {
     # easYgen-2500-5/P1 (unit 8440-1884). Source: manual 37427, which uses
     # "8440-1884-NEW_US_5418-3090-NEW_32.WTOOL" as the file naming example.
     "5418-3090": {"brand": "easYgen", "model": "2500-5-P1", "product": "easYgen-2500-5/P1"},
+    # 2301E digital speed/load control. Source: the factory default settings
+    # files (5418-6350 revisions NEW to G) Woodward publishes for the 2301E,
+    # https://support.woodward.com/kb/articles/factory-settings-files-for-2301e
+    # Files of this application are parsed by the WDW2301E module.
+    "5418-6350": {"brand": "WDW", "model": "2301E", "product": "2301E"},
     # Woodward E3 gas engine controls (ToolKit HMI packages published by Woodward)
     "5418-4091": {"brand": "E3", "model": "Full Authority", "product": "E3 Full Authority"},
     "5418-2955": {"brand": "E3", "model": "Fuel Blending", "product": "E3 Fuel Blending"},
@@ -85,6 +90,17 @@ _XT_IDENTIFIER_RE: Final[re.Pattern[str]] = re.compile(
     r"(?P<prefix>[A-Z]{2,4})(?P<number>\d{1,4})(?P<xt>XT)?(?P<variant>P\d|LT|LITE|RENTAL)?"
     r"(?:[\s_]+(?P<version>\d+\.\d+(?:-\d+)?))?(?:_(?P<build>\d+))?",
 )
+
+
+def is_2301e_application(app: dict[str, Any]) -> bool:
+    """
+    If an application, as identified by :func:`identify_application`, is a
+    recognized 2301E application. ToolKit files of 2301E applications are
+    parsed by the :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` module,
+    all other ToolKit files by the
+    :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+    """
+    return app.get("brand") == "WDW" and app.get("model") == "2301E"
 
 
 def container_type(data: bytes) -> str | None:
@@ -189,5 +205,6 @@ __all__ = [
     "container_type",
     "describe_container_header",
     "identify_application",
+    "is_2301e_application",
     "is_toolkit_container",
 ]

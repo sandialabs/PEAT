@@ -1,9 +1,6 @@
 """Tests for the LogicsManager to Structured Text/TC6 conversion (easygen_logic.py)."""
 
-import gzip
 import re
-from pathlib import Path
-from typing import Final
 
 import pytest
 
@@ -25,16 +22,8 @@ from peat.modules.woodward.easygen_logic import (
     st_identifier,
     time_literal,
 )
-from peat.modules.woodward.parse_wset import parse_wset
 
-REAL_WSET_GZ: Final[Path] = (
-    Path(__file__).resolve().parents[3]
-    / "examples"
-    / "devices"
-    / "woodward"
-    / "easygen-3500"
-    / "4_MVA_Diesel_20161116.wset.gz"
-)
+from .real_files import real_wset_parsed
 
 
 def equation(
@@ -434,8 +423,8 @@ def test_add_logics_manager_logic_st_failure(monkeypatch):
 
 
 @pytest.fixture(scope="module")
-def real_parsed() -> dict:
-    return parse_wset(gzip.decompress(REAL_WSET_GZ.read_bytes()))
+def real_parsed(real_wset_name) -> dict:
+    return real_wset_parsed(real_wset_name)
 
 
 def test_real_file_program(real_parsed):

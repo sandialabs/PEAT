@@ -1,9 +1,5 @@
 """Tests for the easYgen data model mapping (peat/modules/woodward/easygen_data.py)."""
 
-import gzip
-from pathlib import Path
-from typing import Final
-
 import pytest
 
 from peat import DeviceData
@@ -23,16 +19,8 @@ from peat.modules.woodward.easygen_data import (
 from peat.modules.woodward.parse_sid import parse_sid
 from peat.modules.woodward.parse_wset import parse_wset
 
-from .nrbf_builder import build_sid_file
-
-REAL_WSET_GZ: Final[Path] = (
-    Path(__file__).resolve().parents[3]
-    / "examples"
-    / "devices"
-    / "woodward"
-    / "easygen-3500"
-    / "4_MVA_Diesel_20161116.wset.gz"
-)
+from .nrbf_builder import build_sid_file, build_woodward_wset
+from .real_files import real_wset_parsed
 
 
 def record(**overrides) -> dict:
@@ -632,10 +620,9 @@ def test_populate_from_synthetic_sid():
 
 
 @pytest.fixture(scope="module")
-def real_device() -> tuple[DeviceData, dict]:
-    parsed = parse_wset(gzip.decompress(REAL_WSET_GZ.read_bytes()))
+def real_device(real_wset_name) -> tuple[DeviceData, dict]:
     dev = DeviceData()
-    counts = populate_data_model_from_wset(dev, parsed)
+    counts = populate_data_model_from_wset(dev, real_wset_parsed(real_wset_name))
     return dev, counts
 
 
@@ -925,3 +912,31 @@ def test_minimal_records():
     dev = DeviceData()
     assert populate_data_model_from_sid(dev, {}) == {"registers": 0, "tags": 0}
     assert not dev.related.protocols
+
+
+def test_2301e_settings_only_get_registers():
+    # The easYgen mapping relies on easYgen parameter names, so the settings of a
+    # 2301E application only get registers, even with easYgen-like parameters
+    parsed = parse_wset(build_woodward_wset(app_id="5418-6350_G 2017-04-24 10.52.31"))
+    assert parsed["application"]["model"] == "2301E"
+    dev = DeviceData()
+    counts = populate_data_model_from_wset(dev, parsed)
+    assert counts == {
+        "registers": 4,
+        "tags": 0,
+        "io": 0,
+        "interfaces": 0,
+        "services": 0,
+        "users": 0,
+    }
+    assert {r.protocol for r in dev.registers} == {"servlink"}
+    assert dev.related.protocols == {"servlink"}
+    assert dev.name == ""
+    assert "device_number" not in dev.extra
+    assert not dev.tag
+    assert not dev.io
+
+    # The same parameters of an easYgen application are mapped
+    easygen = DeviceData()
+    counts = populate_data_model_from_wset(easygen, parse_wset(build_woodward_wset()))
+    assert easygen.name == "Genset 7"

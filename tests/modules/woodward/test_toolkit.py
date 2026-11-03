@@ -8,6 +8,7 @@ from peat.modules.woodward.toolkit import (
     container_type,
     describe_container_header,
     identify_application,
+    is_2301e_application,
     is_toolkit_container,
 )
 
@@ -90,6 +91,27 @@ def test_describe_container_header():
             id="E3 part number with revision letter and timestamp",
         ),
         pytest.param(
+            "5418-6350_G 2017-04-24 10.52.31",
+            {
+                "part_number": "5418-6350",
+                "revision": "G",
+                "brand": "WDW",
+                "model": "2301E",
+                "product": "2301E",
+            },
+            id="2301E application identifier",
+        ),
+        pytest.param(
+            "5418-6350_New 2012-10-08 09.18.02",
+            {"part_number": "5418-6350", "revision": "New", "model": "2301E"},
+            id="2301E revision New",
+        ),
+        pytest.param(
+            "#5418-6350_D 2014-11-17 18.21.21 UTC",
+            {"part_number": "5418-6350", "revision": "D", "model": "2301E"},
+            id="2301E SID specification",
+        ),
+        pytest.param(
             "5418-9999-NEW",
             {
                 "part_number": "5418-9999",
@@ -147,3 +169,19 @@ def test_identify_application(identifier, expected):
         "model",
         "product",
     }
+
+
+@pytest.mark.parametrize(
+    ("identifier", "expected"),
+    [
+        ("5418-6350_G 2017-04-24 10.52.31", True),
+        ("5418-6350-NEW", True),
+        ("5418-6722-NEW", False),
+        ("EG3500XTP2 2.17-0_54728", False),
+        ("5418-4091A", False),
+        ("5418-9999-NEW", False),
+        ("", False),
+    ],
+)
+def test_is_2301e_application(identifier, expected):
+    assert is_2301e_application(identify_application(identifier)) is expected

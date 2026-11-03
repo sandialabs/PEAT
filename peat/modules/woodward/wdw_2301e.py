@@ -5,6 +5,16 @@ Services
 - Servlink (Woodward proprietary protocol) on RS232 and RS422
 - Modbus (optional) on RS232 and RS422
 
+Parsing supports:
+
+- ToolKit ``*.wset`` settings files of 2301E applications (part number
+  5418-6350), see :mod:`~peat.modules.woodward.parse_wset`. Settings files of
+  other applications are parsed by the
+  :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+- Control Assistant ``*.tc`` tunable files, see
+  :mod:`~peat.modules.woodward.wdw_tc`. This is the generic Control Assistant
+  parser: tunable files of any control except the easYgen are parsed.
+
 Authors
 
 - Peter Shurtz
@@ -18,7 +28,15 @@ from peat import DeviceData, DeviceModule, Interface, SerialMethod, datastore, l
 from peat.file_signature import FileSignature
 from peat.protocols import open_serial_port, pretty_hex_bytes, serial_txn
 
-from .easygen_3500xt import is_easygen_application
+from .easygen_3500xt import identify_woodward_file, is_easygen_application
+from .parse_wset import (
+    WSET_SNIFF_LEN,
+    parse_wset,
+    populate_device_from_wset,
+    save_wset_logic,
+    wset_head_application_info,
+)
+from .toolkit import is_2301e_application
 from .wdw_2301e_svl import *
 
 # TODO: remove '*' imports
@@ -58,6 +76,16 @@ def wdw_tc_signature_check(stream: BinaryIO) -> bool:
     return app is not None and not is_easygen_application(app)
 
 
+def wdw_wset_signature_check(stream: BinaryIO) -> bool:
+    """
+    :class:`~peat.file_signature.FileSignature` custom check for ToolKit
+    settings (``.wset``) files of recognized 2301E applications. Other
+    settings files are parsed by the easYgen module.
+    """
+    app = wset_head_application_info(stream.read(WSET_SNIFF_LEN))
+    return app is not None and is_2301e_application(app)
+
+
 class WDW2301E(DeviceModule):
     """Woodward 2301e Speed Controller."""
 
@@ -66,10 +94,12 @@ class WDW2301E(DeviceModule):
     vendor_name = "Woodward, Inc"
     brand = "WDW"
     model = "2301E"
-    # No "*.tc" filename pattern: tunable files of easYgen applications are
-    # left to the easYgen module (see wdw_tc_signature_check)
+    # No "*.tc" or "*.wset" filename patterns: tunable files of easYgen applications
+    # and settings files of applications other than the 2301E are left to the
+    # easYgen module (see wdw_tc_signature_check and wdw_wset_signature_check)
     file_signatures = [
         FileSignature(default_filename="tunables.tc", custom_check=wdw_tc_signature_check),
+        FileSignature(default_filename="settings.wset", custom_check=wdw_wset_signature_check),
     ]
     # TODO: combine some common functions of 3500XT and 2301E?
     woodward_fallback_baudrates = [9600]
@@ -154,18 +184,35 @@ class WDW2301E(DeviceModule):
     @classmethod
     def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
         """
-        Parse a Control Assistant tunable (``.tc``) file saved from a 2301E.
+        Parse a ToolKit settings (``.wset``) file of a 2301E application or a
+        Control Assistant tunable (``.tc``) file saved from a 2301E.
 
-        This is the generic Control Assistant parser: tunable files of other
-        controls are parsed as well, and the brand and model are taken from
+        Settings files of other applications are rejected, they're parsed by
+        the :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT`
+        module. The parsed settings are saved as ``parsed-wset.json``, refer
+        to :mod:`~peat.modules.woodward.parse_wset` for the file format.
+
+        For tunable files, this is the generic Control Assistant parser:
+        tunable files of other controls are parsed as well, and the brand and model are taken from
         the application identifier in the file if it's known. Files of
         recognized easYgen applications are rejected, they're parsed by the
         :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
 
         Refer to :mod:`~peat.modules.woodward.wdw_tc` for the file format.
         """
+        data = file.read_bytes()
+        kind = identify_woodward_file(data, file.suffix)
+        if kind == "wset":
+            return cls._parse_wset(file, data, dev)
+        if kind in ("sid", "wtool"):
+            cls.log.error(
+                f"'{file.name}' is a ToolKit {kind} file, parse it with the "
+                f"easYgen module ('-d easygen')"
+            )
+            return None
+
         try:
-            parsed_config = parse_tc(file.read_bytes())
+            parsed_config = parse_tc(data)
         except Exception as ex:
             cls.log.exception(f"Failed to parse '{file.name}' as a .tc file: {ex}")
             return None
@@ -185,6 +232,35 @@ class WDW2301E(DeviceModule):
             dev = datastore.get(file.stem, "id")
         populate_device_from_tc(dev, parsed_config)
         dev.write_file(parsed_config, "parsed-tc.json")
+        cls.update_dev(dev)
+        return dev
+
+    @classmethod
+    def _parse_wset(cls, file: Path, data: bytes, dev: DeviceData | None) -> DeviceData | None:
+        """Parse a ToolKit settings (``.wset``) file of a 2301E application."""
+        cls.log.info(f"Parsing '{file.name}' as a Woodward wset file")
+        try:
+            parsed = parse_wset(data)
+        except Exception as ex:
+            cls.log.exception(f"Failed to parse '{file.name}' as a Woodward wset file: {ex}")
+            return None
+        if not parsed:
+            cls.log.error(f"Failed to parse '{file.name}' as a Woodward wset file")
+            return None
+
+        app = parsed.get("application", {})
+        if not is_2301e_application(app):
+            cls.log.error(
+                f"'{file.name}' isn't from a 2301E (application: '{app.get('id', '')}'), "
+                f"parse it with the easYgen module ('-d easygen')"
+            )
+            return None
+
+        if not dev:
+            dev = datastore.get(file.stem, "id")
+        populate_device_from_wset(dev, parsed)
+        dev.write_file(parsed, "parsed-wset.json")
+        save_wset_logic(dev, file)
         cls.update_dev(dev)
         return dev
 

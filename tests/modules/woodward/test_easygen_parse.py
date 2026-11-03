@@ -3,7 +3,6 @@ Tests for parsing Woodward ToolKit and Control Assistant files through the
 easYgen and 2301E device modules, including the ``peat parse`` CLI.
 """
 
-import gzip
 import json
 import sys
 from pathlib import Path
@@ -18,16 +17,20 @@ from peat.modules.woodward.easygen_3500xt import WOODWARD_FILE_PARSERS, identify
 from peat.modules.woodward.wdw_tc import tc_head_application_info
 
 from .nrbf_builder import (
+    build_e3_wset,
     build_generic_wset,
     build_sid_file,
     build_sid_xml,
     build_woodward_wset,
     build_woodward_wtool,
 )
+from .real_files import DIESEL_WSET, NG_WSET, real_wset_bytes
 
-REAL_WSET_GZ: Final[Path] = Path(
-    "devices", "woodward", "easygen-3500", "4_MVA_Diesel_20161116.wset.gz"
-)
+#: Application identifier of Woodward's published 2301E factory default settings
+#: file of revision G (https://support.woodward.com/kb/articles/factory-settings-files-for-2301e)
+APP_ID_2301E: Final[str] = "5418-6350_G 2017-04-24 10.52.31"
+#: SID specification of the same file
+SID_2301E: Final[str] = "5418-6350_G 2017-04-24 14.23.33 UTC"
 TC_FIXTURE: Final[str] = "tunables_synthetic.tc"
 #: Application identifier of the synthetic .tc file, which isn't a known application
 TC_FIXTURE_APPLICATION: Final[str] = "5418-1234 NEW"
@@ -52,14 +55,18 @@ def run_dirs(mocker, tmp_path):
 
 
 @pytest.fixture
-def fixtures(tmp_path, datapath, examples_dir) -> dict[str, Path]:
+def fixtures(tmp_path, datapath) -> dict[str, Path]:
     """Copies of each file type in a scratch directory."""
     sources = {
-        "wset": (
-            REAL_WSET_GZ.with_suffix("").name,
-            lambda: gzip.decompress((examples_dir / REAL_WSET_GZ).read_bytes()),
-        ),
+        "wset": (DIESEL_WSET, lambda: real_wset_bytes(DIESEL_WSET)),
+        "ng.wset": (NG_WSET, lambda: real_wset_bytes(NG_WSET)),
         "synthetic.wset": ("synthetic_settings.wset", build_woodward_wset),
+        # Settings files of other ToolKit applications
+        "2301e.wset": (
+            "2301e_settings.wset",
+            lambda: build_woodward_wset(app_id=APP_ID_2301E, sid=SID_2301E),
+        ),
+        "e3.wset": ("e3_settings.wset", build_e3_wset),
         "sid": ("EG3200XTP1 2.12-0_50976.sid", build_sid_file),
         "xml.sid": ("EG3200XTP1 2.12-0_50976.CAN.sid", build_sid_xml),
         "wtool": ("synthetic_tool.wtool", build_woodward_wtool),
@@ -85,8 +92,8 @@ def fixtures(tmp_path, datapath, examples_dir) -> dict[str, Path]:
 
 
 def test_module_attributes():
-    # .tc files are claimed by file signature only, depending on the application
-    assert Easygen3500XT.filename_patterns == ["*.wset", "*.sid", "*.wtool"]
+    # .wset and .tc files are claimed by file signature only, depending on the application
+    assert Easygen3500XT.filename_patterns == ["*.sid", "*.wtool"]
     assert [s.default_filename for s in Easygen3500XT.file_signatures] == [
         "settings.wset",
         "application.sid",
@@ -98,14 +105,20 @@ def test_module_attributes():
     assert "easYgen-3200" in Easygen3500XT.supported_models
     assert set(WOODWARD_FILE_PARSERS) == {"wset", "sid", "wtool", "tc"}
     assert WDW2301E.filename_patterns == []
-    assert [s.default_filename for s in WDW2301E.file_signatures] == ["tunables.tc"]
+    assert [s.default_filename for s in WDW2301E.file_signatures] == [
+        "tunables.tc",
+        "settings.wset",
+    ]
 
 
 @pytest.mark.parametrize(
     ("key", "expected"),
     [
         ("wset", "wset"),
+        ("ng.wset", "wset"),
         ("synthetic.wset", "wset"),
+        ("2301e.wset", "wset"),
+        ("e3.wset", "wset"),
         ("sid", "sid"),
         ("xml.sid", "sid"),
         ("wtool", "wtool"),
@@ -134,7 +147,9 @@ def test_file_signatures_match_only_their_type(fixtures):
     signatures = {s.default_filename: s for s in Easygen3500XT.file_signatures}
     expected = {
         "wset": "settings.wset",
+        "ng.wset": "settings.wset",
         "synthetic.wset": "settings.wset",
+        "e3.wset": "settings.wset",
         "sid": "application.sid",
         "xml.sid": "application.sid",
         "wtool": "tool.wtool",
@@ -143,9 +158,13 @@ def test_file_signatures_match_only_their_type(fixtures):
     for key, path in fixtures.items():
         matches = [name for name, sig in signatures.items() if sig.matches(path)]
         assert matches == ([expected[key]] if key in expected else []), key
-    # Tunable files of other controls are left to the 2301E module
-    wdw_signature = WDW2301E.file_signatures[0]
-    assert [key for key, path in fixtures.items() if wdw_signature.matches(path)] == ["tc"]
+    # Tunable files of other controls and settings files of 2301E applications
+    # are left to the 2301E module
+    wdw_signatures = {s.default_filename: s for s in WDW2301E.file_signatures}
+    wdw_expected = {"tc": "tunables.tc", "2301e.wset": "settings.wset"}
+    for key, path in fixtures.items():
+        matches = [name for name, sig in wdw_signatures.items() if sig.matches(path)]
+        assert matches == ([wdw_expected[key]] if key in wdw_expected else []), key
 
 
 def test_tc_head_application_info(fixtures):
@@ -160,11 +179,16 @@ def test_tc_head_application_info(fixtures):
     assert tc_head_application_info(b"") is None
 
 
+@pytest.mark.parametrize(
+    "key",
+    [pytest.param("wset", id="diesel"), pytest.param("ng.wset", id="ng", marks=pytest.mark.slow)],
+)
 @pytest.mark.usefixtures("run_dirs")
-def test_parse_real_wset(fixtures, assert_glob_path):
-    dev = Easygen3500XT.parse(fixtures["wset"])
+def test_parse_real_wset(fixtures, assert_glob_path, caplog, key):
+    path = fixtures[key]
+    dev = Easygen3500XT.parse(path)
     assert dev is not None
-    assert dev.get_id() == "4_MVA_Diesel_20161116"
+    assert dev.get_id() == path.stem
     assert dev.description.vendor.name == "Woodward, Inc"
     assert dev.description.brand == "easYgen"
     assert dev.description.model == "3500"
@@ -177,7 +201,7 @@ def test_parse_real_wset(fixtures, assert_glob_path):
     parsed_file = assert_glob_path(out_dir, "parsed-wset.json")
     parsed = json.loads(parsed_file.read_text(encoding="utf-8"))
     assert parsed["num_parameters"] == 2756
-    assert_glob_path(out_dir, "4_MVA_Diesel_20161116.wset")
+    assert_glob_path(out_dir, path.name)
     assert_glob_path(out_dir, "device-data-summary.json")
     assert dev in datastore.objects
     # Data model and logic
@@ -191,16 +215,17 @@ def test_parse_real_wset(fixtures, assert_glob_path):
         "Serial 1",
         "Serial 2",
     ]
-    assert dev.logic.file.local_path == fixtures["wset"]
+    assert dev.logic.file.local_path == path
     assert dev.logic.name == "easYgen-3500 LogicsManager"
     logic_file = assert_glob_path(out_dir, "logic.st")
     assert logic_file.read_text(encoding="utf-8").startswith("PROGRAM main")
     tc6_file = assert_glob_path(out_dir, "logic-tc6.xml")
     assert "plcopen.org" in tc6_file.read_text(encoding="utf-8")
+    assert "non-text source" not in caplog.text
 
 
 @pytest.mark.usefixtures("run_dirs")
-def test_parse_synthetic_wset(fixtures):
+def test_parse_synthetic_wset(fixtures, caplog):
     dev = Easygen3500XT.parse(fixtures["synthetic.wset"])
     assert dev.description.model == "3200XT-P1"
     assert dev.description.product == "easYgen-3200XT-P1"
@@ -211,6 +236,81 @@ def test_parse_synthetic_wset(fixtures):
     assert dev.extra["device_number"] == 7
     assert dev.logic.parsed == ""  # no LogicsManager equations in the synthetic file
     assert not list(dev.get_out_dir().rglob("logic.st"))
+    # The binary settings file isn't recorded (and exported) as the logic source
+    assert dev.logic.file.local_path is None
+    assert not list(dev.get_out_dir().rglob("logic.*"))
+    assert "non-text source" not in caplog.text
+
+
+@pytest.mark.usefixtures("run_dirs")
+def test_parse_e3_wset(fixtures):
+    # Settings files of applications other than the 2301E stay with the easYgen module
+    dev = Easygen3500XT.parse(fixtures["e3.wset"])
+    assert dev.description.brand == "E3"
+    assert dev.description.model == "Full Authority"
+    assert WDW2301E.parse(fixtures["e3.wset"]) is None
+
+
+@pytest.mark.usefixtures("run_dirs")
+def test_parse_2301e_wset(fixtures, assert_glob_path, caplog):
+    dev = WDW2301E.parse(fixtures["2301e.wset"])
+    assert dev is not None
+    assert dev.get_id() == "2301e_settings"
+    assert dev.name == ""  # the easYgen identity mapping isn't used for the 2301E
+    assert dev.description.vendor.id == "Woodward"
+    assert dev.description.brand == "WDW"
+    assert dev.description.model == "2301E"
+    assert dev.description.product == "2301E"
+    assert dev.type == "Controller"
+    assert dev.firmware.id == APP_ID_2301E
+    assert dev.extra["wset"]["application"] == {
+        "id": APP_ID_2301E,
+        "part_number": "5418-6350",
+        "revision": "G",
+        "version": "",
+        "build": "",
+        "brand": "WDW",
+        "model": "2301E",
+        "product": "2301E",
+        "sid": SID_2301E,
+    }
+    assert len(dev.extra["parameters"]) == 4
+    assert len(dev.registers) == 4  # ServLink handles
+    assert "logic" not in dev.extra["wset"]
+    out_dir = dev.get_out_dir()
+    parsed = json.loads(assert_glob_path(out_dir, "parsed-wset.json").read_text("utf-8"))
+    assert parsed["application"]["model"] == "2301E"
+    assert dev.logic.file.local_path is None
+    assert not list(out_dir.rglob("logic.*"))
+    assert "non-text source" not in caplog.text
+
+
+@pytest.mark.usefixtures("run_dirs")
+def test_easygen_rejects_2301e_wset(fixtures, caplog):
+    assert Easygen3500XT.parse(fixtures["2301e.wset"]) is None
+    assert "-d wdw2301e" in caplog.text
+
+
+@pytest.mark.usefixtures("run_dirs")
+def test_2301e_parses_raw_wset_bytes(fixtures):
+    dev = WDW2301E.parse(fixtures["2301e.wset"].read_bytes())
+    assert dev is not None
+    assert dev.id == "settings"  # named by the file signature
+    assert dev.description.model == "2301E"
+
+
+@pytest.mark.usefixtures("run_dirs")
+def test_2301e_wset_parse_errors(fixtures, mocker, tmp_path, caplog):
+    path = tmp_path / "input" / "mystery.wset"
+    path.write_bytes(b"this is not a settings file")
+    assert WDW2301E.parse(path) is None
+    assert "Failed to parse 'mystery.wset'" in caplog.text
+
+    mocker.patch(
+        "peat.modules.woodward.wdw_2301e.parse_wset", side_effect=ValueError("bad settings")
+    )
+    assert WDW2301E.parse(fixtures["2301e.wset"]) is None
+    assert "bad settings" in caplog.text
 
 
 @pytest.mark.parametrize("key", ["sid", "xml.sid"])
@@ -263,9 +363,14 @@ def test_parse_tc_2301e(fixtures, assert_glob_path):
 
 
 @pytest.mark.usefixtures("run_dirs")
-def test_2301e_rejects_other_files(fixtures):
+def test_2301e_rejects_other_files(fixtures, caplog):
     assert WDW2301E.parse(fixtures["synthetic.wset"]) is None
+    assert "isn't from a 2301E" in caplog.text
     assert WDW2301E.parse(fixtures["easygen.tc"]) is None
+    for key in ("sid", "wtool"):
+        caplog.clear()
+        assert WDW2301E.parse(fixtures[key]) is None
+        assert "-d easygen" in caplog.text
 
 
 @pytest.mark.usefixtures("run_dirs")
@@ -371,6 +476,13 @@ def test_cli_parse_directory_auto_detects_modules(exec_peat, tmp_path, fixtures)
     assert ("WDW2301E", fixtures["tc"].name) in parsed
     assert ("Easygen3500XT", fixtures["tc"].name) not in parsed
     assert ("WDW2301E", fixtures["easygen.tc"].name) not in parsed
+    # Each .wset file is parsed by one module, depending on its application
+    for key in ("wset", "ng.wset", "synthetic.wset", "e3.wset"):
+        assert ("Easygen3500XT", fixtures[key].name) in parsed
+        assert ("WDW2301E", fixtures[key].name) not in parsed
+    assert ("WDW2301E", fixtures["2301e.wset"].name) in parsed
+    assert ("Easygen3500XT", fixtures["2301e.wset"].name) not in parsed
+    assert len(summary["parse_results"]) == len(fixtures)
     assert summary["num_parse_failures"] == 0
 
 

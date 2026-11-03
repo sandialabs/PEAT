@@ -1,6 +1,5 @@
 """Tests for the Woodward ToolKit settings file parser (peat/modules/woodward/parse_wset.py)."""
 
-import gzip
 import io
 import json
 from array import array
@@ -19,6 +18,7 @@ from peat.modules.woodward.parse_wset import (
     LOGICS_MANAGER_BINARY_OPERATORS,
     LOGICS_MANAGER_UNARY_OPERATORS,
     WSET_HEADER_LEN,
+    WSET_SNIFF_LEN,
     _descriptor_type,
     _hashtable_items,
     _scale,
@@ -37,9 +37,11 @@ from peat.modules.woodward.parse_wset import (
     parse_wset,
     populate_device_from_wset,
     read_nrbf_streams,
+    save_wset_logic,
     split_parameter_name,
     summarize_wset,
     to_plain,
+    wset_head_application_info,
     wset_signature_check,
 )
 
@@ -54,30 +56,53 @@ from .nrbf_builder import (
     build_woodward_wset,
     build_woodward_wtool,
 )
-
-#: Real easYgen-3500 settings file (see examples/devices/woodward/easygen-3500/README.md)
-REAL_WSET_GZ: Final[Path] = (
-    Path(__file__).resolve().parents[3]
-    / "examples"
-    / "devices"
-    / "woodward"
-    / "easygen-3500"
-    / "4_MVA_Diesel_20161116.wset.gz"
+from .real_files import (
+    DIESEL_WSET,
+    NG_WSET,
+    REAL_WSET_PARAMS_SLOW,
+    real_wset_bytes,
+    real_wset_parsed,
 )
+
+#: Application identifier of the 2301E factory default settings file of revision G,
+#: published by Woodward (https://support.woodward.com/kb/articles/factory-settings-files-for-2301e)
+APP_ID_2301E: Final[str] = "5418-6350_G 2017-04-24 10.52.31"
+
+#: Real easYgen-3500 settings files: the size of the parameter hashtable stream,
+#: and values of parameters that differ between the files
+REAL_FILE_SPECIFICS: Final[dict[str, dict]] = {
+    DIESEL_WSET: {
+        "end": 1955903,
+        "values": {
+            "Config_Application.Engine.3321 Start/Stop mode logic": "Diesel",
+            "Config_Measurement.1752 Gen.. rated active power [kW]": 3400.0,
+            "Config_Measurement.1754 Generator rated current": 300,
+            "Config_Monitoring.Load_Share.4060 Monitoring": "Off",
+        },
+    },
+    NG_WSET: {
+        "end": 1955902,
+        "values": {
+            "Config_Application.Engine.3321 Start/Stop mode logic": "Gas",
+            "Config_Measurement.1752 Gen.. rated active power [kW]": 3150.0,
+            "Config_Measurement.1754 Generator rated current": 263,
+            "Config_Monitoring.Load_Share.4060 Monitoring": "On",
+        },
+    },
+}
 
 
 @pytest.fixture(scope="module")
-def real_wset_path(tmp_path_factory) -> Path:
+def real_wset_path(tmp_path_factory, real_wset_name) -> Path:
     """The example settings file, decompressed into a temporary directory."""
-    assert REAL_WSET_GZ.is_file(), f"Example file missing: {REAL_WSET_GZ}"
-    path = tmp_path_factory.mktemp("woodward") / REAL_WSET_GZ.with_suffix("").name
-    path.write_bytes(gzip.decompress(REAL_WSET_GZ.read_bytes()))
+    path = tmp_path_factory.mktemp("woodward") / real_wset_name
+    path.write_bytes(real_wset_bytes(real_wset_name))
     return path
 
 
 @pytest.fixture(scope="module")
-def real_parsed(real_wset_path) -> dict:
-    return parse_wset(real_wset_path)
+def real_parsed(real_wset_name) -> dict:
+    return real_wset_parsed(real_wset_name)
 
 
 @pytest.fixture(scope="module")
@@ -91,11 +116,11 @@ def synthetic_parsed(synthetic_wset) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Real easYgen-3500 file
+# Real easYgen-3500 files
 # ---------------------------------------------------------------------------
 
 
-def test_real_file_container(real_parsed):
+def test_real_file_container(real_parsed, real_wset_name):
     assert real_parsed["header"] == {
         "hex": "143ab51fd46d59c21400",
         "length": 10,
@@ -110,7 +135,7 @@ def test_real_file_container(real_parsed):
     assert nrbf["trailing_bytes"] == 0
     assert [(s["offset"], s["end"], s["class"]) for s in nrbf["streams"]] == [
         (10, 597, "Woodward_Settings_SettingsHeader"),
-        (597, 1955903, "System_Collections_Hashtable"),
+        (597, REAL_FILE_SPECIFICS[real_wset_name]["end"], "System_Collections_Hashtable"),
     ]
 
 
@@ -179,6 +204,25 @@ def test_real_file_counts(real_parsed):
 
 def test_real_file_is_json_serializable(real_parsed):
     assert json.loads(json.dumps(real_parsed))["num_parameters"] == 2756
+
+
+def test_real_file_specific_values(real_parsed, real_wset_name):
+    values = {record["name"]: record["value"] for record in real_parsed["parameters"]}
+    for name, value in REAL_FILE_SPECIFICS[real_wset_name]["values"].items():
+        assert values[name] == value, name
+
+
+def test_real_files_differ_only_in_values():
+    diesel = real_wset_parsed(DIESEL_WSET)
+    ng = real_wset_parsed(NG_WSET)
+    assert diesel["application"] == ng["application"]
+    assert [r["name"] for r in diesel["parameters"]] == [r["name"] for r in ng["parameters"]]
+    differing = [
+        a["name"]
+        for a, b in zip(diesel["parameters"], ng["parameters"], strict=True)
+        if a["value"] != b["value"]
+    ]
+    assert len(differing) == 23
 
 
 @pytest.fixture(scope="module")
@@ -313,6 +357,7 @@ def test_real_logics_manager_operators_are_known(real_parsed):
             assert record["value"][key] in LOGICS_MANAGER_BINARY_OPERATORS.values()
 
 
+@pytest.mark.parametrize("real_wset_name", REAL_WSET_PARAMS_SLOW, indirect=True)
 def test_real_file_from_bytes_and_stream(real_wset_path, real_parsed):
     data = real_wset_path.read_bytes()
     assert parse_wset(data)["num_parameters"] == real_parsed["num_parameters"]
@@ -322,6 +367,10 @@ def test_real_file_from_bytes_and_stream(real_wset_path, real_parsed):
     assert is_wset_data(data[:64])
     with real_wset_path.open("rb") as stream:
         assert wset_signature_check(stream)
+    # The head identifies the same application (from the SID specification)
+    head_app = wset_head_application_info(data[:WSET_SNIFF_LEN])
+    for key in ("part_number", "revision", "brand", "model", "product"):
+        assert head_app[key] == real_parsed["application"][key], key
 
 
 # ---------------------------------------------------------------------------
@@ -911,3 +960,109 @@ def test_application_info_variants():
 def test_other_container_type_is_not_wset():
     assert not is_wset_data(build_woodward_wtool())
     assert parse_wset(build_woodward_wtool())["settings_header"] == {}
+
+
+# ---------------------------------------------------------------------------
+# Application identification from the start of the file (module routing)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    ("data", "expected"),
+    [
+        pytest.param(
+            build_woodward_wset(app_id=APP_ID_2301E),
+            {
+                "id": APP_ID_2301E,
+                "part_number": "5418-6350",
+                "revision": "G",
+                "brand": "WDW",
+                "model": "2301E",
+                "product": "2301E",
+            },
+            id="2301E",
+        ),
+        pytest.param(
+            build_woodward_wset(app_id="5418-6350_New 2012-10-08 09.18.02"),
+            {"part_number": "5418-6350", "revision": "New", "model": "2301E"},
+            id="2301E revision New",
+        ),
+        pytest.param(
+            build_woodward_wset(),
+            {"brand": "easYgen", "model": "3200XT-P1", "version": "2.12-0", "build": "50976"},
+            id="easYgen XT",
+        ),
+        pytest.param(
+            build_woodward_wset(app_id="5418-6722-NEW", sid="us_5418-6722-NEW"),
+            {"id": "us_5418-6722-NEW", "brand": "easYgen", "model": "3500"},
+            id="easYgen-3500",
+        ),
+        pytest.param(
+            build_e3_wset(), {"part_number": "5418-4091", "brand": "E3"}, id="E3 engine control"
+        ),
+        pytest.param(
+            build_woodward_wset(app_id="5418-9999-NEW"),
+            {"part_number": "5418-9999", "brand": "", "model": ""},
+            id="unknown application",
+        ),
+        pytest.param(
+            build_woodward_wset(app_id="custom", sid=""),
+            {"id": "", "part_number": "", "model": ""},
+            id="no application identifier",
+        ),
+        pytest.param(
+            build_generic_wset(),
+            {"id": "", "part_number": "", "model": ""},
+            id="no settings header",
+        ),
+    ],
+)
+def test_wset_head_application_info(data, expected):
+    app = wset_head_application_info(data[:WSET_SNIFF_LEN])
+    assert {key: app[key] for key in expected} == expected
+    # Only the settings header (the first stream) is needed
+    header_end = read_nrbf_streams(data, WSET_HEADER_LEN)[1]["streams"][0]["end"]
+    assert wset_head_application_info(data[:header_end]) == app
+
+
+def test_wset_head_application_info_ignores_settings():
+    # Identifiers in the parameters (the second stream) aren't used
+    parameters = [{**DEFAULT_PARAMETERS[0], "type": "string", "value": APP_ID_2301E}]
+    data = build_woodward_wset(app_id="custom", sid="", parameters=parameters)
+    assert APP_ID_2301E.encode() in data
+    assert wset_head_application_info(data)["model"] == ""
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        pytest.param(b"", id="empty"),
+        pytest.param(b"not a settings file" * 10, id="text"),
+        pytest.param(build_woodward_wtool(), id="tool file"),
+        pytest.param(WSET_HEADER + b"\x00" * 40, id="header only"),
+    ],
+)
+def test_wset_head_application_info_not_wset(data):
+    assert wset_head_application_info(data) is None
+
+
+def test_save_wset_logic(tmp_path, mocker):
+    source = tmp_path / "settings.wset"
+    source.write_bytes(b"binary")
+
+    # No LogicsManager equations: the binary settings file isn't a logic source
+    dev = DeviceData()
+    populate_device_from_wset(dev, parse_wset(build_woodward_wset()))
+    write_file = mocker.patch.object(DeviceData, "write_file")
+    save_wset_logic(dev, source)
+    assert dev.logic.file.local_path is None
+    write_file.assert_not_called()
+
+    dev.extra["wset"]["logic"] = {"num_equations": 1}
+    dev.logic.formats["structured_text"] = "PROGRAM main\nEND_PROGRAM\n"
+    dev.logic.formats["tc6"] = "<project/>"
+    save_wset_logic(dev, source)
+    assert dev.logic.file.local_path == source
+    assert [c.args[1] for c in write_file.call_args_list] == ["logic.st", "logic-tc6.xml"]
+
+    save_wset_logic(DeviceData(), None)  # nothing parsed
