@@ -16,7 +16,7 @@ from datetime import UTC, datetime, timedelta
 from ipaddress import ip_address
 from pathlib import Path
 from traceback import format_exc
-from typing import Any
+from typing import Any, Final
 
 import pathvalidate
 from dateutil.parser import parse as date_parse
@@ -27,6 +27,9 @@ from peat.protocols.common import MAC_RE_COLON
 
 from . import consts
 from .consts import SYSINFO
+
+_DIGIT_RE: Final[re.Pattern[str]] = re.compile(r"\d")
+_NUMBER_RE: Final[re.Pattern[str]] = re.compile(r"[+-]?\d+(?:\.\d+)?")
 
 
 def convert_to_snake_case(camel_string: str) -> str:
@@ -215,6 +218,46 @@ def parse_date(raw_time: str, year_first: bool | None = None) -> datetime | None
     except Exception as ex:
         log.error(f"Failed to parse date string '{raw_time}': {ex}")
         return None
+
+
+def is_date(to_check: str | bytes | None, fuzzy: bool = False) -> bool:
+    """
+    Check if a string is a date or time, such as ``2015-03-23 14:32:11 UTC``.
+
+    Unlike :func:`parse_date`, this doesn't log anything when the string
+    isn't a date, so it's safe to use for checking arbitrary strings. Plain
+    numbers (``1``, ``12``, ``1.0``) and strings with no digits (``May``,
+    ``Monday``) aren't considered dates, even though ``dateutil`` will
+    happily interpret them as one.
+
+    .. code-block:: python
+
+       >>> from peat.utils import is_date
+       >>> is_date("2015-03-23 14:32:11 UTC")
+       True
+       >>> is_date("5418-1234 NEW")
+       False
+
+    Args:
+        to_check: String to check
+        fuzzy: Allow the date to be surrounded by other text
+            (passed straight to ``dateutil.parser.parse()``)
+
+    Returns:
+        If the string is a date
+    """
+    if isinstance(to_check, bytes):
+        to_check = to_check.decode(errors="ignore")
+    if not to_check or not isinstance(to_check, str):
+        return False
+    to_check = to_check.strip()
+    if not _DIGIT_RE.search(to_check) or _NUMBER_RE.fullmatch(to_check):
+        return False
+    try:
+        date_parse(to_check, fuzzy=fuzzy)
+    except (ValueError, OverflowError, TypeError):  # ParserError is a ValueError
+        return False
+    return True
 
 
 def get_formatted_platform_str() -> str:
