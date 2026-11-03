@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 from subprocess import run
 from typing import Final
+from xml.etree import ElementTree
 
 import pytest
 
@@ -220,7 +221,8 @@ def test_parse_real_wset(fixtures, assert_glob_path, caplog, key):
     logic_file = assert_glob_path(out_dir, "logic.st")
     assert logic_file.read_text(encoding="utf-8").startswith("PROGRAM main")
     tc6_file = assert_glob_path(out_dir, "logic-tc6.xml")
-    assert "plcopen.org" in tc6_file.read_text(encoding="utf-8")
+    tc6_root = ElementTree.fromstring(tc6_file.read_bytes())
+    assert tc6_root.tag == "{http://www.plcopen.org/xml/tc6_0201}project"
     assert "non-text source" not in caplog.text
 
 
