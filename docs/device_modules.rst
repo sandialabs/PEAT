@@ -276,18 +276,11 @@ MicroNet Plus
    :members:
    :no-undoc-members:
 
-easYgen 3500XT Genset Controller
---------------------------------
+easYgen Genset Controllers
+--------------------------
+Refer to :doc:`woodward` for the supported file types and devices.
+
 .. automodule:: peat.modules.woodward.easygen_3500xt
-   :members:
-   :no-undoc-members:
-
-Windows
-=======
-
-WindowsCE
----------
-.. automodule:: peat.modules.windows.wince
    :members:
    :no-undoc-members:
 
@@ -303,3 +296,47 @@ MicroNet parsing
 ^^^^^^^^^^^^^^^^
 .. automodule:: peat.modules.woodward.parse_micronet
    :members:
+
+ToolKit file helpers
+^^^^^^^^^^^^^^^^^^^^
+.. automodule:: peat.modules.woodward.toolkit
+   :members:
+
+ToolKit settings file (.wset) parsing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: peat.modules.woodward.parse_wset
+   :members:
+
+ToolKit Service Interface Definition (.sid) parsing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: peat.modules.woodward.parse_sid
+   :members:
+
+ToolKit tool file (.wtool) parsing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: peat.modules.woodward.parse_wtool
+   :members:
+
+Control Assistant tunable file (.tc) parsing
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: peat.modules.woodward.wdw_tc
+   :members:
+
+easYgen data model mapping
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: peat.modules.woodward.easygen_data
+   :members:
+
+easYgen LogicsManager logic conversion
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.. automodule:: peat.modules.woodward.easygen_logic
+   :members:
+
+Windows
+=======
+
+WindowsCE
+---------
+.. automodule:: peat.modules.windows.wince
+   :members:
+   :no-undoc-members:

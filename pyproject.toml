@@ -698,6 +698,7 @@ ignore = [
 "peat/cli_args.py" = ["E501"]
 "peat/data/models.py" = ["E501", "I001"]
 "peat/modules/woodward/easygen_svl.py" = ["E501"]
+"tests/modules/woodward/nrbf_builder.py" = ["E501"]  # synthetic SID XML document
 "peat/modules/rockwell/clx_relay_ladder_parser.py" = ["ARG001"]
 # if ruff messes up import order then re-add these
 # "peat/protocols/ftp.py" = ["I001"]

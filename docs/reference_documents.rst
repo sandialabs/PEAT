@@ -58,4 +58,5 @@ In-depth documentation for specific PEAT device modules. Refer to :doc:`device_m
 
    sel
    siemens
+   woodward
    openplc

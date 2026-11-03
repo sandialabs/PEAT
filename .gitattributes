@@ -40,6 +40,9 @@ soelog.txt  text eol=crlf
 USERLOG.LOG text eol=crlf
 SYSLOG.LOG  text eol=crlf
 
+# Woodward Control Assistant tunable files (written on Windows)
+*.tc        text eol=crlf
+
 # Rockwell Studio5000/RSLogix5000 .L5X XML files
 *.l5x       text eol=crlf
 *.L5X       text eol=crlf
@@ -55,6 +58,9 @@ SYSLOG.LOG  text eol=crlf
 *.mc7       binary
 *.firmware  binary
 *.wset      binary
+*.wtool     binary
+*.sid       binary
+*.gz        binary
 *.CID       binary
 WebServer.out   binary
 vxWorks     binary

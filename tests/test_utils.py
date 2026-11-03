@@ -85,6 +85,53 @@ def test_parse_date():
     assert not utils.parse_date(None)
 
 
+@pytest.mark.parametrize(
+    "value",
+    [
+        "nov 1 2019 12:26:51",
+        "2019-11-01T12:26:51",
+        "2015-03-23 14:32:11 UTC",
+        "Mon Nov 16 10:22:10 2016 UTC",
+        "11/16/2016 10:22 AM",
+        b"nov 1 2019",
+    ],
+)
+def test_is_date(value):
+    assert utils.is_date(value)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "",
+        b"",
+        None,
+        "   ",
+        "1",
+        "12",
+        "1.0",
+        "-5",
+        "May",
+        "Monday",
+        "NEW",
+        "Genset 1",
+        "5418-1234 NEW",
+        "5418-12 A",
+        "2301E-1234 NEW",
+        "File Version: 1.0",
+        "EG3500XTP2 2.17-0_54728",
+        "2019-13-45",
+    ],
+)
+def test_is_date_not_dates(value):
+    assert not utils.is_date(value)
+
+
+def test_is_date_fuzzy():
+    assert not utils.is_date("Saved on nov 1 2019 by ToolKit")
+    assert utils.is_date("Saved on nov 1 2019 by ToolKit", fuzzy=True)
+
+
 def test_get_formatted_platform_str():
     assert python_version() in utils.get_formatted_platform_str()
 

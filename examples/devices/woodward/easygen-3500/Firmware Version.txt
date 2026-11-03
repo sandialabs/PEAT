@@ -1,0 +1,3 @@
+Woodward easYgen 3500:
+Operating System   v1.2102
+Bootloader         v3.0011

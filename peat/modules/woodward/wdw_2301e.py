@@ -5,6 +5,16 @@ Services
 - Servlink (Woodward proprietary protocol) on RS232 and RS422
 - Modbus (optional) on RS232 and RS422
 
+Parsing supports:
+
+- ToolKit ``*.wset`` settings files of 2301E applications (part number
+  5418-6350), see :mod:`~peat.modules.woodward.parse_wset`. Settings files of
+  other applications are parsed by the
+  :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+- Control Assistant ``*.tc`` tunable files, see
+  :mod:`~peat.modules.woodward.wdw_tc`. This is the generic Control Assistant
+  parser, so tunable files of any control except the easYgen are parsed.
+
 Authors
 
 - Peter Shurtz
@@ -12,32 +22,71 @@ Authors
 
 import struct
 from pathlib import Path
-from typing import Any
+from typing import Any, BinaryIO, Final
 
 from peat import DeviceData, DeviceModule, Interface, SerialMethod, datastore, log
+from peat.file_signature import FileSignature
 from peat.protocols import open_serial_port, pretty_hex_bytes, serial_txn
 
+from .easygen_3500xt import identify_woodward_file, is_easygen_application
+from .parse_wset import (
+    WSET_SNIFF_LEN,
+    parse_wset,
+    populate_device_from_wset,
+    save_wset_logic,
+    wset_head_application_info,
+)
+from .toolkit import is_2301e_application
 from .wdw_2301e_svl import *
 
 # TODO: remove '*' imports
 from .wdw_svl import *
-from .wdw_tc import *
+from .wdw_tc import (
+    TC_SNIFF_LEN,
+    parse_tc,
+    populate_device_from_tc,
+    tc_application_info,
+    tc_head_application_info,
+)
 
 # Track the Servlink sequence
-svl_seq_odd = True
+svl_seq_odd: bool = True
 
 # "Magic" bytes for Servlink "hello" for _servlink_raw_txn()
-SVL_HELLO_ACK = b"\x01\x60\x10\x21\x00\x80\x00\x80\x03\x33\x34"
+SVL_HELLO_ACK: Final[bytes] = b"\x01\x60\x10\x21\x00\x80\x00\x80\x03\x33\x34"
 
 # Data type specifiers for Servlink
 # This is probably not 2301E-specific
 # TODO: are these old?
-svl_data_type = {
+svl_data_type: Final[dict[type, bytes]] = {
     bool: b"\x81",
     float: b"\x82",
     int: b"\x84",
     bytes: b"\xd4",
 }
+
+
+def wdw_tc_signature_check(stream: BinaryIO) -> bool:
+    """
+    :class:`~peat.file_signature.FileSignature` custom check for ``.tc`` files.
+
+    Tunable files of all applications except recognized easYgen applications
+    are claimed. Tunable files of easYgen applications are claimed by the
+    easYgen module.
+    """
+    app = tc_head_application_info(stream.read(TC_SNIFF_LEN))
+    return app is not None and not is_easygen_application(app)
+
+
+def wdw_wset_signature_check(stream: BinaryIO) -> bool:
+    """
+    :class:`~peat.file_signature.FileSignature` custom check for 2301E ``.wset`` files.
+
+    Only settings files of recognized 2301E applications are claimed. Other
+    settings files are claimed by the easYgen module.
+    """
+    app = wset_head_application_info(stream.read(WSET_SNIFF_LEN))
+    return app is not None and is_2301e_application(app)
 
 
 class WDW2301E(DeviceModule):
@@ -48,7 +97,13 @@ class WDW2301E(DeviceModule):
     vendor_name = "Woodward, Inc"
     brand = "WDW"
     model = "2301E"
-    filename_patterns = ["*.wset"]  # TODO: should wset and tc parsing belong here or 3500XT?
+    # No "*.tc" or "*.wset" filename patterns: tunable files of easYgen applications
+    # and settings files of applications other than the 2301E are left to the
+    # easYgen module (see wdw_tc_signature_check and wdw_wset_signature_check)
+    file_signatures = [
+        FileSignature(default_filename="tunables.tc", custom_check=wdw_tc_signature_check),
+        FileSignature(default_filename="settings.wset", custom_check=wdw_wset_signature_check),
+    ]
     # TODO: combine some common functions of 3500XT and 2301E?
     woodward_fallback_baudrates = [9600]
 
@@ -131,26 +186,89 @@ class WDW2301E(DeviceModule):
 
     @classmethod
     def _parse(cls, file: Path, dev: DeviceData | None = None) -> DeviceData | None:
-        to_parse = file.read_bytes()
-        # TODO: detect 2301E wset file
-        try:
-            tc_file_text = to_parse.decode()  # NOTE(cegoes): this may be iso8859-1
-            parsed_config = _parse_tc_file(tc_file_text)
-        except Exception as ex:
-            cls.log.exception(f"Critical parsing error: {ex}")
-            return None
-        # TODO: this is a temporary hack since we currently don't have examples of 2301E files
+        """
+        Parse a ToolKit settings (``.wset``) file or Control Assistant tunable (``.tc``) file.
 
-        if parsed_config:
-            if not dev:
-                dev = datastore.get(file.stem, "id")
-            dev.extra.update(parsed_config)
-            cls.update_dev(dev)
-            dev.write_file(parsed_config, "parsed-config.json")
-            return dev
-        else:
-            cls.log.warning("No project parsed")
+        Only settings files of 2301E applications are parsed. Settings files of
+        other applications are rejected, since they're parsed by the
+        :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+        The parsed settings are saved as ``parsed-wset.json`` (refer to
+        :mod:`~peat.modules.woodward.parse_wset` for the file format).
+
+        For tunable files, this is the generic Control Assistant parser.
+        Tunable files of other controls are parsed as well, and the brand and
+        model are taken from the application identifier in the file if it's
+        known. Tunable files of recognized easYgen applications are rejected,
+        since they're parsed by the
+        :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+        The parsed tunables are saved as ``parsed-tc.json`` (refer to
+        :mod:`~peat.modules.woodward.wdw_tc` for the file format).
+        """
+        data = file.read_bytes()
+        kind = identify_woodward_file(data, file.suffix)
+        if kind == "wset":
+            return cls._parse_wset(file, data, dev)
+        if kind in ("sid", "wtool"):
+            cls.log.error(
+                f"'{file.name}' is a ToolKit {kind} file, parse it with the "
+                f"easYgen module ('-d easygen')"
+            )
             return None
+
+        try:
+            parsed_config = parse_tc(data)
+        except Exception as ex:
+            cls.log.exception(f"Failed to parse '{file.name}' as a .tc file: {ex}")
+            return None
+        if not parsed_config:
+            cls.log.warning(f"No tunables parsed from '{file.name}'")
+            return None
+
+        app = tc_application_info(parsed_config)
+        if is_easygen_application(app):
+            cls.log.error(
+                f"'{file.name}' is from an easYgen (application: '{app['id']}'), "
+                f"parse it with the easYgen module ('-d easygen')"
+            )
+            return None
+
+        if not dev:
+            dev = datastore.get(file.stem, "id")
+        populate_device_from_tc(dev, parsed_config)
+        dev.write_file(parsed_config, "parsed-tc.json")
+        cls.update_dev(dev)
+        return dev
+
+    @classmethod
+    def _parse_wset(cls, file: Path, data: bytes, dev: DeviceData | None) -> DeviceData | None:
+        """
+        Parse a ToolKit settings (``.wset``) file of a 2301E application.
+        """
+        cls.log.info(f"Parsing '{file.name}' as a Woodward wset file")
+        try:
+            parsed = parse_wset(data)
+        except Exception as ex:
+            cls.log.exception(f"Failed to parse '{file.name}' as a Woodward wset file: {ex}")
+            return None
+        if not parsed:
+            cls.log.error(f"Failed to parse '{file.name}' as a Woodward wset file")
+            return None
+
+        app = parsed.get("application", {})
+        if not is_2301e_application(app):
+            cls.log.error(
+                f"'{file.name}' isn't from a 2301E (application: '{app.get('id', '')}'), "
+                f"parse it with the easYgen module ('-d easygen')"
+            )
+            return None
+
+        if not dev:
+            dev = datastore.get(file.stem, "id")
+        populate_device_from_wset(dev, parsed)
+        dev.write_file(parsed, "parsed-wset.json")
+        save_wset_logic(dev, file)
+        cls.update_dev(dev)
+        return dev
 
 
 WDW2301E.serial_methods = [
@@ -162,72 +280,6 @@ WDW2301E.serial_methods = [
         reliability=3,
     )
 ]
-
-
-# TODO: this is in separate file now?
-# This is likely not 2301E-specific
-def _parse_tc_file(project: str) -> dict:
-    """Parse a *.tc device logic file.
-
-    Args:
-        project: The .tc file prepared by parse_project
-
-    Returns:
-        A dictionary containing the device logic
-    """
-    if not isinstance(project, str):
-        log.error(f"Project type error: {type(project)!s}")
-        return {}
-
-    bad_lines = 0
-    parsed_logic = {}
-    lines = project.strip().split("\r\n")
-
-    file_ver_line = lines.pop(0)
-    fw_prefix_line = lines.pop(0)
-    fw_date_line = lines.pop(0)
-    header_line = lines.pop(0)
-    if (
-        "File Version" in file_ver_line
-        and "-" in fw_prefix_line
-        and "UTC" in fw_date_line
-        and len(header_line.split("\t")) == 9
-        and header_line.startswith("Mode")
-    ):
-        parsed_logic["file_version"] = file_ver_line
-        parsed_logic["firmware_prefix"] = fw_prefix_line
-        parsed_logic["firmware_date"] = fw_date_line
-    else:
-        log.warning("Unknown tc logic format")
-        return {}
-
-    parsed_logic["logic"] = {}
-    for line in lines:
-        fields = line.split("\t")
-        if not len(fields) == 9:
-            log.debug(f"Malformed line: '{line}'")
-            bad_lines += 1
-            continue
-
-        # Build Mode, Category, Block Name, and Field Name organization,
-        # then populate with Type, Current, Initial, Low, and High
-        ref = parsed_logic["logic"]
-        # Walk through each layer of the organization
-        for n in range(4):
-            if fields[n] not in ref:
-                ref[fields[n]] = {}  # create a new layer if necessary
-            ref = ref[fields[n]]  # walk to the next layer
-        # Now populate the top layer
-        ref["Type"] = fields[4]
-        ref["Current"] = fields[5]
-        ref["Initial"] = fields[6]
-        ref["Low"] = fields[7]
-        ref["High"] = fields[8]
-
-    if bad_lines > 0:
-        log.warning(f"Skipped {bad_lines} malformed lines")
-
-    return parsed_logic
 
 
 # Not sure if this is 2301E-specific
