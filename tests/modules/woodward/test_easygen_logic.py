@@ -12,9 +12,13 @@ from peat.modules.woodward.easygen_logic import (
     ST_BINARY_OPERATORS,
     ST_SIGNS,
     add_logics_manager_logic,
+    command_variable_constant,
     command_variable_identifier,
+    delay_seconds,
+    equation_result_label,
     equation_to_st,
     expression_listing,
+    link_command_variables,
     logics_manager_program,
     logics_manager_tc6,
     output_identifier,
@@ -109,6 +113,88 @@ def test_time_literal(seconds, expected):
     assert time_literal(seconds) == expected
 
 
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (None, 0.0),
+        ("", 0.0),
+        (0, 0.0),
+        (1.5, 1.5),
+        (" 2.25 ", 2.25),
+        ("0,5", 0.5),
+        ("bad", None),
+        ([1], None),
+        (10**400, None),
+        (float("inf"), None),
+        (float("nan"), None),
+        ("-inf", None),
+        (-0.5, None),
+    ],
+)
+def test_delay_seconds(value, expected):
+    assert delay_seconds(value) == expected
+
+
+@pytest.mark.parametrize(
+    ("name", "expected"),
+    [
+        ("00.01 LM: Flag 1", "Flag 1"),
+        ("96.01 LM: Flag 1 ", "Flag 1"),
+        ("lm:Start w/o load", "Start w/o load"),
+        ("03.05 Horn", ""),
+        ("28.01 Command 1 to LS5(OR) ", ""),
+    ],
+)
+def test_equation_result_label(name, expected):
+    assert equation_result_label(name) == expected
+
+
+@pytest.mark.parametrize(
+    ("name", "expected"),
+    [
+        ("02.01 LM FALSE", "FALSE"),
+        ("02.02 LM TRUE ", "TRUE"),
+        ("lm true", "TRUE"),
+        ("00.01 LM: Flag 1", ""),
+        ("03.05 Horn", ""),
+    ],
+)
+def test_command_variable_constant(name, expected):
+    assert command_variable_constant(name) == expected
+
+
+def test_logics_manager_program_constants():
+    program = logics_manager_program(
+        [equation(inputs=("02.02 LM TRUE", "02.01 LM FALSE", "03.05 Horn"))]
+    )
+    assert program["constant_command_variables"] == {"CV_02_01": "FALSE", "CV_02_02": "TRUE"}
+    comments = {v["name"]: v["comment"] for v in program["variables"]}
+    assert comments["CV_02_02"] == "02.02 LM TRUE (constant TRUE)"
+    assert comments["CV_03_05"] == "03.05 Horn"
+    body = program["body"]
+    assert "CV_02_01 := FALSE;\nCV_02_02 := TRUE;\n" in body
+    assert body.index("CV_02_02 := TRUE;") < body.index("LM_12110 :=")
+
+
+def test_link_command_variables():
+    flag = {**equation(), "id": 12230, "label": "Flag 1"}
+    start = {**equation(), "id": 12120, "label": "Start req. in AUTO"}
+    duplicate = {**equation(), "id": 99, "label": "Relay 2"}
+    no_equation = {"id": 5, "label": "Flag 2", "kind": "logics_manager"}
+    identifiers = {
+        "00.01 LM: Flag 1": "CV_00_01",
+        "86.09 LM: Start req.in AUTO": "CV_86_09",
+        "00.42 LM: Relay 2": "CV_00_42",  # two equations with this label
+        "00.02 LM: Flag 2": "CV_00_02",  # no equation
+        "03.05 Horn": "CV_03_05",
+    }
+    links = link_command_variables(
+        [equation(), flag, start, duplicate, no_equation, {"kind": "logics_manager"}],
+        identifiers,
+    )
+    assert links == {"CV_00_01": "LM_12230", "CV_86_09": "LM_12120"}
+
+
 def test_equation_without_delays():
     identifiers: dict[str, str] = {}
     lines, blocks, unknown = equation_to_st(equation(), identifiers)
@@ -146,6 +232,26 @@ def test_equation_delay_off_only():
     assert lines[2] == "LM_12110_TOF(IN := LM_12110_IN, PT := T#2000ms);"
     assert lines[3] == "LM_12110 := LM_12110_TOF.Q;"
     assert blocks == [("LM_12110_TOF", "TOF")]
+
+
+def test_equation_invalid_delays():
+    lines, blocks, _ = equation_to_st(equation(delay_on="bad", delay_off=float("nan")), {})
+    assert lines[1] == "LM_12110 := ((CV_03_05 AND TRUE) AND TRUE);"
+    assert blocks == []
+
+
+def test_equation_input_selectors():
+    record = equation()
+    record["value"]["input_1"] = "03.05 Horn"
+    record["value"]["input_2"] = None
+    record["value"]["input_3"] = {"value": 7}
+    identifiers: dict[str, str] = {}
+    lines, _, _ = equation_to_st(record, identifiers)
+    assert lines[1] == "LM_12110 := ((CV_03_05 AND TRUE) AND TRUE);"
+    assert identifiers == {
+        "03.05 Horn": "CV_03_05",
+        "command variable 7": "CV_command_variable_7",
+    }
 
 
 def test_equation_unknown_operators():
@@ -232,6 +338,13 @@ def test_logics_manager_program():
     assert "LM_12200_TON(IN := LM_12200_IN, PT := T#1000ms);" in body
     assert body.index("12110 Relay 2") < body.index("12200 Inhibit")  # sorted by parameter number
 
+    unknown = logics_manager_program(
+        [equation(binary=("unknown(9)", "And")), {"id": 5, "kind": "logics_manager"}]
+    )
+    assert unknown["unknown_operators"] == 1
+    assert unknown["num_equations"] == 2
+    assert "(* no equation for LM_5 *)" in unknown["body"]
+
     empty = logics_manager_program([{"kind": "basic"}])
     assert empty["num_equations"] == 0
     assert empty["body"] == "\n"
@@ -301,8 +414,23 @@ def test_add_logics_manager_logic():
     dev2.logic.name = "existing"
     assert add_logics_manager_logic(dev2, {"parameters": [{"kind": "basic"}]}) == {}
     assert dev2.logic.parsed == ""
+    dev2.logic.description = "existing description"
     add_logics_manager_logic(dev2, parsed)
     assert dev2.logic.name == "existing"
+    assert dev2.logic.description == "existing description"
+
+
+def test_add_logics_manager_logic_st_failure(monkeypatch):
+    monkeypatch.setattr(
+        "peat.modules.woodward.easygen_logic.TC6.generate_st", lambda *_args, **_kwargs: ""
+    )
+    dev = DeviceData()
+    program = add_logics_manager_logic(dev, {"parameters": [equation()]})
+    assert program["structured_text"] == ""
+    assert dev.logic.parsed.strip() == program["body"].strip()
+    assert "structured_text" not in dev.logic.formats
+    assert dev.logic.formats["tc6"] == program["tc6"]
+    assert dev.logic.name == "easYgen LogicsManager"
 
 
 @pytest.fixture(scope="module")

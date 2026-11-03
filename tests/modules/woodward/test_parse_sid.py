@@ -254,6 +254,9 @@ def test_without_enumerations(sid_file):
         pytest.param(b"<?xml version='1.0'?><Other/>", id="other xml"),
         pytest.param(b"<ServiceInterfaceDefinition><Unclosed>", id="broken xml"),
         pytest.param(SID_HEADER + b"\x1f\x8b\x08garbage", id="bad gzip"),
+        pytest.param(build_sid_file(IDENTIFIER)[:-20], id="truncated gzip"),
+        pytest.param(build_sid_file(IDENTIFIER) + b"trailing", id="trailing garbage"),
+        pytest.param(b"<Wrapper><ServiceInterfaceDefinition/></Wrapper>", id="wrong root element"),
         pytest.param(build_generic_wset(), id="wset"),
     ],
 )
@@ -287,6 +290,67 @@ def test_text_in_xml_elements():
     assert parsed["parameters"][1]["type"] == "unknown"
     assert parsed["parameters"][1]["id"] is None
     assert parsed["application"]["model"] == ""
+
+
+def test_unusual_elements_and_attributes():
+    xml = (
+        b'<ServiceInterfaceDefinition Identifier="X" IsMostSignificantByteFirst="maybe">'
+        b'<SecurityProtocols><Servlink><Accounts><Password Level="1">secret</Password>'
+        b"</Accounts></Servlink><Other/></SecurityProtocols>"
+        b'<Enumeration Else="!!!"><Element Name="Unnamed" Value="0"/></Enumeration>'
+        b'<Structure Name="S"><Comment/><Field Name="F"><Integer Size="8"/></Field></Structure>'
+        b'<Namespace Name="N">'
+        b'<DataItem Name="100 Odd values" Access="ReadWrite">'
+        b'<Float IsSigned="maybe" Precision="Single"/>'
+        b'<CommunicationProperties><Servlink Handle="0x10"/><CANopen Multiplexor="12"/>'
+        b'<Modbus Register="40001"/></CommunicationProperties>'
+        b"<InitialValue>not a number</InitialValue>"
+        b"<Minimum><Constant>low</Constant></Minimum>"
+        b'<Security Operation="Write" Level="high"/><Security Operation="Execute" Level="1"/>'
+        b"</DataItem>"
+        b'<DataItem Name="101 Count"><Integer/><InitialValue>none</InitialValue></DataItem>'
+        b'<LogicManager Name="200 LM short"><InitialValue>0 0 True</InitialValue></LogicManager>'
+        b'<StructureItem Name="300 SI" Structure="S" Persist="yes"/>'
+        b"</Namespace></ServiceInterfaceDefinition>"
+    )
+    parsed = parse_sid(xml)
+    assert parsed["is_most_significant_byte_first"] is None
+    assert parsed["security"] == {
+        "servlink": {
+            "accounts": [{"type": "Password", "Level": "1", "text": "secret"}],
+            "command_security_levels": {},
+        },
+        "other": {"accounts": [], "command_security_levels": {}},
+    }
+    assert parsed["num_enumerations"] == 0
+    assert parsed["structures"] == {"S": [{"name": "F", "type": "integer", "size": 8}]}
+
+    item, count, logic, structure = parsed["parameters"]
+    assert count["initial"] == "none"
+    assert "signed" not in item
+    assert item["servlink_handle"] is None
+    assert item["canopen_multiplexor"] == 12
+    assert item["modbus_properties"] == {"Register": "40001"}
+    assert item["initial"] == "not a number"
+    assert item["minimum"] == "low"
+    assert item["maximum"] is None
+    assert item["read_security_level"] is None
+    assert item["write_security_level"] is None
+
+    assert logic["initial"] == {"text": "0 0 True"}
+    assert logic["servlink_handle"] is None
+    assert structure["extra"] == {"Persist": "yes"}
+    assert structure["initial"] is None
+
+
+def test_no_data_items():
+    parsed = parse_sid(b'<ServiceInterfaceDefinition Identifier="EG3500XTP2 2.17-0_54728"/>')
+    assert parsed["num_parameters"] == 0
+    assert parsed["parameters"] == []
+    assert parsed["namespaces"] == []
+    assert parsed["events"] == {}
+    assert parsed["application"]["model"] == "3500XT-P2"
+    assert parsed["header"] == {}
 
 
 @pytest.mark.parametrize(

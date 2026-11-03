@@ -4,6 +4,7 @@ import gzip
 import io
 import json
 from array import array
+from collections import namedtuple
 from datetime import datetime, timedelta
 from decimal import Decimal
 from pathlib import Path
@@ -12,15 +13,27 @@ from typing import Final
 import pytest
 
 from peat import DeviceData
+from peat.modules.woodward import parse_wset as parse_wset_module
 from peat.modules.woodward.parse_wset import (
     INTERNAL_GROUP,
     LOGICS_MANAGER_BINARY_OPERATORS,
     LOGICS_MANAGER_UNARY_OPERATORS,
     WSET_HEADER_LEN,
+    _descriptor_type,
+    _hashtable_items,
+    _scale,
+    _text_value,
+    _to_bool,
+    _to_float,
+    _to_int,
+    application_info,
     easygen_parameter_names,
     extract_generic_parameters,
+    extract_settings,
     find_nrbf_offset,
+    is_settings_table,
     is_wset_data,
+    parameter_record,
     parse_wset,
     populate_device_from_wset,
     read_nrbf_streams,
@@ -32,10 +45,14 @@ from peat.modules.woodward.parse_wset import (
 
 from .nrbf_builder import (
     DEFAULT_PARAMETERS,
+    E3_APP_ID,
+    E3_PARAMETERS,
     WSET_HEADER,
+    build_e3_wset,
     build_generic_streams,
     build_generic_wset,
     build_woodward_wset,
+    build_woodward_wtool,
 )
 
 #: Real easYgen-3500 settings file (see examples/devices/woodward/easygen-3500/README.md)
@@ -551,6 +568,8 @@ def test_summarize_and_populate(real_parsed):
     assert dev.extra["wset"]["logic"] == {
         "num_equations": 130,
         "num_command_variables": 43,
+        "num_linked_command_variables": 5,
+        "num_constant_command_variables": 0,
         "unknown_operators": 0,
     }
     assert len(dev.registers) == 4548
@@ -580,3 +599,315 @@ def test_summarize_and_populate(real_parsed):
     empty = DeviceData()
     populate_device_from_wset(empty, {})
     assert not empty.extra
+
+
+# ---------------------------------------------------------------------------
+# Synthetic E3 engine control settings file
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture(scope="module")
+def e3_parsed() -> dict:
+    return parse_wset(build_e3_wset())
+
+
+@pytest.fixture(scope="module")
+def e3_records(e3_parsed) -> dict[str, dict]:
+    return {record["name"]: record for record in e3_parsed["parameters"]}
+
+
+def test_e3_file(e3_parsed):
+    assert e3_parsed["nrbf"]["errors"] == []
+    assert e3_parsed["application"]["id"] == E3_APP_ID
+    assert e3_parsed["application"]["brand"] == "E3"
+    assert e3_parsed["application"]["part_number"] == "5418-4091"
+    assert e3_parsed["num_parameters"] == len(E3_PARAMETERS)
+    assert e3_parsed["parameter_kinds"] == {"basic": 4, "lookup_table": 1, "array": 1}
+    assert e3_parsed["parameter_types"] == {"boolean": 2, "array": 2, "float": 1, "string": 1}
+    assert e3_parsed["groups"] == {"DIAG": 2, "EBP": 1, "FUEL": 1, "QGN": 1, "REV_INFO": 1}
+    assert all(record["id"] is None for record in e3_parsed["parameters"])
+    assert json.loads(json.dumps(e3_parsed))["num_parameters"] == len(E3_PARAMETERS)
+
+
+def test_e3_float(e3_records):
+    record = e3_records["QGN.CL_KP_"]
+    assert (record["group"], record["id"], record["label"]) == ("QGN", None, "CL_KP_")
+    assert record["kind"] == "basic"
+    assert record["type"] == "float"
+    assert record["value"] == 0.25
+    assert record["value_text"] == "0.25"
+    assert record["initial"] == 0.25
+    assert record["minimum"] == 0.001
+    assert record["maximum"] == 9.999
+    assert record["units"] == ""
+    assert record["servlink_handle"] == 2196768448
+
+
+def test_e3_boolean(e3_records):
+    on = e3_records["DIAG.AL_751.OVRD"]
+    assert (on["group"], on["id"], on["label"]) == ("DIAG.AL_751", None, "OVRD")
+    assert on["type"] == "boolean"
+    assert on["value"] is True
+    assert on["value_text"] == "True"
+    assert on["initial"] is False
+    assert on["minimum"] is None
+    off = e3_records["DIAG.AL_752.OVRD"]
+    assert off["value"] is False
+    assert off["initial"] is True
+
+
+def test_e3_string(e3_records):
+    record = e3_records["REV_INFO.GAS_RUNNING_H"]
+    assert record["type"] == "string"
+    assert record["value"] == "Natural Gas"
+    assert record["initial"] == "Natural Gas"
+    assert record["max_size"] == 49
+
+
+def test_e3_lookup_table(e3_records):
+    record = e3_records["EBP.CURVE_H"]
+    assert record["class"] == "Woodward_DataAccess_LookupTableParameter"
+    assert record["kind"] == "lookup_table"
+    assert record["type"] == "array"
+    assert record["index_inputs"] == ["EBP.CURVE_H_XInput", "EBP.CURVE_H_YInput"]
+    # Descriptor fields come from the output array's descriptor
+    assert record["units"] == "kPa"
+    assert record["write_security_level"] == 3
+    assert record["servlink_handle"] == 3256877111
+    assert record["arrays"] == [
+        {
+            "name": "EBP.CURVE_H",
+            "type": "float",
+            "size": 4,
+            "values": [0.0, 0.5, 1.0, 1.5],
+            "initial": [0.0, 0.0, 0.0, 0.0],
+            "units": "kPa",
+        },
+        {
+            "name": "EBP.CURVE_H_XTable",
+            "type": "float",
+            "size": 2,
+            "values": [1000.0, 1800.0],
+            "initial": [1000.0, 1800.0],
+            "units": "RPM",
+        },
+        {
+            "name": "EBP.CURVE_H_YTable",
+            "type": "float",
+            "size": 2,
+            "values": [10.0, 220.0],
+            "initial": [10.0, 220.0],
+            "units": "kPa",
+        },
+    ]
+    assert record["value"] == [[0.0, 0.5, 1.0, 1.5], [1000.0, 1800.0], [10.0, 220.0]]
+    assert record["initial"] == [[0.0, 0.0, 0.0, 0.0], [1000.0, 1800.0], [10.0, 220.0]]
+
+
+def test_e3_array(e3_records):
+    record = e3_records["FUEL.TRIM_ARRAY"]
+    assert record["class"] == "Woodward_DataAccess_ArrayParameter"
+    assert record["kind"] == "array"
+    assert record["type"] == "array"
+    assert "index_inputs" not in record
+    assert record["arrays"] == [
+        {
+            "name": "FUEL.TRIM_ARRAY",
+            "type": "float",
+            "size": 3,
+            "values": [1.25, 2.5, -3.0],
+            "initial": [0.0],  # a single initial value is used for every element
+            "units": "%",
+        }
+    ]
+    assert record["value"] == [1.25, 2.5, -3.0]
+    assert record["initial"] == [0.0]
+    assert record["units"] == "%"
+    assert record["write_security_level"] == 2
+
+
+def test_e3_populate():
+    dev = DeviceData()
+    parsed = parse_wset(build_e3_wset())
+    populate_device_from_wset(dev, parsed)
+    assert dev.description.brand == "E3"
+    assert dev.firmware.id == E3_APP_ID
+    parameters = dev.extra["parameters"]
+    assert parameters["DIAG.AL_751.OVRD"] is True
+    assert parameters["EBP.CURVE_H"][1] == [1000.0, 1800.0]
+    assert len(parameters) == len(E3_PARAMETERS)
+
+
+# ---------------------------------------------------------------------------
+# Error paths and alternate object layouts
+# ---------------------------------------------------------------------------
+
+
+def _fake(class_name: str, **fields):
+    """A fake decoded .NET object (``_is_record`` only needs ``_fields`` and ``_asdict``)."""
+    return namedtuple(class_name, list(fields))(**fields)
+
+
+def test_parameter_extraction_failure(monkeypatch, synthetic_wset):
+    real_parameter_record = parse_wset_module.parameter_record
+
+    def _parameter_record(name, parameter, by_name):
+        if name == "Th2GenOverFreq":
+            raise ValueError("bad parameter")
+        return real_parameter_record(name, parameter, by_name)
+
+    monkeypatch.setattr(parse_wset_module, "parameter_record", _parameter_record)
+    parsed = parse_wset(synthetic_wset)
+    assert parsed["num_parameters"] == len(DEFAULT_PARAMETERS)
+    assert parsed["parameter_kinds"] == {"basic": 3, "error": 1}
+    records = {record["name"]: record for record in parsed["parameters"]}
+    assert records["Th2GenOverFreq"] == {
+        "name": "Th2GenOverFreq",
+        "kind": "error",
+        "type": "unknown",
+        "value": None,
+        "error": "ValueError('bad parameter')",
+    }
+
+
+def test_undecodable_streams():
+    # A valid NRBF header record followed by garbage
+    data = WSET_HEADER + build_generic_streams()[:17] + b"\xfe" * 32
+    assert is_wset_data(data)
+    assert parse_wset(data) == {}
+
+
+def test_hashtable_layouts():
+    name = _fake("Woodward_Sid_Descriptors_ParameterName", delimitedName="A.1702 Device number")
+    parameter = _fake(
+        "Woodward_DataAccess_BasicParameter",
+        parameterValueCache=_fake("Cache", value="7"),
+        descriptor=None,
+    )
+    assert _hashtable_items({"key": "value"}) == [("key", "value")]
+    pairs = _fake(
+        "System_Collections_Generic_Dictionary",
+        KeyValuePairs=[_fake("Pair", key=name, value=parameter)],
+    )
+    assert _hashtable_items(pairs) == [(name, parameter)]
+    assert is_settings_table(pairs)
+    records, inputs = extract_settings(pairs)
+    assert inputs == {}
+    assert [(r["name"], r["id"], r["kind"], r["value"]) for r in records] == [
+        ("A.1702 Device number", 1702, "basic", "7")
+    ]
+    assert _hashtable_items(_fake("Other", Keys=None)) == []
+    assert _hashtable_items(None) == []
+    assert not is_settings_table({})
+    assert not is_settings_table({"plain string key": parameter})
+
+
+def test_text_and_number_conversion():
+    assert _text_value(None) is None
+    assert _text_value("text") == "text"
+    assert _text_value(_fake("Woodward_Sid_TextValue", value=[])) is None
+    assert _text_value(_fake("Woodward_Sid_TextValue", value=["a", "b"])) == ["a", "b"]
+    assert _text_value(_fake("Woodward_Sid_TextValue", value=5)) == "5"
+    assert _text_value(_fake("Woodward_Sid_TextValue", value=None)) is None
+    assert _to_int(None) is None
+    assert _to_int(" 12 ") == 12
+    assert _to_int("twelve") == "twelve"
+    assert _to_float(None) is None
+    assert _to_float("1.5") == 1.5
+    assert _to_float("n/a") == "n/a"
+    assert _to_bool(None) is None
+    assert _to_bool("maybe") == "maybe"
+
+
+def test_computed_missing_source(caplog):
+    caplog.set_level("DEBUG")
+    descriptor = _fake(
+        "Woodward_Sid_Descriptors_ParameterDescriptor",
+        dataTypeDescriptor=_fake("Woodward_Sid_Descriptors_FloatDescriptor", precision=None),
+        expressionDescriptor=_fake(
+            "Woodward_Sid_Descriptors_ExpressionDescriptor",
+            paramName="MissingSource",
+            multiplier=0.1,
+            offset=0.0,
+        ),
+        initialValue=None,
+        minimum=None,
+        maximum=None,
+    )
+    parameter = _fake("Woodward_DataAccess_ComputedParameter", descriptor=descriptor)
+    record = parameter_record("Config.1910 Limit", parameter, {})
+    assert record["kind"] == "computed"
+    assert record["type"] == "float"
+    assert record["source"] == "MissingSource"
+    assert record["value"] is None
+    assert record["source_value"] is None
+    assert record["initial"] is None
+    assert "Computed parameter source 'MissingSource' not found" in caplog.text
+
+
+def test_unknown_parameter_class():
+    parameter = _fake("Woodward_DataAccess_FutureParameter", something=1)
+    record = parameter_record("FUTURE.PARAM", parameter, {})
+    assert record["kind"] == "unknown"
+    assert record["value"] == {"_class": "Woodward_DataAccess_FutureParameter", "something": 1}
+
+
+def test_array_cache_value_layout():
+    # A cache with a TextValue "value" instead of a "values" list
+    descriptor = _fake(
+        "Woodward_Sid_Descriptors_ParameterDescriptor",
+        name="T.ARRAY",
+        dataTypeDescriptor=_fake("Woodward_Sid_Descriptors_IntegerDescriptor", size=16),
+        initialValue=None,
+        units="s",
+    )
+    parameter = _fake(
+        "Woodward_DataAccess_ArrayParameter",
+        arrayParameterValueCache=_fake(
+            "Woodward_Settings_ArrayParameterValueCache",
+            descriptor=descriptor,
+            value=_fake("Woodward_Sid_TextValue", value=["1", "2"]),
+        ),
+        descriptor=descriptor,
+    )
+    record = parameter_record("T.ARRAY", parameter, {})
+    assert record["kind"] == "array"
+    assert record["value"] == [1, 2]
+    assert record["initial"] is None
+    assert record["arrays"][0]["type"] == "integer"
+    assert record["arrays"][0]["units"] == "s"
+
+
+@pytest.mark.parametrize(
+    ("class_name", "expected"),
+    [
+        ("Woodward_Sid_Descriptors_BitFieldBooleanDescriptor", "bit_field"),
+        ("Woodward_Sid_Descriptors_BitFieldsDescriptor", "bit_fields"),
+        ("Woodward_Sid_Descriptors_ArrayDescriptor", "array"),
+        ("Woodward_Sid_Descriptors_FutureDescriptor", "Woodward_Sid_Descriptors_FutureDescriptor"),
+    ],
+)
+def test_descriptor_type(class_name, expected):
+    assert _descriptor_type(_fake(class_name)) == expected
+    assert _descriptor_type(None) == "unknown"
+
+
+def test_scale_invalid():
+    assert _scale(10, "x", 0) is None
+    assert _scale("10", 1, 0) is None
+    assert _scale(True, 1, 0) is None
+
+
+def test_application_info_variants():
+    assert application_info({"sid_identifier": "5418-6722-NEW"})["model"] == "3500"
+    info = application_info(
+        {"sid_specification": "us_5418-6722-NEW", "application_description": "custom"}
+    )
+    assert info["id"] == "custom"
+    assert info["part_number"] == "5418-6722"
+    assert info["sid"] == "us_5418-6722-NEW"
+
+
+def test_other_container_type_is_not_wset():
+    assert not is_wset_data(build_woodward_wtool())
+    assert parse_wset(build_woodward_wtool())["settings_header"] == {}

@@ -423,7 +423,7 @@ def _write_parameter_name(w: NrbfWriter, name: str) -> None:
     w.string(name)
 
 
-def _write_text_value(w: NrbfWriter, text: str | None) -> None:
+def _write_text_value(w: NrbfWriter, text: str | list[str] | None) -> None:
     if text is None:
         w.null()
         return
@@ -433,7 +433,7 @@ def _write_text_value(w: NrbfWriter, text: str | None) -> None:
         [("value", BT_STRING_ARRAY, None), ("cultureInfo", BT_OBJECT, None)],
         library_id=LIB_SID,
     )
-    w.string_array_ref([text])
+    w.string_array_ref(text if isinstance(text, list) else [text])
     w.null()
 
 
@@ -458,7 +458,53 @@ def _write_range_limit(w: NrbfWriter, text: str | None) -> None:
 
 def _write_data_type(w: NrbfWriter, param: dict[str, Any]) -> None:
     kind = param["type"]
-    if kind == "integer":
+    if kind == "float":
+        w.class_record(
+            w.new_id(),
+            "Woodward.Sid.Descriptors.FloatDescriptor",
+            [
+                (
+                    "precision",
+                    BT_CLASS,
+                    ("Woodward.Sid.Descriptors.FloatDescriptor+PrecisionEnum", LIB_SID),
+                ),
+                ("maximumPercentageChange", BT_PRIMITIVE, INT32),
+            ],
+            library_id=LIB_SID,
+        )
+        w.class_record(
+            w.new_id(),
+            "Woodward.Sid.Descriptors.FloatDescriptor+PrecisionEnum",
+            [("value__", BT_PRIMITIVE, INT32)],
+            library_id=LIB_SID,
+        )
+        w.primitive(INT32, 0)
+        w.primitive(INT32, 10)
+    elif kind == "boolean":
+        w.class_record(
+            w.new_id(),
+            "Woodward.Sid.Descriptors.BooleanDescriptor",
+            [("size", BT_PRIMITIVE, INT32)],
+            library_id=LIB_SID,
+        )
+        w.primitive(INT32, 8)
+    elif kind == "array":
+        w.class_record(
+            w.new_id(),
+            "Woodward.Sid.Descriptors.ArrayDescriptor",
+            [
+                ("size", BT_PRIMITIVE, INT32),
+                ("dataTypeDesc", BT_OBJECT, None),
+                ("expression", BT_OBJECT, None),
+                ("isMonotonicRestricted", BT_PRIMITIVE, BOOLEAN),
+            ],
+            library_id=LIB_SID,
+        )
+        w.primitive(INT32, len(param["values"]))
+        _write_data_type(w, {"type": param.get("element_type", "float")})
+        w.null()
+        w.primitive(BOOLEAN, False)
+    elif kind == "integer":
         w.class_record(
             w.new_id(),
             "Woodward.Sid.Descriptors.IntegerDescriptor",
@@ -627,6 +673,120 @@ def _write_basic_parameter(w: NrbfWriter, param: dict[str, Any]) -> None:
     w.reference(descriptor_id)
 
 
+def _write_array_parameter(w: NrbfWriter, param: dict[str, Any], descriptor_id: int) -> None:
+    """
+    An E3-style ``Woodward.DataAccess.ArrayParameter``: an
+    ``ArrayParameterValueCache`` with the array's descriptor and cached
+    ``values``, and a reference to the same descriptor.
+    """
+    w.class_record(
+        w.new_id(),
+        "Woodward.DataAccess.ArrayParameter",
+        [
+            (
+                "arrayParameterValueCache",
+                BT_CLASS,
+                ("Woodward.Settings.ArrayParameterValueCache", LIB_SETTINGS),
+            ),
+            ("descriptor", BT_CLASS, ("Woodward.Sid.Descriptors.ParameterDescriptor", LIB_SID)),
+        ],
+        library_id=LIB_DATA_ACCESS,
+    )
+    w.class_record(
+        w.new_id(),
+        "Woodward.Settings.ArrayParameterValueCache",
+        [
+            ("descriptor", BT_CLASS, ("Woodward.Sid.Descriptors.ParameterDescriptor", LIB_SID)),
+            ("values", BT_STRING_ARRAY, None),
+        ],
+        library_id=LIB_SETTINGS,
+    )
+    _write_descriptor(w, {**param, "type": "array"}, descriptor_id)
+    w.string_array_ref(param["values"])
+    w.reference(descriptor_id)
+
+
+def _write_lookup_table_parameter(w: NrbfWriter, param: dict[str, Any]) -> None:
+    """
+    An E3-style ``Woodward.DataAccess.LookupTableParameter``: a
+    ``LookupTableValue`` with the output array and the index (axis) arrays,
+    and a ``LookupTableDescriptor`` (note the capitalized ``Descriptor`` field)
+    that references the array descriptors and names the index input parameters.
+    """
+    arrays = param["arrays"]
+    descriptor_ids = [w.new_id() for _ in arrays]
+    w.class_record(
+        w.new_id(),
+        "Woodward.DataAccess.LookupTableParameter",
+        [
+            ("value", BT_CLASS, ("Woodward.DataAccess.LookupTableValue", LIB_DATA_ACCESS)),
+            (
+                "Descriptor",
+                BT_CLASS,
+                ("Woodward.Sid.Descriptors.LookupTableDescriptor", LIB_SID),
+            ),
+        ],
+        library_id=LIB_DATA_ACCESS,
+    )
+    w.class_record(
+        w.new_id(),
+        "Woodward.DataAccess.LookupTableValue",
+        [("arrays", BT_OBJECT_ARRAY, None)],
+        library_id=LIB_DATA_ACCESS,
+    )
+    arrays_id = w.new_id()
+    w.reference(arrays_id)
+
+    def _arrays() -> None:
+        w.array_single_object(arrays_id, len(arrays))
+        for array_param, descriptor_id in zip(arrays, descriptor_ids, strict=True):
+            _write_array_parameter(w, array_param, descriptor_id)
+
+    w.defer(_arrays)
+    w.class_record(
+        w.new_id(),
+        "Woodward.Sid.Descriptors.LookupTableDescriptor",
+        [
+            (
+                "outputArrayDescriptor",
+                BT_CLASS,
+                ("Woodward.Sid.Descriptors.ParameterDescriptor", LIB_SID),
+            ),
+            ("indexArrayDescriptors", BT_OBJECT_ARRAY, None),
+            ("indexInputParameterNames", BT_OBJECT_ARRAY, None),
+        ],
+        library_id=LIB_SID,
+    )
+    w.reference(descriptor_ids[0])
+    index_descriptors_id = w.new_id()
+    w.reference(index_descriptors_id)
+    index_names_id = w.new_id()
+    w.reference(index_names_id)
+
+    def _index_descriptors() -> None:
+        w.array_single_object(index_descriptors_id, len(descriptor_ids) - 1)
+        for descriptor_id in descriptor_ids[1:]:
+            w.reference(descriptor_id)
+
+    def _index_names() -> None:
+        w.array_single_object(index_names_id, len(param["index_inputs"]))
+        for name in param["index_inputs"]:
+            _write_parameter_name(w, name)
+
+    w.defer(_index_descriptors)
+    w.defer(_index_names)
+
+
+def _write_parameter(w: NrbfWriter, param: dict[str, Any]) -> None:
+    kind = param.get("kind", "basic")
+    if kind == "lookup_table":
+        _write_lookup_table_parameter(w, param)
+    elif kind == "array":
+        _write_array_parameter(w, param, w.new_id())
+    else:
+        _write_basic_parameter(w, param)
+
+
 def _write_settings_table(w: NrbfWriter, parameters: list[dict[str, Any]]) -> None:
     w.header(1)
     w.library(LIB_SETTINGS, SETTINGS_LIBRARY)
@@ -657,7 +817,7 @@ def _write_settings_table(w: NrbfWriter, parameters: list[dict[str, Any]]) -> No
         _write_parameter_name(w, param["name"])
     w.array_single_object(3, len(parameters))
     for param in parameters:
-        _write_basic_parameter(w, param)
+        _write_parameter(w, param)
     # Referenced arrays (TextValue strings, enumeration elements) must follow the
     # array they're referenced from, not be interleaved with its elements
     w.flush()
@@ -678,6 +838,109 @@ def build_woodward_wset(
     w = NrbfWriter()
     _write_settings_header(w, app_id, sid if sid is not None else app_id, notes)
     _write_settings_table(w, parameters if parameters is not None else DEFAULT_PARAMETERS)
+    return header + w.getvalue()
+
+
+# ---------------------------------------------------------------------------
+# Woodward E3 settings fixture: names without parameter numbers, float and
+# boolean parameters, arrays and lookup tables (modeled on real E3 files)
+# ---------------------------------------------------------------------------
+
+E3_APP_ID: Final[str] = "5418-4091A 2013-10-24 11.14.58"
+
+#: Default E3 parameters (see :data:`DEFAULT_PARAMETERS` for the basic parameter keys).
+#: Lookup tables list their output array first, followed by the index (axis) arrays.
+E3_PARAMETERS: Final[list[dict[str, Any]]] = [
+    {
+        "name": "QGN.CL_KP_",
+        "type": "float",
+        "value": "0.25",
+        "initial": "0.25",
+        "minimum": "0.001",
+        "maximum": "9.999",
+        "write_level": 2,
+        "servlink_handle": 2196768448,
+    },
+    {
+        "name": "DIAG.AL_751.OVRD",
+        "type": "boolean",
+        "value": "True",
+        "initial": "false",
+        "write_level": 0,
+        "servlink_handle": 2179992958,
+    },
+    {
+        "name": "DIAG.AL_752.OVRD",
+        "type": "boolean",
+        "value": "False",
+        "initial": "true",
+        "write_level": 0,
+        "servlink_handle": 2179992959,
+    },
+    {
+        "name": "REV_INFO.GAS_RUNNING_H",
+        "type": "string",
+        "value": "Natural Gas",
+        "initial": "Natural Gas",
+        "write_level": 0,
+        "servlink_handle": 2431649549,
+    },
+    {
+        "name": "EBP.CURVE_H",
+        "kind": "lookup_table",
+        "index_inputs": ["EBP.CURVE_H_XInput", "EBP.CURVE_H_YInput"],
+        "arrays": [
+            {
+                "name": "EBP.CURVE_H",
+                "values": ["0", "0.5", "1", "1.5"],
+                "initial": ["0", "0", "0", "0"],
+                "minimum": "-900000000000000000000",
+                "maximum": "900000000000000000000",
+                "units": "kPa",
+                "write_level": 3,
+                "servlink_handle": 3256877111,
+            },
+            {
+                "name": "EBP.CURVE_H_XTable",
+                "values": ["1000", "1800"],
+                "initial": ["1000", "1800"],
+                "units": "RPM",
+                "write_level": 3,
+            },
+            {
+                "name": "EBP.CURVE_H_YTable",
+                "values": ["10", "220"],
+                "initial": ["10", "220"],
+                "units": "kPa",
+                "write_level": 3,
+            },
+        ],
+    },
+    {
+        "name": "FUEL.TRIM_ARRAY",
+        "kind": "array",
+        "values": ["1.25", "2.5", "-3"],
+        "initial": "0",
+        "units": "%",
+        "write_level": 2,
+    },
+]
+
+
+def build_e3_wset(
+    app_id: str = E3_APP_ID,
+    parameters: list[dict[str, Any]] | None = None,
+    header: bytes = WSET_HEADER,
+) -> bytes:
+    """
+    A synthetic E3 engine control ``.wset`` file, modeled on the object layout
+    of real E3 settings files: names without parameter numbers, ``FloatDescriptor``,
+    ``BooleanDescriptor`` and ``StringDescriptor`` basic parameters, a
+    ``LookupTableParameter`` and a plain ``ArrayParameter``.
+    """
+    w = NrbfWriter()
+    _write_settings_header(w, app_id, app_id)
+    _write_settings_table(w, parameters if parameters is not None else E3_PARAMETERS)
     return header + w.getvalue()
 
 

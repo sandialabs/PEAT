@@ -72,8 +72,14 @@ TOOLKIT_PRODUCT_NAMES: Final[dict[str, dict[str, str]]] = {
     "MSLC": {"brand": "MSLC", "product": "MSLC"},
 }
 
+# Woodward part numbers (NNNN-NNNN or NNNN-NNN) with an optional revision
+# that is attached or follows a "-", "_", or space: 5418-6722-NEW, 5418-4091A,
+# 9908-419A, 8440-2088_M, 5418-6722 NEW. A revision must end at a boundary,
+# otherwise the part number has no revision (5418-6722-NEWS, 5418-6722_32).
 _PART_NUMBER_RE: Final[re.Pattern[str]] = re.compile(
-    r"(?P<part>\d{4}-\d{4})(?:-?(?P<rev>[A-Za-z0-9]+))?(?![\d-])"
+    r"(?<!\d)(?<!\d-)(?P<part>\d{4}-\d{3,4})(?!\d)"
+    r"(?:(?:[-_]?(?P<rev>[A-Za-z][A-Za-z0-9]{0,2})|\s(?P<spaced_rev>[A-Z]{1,3}))"
+    r"(?![A-Za-z0-9]))?"
 )
 _XT_IDENTIFIER_RE: Final[re.Pattern[str]] = re.compile(
     r"(?P<prefix>[A-Z]{2,4})(?P<number>\d{1,4})(?P<xt>XT)?(?P<variant>P\d|LT|LITE|RENTAL)?"
@@ -156,7 +162,7 @@ def identify_application(identifier: str) -> dict[str, Any]:
     match = _PART_NUMBER_RE.search(identifier)
     if match:
         info["part_number"] = match.group("part")
-        info["revision"] = match.group("rev") or ""
+        info["revision"] = match.group("rev") or match.group("spaced_rev") or ""
         info.update(TOOLKIT_APPLICATIONS.get(match.group("part"), {}))
         return info
 

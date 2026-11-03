@@ -25,7 +25,12 @@ LogicsManager "command chain" documented in the easYgen Modbus appendix
 
 The conversion produces one ``PROGRAM`` with a ``BOOL`` variable per
 command variable (``CV_03_05``) and per equation output (``LM_12110``), and
-``TON``/``TOF`` function block instances for the delays. The PLCopen TC6
+``TON``/``TOF`` function block instances for the delays. Command variables
+that are the result of an equation (``00.01 LM: Flag 1`` is the output of
+``12230 Flag 1``) are assigned the equation output right after it
+(``CV_00_01 := LM_12230;``), like the cyclic evaluation of the device, so the
+equations stay linked. Constant command variables (``02.02 LM TRUE`` on the
+easYgen-XT) are assigned their value at the start. The PLCopen TC6
 XML is built with :class:`~peat.parsing.tc6.TC6`, the same class the
 Schneider M340 and Rockwell modules use, so the easYgen logic goes through
 the same Structured Text generation and SCEPTRE/OpenPLC compatibility
@@ -38,6 +43,7 @@ options as the PLC logic PEAT parses.
    is stored as data source selections, not as equations.
 """
 
+import math
 import re
 from typing import Any, Final
 from xml.etree.ElementTree import SubElement
@@ -65,6 +71,24 @@ ST_SIGNS: Final[dict[str, str]] = {
 
 _CV_NUMBER_RE: Final[re.Pattern[str]] = re.compile(r"^(\d{2})\.(\d{2})\b")
 _IDENTIFIER_RE: Final[re.Pattern[str]] = re.compile(r"[^A-Za-z0-9_]+")
+
+#: Command variables that are the result of a LogicsManager equation, e.g.
+#: ``00.01 LM: Flag 1`` (easYgen-3000) or ``96.01 LM: Flag 1`` (easYgen-XT).
+#: The text after ``LM:`` is the label of the equation.
+_LM_RESULT_RE: Final[re.Pattern[str]] = re.compile(
+    r"^\s*(?:\d{2}\.\d{2}\s+)?LM\s*:\s*(?P<label>.+?)\s*$", re.IGNORECASE
+)
+
+#: Constant command variables, e.g. ``02.01 LM FALSE`` and ``02.02 LM TRUE``
+#: (easYgen-XT). The device sets them, they aren't inputs.
+_LM_CONSTANT_RE: Final[re.Pattern[str]] = re.compile(
+    r"^\s*(?:\d{2}\.\d{2}\s+)?LM\s+(?P<value>TRUE|FALSE)\s*$", re.IGNORECASE
+)
+
+#: Characters ignored when comparing labels. ToolKit abbreviates labels with
+#: dots and the abbreviations differ between files and firmware versions,
+#: e.g. ``Start req.in AUTO``, ``Start req. in AUTO`` and ``Start req in AUTO``.
+_LABEL_IGNORED_RE: Final[re.Pattern[str]] = re.compile(r"[\s.\-_]+")
 
 
 def st_identifier(text: str, prefix: str = "") -> str:
@@ -122,12 +146,38 @@ def output_identifier(record: dict[str, Any]) -> str:
     return st_identifier(record.get("label") or record.get("name") or "", "LM_")
 
 
-def time_literal(seconds: Any) -> str:
-    """Convert a delay in seconds to a Structured Text time literal, e.g. ``T#500ms``."""
+def delay_seconds(value: Any) -> float | None:
+    """
+    Parse a LogicsManager delay in seconds.
+
+    Args:
+        value: The delay, e.g. ``0.5``, ``"0.5"`` or ``"0,5"`` (comma decimal)
+
+    Returns:
+        The delay in seconds, ``0.0`` if there is no delay (empty value), or
+        :obj:`None` if the delay isn't a finite, non-negative number
+    """
+    if value is None or value == "":
+        return 0.0
+    if isinstance(value, str):
+        value = value.strip().replace(",", ".")
     try:
-        milliseconds = round(float(seconds) * 1000)
-    except (TypeError, ValueError):
-        milliseconds = 0
+        seconds = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return None
+    if not math.isfinite(seconds) or seconds < 0:
+        return None
+    return seconds
+
+
+def time_literal(seconds: Any) -> str:
+    """
+    Convert a delay in seconds to a Structured Text time literal, e.g. ``T#500ms``.
+
+    Invalid delays (see :func:`delay_seconds`) become ``T#0ms``.
+    """
+    parsed = delay_seconds(seconds)
+    milliseconds = round(parsed * 1000) if parsed else 0
     return f"T#{milliseconds}ms"
 
 
@@ -139,6 +189,51 @@ def _equation(record: dict[str, Any]) -> dict[str, Any] | None:
     if not isinstance(value, dict) or "input_1" not in value:
         return None
     return value
+
+
+def _equation_delay(equation: dict[str, Any], key: str, output: str) -> float:
+    """A delay of an equation in seconds, ``0.0`` (no timer) if it's invalid."""
+    value = equation.get(key)
+    seconds = delay_seconds(value)
+    if seconds is None:
+        log.warning(f"Invalid LogicsManager {key} {value!r} for {output}, ignoring the delay")
+        return 0.0
+    return seconds
+
+
+def _normalize_label(label: str) -> str:
+    """Normalize a label for comparisons, e.g. ``Stop req.. in AUTO`` -> ``stopreqinauto``."""
+    return _LABEL_IGNORED_RE.sub("", label).lower()
+
+
+def equation_result_label(name: str) -> str:
+    """
+    Label of the equation a command variable is the result of.
+
+    Args:
+        name: The command variable name, e.g. ``00.01 LM: Flag 1``
+
+    Returns:
+        The equation label, e.g. ``Flag 1``, or an empty string if the
+        command variable isn't the result of an equation
+    """
+    match = _LM_RESULT_RE.match(name)
+    return match.group("label") if match else ""
+
+
+def command_variable_constant(name: str) -> str:
+    """
+    Value of a constant command variable.
+
+    Args:
+        name: The command variable name, e.g. ``02.02 LM TRUE``
+
+    Returns:
+        ``TRUE`` or ``FALSE``, or an empty string if the command variable
+        isn't a constant
+    """
+    match = _LM_CONSTANT_RE.match(name)
+    return match.group("value").upper() if match else ""
 
 
 def _input_name(equation: dict[str, Any], number: int) -> str:
@@ -204,13 +299,10 @@ def equation_to_st(
             template = "{a} AND {b} (* unknown operator " + operator + " *)"
         expression = "(" + template.format(a=expression, b=term) + ")"
 
-    delay_on = equation.get("delay_on") or 0
-    delay_off = equation.get("delay_off") or 0
-    try:
-        has_on = float(delay_on) > 0
-        has_off = float(delay_off) > 0
-    except (TypeError, ValueError):
-        has_on = has_off = False
+    delay_on = _equation_delay(equation, "delay_on", output)
+    delay_off = _equation_delay(equation, "delay_off", output)
+    has_on = delay_on > 0
+    has_off = delay_off > 0
 
     lines = [header]
     blocks: list[tuple[str, str]] = []
@@ -232,9 +324,58 @@ def equation_to_st(
     return lines, blocks, unknown
 
 
+def link_command_variables(
+    records: list[dict[str, Any]], identifiers: dict[str, str]
+) -> dict[str, str]:
+    """
+    Find the command variables that are the result of a LogicsManager equation.
+
+    Command variables such as ``00.01 LM: Flag 1`` are the outputs of other
+    equations (here ``12230 Flag 1``). They're matched to the equations by
+    label (see :func:`equation_result_label`). Labels matching no equation,
+    or more than one, aren't linked.
+
+    Args:
+        records: The LogicsManager parameter records
+        identifiers: Command variable identifiers by name
+
+    Returns:
+        The equation output identifier by command variable identifier,
+        e.g. ``{"CV_00_01": "LM_12230"}``
+    """
+    outputs_by_label: dict[str, set[str]] = {}
+    for record in records:
+        label = record.get("label") or ""
+        if label and _equation(record) is not None:
+            outputs_by_label.setdefault(_normalize_label(label), set()).add(
+                output_identifier(record)
+            )
+
+    links: dict[str, str] = {}
+    for name, identifier in identifiers.items():
+        label = equation_result_label(name)
+        if not label:
+            continue
+        outputs = outputs_by_label.get(_normalize_label(label), set())
+        if len(outputs) == 1:
+            links[identifier] = next(iter(outputs))
+        else:
+            log.debug(
+                f"LogicsManager command variable '{name.strip()}' matches "
+                f"{len(outputs)} equations, not linking it"
+            )
+    return links
+
+
 def logics_manager_program(records: list[dict[str, Any]]) -> dict[str, Any]:
     """
     Build the Structured Text program body for a set of LogicsManager equations.
+
+    Command variables that are the result of an equation (e.g.
+    ``00.01 LM: Flag 1``) are assigned the equation output right after the
+    equation, so the following equations and the next scan use it, like the
+    cyclic evaluation of the device. Constant command variables (e.g.
+    ``02.02 LM TRUE``) are assigned their value at the start of the body.
 
     Args:
         records: Parameter records, only ``logics_manager`` records are used
@@ -242,31 +383,68 @@ def logics_manager_program(records: list[dict[str, Any]]) -> dict[str, Any]:
     Returns:
         A :class:`dict` with the program ``body`` (statements), the
         ``variables`` (``{"name", "type", "comment"}``) to declare, the
-        ``command_variables`` (``{name: identifier}``), ``num_equations``,
-        and the number of ``unknown_operators``
+        ``command_variables`` (``{name: identifier}``), the
+        ``linked_command_variables`` (``{identifier: equation output}``),
+        the ``constant_command_variables`` (``{identifier: "TRUE"/"FALSE"}``),
+        ``num_equations``, and the number of ``unknown_operators``
     """
-    equations = [r for r in records if r.get("kind") == "logics_manager"]
+    equations = sorted(
+        (r for r in records if r.get("kind") == "logics_manager"),
+        key=lambda r: (r.get("id") or 0, r.get("name", "")),
+    )
     identifiers: dict[str, str] = {}
-    statements: list[str] = []
+    converted: list[tuple[str, list[str]]] = []  # (output, statements)
     blocks: list[tuple[str, str]] = []
     outputs: list[tuple[str, str]] = []
     unknown = 0
     intermediates: list[str] = []
 
-    for record in sorted(equations, key=lambda r: (r.get("id") or 0, r.get("name", ""))):
+    for record in equations:
         lines, record_blocks, record_unknown = equation_to_st(record, identifiers)
         output = output_identifier(record)
         outputs.append((output, record.get("name", "")))
         if record_blocks:
             intermediates.append(f"{output}_IN")
-        statements.extend(lines)
-        statements.append("")
+        converted.append((output, lines))
         blocks.extend(record_blocks)
         unknown += record_unknown
 
+    links = link_command_variables(equations, identifiers)
+    linked_by_output: dict[str, list[str]] = {}
+    for identifier, output in sorted(links.items()):
+        linked_by_output.setdefault(output, []).append(identifier)
+
+    statements: list[str] = []
+    for output, lines in converted:
+        statements.extend(lines)
+        statements.extend(
+            f"{identifier} := {output};" for identifier in linked_by_output.get(output, [])
+        )
+        statements.append("")
+
+    # One declaration per identifier, even if two names map to the same one
+    names_by_identifier: dict[str, str] = {}
+    for name, identifier in sorted(identifiers.items(), key=lambda item: item[1]):
+        names_by_identifier.setdefault(identifier, name.strip())
+
+    # Constant command variables (e.g. "02.02 LM TRUE") are set by the device
+    constants: dict[str, str] = {}
+    for identifier, name in names_by_identifier.items():
+        value = command_variable_constant(name)
+        if value and identifier not in links:
+            constants[identifier] = value
+
+    def comment(identifier: str) -> str:
+        name = names_by_identifier[identifier]
+        if identifier in links:
+            return f"{name} (equation output {links[identifier]})"
+        if identifier in constants:
+            return f"{name} (constant {constants[identifier]})"
+        return name
+
     variables: list[dict[str, str]] = [
-        {"name": identifier, "type": "BOOL", "comment": name}
-        for name, identifier in sorted(identifiers.items(), key=lambda item: item[1])
+        {"name": identifier, "type": "BOOL", "comment": comment(identifier)}
+        for identifier in names_by_identifier
     ]
     variables.extend({"name": output, "type": "BOOL", "comment": name} for output, name in outputs)
     variables.extend({"name": name, "type": "BOOL", "comment": ""} for name in intermediates)
@@ -276,8 +454,12 @@ def logics_manager_program(records: list[dict[str, Any]]) -> dict[str, Any]:
     if identifiers:
         body_lines.append("(* LogicsManager command variables *)")
         body_lines.extend(
-            f"(* {identifier} : {name} *)"
-            for name, identifier in sorted(identifiers.items(), key=lambda item: item[1])
+            f"(* {identifier} : {comment(identifier)} *)" for identifier in names_by_identifier
+        )
+        body_lines.append("")
+    if constants:
+        body_lines.extend(
+            f"{identifier} := {value};" for identifier, value in sorted(constants.items())
         )
         body_lines.append("")
     body_lines.extend(statements)
@@ -289,6 +471,8 @@ def logics_manager_program(records: list[dict[str, Any]]) -> dict[str, Any]:
         "body": "\n".join(body_lines).rstrip() + "\n",
         "variables": variables,
         "command_variables": identifiers,
+        "linked_command_variables": links,
+        "constant_command_variables": constants,
         "num_equations": len(equations),
         "unknown_operators": unknown,
     }
@@ -425,9 +609,13 @@ __all__ = [
     "ST_BINARY_OPERATORS",
     "ST_SIGNS",
     "add_logics_manager_logic",
+    "command_variable_constant",
     "command_variable_identifier",
+    "delay_seconds",
+    "equation_result_label",
     "equation_to_st",
     "expression_listing",
+    "link_command_variables",
     "logics_manager_program",
     "logics_manager_tc6",
     "output_identifier",

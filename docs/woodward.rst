@@ -67,7 +67,7 @@ The ToolKit file formats are shared by every ToolKit-based Woodward control, so 
    "Woodward E3 gas engine controls (Full Authority, Fuel Blending, Lean Burn Trim)", "ToolKit 4.x", "Verified with the settings, SID, and tool files Woodward publishes in its E3 HMI packages. These files use additional parameter types (boolean and lookup table parameters) which are supported."
    "easYgen-1000, easYgen-300, LS-4, MFR 2/11/15", "LeoPC1", "Not supported. These devices don't use ToolKit."
    "easYgen-400, 600, 800, 1400, 1600, 1700, 1800", "ToolKit-SC", "Not supported. ToolKit-SC is a separate product, and its file formats haven't been researched."
-   "2301E, 505, Atlas, 723PLUS, MicroNet (Control Assistant tunable files)", "Control Assistant", "``.tc`` files are parsed by :class:`~peat.modules.woodward.wdw_2301e.WDW2301E` (and also by the easYgen module). The layout was taken from PEAT's original parser, as no public example files exist."
+   "2301E, 505, Atlas, 723PLUS, MicroNet (Control Assistant tunable files)", "Control Assistant", "``.tc`` files are parsed by :class:`~peat.modules.woodward.wdw_2301e.WDW2301E`, except those of recognized easYgen applications, which are parsed by the easYgen module (see the notes below). The layout was taken from PEAT's original parser, as no public example files exist."
 
 Usage
 -----
@@ -87,14 +87,14 @@ Usage
    # Parse a Control Assistant tunable file saved from a 2301E
    peat parse -d wdw2301e ./2301e-tunables.tc
 
-   # Let PEAT pick the module by file name and signature. Note that .tc files
-   # match both Woodward modules and are parsed by each of them.
+   # Let PEAT pick the module by file name and signature. A .tc file goes to
+   # the easYgen module if it's from an easYgen, and to the 2301E module otherwise.
    peat parse ./toolkit-files/
 
    # Piped input works too, the file type is detected from its contents
    cat ./genset-1.wset | peat parse -d easygen -
 
-The parsed data is saved as ``parsed-wset.json``, ``parsed-sid.json``, ``parsed-wtool.json``, or ``parsed-tc.json`` in the device's output directory, next to the device data files. A summary of the file is added to the device data under ``extra.wset``, ``extra.sid``, ``extra.wtool``, or ``extra.tc``, the parameter values under ``extra.parameters``, and the application identity to the device description (brand, model, product) and firmware identifier. Settings files also populate the rest of the data model and the device logic (see below), and the LogicsManager logic is saved as ``logic.st`` (Structured Text) and ``logic-tc6.xml`` (PLCopen TC6 XML).
+The parsed data is saved as ``parsed-wset.json``, ``parsed-sid.json``, ``parsed-wtool.json``, or ``parsed-tc.json`` in the device's output directory, next to the device data files. A summary of the file is added to the device data under ``extra.wset``, ``extra.sid``, ``extra.wtool``, or ``extra.tc``, the parameter values under ``extra.parameters`` (a :class:`dict` of ``{parameter name: value}``), and the application identity to the device description (brand, model, product) and firmware identifier. Settings files also populate the rest of the data model and the device logic (see below), and the LogicsManager logic is saved as ``logic.st`` (Structured Text) and ``logic-tc6.xml`` (PLCopen TC6 XML).
 
 Python API:
 
@@ -147,12 +147,12 @@ Beyond the parameter list, the contents of a settings file are mapped onto the P
    "``tag``", "LogicsManager command variable list and AnalogManager data source list", "``binary`` tags for the ~680 command variables (``03.05 Horn``) and ``analog`` tags for the ~240 data sources (``01.01 Gen.volt.L-N [%]``), with the variable number as address."
    "``io``", "``Config_IO`` discrete and analog inputs and outputs, including external I/O", "One :class:`~peat.data.models.IO` per point (``DI 01``, ``DO 03``, ``AI 02``, ``AO 01``, ``External DO 21``) with all of its settings in ``extra``. Relay outputs are named after their LogicsManager parameter (``Relay 3``) and carry the equation as description."
    "``interface``", "``Config_Serial1``/``2`` (baudrate, parity, stop bits), ``Config_CAN1``..``3`` (baudrate), Ethernet IP/subnet/gateway parameters (easYgen-3000XT)", "Serial 1 is reported as RS-232 and Serial 2 (which has a duplex setting) as RS-485, as on the easYgen-3000 series."
-   "``service``", "Modbus on the serial interfaces (enable flag, slave ID, protocol number), CANopen (node ID) and J1939 on the CAN interfaces", "Services are attached to their interface."
+   "``service``", "Modbus on the serial interfaces (enable flag, slave ID, protocol number), CANopen (node ID) and J1939 on the CAN interfaces", "Services are attached to their interface, and are only added when they're configured: Modbus when it's enabled (or, without an enable parameter, when a slave ID is set), CANopen when the device has a node ID on the bus, and J1939 when it's enabled or an ECU device type is selected."
    "``users``", "``Password ...`` parameters (easYgen-3000XT: basic, commissioning, super commissioning, serial and CAN interface passwords)", "The configured password is in the user's ``extra``. First generation easYgen-3000 settings files don't hold passwords. Code level settings are in ``extra.code_levels``."
    "``name``, ``geo.timezone``, ``extra``", "``Device name``, ``Time zone``, ``Device number``, ``Language`` parameters", ""
    "``logic``", "LogicsManager equations", "See the next section."
 
-The counts of the objects added are in ``extra.wset.data_model`` (``extra.sid.data_model`` for SIDs).
+The counts of the objects stored are in ``extra.wset.data_model`` (``extra.sid.data_model`` for SIDs). Objects that already exist on the device (e.g. when the same file is parsed twice) are merged, not duplicated, and are included in the counts.
 
 LogicsManager logic
 -------------------
@@ -171,22 +171,31 @@ Each equation becomes a ``BOOL`` output (``LM_12310`` for parameter 12310) compu
    LM_12310_TON(IN := LM_12310_IN, PT := T#50000ms);
    LM_12310 := LM_12310_TON.Q;
 
+Command variables that are the output of another equation (e.g. ``00.01 LM: Flag 1``, the output of ``12230 Flag 1``) are assigned that output right after the equation (``CV_00_01 := LM_12230;``), like the cyclic evaluation of the device, so the equations stay linked. Constant command variables (e.g. ``02.02 LM TRUE`` on the easYgen-3000XT) are assigned their value at the start of the program. The counts of equations, command variables, and linked and constant command variables are in ``extra.wset.logic``.
+
 The command variable names are listed as comments at the top of the program. Equations are chained left to right ``((sign1(cv1) op1 sign2(cv2)) op2 sign3(cv3))``, matching the order of the LogicsManager command chain in the Modbus documentation. The AnalogManager (data source selections and analog setpoints) isn't converted to logic; its data sources are available as tags and the selections as parameters.
 
 SID (``.sid``) output
 ---------------------
-:func:`~peat.modules.woodward.parse_sid.parse_sid` returns the SID ``identifier``, ``specification``, and ``schema``, the ``application`` identity, the ServLink ``security`` configuration (accounts and command security levels), the top-level ``namespaces`` (``PARAMETER``, ``STATUS MENU``, ``ALARM STATUS``, ...), the ``parameters`` (every ``DataItem``, ``LogicManager``, and ``StructureItem`` with its namespace ``path``, type, default, range, units, security levels, and communication handles), the ``enumerations``, ``events``, and ``structures``.
+:func:`~peat.modules.woodward.parse_sid.parse_sid` returns the SID ``identifier``, ``specification``, and ``schema``, the ``application`` identity, the ServLink ``security`` configuration (accounts and command security levels), the top-level ``namespaces`` (``PARAMETER``, ``STATUS MENU``, ``ALARM STATUS``, ...), the ``parameters`` (every ``DataItem``, ``LogicManager``, and ``StructureItem`` with its namespace ``path``, type, default, range, units, security levels, and communication handles), the ``enumerations``, ``events``, and ``structures``. Compressed SIDs are decompressed up to :data:`~peat.modules.woodward.parse_sid.SID_MAX_XML_SIZE` (256 MiB); larger files are rejected.
+
+Tool file (``.wtool``) output
+-----------------------------
+:func:`~peat.modules.woodward.parse_wtool.parse_wtool` returns the container ``header``, the ``nrbf`` stream information, the ``tool_properties``, the tool ``name``, the ``device_names``, the ``sid_specifications`` the tool is associated with, and the ``application`` identity. The SID specifications are unique and sorted in natural order (numbers are compared numerically, so ``EG3200XTP1 2.9-0_1`` comes before ``EG3200XTP1 2.12-0_50976`` and the newest release of a product is last), without the language prefix of part number style specifications (``5418-6722-NEW``, not ``us_5418-6722-NEW``). The application is identified from the last one.
 
 Tunable file (``.tc``) output
 -----------------------------
-:func:`~peat.modules.woodward.wdw_tc.parse_tc` returns the file metadata (``file_version``, ``firmware_prefix``, ``firmware_date``), the nested ``config`` tree (``Mode > Category > Block Name > Field Name``) with the raw text values, and a flat ``parameters`` list with the ``current``, ``initial``, ``low``, and ``high`` values converted to Python types.
+:func:`~peat.modules.woodward.wdw_tc.parse_tc` returns the file metadata (``file_version``, ``firmware_prefix``, ``firmware_date``), the nested ``config`` tree (``Mode > Category > Block Name > Field Name``) with the raw text values, and a flat ``parameters`` list with the ``current``, ``initial``, ``low``, and ``high`` values converted to Python types. Each parameter has a ``path`` (``Category/Block Name/Field Name``).
+
+On the device, ``extra.parameters`` holds the current values as a :class:`dict` of ``{path: value}`` (the path is prefixed with the mode if two modes have the same path), and the summary of the file is in ``extra.tc``. The application identifier line of the file (e.g. ``5418-6722 NEW``) is looked up with :func:`~peat.modules.woodward.toolkit.identify_application`: the brand, model, and product are set if it's known, otherwise the brand is ``Woodward`` and the model is left to the module.
 
 Notes and limitations
 ---------------------
 - The model of a device is only identified when the application identifier is recognized. XT-style identifiers are always decoded. Older part number identifiers are looked up in :data:`~peat.modules.woodward.toolkit.TOOLKIT_APPLICATIONS`, which only contains the applications that could be verified from public files and manuals. Add entries there for the applications of your devices (the part number is printed on the control's nameplate and in the ``.wtool``/``.sid`` file names Woodward publishes).
 - Woodward doesn't document the ``.wset`` format. PEAT's parser was reverse engineered from published files saved by ToolKit 4.x and 5.x. Unknown object layouts are still decoded and reported using a best-effort ``generic`` parameter extraction, and the full decoded object graph is available with ``parse_wset(..., include_raw=True)``.
 - The meaning of the LogicsManager operator numbers was derived empirically: pass-through (``NoOperator``), ``Not``, ``True``, and ``False`` for the per-input operators and ``And`` and ``Or`` for the binary operators were observed. The remaining binary operators (``Nand``, ``Nor``, ``Xor``, ``Nxor``) follow the order in the easYgen manuals and are unverified.
-- ``.tc`` files are matched by both the easYgen and the 2301E modules. Pass ``-d easygen`` or ``-d wdw2301e`` to ``peat parse`` to parse them once with the right module.
+- A ``.tc`` file is parsed by the easYgen module only if its application identifier is a recognized easYgen application (:func:`~peat.modules.woodward.toolkit.identify_application` returns the brand ``easYgen``). Every other ``.tc`` file is parsed by the 2301E module. ``-d easygen`` with a ``.tc`` file of another control, and ``-d wdw2301e`` with a ``.tc`` file of an easYgen, are rejected with an error that names the right module.
+- In settings files, parameter numbers with 1 or 2 digits aren't split from the parameter name, so such parameters have no ``id``. easYgen-3000XT SIDs define a few of them (e.g. ``60 Data Protocol 1, Mux``), but none were found in the available settings files. The SID parser recognizes them.
 - Pulling settings from a live easYgen (``peat pull``) uses ServLink/TCP and FTP and doesn't produce a ``.wset`` file. Save the settings with ToolKit to parse them with PEAT.
 
 Example files

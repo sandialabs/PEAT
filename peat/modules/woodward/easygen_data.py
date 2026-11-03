@@ -31,7 +31,8 @@ import re
 from collections import defaultdict
 from typing import Any, Final
 
-from peat import IO, DeviceData, Interface, Register, Service, Tag, User, consts, log
+from peat import IO, DeviceData, Interface, Register, Service, Tag, User, consts, log, utils
+from peat.data.data_utils import merge_models
 
 _IO_GROUP_RE: Final[re.Pattern[str]] = re.compile(
     r"(?:^|\.)(?P<kind>Discrete_In|Discrete_Out|Analog_In|Analog_Out|"
@@ -81,13 +82,18 @@ _BAUDRATE_RE: Final[re.Pattern[str]] = re.compile(
 )
 _PARITY: Final[dict[str, str]] = {"no": "none", "none": "none", "even": "even", "odd": "odd"}
 _STOP_BITS: Final[dict[str, int]] = {"one": 1, "1": 1, "two": 2, "2": 2}
-_ETHERNET_RE: Final[re.Pattern[str]] = re.compile(r"Ethernet\s+(?P<port>[A-Z])", re.IGNORECASE)
+# The port is a single letter ("Ethernet A"), so "Configure Ethernet interface" doesn't match
+_ETHERNET_RE: Final[re.Pattern[str]] = re.compile(r"Ethernet\s+(?P<port>[A-Z])\b", re.IGNORECASE)
 _PART_RE: Final[re.Pattern[str]] = re.compile(r"part\s*(?P<part>[2-4])\s*$", re.IGNORECASE)
 _IP_BASE_LABELS: Final[dict[str, str]] = {
     "ip address": "ip",
     "subnet mask": "subnet_mask",
     "gateway ip": "gateway",
 }
+_NODE_ID_RE: Final[re.Pattern[str]] = re.compile(
+    r"^(?:Node[- ]?ID\s*)?(?P<node_id>\d{1,3})$", re.IGNORECASE
+)
+_OFF_VALUES: Final[frozenset[str]] = frozenset({"", "0", "off", "no", "none", "false", "disabled"})
 
 
 # ---------------------------------------------------------------------------
@@ -168,6 +174,27 @@ def _baudrate(value: Any) -> int | None:
     return round(number)
 
 
+def _is_off(value: Any) -> bool:
+    """If a setting such as a device type or node ID selection is ``Off`` (not configured)."""
+    return value is None or str(value).strip().lower() in _OFF_VALUES
+
+
+def _node_id(value: Any) -> int | None:
+    """
+    CANopen node ID of a setting such as ``1`` or ``Node-ID 7``.
+
+    Returns:
+        The node ID (1-127), or :obj:`None` if the setting is ``Off`` or not a node ID
+    """
+    if isinstance(value, bool):
+        return None
+    match = _NODE_ID_RE.match(str(value).strip())
+    if not match:
+        return None
+    node_id = int(match.group("node_id"))
+    return node_id if 1 <= node_id <= 127 else None
+
+
 def _by_group(records: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
     groups: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for record in records:
@@ -189,6 +216,22 @@ def _value(record: dict[str, Any] | None, default: Any = None) -> Any:
         return default
     value = record.get("value")
     return default if value is None else value
+
+
+def _same_parameter(name: str, other: str) -> bool:
+    """
+    If two parameter names with the same address are the same parameter.
+
+    Settings files qualify the names with their namespace (``Namespace.AI_CAL``),
+    SIDs don't (``AI_CAL``).
+    """
+    return (
+        name == other
+        or not name
+        or not other
+        or name.endswith(f".{other}")
+        or other.endswith(f".{name}")
+    )
 
 
 def _settings(records: list[dict[str, Any]]) -> dict[str, Any]:
@@ -218,14 +261,24 @@ def add_registers(
     """
     Add the ServLink and CANopen addresses of the parameters as registers.
 
+    Registers are identified by protocol, address, and parameter name. A
+    register that's already on the device (e.g. from parsing the same file
+    again, or a settings file and the SID of the same application) is merged
+    into the existing one instead of being added again. A parameter with the
+    address of a different parameter (e.g. a settings file and a SID of
+    another application version) is added as a separate register.
+
     Args:
         dev: The device
         records: Parameter records from a settings file or SID
         defaults_only: The records come from a SID (no configured values)
 
     Returns:
-        The number of registers added
+        The number of registers stored (added or merged)
     """
+    existing: dict[tuple[str, str], list[Register]] = defaultdict(list)
+    for register in dev.registers:
+        existing[(register.protocol, register.address)].append(register)
     count = 0
     for record in records:
         name = str(record.get("name") or "")
@@ -278,7 +331,22 @@ def add_registers(
                 enabled=True,
                 extra=dict(extra),
             )
-            dev.store("registers", register, append=True)
+            candidates = existing[(protocol, address)]
+            current = next((r for r in candidates if r.name == name), None) or next(
+                (r for r in candidates if _same_parameter(r.name, name)), None
+            )
+            if current is not None:
+                merge_models(current, register)
+                current.annotate(dev)
+            else:
+                if candidates:
+                    log.debug(
+                        f"Parameter '{name}' has the {protocol} address {address} "
+                        f"of parameter '{candidates[0].name}', adding it as a separate register"
+                    )
+                # Lookups with dev.store() are linear, the index above is much faster
+                dev.store("registers", register, append=True)
+                candidates.append(register)
             count += 1
     return count
 
@@ -287,14 +355,19 @@ def add_tags(dev: DeviceData, logic_inputs: dict[str, str], analog_inputs: dict[
     """
     Add the LogicsManager command variables and AnalogManager data sources as tags.
 
+    Tags are identified by type and address (the variable number). A tag
+    that's already on the device is merged into the existing one instead
+    of being added again.
+
     Args:
         dev: The device
         logic_inputs: ``{number: name}`` of the LogicsManager command variables
         analog_inputs: ``{number: name}`` of the AnalogManager data sources
 
     Returns:
-        The number of tags added
+        The number of tags stored (added or merged)
     """
+    existing: dict[tuple[str, str], Tag] = {(t.type, t.address): t for t in dev.tag}
     count = 0
     for inputs, tag_type, description in (
         (logic_inputs, "binary", "LogicsManager command variable"),
@@ -304,11 +377,14 @@ def add_tags(dev: DeviceData, logic_inputs: dict[str, str], analog_inputs: dict[
             name = str(name).strip()
             if not name:
                 continue
-            dev.store(
-                "tag",
-                Tag(name=name, address=str(number), type=tag_type, description=description),
-                append=True,
-            )
+            tag = Tag(name=name, address=str(number), type=tag_type, description=description)
+            current = existing.get((tag_type, tag.address))
+            if current is not None:
+                merge_models(current, tag)
+                current.annotate(dev)
+            else:
+                dev.store("tag", tag, append=True)
+                existing[(tag_type, tag.address)] = tag
             count += 1
     return count
 
@@ -400,62 +476,107 @@ def _can_interface(number: str, group_records: list[dict[str, Any]], group: str)
     )
 
 
-def _ethernet_interfaces(records: list[dict[str, Any]]) -> list[Interface]:
+def _ethernet_port(text: str) -> str:
+    """Port letter of the last ``Ethernet X`` in a label or group name, or ``""``."""
+    matches = list(_ETHERNET_RE.finditer(text))
+    return matches[-1].group("port").upper() if matches else ""
+
+
+def _ethernet_interfaces(
+    records: list[dict[str, Any]],
+) -> tuple[list[Interface], list[dict[str, str]]]:
     """
     Ethernet interfaces from IP address parameters.
 
     easYgen-3000XT controls store each address as four parameters: the
     base parameter (``5330 IP address``) and ``... part 2``..``part 4``
-    with the following parameter numbers.
+    with the following parameter numbers. The port is named by the
+    parameter labels (``Ethernet A - IP address part 2``) or, if they
+    don't name it, by the parameter group (``...Ethernet B``).
+
+    Returns:
+        The interfaces, and the addresses that couldn't be assigned to a
+        port (``{"group": ..., "gateway": ...}``), e.g. a gateway in a group
+        with several ports whose parameters don't name the port, or a second
+        address of a port
     """
     by_id = {r["id"]: r for r in records if r.get("id") is not None}
     interfaces: dict[str, dict[str, Any]] = {}
+    unassigned: list[dict[str, str]] = []
     for record in records:
         label = str(record.get("label") or "").strip().lower()
         field = _IP_BASE_LABELS.get(label)
         if field is None or record.get("id") is None:
             continue
         parts = [record]
-        port = ""
         for offset in (1, 2, 3):
             part = by_id.get(record["id"] + offset)
             if part is None or not _PART_RE.search(str(part.get("label") or "")):
                 break
             parts.append(part)
-            port_match = _ETHERNET_RE.search(str(part.get("label") or ""))
-            if port_match:
-                port = port_match.group("port").upper()
+        group = str(record.get("group") or "")
+        port = ""
+        for text in [*(str(part.get("label") or "") for part in parts), group]:
+            port = _ethernet_port(text)
+            if port:
+                break
         values = [part.get("value") for part in parts]
-        if len(values) == 4 and all(isinstance(v, int) and 0 <= v <= 255 for v in values):
+        if len(values) == 4 and all(
+            isinstance(v, int) and not isinstance(v, bool) and 0 <= v <= 255 for v in values
+        ):
             address = ".".join(str(v) for v in values)
-        elif len(values) == 1 and isinstance(values[0], str) and values[0].count(".") == 3:
-            address = values[0]
+        elif len(values) == 1 and isinstance(values[0], str):
+            address = values[0].strip()
         else:
             continue
-        group = str(record.get("group") or "")
+        if not utils.is_ip(address):
+            log.debug(f"Skipping invalid Ethernet {field} '{address}' of parameter {record['id']}")
+            continue
+        if address == "0.0.0.0" and field != "subnet_mask":
+            continue  # Not configured
         key = f"{group}|{port}"
         entry = interfaces.setdefault(key, {"port": port, "group": group})
+        if entry.get(field) and entry[field] != address:
+            # Another address of the same port, e.g. ports whose parameters
+            # and group don't name them. The first one is kept.
+            unassigned.append({"group": group, **({"port": port} if port else {}), field: address})
+            continue
         entry[field] = address
 
-    # Addresses whose parameters don't name the port (e.g. "Gateway IP part 2")
-    # belong to the port of their parameter group, if there is exactly one
+    # Addresses whose parameters and group don't name the port belong to the
+    # port of their parameter group, if there is exactly one. Addresses that
+    # can't be assigned to a port are returned separately so they aren't lost.
     for key, entry in list(interfaces.items()):
         if entry["port"]:
             continue
+        addresses = {f: entry[f] for f in _IP_BASE_LABELS.values() if entry.get(f)}
         siblings = [
             other
             for other_key, other in interfaces.items()
             if other_key != key and other["group"] == entry["group"] and other["port"]
         ]
         if len(siblings) == 1:
-            for field in _IP_BASE_LABELS.values():
-                if entry.get(field) and not siblings[0].get(field):
-                    siblings[0][field] = entry[field]
+            leftover = {}
+            for field, address in addresses.items():
+                if not siblings[0].get(field):
+                    siblings[0][field] = address
+                elif siblings[0][field] != address:
+                    leftover[field] = address
             del interfaces[key]
+            if leftover:
+                unassigned.append({"group": entry["group"], **leftover})
+        elif not entry.get("ip"):
+            del interfaces[key]
+            if entry.get("gateway"):
+                unassigned.append({"group": entry["group"], **addresses})
 
     result = []
     for key, entry in interfaces.items():
         if not entry.get("ip"):
+            # A port without an IP address (a subnet mask alone isn't worth keeping)
+            if entry.get("gateway"):
+                addresses = {f: entry[f] for f in _IP_BASE_LABELS.values() if entry.get(f)}
+                unassigned.append({"group": entry["group"], "port": entry["port"], **addresses})
             continue
         name = f"Ethernet {entry['port']}" if entry["port"] else "Ethernet"
         result.append(
@@ -470,7 +591,7 @@ def _ethernet_interfaces(records: list[dict[str, Any]]) -> list[Interface]:
                 extra={"group": entry["group"], "key": key},
             )
         )
-    return result
+    return result, unassigned
 
 
 def add_interfaces_and_services(dev: DeviceData, records: list[dict[str, Any]]) -> tuple[int, int]:
@@ -539,12 +660,20 @@ def add_interfaces_and_services(dev: DeviceData, records: list[dict[str, Any]]) 
         dev.store("interface", interface, lookup="name")
         interfaces += 1
         all_records = [r for _, group_records in group_list for r in group_records]
-        node_id = _find(all_records, f"Node-ID CAN bus {number}", "Node-ID", "Node ID")
-        if node_id is not None or any("canopen" in group.lower() for group, _ in group_list):
+        # CANopen is configured if the device has a node ID on the bus. On CAN 2
+        # of the easYgen-3000 (expansion cards), "This device" is "Node-ID 7" or "Off".
+        node_id = _node_id(
+            _value(
+                _find(
+                    all_records, f"Node-ID CAN bus {number}", "Node-ID", "Node ID", "This device"
+                )
+            )
+        )
+        if node_id is not None:
             service = Service(
                 protocol="canopen",
                 listen_interface=interface.name,
-                extra={"node_id": _scalar(_value(node_id)), "baudrate": interface.baudrate},
+                extra={"node_id": node_id, "baudrate": interface.baudrate},
             )
             dev.store(
                 "service",
@@ -554,11 +683,28 @@ def add_interfaces_and_services(dev: DeviceData, records: list[dict[str, Any]]) 
             )
             dev.related.protocols.add("canopen")
             services += 1
-        if any("j1939" in group.lower() for group, _ in group_list):
+        # J1939 is configured if it's enabled, or an ECU device type is selected
+        j1939_records = [
+            r
+            for group, group_records in group_list
+            if "j1939" in group.lower()
+            for r in group_records
+        ]
+        j1939_enable = _find(j1939_records, "J1939")
+        device_type = _find(j1939_records, "Device type")
+        if j1939_enable is not None:
+            j1939 = _is_true(_value(j1939_enable))
+        else:
+            j1939 = device_type is not None and not _is_off(_value(device_type))
+        if j1939:
             service = Service(
                 protocol="j1939",
                 listen_interface=interface.name,
-                extra={"baudrate": interface.baudrate},
+                extra={
+                    "address": _scalar(_value(_find(j1939_records, "J1939 own address"))),
+                    "device_type": _scalar(_value(device_type)),
+                    "baudrate": interface.baudrate,
+                },
             )
             dev.store(
                 "service",
@@ -569,11 +715,19 @@ def add_interfaces_and_services(dev: DeviceData, records: list[dict[str, Any]]) 
             dev.related.protocols.add("j1939")
             services += 1
 
-    for interface in _ethernet_interfaces(records):
+    ethernet, unassigned = _ethernet_interfaces(records)
+    for interface in ethernet:
         dev.store("interface", interface, lookup="name")
         interfaces += 1
-        if interface.ip:
-            dev.related.ip.add(interface.ip)
+        dev.related.ip.add(interface.ip)  # Ethernet interfaces always have an IP address
+    for addresses in unassigned:
+        log.debug(f"Ethernet addresses not assigned to a port: {addresses}")
+        stored = dev.extra.setdefault("unassigned_ethernet_addresses", [])
+        if addresses not in stored:
+            stored.append(addresses)
+        for field in ("ip", "gateway"):
+            if addresses.get(field):
+                dev.related.ip.add(addresses[field])
 
     return interfaces, services
 

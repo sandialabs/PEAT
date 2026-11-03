@@ -12,17 +12,24 @@ Authors
 
 import struct
 from pathlib import Path
-from typing import Any, Final
+from typing import Any, BinaryIO, Final
 
 from peat import DeviceData, DeviceModule, Interface, SerialMethod, datastore, log
 from peat.file_signature import FileSignature
 from peat.protocols import open_serial_port, pretty_hex_bytes, serial_txn
 
+from .easygen_3500xt import is_easygen_application
 from .wdw_2301e_svl import *
 
 # TODO: remove '*' imports
 from .wdw_svl import *
-from .wdw_tc import parse_tc, populate_device_from_tc, tc_signature_check
+from .wdw_tc import (
+    TC_SNIFF_LEN,
+    parse_tc,
+    populate_device_from_tc,
+    tc_application_info,
+    tc_head_application_info,
+)
 
 # Track the Servlink sequence
 svl_seq_odd: bool = True
@@ -41,6 +48,16 @@ svl_data_type: Final[dict[type, bytes]] = {
 }
 
 
+def wdw_tc_signature_check(stream: BinaryIO) -> bool:
+    """
+    :class:`~peat.file_signature.FileSignature` custom check for Control
+    Assistant tunable (``.tc``) files, except for those of recognized easYgen
+    applications (which are parsed by the easYgen module).
+    """
+    app = tc_head_application_info(stream.read(TC_SNIFF_LEN))
+    return app is not None and not is_easygen_application(app)
+
+
 class WDW2301E(DeviceModule):
     """Woodward 2301e Speed Controller."""
 
@@ -49,9 +66,10 @@ class WDW2301E(DeviceModule):
     vendor_name = "Woodward, Inc"
     brand = "WDW"
     model = "2301E"
-    filename_patterns = ["*.tc"]
+    # No "*.tc" filename pattern: tunable files of easYgen applications are
+    # left to the easYgen module (see wdw_tc_signature_check)
     file_signatures = [
-        FileSignature(default_filename="tunables.tc", custom_check=tc_signature_check),
+        FileSignature(default_filename="tunables.tc", custom_check=wdw_tc_signature_check),
     ]
     # TODO: combine some common functions of 3500XT and 2301E?
     woodward_fallback_baudrates = [9600]
@@ -138,11 +156,29 @@ class WDW2301E(DeviceModule):
         """
         Parse a Control Assistant tunable (``.tc``) file saved from a 2301E.
 
+        This is the generic Control Assistant parser: tunable files of other
+        controls are parsed as well, and the brand and model are taken from
+        the application identifier in the file if it's known. Files of
+        recognized easYgen applications are rejected, they're parsed by the
+        :class:`~peat.modules.woodward.easygen_3500xt.Easygen3500XT` module.
+
         Refer to :mod:`~peat.modules.woodward.wdw_tc` for the file format.
         """
-        parsed_config = parse_tc(file.read_bytes())
+        try:
+            parsed_config = parse_tc(file.read_bytes())
+        except Exception as ex:
+            cls.log.exception(f"Failed to parse '{file.name}' as a .tc file: {ex}")
+            return None
         if not parsed_config:
             cls.log.warning(f"No tunables parsed from '{file.name}'")
+            return None
+
+        app = tc_application_info(parsed_config)
+        if is_easygen_application(app):
+            cls.log.error(
+                f"'{file.name}' is from an easYgen (application: '{app['id']}'), "
+                f"parse it with the easYgen module ('-d easygen')"
+            )
             return None
 
         if not dev:

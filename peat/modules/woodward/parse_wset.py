@@ -116,8 +116,16 @@ LOGICS_MANAGER_BINARY_OPERATORS: Final[dict[int, str]] = {
 #: Group name used for internal variables that have no group or parameter number
 INTERNAL_GROUP: Final[str] = "(internal)"
 
+# The group is greedy, so the parameter number is the last ``.NNN `` in the name
+# that isn't preceded by exactly one other dot (labels abbreviate with ``..``,
+# e.g. ``displ..15``). A group may end with a ``..`` abbreviation (``Busb...3955``).
 _PARAMETER_NAME_RE: Final[re.Pattern[str]] = re.compile(
-    r"^(?:(?P<group>.*?)\.)?(?P<id>\d{3,6})\s+(?P<label>.*)$"
+    r"^(?:(?P<group>(?:.*[^.])?(?:\.\.)?)\.)?(?P<id>\d{3,6})\s+(?P<label>.*)$"
+)
+# Used when _PARAMETER_NAME_RE doesn't match: the parameter number is the last
+# ``.NNN `` in the name, even if it follows another dot (``Overfreq..1910 Limit``)
+_PARAMETER_NAME_FALLBACK_RE: Final[re.Pattern[str]] = re.compile(
+    r"^(?P<group>.*)\.(?P<id>\d{3,6})\s+(?P<label>.*)$"
 )
 _CAMEL_RE: Final[re.Pattern[str]] = re.compile(r"(?<=[a-z0-9])(?=[A-Z])|(?<=[A-Z])(?=[A-Z][a-z])")
 
@@ -285,13 +293,20 @@ def snake_case(name: str) -> str:
     return _CAMEL_RE.sub("_", name).lower()
 
 
-def to_plain(obj: Any, _active: set[int] | None = None) -> Any:
+def to_plain(
+    obj: Any, _active: set[int] | None = None, _memo: dict[int, Any] | None = None
+) -> Any:
     """
     Convert a decoded NRBF object graph into plain JSON-serializable Python data.
 
     .NET objects become :class:`dict` with a ``_class`` key, arrays become
     lists, and dates, decimals, and bytes become strings. Circular references
     are replaced with the string ``<circular reference>``.
+
+    Objects that are referenced more than once (e.g. a descriptor shared by a
+    parameter and its value cache) are converted once, and the same plain
+    object is used for every reference, so conversion time is linear in the
+    size of the object graph.
 
     Args:
         obj: Object returned by the NRBF reader
@@ -313,29 +328,34 @@ def to_plain(obj: Any, _active: set[int] | None = None) -> Any:
         return obj.tolist()
 
     active = _active if _active is not None else set()
+    memo = _memo if _memo is not None else {}
     obj_id = id(obj)
+    if obj_id in memo:
+        return memo[obj_id]
     if obj_id in active:
         return "<circular reference>"
     active.add(obj_id)
     try:
         if isinstance(obj, dict):
-            return {str(k): to_plain(v, active) for k, v in obj.items()}
-        if _is_record(obj):
-            plain: dict[str, Any] = {"_class": type(obj).__name__}
+            plain: Any = {str(k): to_plain(v, active, memo) for k, v in obj.items()}
+        elif _is_record(obj):
+            plain = {"_class": type(obj).__name__}
             for field in obj._fields:
-                plain[field] = to_plain(getattr(obj, field), active)
-            return plain
-        if isinstance(obj, (set, frozenset)):
-            items = [to_plain(x, active) for x in obj]
+                plain[field] = to_plain(getattr(obj, field), active, memo)
+        elif isinstance(obj, (set, frozenset)):
+            plain = [to_plain(x, active, memo) for x in obj]
             try:
-                return sorted(items)
+                plain = sorted(plain)
             except TypeError:
-                return items
-        if isinstance(obj, (list, tuple)):
-            return [to_plain(x, active) for x in obj]
+                pass
+        elif isinstance(obj, (list, tuple)):
+            plain = [to_plain(x, active, memo) for x in obj]
+        else:
+            plain = repr(obj)
     finally:
         active.discard(obj_id)
-    return repr(obj)
+    memo[obj_id] = plain
+    return plain
 
 
 def _snake_keys(plain: Any) -> Any:
@@ -395,13 +415,35 @@ def split_parameter_name(name: str) -> tuple[str, int | None, str]:
     (``PDO_9_2.BIT_0_HMI`` becomes ``("PDO_9_2", None, "BIT_0_HMI")``), and
     names of internal variables (e.g. ``Th2GenOverFreq``) return ``("", None, name)``.
 
+    The parameter number is the *last* dot-separated segment that starts with
+    3 to 6 digits and whitespace, so group names may start with digits
+    (``Config.100 Hz filter.1910 Limit`` is split into
+    ``("Config.100 Hz filter", 1910, "Limit")``). Labels may contain dots
+    (``Config_Admin.14659 Colour displ..15 bit RGB val..0``), so a ``..NNN ``
+    is treated as an abbreviation in the label, unless the name has no other
+    parameter number (``Config.Overfreq..1910 Limit`` is split into
+    ``("Config.Overfreq.", 1910, "Limit")``). A group may end with a ``..``
+    abbreviation (``Config.Gen.. Busb...3955 Alarm class`` is split into
+    ``("Config.Gen.. Busb..", 3955, "Alarm class")``).
+
+    Limitations: a dot inside a label that is directly followed by 3 to 6 digits
+    and whitespace (and isn't part of a ``..`` abbreviation), e.g. a hypothetical
+    ``Limit 1.500 Hz``, is mistaken for the parameter number. A group that ends
+    with a single-dot abbreviation (``Overfreq.``) is only recognized when the
+    label has no ``..NNN `` of its own. No such name exists in the easYgen,
+    easYgen-XT, or E3 settings and SID files the parser was tested with.
+    Parameter numbers with 1 or 2 digits (easYgen-3000XT SIDs define a few,
+    e.g. ``60 Data Protocol 1, Mux``) aren't recognized, because accepting
+    them would split names such as ``9312 81.03 AM Frequency SP1[Hz]`` at
+    the ``81.03``.
+
     Args:
         name: The delimited parameter name
 
     Returns:
         A tuple of ``(group, parameter id or None, label)``
     """
-    match = _PARAMETER_NAME_RE.match(name)
+    match = _PARAMETER_NAME_RE.match(name) or _PARAMETER_NAME_FALLBACK_RE.match(name)
     if match:
         return match.group("group") or "", int(match.group("id")), match.group("label").strip()
     if "." in name:
@@ -484,7 +526,8 @@ def _scale(base: Any, multiplier: Any, offset: Any) -> Any:
     if base is None or not isinstance(base, (int, float)) or isinstance(base, bool):
         return None
     try:
-        result = Decimal(str(base)) * Decimal(str(multiplier or 1)) + Decimal(str(offset or 0))
+        result = Decimal(str(base)) * Decimal(str(1 if multiplier is None else multiplier))
+        result += Decimal(str(0 if offset is None else offset))
     except (InvalidOperation, ValueError):
         return None
     if result == result.to_integral_value():
@@ -874,7 +917,8 @@ def extract_generic_parameters(plain: Any) -> list[dict[str, Any]]:
     Best-effort extraction of parameter-like records from an unknown object graph.
 
     Any object with an integer ``Id``-like member and a ``Value``-like member
-    is treated as a parameter.
+    is treated as a parameter. Objects that are referenced from several
+    places are only walked (and reported) once, at the first path found.
 
     Args:
         plain: Output of :func:`to_plain`
@@ -910,7 +954,14 @@ def extract_generic_parameters(plain: Any) -> list[dict[str, Any]]:
             "path": path,
         }
 
+    visited: set[int] = set()
+
     def _walk(node: Any, path: str) -> None:
+        if isinstance(node, (dict, list)):
+            # to_plain() reuses the plain object of a shared reference, walk it once
+            if id(node) in visited:
+                return
+            visited.add(id(node))
         if isinstance(node, dict):
             record = _record(node, path)
             if record:
@@ -1122,13 +1173,39 @@ def summarize_wset(parsed: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def parameter_values(records: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    Map parameter records to ``{name: value}`` (the LogicsManager expression
+    for LogicsManager equations).
+
+    Records without a name (from the generic fallback extraction) are keyed by
+    their object path (or ``(unnamed N)`` if they have no path), and keys that
+    occur more than once get a ``#N`` suffix (``N`` is the record's index), so
+    no value is overwritten by another record from the same file.
+
+    Args:
+        records: Parameter records, see :func:`parse_wset`
+
+    Returns:
+        The parameter values, keyed by name
+    """
+    values: dict[str, Any] = {}
+    for index, record in enumerate(records):
+        key = str(record.get("name") or record.get("path") or f"(unnamed {index})")
+        if key in values:
+            key = f"{key}#{index}"
+        values[key] = record.get("expression", record.get("value"))
+    return values
+
+
 def populate_device_from_wset(dev: DeviceData, parsed: dict[str, Any]) -> None:
     """
     Add the results of :func:`parse_wset` to a device.
 
     The application identity is used for the device description and firmware
-    identifier, the parameter values are stored in ``dev.extra["parameters"]``
-    (``{name: value}``), and a summary of the file in ``dev.extra["wset"]``.
+    identifier, the parameter values are merged into ``dev.extra["parameters"]``
+    (``{name: value}``, see :func:`parameter_values`), and a summary of the
+    file is stored in ``dev.extra["wset"]``.
     The parameters are also mapped onto the data model (registers, tags,
     I/O, interfaces, services, users, see
     :mod:`~peat.modules.woodward.easygen_data`) and the LogicsManager
@@ -1143,9 +1220,11 @@ def populate_device_from_wset(dev: DeviceData, parsed: dict[str, Any]) -> None:
         return
 
     dev.extra["wset"] = summarize_wset(parsed)
-    dev.extra["parameters"] = {
-        p["name"]: p.get("expression", p.get("value")) for p in parsed.get("parameters", [])
-    }
+    parameters = dev.extra.get("parameters")
+    if not isinstance(parameters, dict):
+        parameters = {}
+        dev.extra["parameters"] = parameters
+    parameters.update(parameter_values(parsed.get("parameters", [])))
 
     app = parsed.get("application", {})
     if app.get("id") and not dev.firmware.id:
@@ -1173,6 +1252,8 @@ def populate_device_from_wset(dev: DeviceData, parsed: dict[str, Any]) -> None:
         dev.extra["wset"]["logic"] = {
             "num_equations": program["num_equations"],
             "num_command_variables": len(program["command_variables"]),
+            "num_linked_command_variables": len(program.get("linked_command_variables", {})),
+            "num_constant_command_variables": len(program.get("constant_command_variables", {})),
             "unknown_operators": program["unknown_operators"],
         }
 
@@ -1189,6 +1270,7 @@ __all__ = [
     "find_nrbf_offset",
     "is_wset_data",
     "parameter_record",
+    "parameter_values",
     "parse_wset",
     "populate_device_from_wset",
     "read_nrbf_streams",

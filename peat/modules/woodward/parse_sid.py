@@ -59,7 +59,6 @@ The XML layout (``Sid18.xsd`` to ``Sid21.xsd`` have been seen)::
    settings files, see :mod:`~peat.modules.woodward.parse_wset`.
 """
 
-import gzip
 import re
 import xml.etree.ElementTree as ET
 import zlib
@@ -83,6 +82,15 @@ SID_ROOT_TAG: Final[str] = "ServiceInterfaceDefinition"
 #: Enumerations with at most this many elements are included in parameter records
 SID_MAX_INLINE_OPTIONS: Final[int] = 32
 
+#: Maximum size of the decompressed SID XML, to guard against gzip bombs.
+#: Real SIDs are a few MB (2 to 4 MB for easYgen-3000XT and E3 SIDs).
+SID_MAX_XML_SIZE: Final[int] = 256 * 1024 * 1024
+
+# Input block sizes for gzip decompression, and the zero padding allowed after a gzip member
+_GZIP_MIN_INPUT_BLOCK: Final[int] = 256
+_GZIP_MAX_INPUT_BLOCK: Final[int] = 64 * 1024
+_ZERO_PADDING_RE: Final[re.Pattern[bytes]] = re.compile(rb"\x00*")
+
 _TYPE_TAGS: Final[dict[str, str]] = {
     "Integer": "integer",
     "Float": "float",
@@ -104,6 +112,9 @@ _COMMON_CHILD_TAGS: Final[frozenset[str]] = frozenset(
     }
 )
 _INT_RE: Final[re.Pattern[str]] = re.compile(r"^[+-]?\d+$")
+# Parameter numbers have 2 to 6 digits. Unlike settings files, SIDs have
+# genuine 2 digit parameters, e.g. "60 Data Protocol 1, Mux" in easYgen-3000XT
+# SIDs, whose ServLink handles are numbered like those of the other parameters.
 _NAME_RE: Final[re.Pattern[str]] = re.compile(r"^(?P<id>\d{2,6})\s+(?P<label>.+)$")
 
 
@@ -150,6 +161,58 @@ def sid_signature_check(stream: BinaryIO) -> bool:
     return is_sid_data(stream.read(65536))
 
 
+def _gunzip(data: bytes, max_size: int = SID_MAX_XML_SIZE) -> bytes:
+    """
+    Decompress a gzip stream (one or more members), limiting the output size.
+
+    The input is fed to the decompressor in blocks that start small and grow
+    up to :data:`_GZIP_MAX_INPUT_BLOCK` bytes for each member, so the time
+    taken grows linearly with the input size, even for a stream of many
+    small members.
+
+    Raises:
+        ValueError: If the data can't be decompressed or the decompressed
+            data is larger than ``max_size``
+    """
+    chunks: list[bytes] = []
+    total = 0
+    pos = 0
+    view = memoryview(data)
+    while pos < len(data):
+        decompressor = zlib.decompressobj(16 + zlib.MAX_WBITS)
+        block_size = _GZIP_MIN_INPUT_BLOCK
+        while not decompressor.eof:
+            pending: bytes | memoryview = view[pos : pos + block_size]
+            block_size = min(block_size * 2, _GZIP_MAX_INPUT_BLOCK)
+            if not pending:
+                raise ValueError(
+                    "Failed to decompress SID data: the compressed data ended "
+                    "before the end-of-stream marker was reached"
+                )
+            pos += len(pending)
+            while pending:
+                try:
+                    chunk = decompressor.decompress(pending, max_size - total + 1)
+                except zlib.error as ex:
+                    raise ValueError(f"Failed to decompress SID data: {ex}") from ex
+                total += len(chunk)
+                if total > max_size:
+                    raise ValueError(
+                        f"Decompressed SID data is larger than the limit of {max_size} bytes"
+                    )
+                chunks.append(chunk)
+                pending = decompressor.unconsumed_tail
+        # Go back to the start of the data after this member. Like
+        # gzip.decompress, allow more members and trailing zero padding.
+        pos -= len(decompressor.unused_data)
+        padding = _ZERO_PADDING_RE.match(data, pos)
+        if padding:
+            pos = padding.end()
+        if pos < len(data) and not data.startswith(GZIP_MAGIC, pos):
+            raise ValueError("Failed to decompress SID data: trailing garbage after gzip data")
+    return b"".join(chunks)
+
+
 def read_sid_xml(data: bytes) -> tuple[bytes, dict[str, Any]]:
     """
     Get the XML document from SID file data.
@@ -162,7 +225,8 @@ def read_sid_xml(data: bytes) -> tuple[bytes, dict[str, Any]]:
         (``header`` and ``compressed``)
 
     Raises:
-        ValueError: If the data isn't a SID
+        ValueError: If the data isn't a SID, can't be decompressed, or the
+            decompressed data is larger than :data:`SID_MAX_XML_SIZE`
     """
     info: dict[str, Any] = {"header": {}, "compressed": False}
     payload = data
@@ -171,10 +235,7 @@ def read_sid_xml(data: bytes) -> tuple[bytes, dict[str, Any]]:
         payload = data[CONTAINER_HEADER_LEN:]
     if payload.startswith(GZIP_MAGIC):
         info["compressed"] = True
-        try:
-            payload = gzip.decompress(payload)
-        except (OSError, EOFError) as ex:
-            raise ValueError(f"Failed to decompress SID data: {ex}") from ex
+        payload = _gunzip(payload)
     if SID_ROOT_TAG not in _xml_head(payload):
         raise ValueError(f"Not a Service Interface Definition: no <{SID_ROOT_TAG}> element")
     return payload, info
@@ -745,6 +806,7 @@ def populate_device_from_sid(dev: DeviceData, parsed: dict[str, Any]) -> None:
 
 __all__ = [
     "SID_MAX_INLINE_OPTIONS",
+    "SID_MAX_XML_SIZE",
     "SID_ROOT_TAG",
     "data_item_record",
     "is_sid_data",

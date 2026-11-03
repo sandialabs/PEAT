@@ -34,10 +34,13 @@ from .toolkit import (
 
 _SID_SPEC_RES: Final[tuple[re.Pattern[bytes], ...]] = (
     # XT-style: EG3500XTP2 2.17-0_54728
-    re.compile(rb"\b[A-Z]{2,4}\d{3,4}(?:XT)?(?:P\d|LT|LITE|RENTAL)?[ _]\d+\.\d+-\d+_\d+\b"),
-    # Part number style: 5418-6722-NEW, 5418-4091A
-    re.compile(rb"\b(?:us_)?\d{4}-\d{4}(?:-?[A-Z]{1,3}|-NEW)\b"),
+    re.compile(rb"\b([A-Z]{2,4}\d{3,4}(?:XT)?(?:P\d|LT|LITE|RENTAL)?[ _]\d+\.\d+-\d+_\d+)\b"),
+    # Part number style: 5418-6722-NEW, 5418-4091A. SIDs are published per
+    # language, and the specification can have a language prefix, e.g.
+    # us_5418-6722-NEW or DE_5418-6722-NEW, which isn't part of the identifier.
+    re.compile(rb"(?<![A-Za-z0-9])(?:[A-Za-z]{2}_)?(\d{4}-\d{4}(?:-?[A-Z]{1,3}))(?![A-Za-z0-9])"),
 )
+_NATURAL_SPLIT_RE: Final[re.Pattern[str]] = re.compile(r"(\d+)")
 
 
 def is_wtool_data(data: bytes) -> bool:
@@ -52,21 +55,37 @@ def wtool_signature_check(stream: BinaryIO) -> bool:
     return is_wtool_data(stream.read(64))
 
 
+def _natural_key(identifier: str) -> tuple[tuple[tuple[int, int, str], ...], str]:
+    """Sort key that compares the numbers in an identifier numerically."""
+    parts = tuple(
+        (0, int(part), "") if part.isdigit() else (1, 0, part.lower())
+        for part in _NATURAL_SPLIT_RE.split(identifier)
+        if part
+    )
+    return parts, identifier
+
+
 def find_sid_specifications(data: bytes) -> list[str]:
     """
     Find SID specification identifiers mentioned in tool file data.
+
+    Language prefixes of part number style specifications (e.g. ``us_`` in
+    ``us_5418-6722-NEW``) are removed.
 
     Args:
         data: The raw file data
 
     Returns:
-        Sorted list of unique identifiers, e.g. ``["EG3500XTP2 2.17-0_54728"]``
+        List of unique identifiers, e.g. ``["EG3500XTP2 2.17-0_54728"]``, in
+        natural order (numbers are compared numerically, so
+        ``EG3200XTP1 2.9-0_1`` comes before ``EG3200XTP1 2.12-0_50976``).
+        For identifiers of the same product, the newest release is last.
     """
     found: set[str] = set()
     for pattern in _SID_SPEC_RES:
         for match in pattern.findall(data):
             found.add(match.decode("utf-8", errors="replace"))
-    return sorted(found)
+    return sorted(found, key=_natural_key)
 
 
 def _device_names(plain: Any) -> list[str]:
@@ -152,7 +171,11 @@ def parse_wtool(source: Path | bytes | BinaryIO) -> dict[str, Any]:
         parsed["sid_specifications"][-1] if parsed["sid_specifications"] else parsed["name"]
     )
     parsed["application"] = identify_application(identifier)
-    if not parsed["application"].get("model") and parsed["name"]:
+    if (
+        not parsed["application"]["part_number"]
+        and not parsed["application"]["model"]
+        and parsed["name"]
+    ):
         parsed["application"] = {**identify_application(parsed["name"]), "id": identifier}
     return parsed
 

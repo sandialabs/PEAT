@@ -472,7 +472,7 @@ def test_add_interfaces_and_services():
             label="Gateway IP part 4",
             value=1,
         ),
-        # A plain dotted address (no parts) on another port
+        # A plain dotted address (no parts) on another port, named by the group
         record(
             name="PARAMETER.Ethernet B.5430 IP address",
             group="PARAMETER.Ethernet B",
@@ -486,7 +486,7 @@ def test_add_interfaces_and_services():
     assert interfaces == 6
     assert services == 4  # Modbus on both serial ports, CANopen on CAN 1, J1939 on CAN 2
     by_name = {i.name: i for i in dev.interface}
-    assert set(by_name) == {"Serial 1", "Serial 2", "CAN 1", "CAN 2", "Ethernet A", "Ethernet"}
+    assert set(by_name) == {"Serial 1", "Serial 2", "CAN 1", "CAN 2", "Ethernet A", "Ethernet B"}
 
     serial1 = by_name["Serial 1"]
     assert serial1.type == "rs_232"
@@ -522,7 +522,7 @@ def test_add_interfaces_and_services():
     assert ethernet.ip == "192.0.2.20"
     assert ethernet.subnet_mask == "255.255.255.0"
     assert ethernet.gateway == "192.0.2.1"
-    assert by_name["Ethernet"].ip == "10.1.1.5"
+    assert by_name["Ethernet B"].ip == "10.1.1.5"  # port from the group name
     assert dev.related.ip == {"192.0.2.20", "10.1.1.5", "192.0.2.1"}  # gateways are related IPs
 
     assert sorted((s.protocol, s.listen_interface) for s in dev.service) == [
@@ -716,3 +716,212 @@ def test_real_file_identity(real_device):
         "Codelevel set operation hours": 2,
     }
     assert dev.users == []
+
+
+def test_settings_and_sid_registers_and_tags_combine():
+    dev = DeviceData()
+    assert add_registers(dev, [record(initial=None)]) == 2
+    assert add_registers(dev, [record(name="1702 Device number", value=None)], True) == 2
+    assert len(dev.registers) == 2
+    number = next(r for r in dev.registers if r.protocol == "servlink")
+    assert number.name == "Config_Admin.1702 Device number"  # the settings name is kept
+    assert number.extra["value"] == 1  # from the settings file
+    assert number.extra["initial"] == 1  # from the SID
+
+    # A different parameter with the same address is a separate register
+    other = record(name="Config_Admin.1703 Other", label="Other", canopen_multiplexor=None)
+    assert add_registers(dev, [other], True) == 1
+    assert len(dev.registers) == 3
+    assert {r.name for r in dev.registers if r.address == number.address} == {
+        number.name,
+        "Config_Admin.1703 Other",
+    }
+
+    assert add_tags(dev, {"0": "00.01 LM: Flag 1"}, {}) == 1
+    assert add_tags(dev, {"0": "00.01 LM: Flag 1", "1": "00.02 LM: Flag 2"}, {"0": "x"}) == 3
+    assert sorted((t.type, t.address, t.name) for t in dev.tag) == [
+        ("analog", "0", "x"),
+        ("binary", "0", "00.01 LM: Flag 1"),
+        ("binary", "1", "00.02 LM: Flag 2"),
+    ]
+
+
+def test_add_io_skips_unknown_kinds_and_unnamed_settings(monkeypatch):
+    records = [
+        record(name="", label="", group="Config_IO.Discrete_In.01", id=1200, value=0.2),
+        record(name="x.1201 Operation", label="Operation", group="Config_IO.Discrete_In.01"),
+        record(name="x.1300 Delay", label="Delay", group="Config_IO.Discrete_Out.02"),
+    ]
+    dev = DeviceData()
+    assert add_io(dev, records) == 2
+    assert dev.io[0].extra == {"group": "Config_IO.Discrete_In.01", "Operation": 1}
+
+    # A kind the group pattern matches but that has no mapping is skipped
+    from peat.modules.woodward import easygen_data
+
+    monkeypatch.delitem(easygen_data._IO_KINDS, "discrete_in")
+    dev = DeviceData()
+    assert add_io(dev, records) == 1
+    assert [p.id for p in dev.io] == ["DO 02"]
+
+
+def test_interface_settings_fallbacks():
+    dev = DeviceData()
+    records = [
+        record(name="S1.Baudrate", group="Config_Serial1", id=3163, label="Baudrate", value="?"),
+        record(
+            name="S1.Enable",
+            group="Config_Serial1",
+            id=7900,
+            label="Enable Modbus protocol",
+            value="Maybe",
+        ),
+        record(
+            name="C1.Node", group="Config_CAN1", id=8950, label="Node-ID CAN bus 1", value=True
+        ),
+        record(
+            name="C2.Node", group="Config_CAN2.CANopen", id=9940, label="This device", value="Off"
+        ),
+        record(name="C2.J1939", group="Config_CAN2.J1939", id=15166, label="J1939", value=0),
+        record(
+            name="C2.Type", group="Config_CAN2.J1939", id=15102, label="Device type", value="On"
+        ),
+        record(name="C3.Node", group="Config_CAN3", id=8952, label="Node-ID CAN bus 3", value=200),
+        record(
+            name="C3.Type", group="Config_CAN3.J1939", id=15102, label="Device type", value="Off"
+        ),
+        record(name="C4.Node", group="Config_CAN4", id=8953, label="Node-ID", value="Node-ID 9"),
+        record(name="C4.J1939", group="Config_CAN4.J1939", id=15166, label="J1939", value="Yes"),
+        record(
+            name="C4.Addr", group="Config_CAN4.J1939", id=15106, label="J1939 own address", value=3
+        ),
+    ]
+    assert add_interfaces_and_services(dev, records) == (5, 2)
+    by_name = {i.name: i for i in dev.interface}
+    assert by_name["Serial 1"].baudrate is None
+    assert by_name["Serial 1"].services == []
+    assert by_name["CAN 1"].services == []
+    assert by_name["CAN 2"].services == []
+    assert by_name["CAN 3"].services == []
+    assert [(s.protocol, s.extra) for s in by_name["CAN 4"].services] == [
+        ("canopen", {"node_id": 9, "baudrate": None}),
+        ("j1939", {"address": 3, "device_type": None, "baudrate": None}),
+    ]
+
+
+def test_ethernet_address_fallbacks():
+    def address(group: str, first_id: int, label: str, values: list) -> list[dict]:
+        # easYgen-3000XT style: "IP address", "Ethernet A - IP address part 2", ...
+        port, _, base = label.rpartition(" - ")
+        prefix = f"{port} - " if port else ""
+        labels = [base] + [f"{prefix}{base} part {n}" for n in range(2, len(values) + 1)]
+        return [
+            record(
+                name=f"{group}.{first_id + i} {lbl}",
+                group=group,
+                id=first_id + i,
+                label=lbl,
+                value=v,
+            )
+            for i, (lbl, v) in enumerate(zip(labels, values, strict=True))
+        ]
+
+    records = [
+        # Two ports in one group, and a gateway that doesn't name its port
+        *address("E", 10, "Ethernet A - IP address", [10, 0, 0, 1]),
+        *address("E", 20, "Ethernet B - IP address", [10, 0, 1, 1]),
+        *address("E", 30, "Gateway IP", [10, 0, 0, 254]),
+        # One port and a gateway conflicting with the port's own gateway
+        *address("F", 40, "Ethernet C - IP address", [10, 1, 0, 1]),
+        *address("F", 50, "Ethernet C - Gateway IP", [10, 1, 0, 254]),
+        *address("F", 60, "Gateway IP", [10, 1, 0, 253]),
+        # A port with a gateway but no IP address (not configured)
+        *address("G", 70, "Ethernet D - IP address", [0, 0, 0, 0]),
+        *address("G", 80, "Ethernet D - Gateway IP", [10, 2, 0, 254]),
+        *address("G", 90, "Ethernet D - subnet mask", [255, 255, 255, 0]),
+        # Incomplete and invalid addresses are skipped
+        *address("H", 100, "Ethernet E - IP address", [10, 3]),
+        record(name="H.110 IP address", group="Ethernet F", id=110, label="IP address", value="x"),
+        record(name="H.120 IP address", group="Ethernet G", id=120, label="IP address", value=7),
+        # A second address of a port, the first one is kept
+        record(
+            name="I.130 IP address",
+            group="ethernet h",
+            id=130,
+            label="IP address",
+            value="10.4.0.1",
+        ),
+        record(
+            name="I.140 IP address",
+            group="ethernet h",
+            id=140,
+            label="IP address",
+            value="10.4.0.2",
+        ),
+        # The same gateway as the port's own one, and subnet masks alone
+        *address("J", 150, "Ethernet I - IP address", [10, 5, 0, 1]),
+        *address("J", 160, "Ethernet I - Gateway IP", [10, 5, 0, 254]),
+        *address("J", 170, "Gateway IP", [10, 5, 0, 254]),
+        *address("K", 180, "Ethernet J - subnet mask", [255, 255, 0, 0]),
+        *address("L", 190, "subnet mask", [255, 255, 0, 0]),
+    ]
+    dev = DeviceData()
+    assert add_interfaces_and_services(dev, records) == (5, 0)
+    assert {(i.name, i.ip, i.gateway) for i in dev.interface} == {
+        ("Ethernet A", "10.0.0.1", ""),
+        ("Ethernet B", "10.0.1.1", ""),
+        ("Ethernet C", "10.1.0.1", "10.1.0.254"),
+        ("Ethernet H", "10.4.0.1", ""),
+        ("Ethernet I", "10.5.0.1", "10.5.0.254"),
+    }
+    unassigned = [
+        {"group": "ethernet h", "port": "H", "ip": "10.4.0.2"},
+        {"group": "E", "gateway": "10.0.0.254"},
+        {"group": "F", "gateway": "10.1.0.253"},
+        {"group": "G", "port": "D", "subnet_mask": "255.255.255.0", "gateway": "10.2.0.254"},
+    ]
+    assert dev.extra["unassigned_ethernet_addresses"] == unassigned
+    assert {"10.0.0.254", "10.1.0.253", "10.2.0.254", "10.4.0.2"} <= dev.related.ip
+
+    add_interfaces_and_services(dev, records)
+    assert dev.extra["unassigned_ethernet_addresses"] == unassigned
+
+
+def test_minimal_records():
+    # No parameter kind, no CANopen addresses, a baudrate in Bd, an Ethernet group without ports
+    fields = [
+        {},
+        {
+            "name": "S1.Baud",
+            "group": "Config_Serial1",
+            "id": 3163,
+            "label": "Baudrate",
+            "value": "9600 Bd",
+        },
+        {
+            "name": "N.IP",
+            "group": "PARAMETER.Network",
+            "id": 4000,
+            "label": "IP address",
+            "value": "10.6.0.1",
+        },
+    ]
+    records = [
+        record(kind="", canopen_multiplexor=None, servlink_handle=handle, **overrides)
+        for handle, overrides in enumerate(fields, start=1)
+    ]
+    dev = DeviceData()
+    counts = populate_data_model_from_wset(dev, {"parameters": records})
+    assert counts["registers"] == 3
+    assert all("kind" not in r.extra for r in dev.registers)
+    assert {r.protocol for r in dev.registers} == {"servlink"}
+    assert dev.related.protocols == {"servlink"}
+    assert {(i.name, i.ip, i.baudrate) for i in dev.interface} == {
+        ("Serial 1", "", 9600),
+        ("Ethernet", "10.6.0.1", None),
+    }
+    assert "code_levels" not in dev.extra
+
+    dev = DeviceData()
+    assert populate_data_model_from_sid(dev, {}) == {"registers": 0, "tags": 0}
+    assert not dev.related.protocols

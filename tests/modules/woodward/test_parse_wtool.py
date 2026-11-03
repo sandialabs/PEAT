@@ -6,6 +6,7 @@ import pytest
 
 from peat import DeviceData
 from peat.modules.woodward.parse_wtool import (
+    _device_names,
     find_sid_specifications,
     is_wtool_data,
     parse_wtool,
@@ -108,6 +109,22 @@ def test_invalid_data(data):
     assert parse_wtool(data) == {}
 
 
+def test_device_names():
+    plain = {
+        "_class": "DeviceNamesList",
+        "items": [
+            {"name": {"defaultText": "Device1"}},
+            {"name": "Device2"},
+            {"name": {"defaultText": None}},
+            "Device3",
+            {"other": [{"name": ""}, 12]},
+        ],
+    }
+    assert _device_names(plain) == ["Device1", "Device2", "Device3"]
+    assert _device_names(None) == []
+    assert _device_names([]) == []
+
+
 def test_find_sid_specifications():
     data = (
         b"xx EG3500XTP2 2.17-0_54728 yy us_5418-6722-NEW zz 5418-4091A 2013 "
@@ -115,8 +132,8 @@ def test_find_sid_specifications():
     )
     assert find_sid_specifications(data) == [
         "5418-4091A",
+        "5418-6722-NEW",
         "EG3500XTP2 2.17-0_54728",
-        "us_5418-6722-NEW",
     ]
     assert find_sid_specifications(b"") == []
 

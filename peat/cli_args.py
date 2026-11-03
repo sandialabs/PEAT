@@ -264,7 +264,8 @@ peat parse -d sel ./*.rdb
 
 # Parse a Woodward ToolKit settings file (*.wset) saved from an easYgen genset
 # controller. ToolKit *.sid and *.wtool files and Control Assistant *.tc
-# tunable files are supported as well.
+# tunable files of easYgen controls are supported as well. Other *.tc files
+# are parsed by the 2301E module (-d wdw2301e).
 peat parse -d easygen ./genset-1.wset
 
 # Multiple file paths arguments. PEAT will automatically select the

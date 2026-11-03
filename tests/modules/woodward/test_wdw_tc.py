@@ -15,12 +15,16 @@ from peat.modules.woodward.wdw_tc import (
     is_tc_data,
     parse_tc,
     populate_device_from_tc,
+    tc_application_info,
+    tc_parameter_values,
     tc_signature_check,
+    unquote_tc_field,
 )
 
 from .nrbf_builder import build_generic_wset
 
 FIXTURE: Final[str] = "tunables_synthetic.tc"
+HEADER: Final[str] = "Mode\tCategory\tBlock Name\tField Name\tType\tCurrent\tInitial\tLow\tHigh\n"
 
 
 @pytest.fixture(scope="module")
@@ -178,8 +182,47 @@ def test_invalid_data(text):
     assert parse_tc(text) == {}
 
 
-def test_unsupported_source_type():
+def test_unsupported_source_type(tmp_path):
     assert parse_tc(12345) == {}  # type: ignore[arg-type]
+    assert parse_tc(tmp_path / "missing.tc") == {}
+
+
+def test_bytearray_source(tc_bytes, parsed):
+    assert parse_tc(bytearray(tc_bytes)) == parsed
+
+
+def test_header_without_rows():
+    parsed = parse_tc("File Version: 1.0\n" + HEADER)
+    assert parsed["columns"] == TC_EXPECTED_COLUMNS
+    assert parsed["num_parameters"] == 0
+    assert parsed["parameters"] == []
+    assert parsed["config"] == {}
+
+
+def test_missing_type_column():
+    text = (
+        "File Version: 1.0\n"
+        "Mode\tCategory\tBlock Name\tField Name\tCurrent\n"
+        "Service\tCAT\tBLOCK\tFIELD\t5\n"
+    )
+    record = parse_tc(text)["parameters"][0]
+    assert record["type"] == ""
+    assert record["current"] == 5
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("plain", "plain"),
+        (' "quoted" ', "quoted"),
+        ('""', ""),
+        ('"', '"'),
+        ('"a""b"', 'a"b'),
+        ('a"b', 'a"b'),
+    ],
+)
+def test_unquote_tc_field(raw, expected):
+    assert unquote_tc_field(raw) == expected
 
 
 def test_is_tc_data(tc_bytes):
@@ -208,6 +251,11 @@ def test_tc_signature_check(datapath):
         pytest.param("café".encode("utf-16"), "café", id="utf-16 with bom"),
         pytest.param(b"80 \x80 euro", "80 € euro", id="cp1252 euro sign"),
         pytest.param(b"\xff\xfe\x00", "\xff\xfe\x00", id="bad utf-16 falls back"),
+        pytest.param("File Version".encode("utf-16-le"), "File Version", id="utf-16-le no bom"),
+        pytest.param("File Version".encode("utf-16-be"), "File Version", id="utf-16-be no bom"),
+        pytest.param(b"A\x00B\x00C\x00\x01\xd8", "A\x00B\x00C\x00\x01Ø", id="bad utf-16-le"),
+        pytest.param(b"\x81", "\x81", id="latin-1 fallback"),
+        pytest.param("\ufeffstr with bom", "str with bom", id="str bom stripped"),
     ],
 )
 def test_decode_text(data, expected):
@@ -235,6 +283,16 @@ def test_decode_text(data, expected):
         ("  spaced  ", "", "spaced"),
         ("", "Float", ""),
         ("maybe", "Boolean", "maybe"),
+        ("1", "Float", 1.0),
+        ("2", "REAL", 2.0),
+        ("x", "Double", "x"),
+        ("60.0", "Integer", 60),
+        ("1.5", "DINT", 1.5),
+        ("auto", "Word", "auto"),
+        ('"7"', '"Integer"', 7),
+        ("nan", "", "nan"),
+        ("-inf", "Float", "-inf"),
+        ("1e999", "Integer", "1e999"),
     ],
 )
 def test_convert_tc_value(raw, type_name, expected):
@@ -252,9 +310,17 @@ def test_populate_device_from_tc(parsed):
     assert dev.extra["tc"]["modes"] == ["Configure", "Service"]
     assert "config" not in dev.extra["tc"]
     assert len(dev.extra["parameters"]) == 7
-    assert (
-        dev.extra["parameters"][0]["path"] == "A**ENGINE PARAMETERS**/SPEED_SETPOINT/RATED_SPEED"
-    )
+    assert dev.extra["parameters"]["A**ENGINE PARAMETERS**/SPEED_SETPOINT/RATED_SPEED"] == 1800.0
+    assert dev.extra["parameters"]["CfgA/01/USE_RPM"] is True
+    # Unknown application: generic brand, model is left for the module
+    assert dev.description.brand == "Woodward"
+    assert not dev.description.model
+
+    # Parsing the same file again doesn't duplicate anything, other values are kept
+    dev.extra["parameters"]["1750 Rated voltage"] = 400
+    populate_device_from_tc(dev, parsed)
+    assert len(dev.extra["parameters"]) == 8
+    assert dev.extra["parameters"]["1750 Rated voltage"] == 400
 
     # Existing values aren't overwritten
     dev2 = DeviceData()
@@ -265,3 +331,33 @@ def test_populate_device_from_tc(parsed):
     dev3 = DeviceData()
     populate_device_from_tc(dev3, {})
     assert not dev3.extra
+
+
+def test_populate_known_application():
+    text = "File Version: 1.0\n5418-6722 NEW\nnot a date\n" + HEADER
+    parsed = parse_tc(text)
+    assert tc_application_info(parsed)["model"] == "3500"
+    dev = DeviceData()
+    populate_device_from_tc(dev, parsed)
+    assert dev.description.brand == "easYgen"
+    assert dev.description.model == "3500"
+    assert dev.description.product == "easYgen-3500"
+    assert dev.extra["parameters"] == {}
+    assert not dev.firmware.timestamp
+    # Values that are already set aren't overwritten
+    dev2 = DeviceData()
+    dev2.description.model = "3500XT"
+    populate_device_from_tc(dev2, parsed)
+    assert dev2.description.model == "3500XT"
+    assert dev2.description.product == "easYgen-3500"
+
+
+def test_tc_parameter_values_same_path_in_two_modes():
+    records = [
+        {"mode": "Service", "path": "CAT/BLOCK/FIELD", "current": 1},
+        {"mode": "Configure", "path": "CAT/BLOCK/FIELD", "current": 2},
+    ]
+    assert tc_parameter_values(records) == {
+        "CAT/BLOCK/FIELD": 1,
+        "Configure/CAT/BLOCK/FIELD": 2,
+    }
