@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SCEPTRE>
+    <field-device>
+        <name>rtu-1</name>
+        <cycle-time>1000</cycle-time>
+        <tags>
+            <external-tag>
+                <name>var_I2</name>
+                <io>I2</io>
+                <type>binary</type>
+            </external-tag>
+            <external-tag>
+                <name>var_I3</name>
+                <io>I3</io>
+                <type>binary</type>
+            </external-tag>
+            <external-tag>
+                <name>var_I1</name>
+                <io>I1</io>
+                <type>analog</type>
+            </external-tag>
+            <external-tag>
+                <name>var_O0</name>
+                <io>O0</io>
+                <type>binary</type>
+            </external-tag>
+            <external-tag>
+                <name>var_O3</name>
+                <io>O3</io>
+                <type>analog</type>
+            </external-tag>
+            <external-tag>
+                <name>var_O1</name>
+                <io>O1</io>
+                <type>binary</type>
+            </external-tag>
+
+            <internal-tag>
+                <name>var_O11</name>
+                <status>false</status>
+            </internal-tag>
+        </tags>
+
+        <comms>
+            <modbus-server>
+                <endpoint>/dev/ttyUSB0</endpoint>
+                <event-logging>rtu-1-modbus-server.log</event-logging>
+                <input-register>
+                    <address>30000</address>
+                    <max-value>1000</max-value>
+                    <min-value>0</min-value>
+                    <tag>var_I1</tag>
+                </input-register>
+                <discrete-input>
+                    <address>10000</address>
+                    <tag>var_I3</tag>
+                </discrete-input>
+                <discrete-input>
+                    <address>10001</address>
+                    <tag>var_I2</tag>
+                </discrete-input>
+                <coil>
+                    <address>0</address>
+                    <tag>var_O0</tag>
+                </coil>
+                <coil>
+                    <address>1</address>
+                    <tag>var_O1</tag>
+                </coil>
+                <holding-register>
+                    <address>40000</address>
+                    <max-value>1000</max-value>
+                    <min-value>0</min-value>
+                    <tag>var_O3</tag>
+                </holding-register>
+            </modbus-server>
+        </comms>
+
+        <input>
+            <endpoint>udp://239.0.0.1:40000</endpoint>
+            <analog>
+                <id>I0</id>
+                <name>bus-1.gen_mw</name>
+            </analog>
+            <analog>
+                <id>I1</id>
+                <name>load-1_bus-1.mw</name>
+            </analog>
+            <binary>
+                <id>I2</id>
+                <name>generator-1_bus-1.active</name>
+            </binary>
+            <binary>
+                <id>I3</id>
+                <name>load-1_bus-1.active</name>
+            </binary>
+        </input>
+
+        <output>
+            <endpoint>tcp://127.0.0.1:5555</endpoint>
+            <binary>
+                <id>O0</id>
+                <name>load-1_bus-1.active</name>
+            </binary>
+            <binary>
+                <id>O1</id>
+                <name>generator-1_bus-1.active</name>
+            </binary>
+            <analog>
+                <id>O2</id>
+                <name>bus-1.gen_mw</name>
+            </analog>
+            <analog>
+                <id>O3</id>
+                <name>load-1_bus-1.mw</name>
+            </analog>
+        </output>
+
+        <logic>
+            <![CDATA[
+
+
+            var_O0 = !(var_I1 >= 500.55)
+
+            var_O1 = var_O0,delay:20000
+
+            var_O11 = var_O1
+
+            ]]>
+        </logic>
+    </field-device>
+</SCEPTRE>

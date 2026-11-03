@@ -447,16 +447,6 @@ device_options:
   # Enable SCEPTRE/OpenPLC compatibility changes to Structured Text logic output
   sceptre_plc_compatible_st_logic: false
 
-  # Configuration specific to the SCEPTRE module
-  sceptre:
-    # Enable local development of SCEPTRE module using Twisted
-    # (refer to SCEPTRE module docstring for details)
-    ftp_testing: false
-
-    # Name of bennu firmware file.
-    # This will be auto-determined if a scan is performed.
-    bennu_filename: "bennu-field-deviced.firmware"
-
   # Configuration specific to the SEL modules (SELRelay and SELRTAC)
   sel:
     # Select what protocols PEAT is allowed to use

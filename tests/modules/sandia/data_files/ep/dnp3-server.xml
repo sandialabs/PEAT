@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SCEPTRE>
+    <field-device>
+        <name>rtu-1</name>
+        <cycle-time>500</cycle-time>
+        <tags>
+            <external-tag>
+                <name>brkr</name>
+                <io>I3</io>
+                <type>binary</type>
+            </external-tag>
+            <external-tag>
+                <name>load-power</name>
+                <io>I1</io>
+                <type>analog</type>
+            </external-tag>
+            <external-tag>
+                <name>load-breaker-toggle</name>
+                <io>O0</io>
+                <type>binary</type>
+            </external-tag>
+            <external-tag>
+                <name>load-mw-setpoint</name>
+                <io>O3</io>
+                <type>analog</type>
+            </external-tag>
+
+            <internal-tag>
+                <name>machine_power</name>
+                <status>false</status>
+            </internal-tag>
+            <internal-tag>
+                <name>machine_powered_time</name>
+                <value>0.0</value>
+            </internal-tag>
+        </tags>
+
+        <comms>
+	    <dnp3-server>
+		<endpoint>tcp://127.0.0.1:20000</endpoint>
+                <address>10</address>
+                <event-logging>rtu-1-dnp3-outstation.log</event-logging>
+                <!--
+                    Optional: per-type event buffer capacity (default 100).
+                    Only matters for points assigned to an event class
+                    (Class1/2/3). If the master doesn't poll event classes the
+                    buffer fills and every response sets IIN2.3 (event buffer
+                    overflow).
+                <event-buffer-size>100</event-buffer-size>
+                -->
+                <!--
+                    Point options (all optional unless noted):
+                      address   DNP3 point index (required)
+                      tag       field-device tag (required)
+                      class     Class0 | Class1 | Class2 | Class3 (default Class0)
+                                Class0 = static data only, no events.
+                                Class1-3 = also generate events in that class.
+                      sgvar     static group/variation (inputs only)
+                                binary-input: Group1Var1 | Group1Var2 (default)
+                                analog-input: Group30Var1-6 (default Group30Var6)
+                      egvar     event group/variation (inputs only)
+                                binary-input: Group2Var1-3 (default Group2Var2)
+                                analog-input: Group32Var1-8 (default Group32Var6)
+                      deadband  analog-input event deadband (default 0.0)
+                      sbo       outputs only: 1 = require select-before-operate,
+                                reject direct operate (default 0)
+                -->
+                <binary-input>
+                    <address>2</address>
+                    <tag>brkr</tag>
+                    <!--
+                    <class>Class1</class>
+                    <sgvar>Group1Var2</sgvar>
+                    <egvar>Group2Var2</egvar>
+                    -->
+                </binary-input>
+                <binary-output>
+                    <address>5</address>
+                    <tag>load-breaker-toggle</tag>
+                    <!--
+                    <class>Class1</class>
+                    <sbo>1</sbo>
+                    -->
+                </binary-output>
+                <analog-input>
+                    <address>0</address>
+                    <tag>load-power</tag>
+                    <!--
+                    <class>Class2</class>
+                    <sgvar>Group30Var6</sgvar>
+                    <egvar>Group32Var6</egvar>
+                    <deadband>0.5</deadband>
+                    -->
+                </analog-input>
+                <analog-output>
+                    <address>1</address>
+                    <tag>load-mw-setpoint</tag>
+                    <sbo>1</sbo>
+                    <!--
+                    <class>Class2</class>
+                    -->
+                </analog-output>
+            </dnp3-server>
+        </comms>
+
+        <input>
+            <endpoint>udp://239.0.0.1:40000</endpoint>
+            <analog>
+                <id>I0</id>
+                <name>bus-1.gen_mw</name>
+            </analog>
+            <analog>
+                <id>I1</id>
+                <name>load-1_bus-1.mw</name>
+            </analog>
+            <binary>
+                <id>I2</id>
+                <name>generator-1_bus-1.active</name>
+            </binary>
+            <binary>
+                <id>I3</id>
+                <name>load-1_bus-1.active</name>
+            </binary>
+        </input>
+
+        <output>
+            <endpoint>tcp://127.0.0.1:5555</endpoint>
+            <binary>
+                <id>O0</id>
+                <name>load-1_bus-1.active</name>
+            </binary>
+            <binary>
+                <id>O1</id>
+                <name>generator-1_bus-1.active</name>
+            </binary>
+            <analog>
+                <id>O2</id>
+                <name>bus-1.gen_mw</name>
+            </analog>
+            <analog>
+                <id>O3</id>
+                <name>load-1_bus-1.mw</name>
+            </analog>
+        </output>
+    </field-device>
+</SCEPTRE>

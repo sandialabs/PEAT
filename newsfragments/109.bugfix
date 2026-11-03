@@ -1,0 +1,1 @@
+Fixed an ``UnboundLocalError`` in ``peat push`` when a module's push raised an exception. SCEPTRE FTP uploads are now always binary, checked against the file size on the server, and logged as errors when they fail.

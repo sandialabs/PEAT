@@ -93,7 +93,7 @@ def push(
                 push_type=push_type,
             )
         except Exception:
-            log.exception(f"Failed to push to {dev.get_id()}")
+            log.exception(f"Failed to push to {device.get_id()}")
             return False
 
         if not push_result:

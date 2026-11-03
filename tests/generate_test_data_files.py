@@ -138,7 +138,11 @@ class SELRTACGenerator(TestDataGenerator):
 
 
 class SCEPTREGenerator(TestDataGenerator):
-    input_paths = ["./tests/modules/sandia/data_files/"]
+    input_paths = [
+        "./tests/modules/sandia/data_files/bp/",
+        "./tests/modules/sandia/data_files/ep/",
+        "./tests/modules/sandia/data_files/phenix-soap/",
+    ]
     input_globs = ["*.xml"]
     file_types = ["device-data-full.json", "device-data-summary.json"]
 

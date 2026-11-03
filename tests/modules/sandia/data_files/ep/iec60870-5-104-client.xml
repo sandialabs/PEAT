@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<SCEPTRE>
+    <field-device>
+        <name>fep-1</name>
+        <comms>
+            <iec60870-5-104-client>
+                <iec60870-5-104-connection>
+                    <endpoint>tcp://127.0.0.1:2404</endpoint>
+                    <binary-input>
+                        <address>100</address>
+                        <tag>I_generator-1_bus-1.active</tag>
+                    </binary-input>
+                    <binary-input>
+                        <address>101</address>
+                        <tag>I_load-1_bus-1.active</tag>
+                    </binary-input>
+                    <analog-input>
+                        <address>102</address>
+                        <tag>I_bus-1.gen_mw</tag>
+                    </analog-input>
+                    <analog-input>
+                        <address>103</address>
+                        <tag>I_load-1_bus-1.mw</tag>
+                    </analog-input>
+                    <binary-output>
+                        <address>0</address>
+                        <tag>O_generator-1_bus-1.active</tag>
+                    </binary-output>
+                    <binary-output>
+                        <address>1</address>
+                        <tag>O_load-1_bus-1.active</tag>
+                    </binary-output>
+                    <analog-output>
+                        <address>2</address>
+                        <tag>O_bus-1.gen_mw</tag>
+                    </analog-output>
+                    <analog-output>
+                        <address>3</address>
+                        <tag>O_load-1_bus-1.mw</tag>
+                    </analog-output>
+                </iec60870-5-104-connection>
+                <command-interface>tcp://127.0.0.1:1330</command-interface>
+            </iec60870-5-104-client>
+        </comms>
+    </field-device>
+</SCEPTRE>

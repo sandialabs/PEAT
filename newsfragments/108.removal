@@ -1,0 +1,1 @@
+Removed the SCEPTRE module's ``ftp_testing`` and ``bennu_filename`` options (``device_options.sceptre``). Test against a real bennu VM with ``scripts/run-bennu-vm.sh`` instead of a local FTP server. Firmware is now pulled from ``bennu-field-deviced.firmware`` if it exists, otherwise from ``bennu-field-deviced``.
