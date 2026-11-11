@@ -1,0 +1,7 @@
+metadata:
+  name: invalid-syntax-config
+  author: pauliejog
+    bad_key: this indentation makes the YAML invalid
+
+debug: 4
+verbose: true

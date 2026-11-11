@@ -34,6 +34,44 @@ def test_cli_parse_non_existing_file(exec_peat, tmp_path, assert_meta_files):
 
 
 @pytest.mark.slow
+@pytest.mark.parametrize(
+    ("config_filename", "expected_error"),
+    [
+        ("invalid-syntax-config.yaml", "mapping values are not allowed here"),
+        ("invalid-syntax-config.json", "Expecting property name enclosed in double quotes"),
+    ],
+)
+def test_cli_parse_invalid_config_syntax(
+    exec_peat, tmp_path, datapath, examples_dir, config_filename, expected_error
+):
+    """
+    Regression test: Passing a config file (-c/--config-file) with invalid syntax
+    mustexit with non-zero code and a clear error message (no silent failures).
+    """
+    args = [
+        "parse",
+        "--config-file",
+        datapath(config_filename).as_posix(),
+        "--run-dir",
+        tmp_path.as_posix(),
+        (examples_dir / "devices" / "sceptre" / "bp" / "modbus-client.xml").as_posix(),
+    ]
+
+    result = exec_peat(args)
+
+    assert result.returncode == 1
+    assert not result.stdout  # no output from failed parse
+
+    output = result.stderr.decode()
+    assert output  # must NOT be completely silent
+    assert "ERROR" in output
+    assert expected_error in output
+
+    # Since config loading failed, no run directory/metadata should be created.
+    assert not any(tmp_path.iterdir())
+
+
+@pytest.mark.slow
 def test_cli_push_non_existing_file(exec_peat, tmp_path, assert_meta_files):
     bad_filename = "INVALIDFILE.TXT.PS.INVALID"
     args = [

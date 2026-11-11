@@ -40,6 +40,11 @@ def initialize_peat(conf: dict, entrypoint: consts.EntrypointType = "Package") -
     """
     state.entrypoint = entrypoint
 
+    # Add a temporary stderr sink to catch early config errors
+    # (e.g., bad YAML/JSON) without triggering the full logging setup.
+    log.remove()
+    log.add(sys.stderr, level="INFO")
+
     # Convert top-level keys to lowercase. This makes it easier to use
     # this function directly from testing scripts or the REPL, e.g.
     # initialize_peat({"DEBUG": 1, "OUT_DIR": None})
@@ -60,7 +65,10 @@ def initialize_peat(conf: dict, entrypoint: consts.EntrypointType = "Package") -
     try:
         if conf.get("config_file"):
             config_path = Path(conf["config_file"]).resolve()
-            config.load_from_file(config_path)
+            if not config.load_from_file(config_path):
+                # Stop early if ``load_from_file`` failed, preventing
+                # confusing downstream errors.
+                sys.exit(1)
     except AttributeError:
         # This is likely an encrypted config, check to see if it is and unencrypt
         # need to decrypt file then load yaml (safe_load) or json (load)

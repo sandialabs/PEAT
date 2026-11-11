@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from typing import Literal
 
-from pydantic import conint, constr
+from pydantic.v1 import conint, constr
 
 from peat.data.base_model import BaseModel
 

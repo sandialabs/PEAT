@@ -2,7 +2,7 @@ import ipaddress
 import re
 from pathlib import Path, PurePath
 
-from pydantic.fields import ModelField
+from pydantic.v1.fields import ModelField
 
 from peat.protocols.addresses import clean_ipv4, clean_mac
 
