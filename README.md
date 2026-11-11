@@ -2,10 +2,11 @@
 
 [![GitHub Actions Pipeline Status](https://github.com/sandialabs/PEAT/actions/workflows/tests.yml/badge.svg)](https://github.com/sandialabs/PEAT/actions)
 [![OpenSSF Best Practices](https://www.bestpractices.dev/projects/11835/badge)](https://www.bestpractices.dev/projects/11835)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/sandialabs/PEAT/badge)](https://scorecard.dev/viewer/?uri=github.com/sandialabs/PEAT)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
 [![Open in Dev Containers](https://img.shields.io/static/v1?label=Dev%20Containers&message=Open&color=blue)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/sandialabs/PEAT)
 
-PEAT is a Operational Technology (OT) device interrogator, including pulling, parsing and uploading artifacts (configuration, firmware, process logic, etc.) and network discovery ("scanning"). It runs on most systems, including Linux, Windows, and as a Docker container.
+PEAT is a Operational Technology (OT) device interrogator, including pulling, parsing and uploading artifacts (configuration, firmware, process logic, etc.) and network discovery ("scanning"). It runs on most systems, including Linux, Windows, macOS (Apple Silicon and Intel), and as a Docker container. Refer to the [supported platforms](https://sandialabs.github.io/PEAT/system_requirements.html#supported-platforms) documentation for the versions tested in CI and platform limitations.
 
 Documentation about installation, usage, development, and other information is in the [PEAT documentation](https://sandialabs.github.io/PEAT/).
 
@@ -15,9 +16,9 @@ Quick "one-liners" to easily install PEAT. We *strongly* recommend verifying scr
 
 NOTE: PEAT will hang for a few seconds after running before there is output. This is normal, and is caused by slow imports.
 
-### Linux/MacOS
+### Linux/macOS
 
-The install script will download the latest full release of PEAT and install it into `/usr/local/bin/peat`. It will also download the manpage into `/usr/local/share/man/man1/peat.1` and update the manual database, if `mandb` command is present.
+The install script will download the latest full release of PEAT for your platform (Linux, or macOS on Apple Silicon or Intel) and install it into `/usr/local/bin/peat`. It will also download the manpage into `/usr/local/share/man/man1/peat.1` and update the manual database, if `mandb` command is present.
 
 ```shell
 curl -sSL https://raw.githubusercontent.com/sandialabs/PEAT/refs/heads/main/scripts/install_peat.sh | sudo sh -

@@ -1039,7 +1039,9 @@ def build_argument_parser(version: str = "0.0.0") -> argparse.ArgumentParser:
             help="Serial port(s) to target. Use a single number to specify a "
             "single port (0), or numbers separated by a - to specify a "
             "range of ports (e.g. 0-4). Alternatively, platform-specific "
-            "port names can be used (e.g. /dev/ttyUSB0).",
+            "port names can be used (e.g. /dev/ttyUSB0). On macOS, numbers are "
+            "an index into the sorted list of /dev/cu.* devices, and device "
+            "names (e.g. usbserial-1410) are also accepted.",
         )
         host_group.add_argument(
             "-f",

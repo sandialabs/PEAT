@@ -232,3 +232,51 @@ jobs:
             dist/peat.exe
             dist/sneakypeat.exe
           if-no-files-found: error
+
+  macos-build:
+    name: Build macOS Executable (${{ matrix.arch }})
+    # Build on the oldest tested macOS release so the executable runs on it and newer releases
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      matrix:
+        include:
+          - platform: macos-15
+            arch: arm64
+          - platform: macos-15-intel
+            arch: x86_64
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          fetch-tags: true
+          fetch-depth: 0  # checkout full history
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
+        with:
+          python-version: "3.12"
+          cache: true
+      - name: Install dependencies
+        run: pdm sync -G exe
+      - name: Build executable
+        run: pdm run build-exe
+      - name: List executable contents
+        run: pdm run pyi-archive_viewer --list dist/peat
+      - name: Check executable
+        run: |
+          file dist/peat
+          file dist/peat | grep -q "${{ matrix.arch }}"
+          ./dist/peat --version
+          ./dist/peat --help
+          ./dist/peat parse --list-modules
+          ./dist/peat parse -vVV -d AwesomeTool -I examples/example_peat_module/ -- examples/example_peat_module/awesome_output.json
+          mv dist/peat "dist/peat_macos_${{ matrix.arch }}"
+      - name: Upload artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: macos_exe_${{ matrix.arch }}
+          path: dist/peat_macos_${{ matrix.arch }}
+          if-no-files-found: error

@@ -7,7 +7,7 @@ PEAT is distributed in multiple formats customized to each supported platform. A
 
 Installation
 ------------
-The recommended method of installation for most users is to use the latest pre-built executable release (``peat`` on Linux and ``peat.exe`` on Windows). Additionally, a :term:`Container` image is available for use with :term:`Docker` or :term:`Podman`.
+The recommended method of installation for most users is to use the latest pre-built executable release (``peat`` on Linux, ``peat.exe`` on Windows, and ``peat_macos_arm64`` or ``peat_macos_x86_64`` on macOS). Additionally, a :term:`Container` image is available for use with :term:`Docker` or :term:`Podman`.
 
 Linux
 ^^^^^
@@ -73,6 +73,30 @@ Usage without installation
 
    # View man page
    man ./peat.1
+
+macOS
+^^^^^
+The same installation script used for Linux works on macOS. It downloads the executable for your Mac's architecture (Apple Silicon or Intel) and installs it to ``/usr/local/bin/peat``, along with the man page.
+
+.. code-block:: bash
+
+   # Download script
+   curl -fLO https://raw.githubusercontent.com/sandialabs/PEAT/refs/heads/main/scripts/install_peat.sh
+
+   # Verify script contents to ensure they are trusted
+   less install_peat.sh
+
+   # Run script
+   chmod +rx install_peat.sh
+   sudo ./install_peat.sh
+
+   # Verify installation
+   peat --version
+   man peat
+
+To install manually, download ``peat_macos_arm64`` (Apple Silicon) or ``peat_macos_x86_64`` (Intel) and ``peat.1`` from the release, then follow the Linux manual installation steps above, using the downloaded file name in place of ``peat`` (``mandb`` isn't needed on macOS). If you downloaded the executable with a web browser, remove the quarantine attribute first, since the executable isn't notarized: ``xattr -d com.apple.quarantine ./peat_macos_arm64``.
+
+The Python package (the ``.whl`` file from the release) also works on macOS with Python 3.11 to 3.13, e.g. ``pip install ./PEAT-<version>-py3-none-any.whl`` in a virtual environment. Refer to :ref:`macos-limitations` for platform-specific considerations, notably that ``sudo`` is needed for ARP and ICMP host discovery.
 
 Windows
 ^^^^^^^
@@ -155,7 +179,7 @@ PEAT Releases
 -------------
 PEAT releases are managed via `GitHub Releases <https://github.com/sandialabs/PEAT/releases>`__, and usually consist of the following:
 
-- The Linux and Windows executables (``peat`` and ``peat.exe``)
+- The Linux, Windows, and macOS executables (``peat``, ``peat.exe``, ``peat_macos_arm64``, and ``peat_macos_x86_64``)
 - The Python source distribution (``.tar.gz``) and binary wheel (``.whl``)
 - The Linux man page (``peat.1`` file)
 - The :term:`Container` image via GitHub Container Registry (``ghcr.io``)

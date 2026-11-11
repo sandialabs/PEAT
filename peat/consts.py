@@ -57,6 +57,9 @@ POSIX: Final[bool] = os.name == "posix"
 #: bool: If the local system is Linux-based
 LINUX: Final[bool] = sys.platform == "linux"
 
+#: bool: If the local system is macOS (Darwin)
+MACOS: Final[bool] = sys.platform == "darwin"
+
 #: bool: If the local system is a Windows Subsystem for Linux (WSL) environment
 WSL: Final[bool] = LINUX and "Microsoft" in platform.version()
 
@@ -244,6 +247,12 @@ def get_platform_info() -> dict[str, str | int | bool]:
             info["os_full"] = f"{info['os_name']} {info['os_rel']} ({distro.name(True)})"
         except Exception:
             pass  # Fail silently if anything goes wrong, info is non-critical
+    elif MACOS:
+        mac_ver = platform.mac_ver()[0]  # "15.3.1"
+        if mac_ver:
+            info["os_ver"] = mac_ver
+            # "Darwin 24.3.0 (macOS 15.3.1)"
+            info["os_full"] = f"{info['os_name']} {info['os_rel']} (macOS {mac_ver})"
 
     return info
 

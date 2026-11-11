@@ -5,9 +5,14 @@ import struct
 from collections.abc import Callable
 from pprint import pformat
 from socket import AF_INET, SOCK_DGRAM, SOCK_STREAM
+from typing import Final
 
 from peat import config, consts, log
 from peat.protocols.snmp import SNMP
+
+#: Socket error codes for "connection refused". The value of ``errno.ECONNREFUSED``
+#: is platform-specific (111 on Linux, 61 on macOS), and Winsock uses 10061.
+CONN_REFUSED_CODES: Final[frozenset[int]] = frozenset({errno.ECONNREFUSED, 10061})
 
 
 def check_tcp_port(
@@ -51,7 +56,7 @@ def check_tcp_port(
             to prevent issues with devices that will respond with data
             and cause issues (like errno 11 "Resource temporarily unavailable").
             This is similar to ``nmap -sS`` ("SYN scan").
-        syn_sweep: If connection refused (code 111) should be considered "open".
+        syn_sweep: If connection refused (``ECONNREFUSED``) should be considered "open".
             Commonly used when checking if a host is online and responding.
             This also changes the amount of logging output to accommodate
             SYN sweep scanning, which generates a lot of errors.
@@ -98,10 +103,12 @@ def check_tcp_port(
             log.debug(f"TCP scan of {ip}:{port} failed due to an exception: {err}")
             return False
 
-    # 0 => Success, 111 => Connection refused (something is there)
+    # 0 => Success, ECONNREFUSED => Connection refused (something is there)
+    # The value of ECONNREFUSED varies by platform: 111 on Linux, 61 on macOS,
+    # and 10061 (WSAECONNREFUSED) on Windows.
     # socket errno reference: https://gist.github.com/gabrielfalcao/4216897
     # WinError codes reference: https://support.microsoft.com/en-us/help/819124
-    if result == 0 or (syn_sweep and result in [111, 10061]):
+    if result == 0 or (syn_sweep and result in CONN_REFUSED_CODES):
         if config.DEBUG >= 4:
             log.trace4(f"{ip}:{port} scan succeeded: {err_code_to_str(result)}")
         return True

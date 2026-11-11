@@ -8,7 +8,7 @@ Requirements for deploying and running PEAT, including platforms it can run on, 
 Supported platforms
 ===================
 .. note::
-   The PEAT "executable" (``peat`` on Linux, ``peat.exe`` on Windows) is the standard method of using PEAT. The executable is distribution-agnostic and should work on most distributions of Linux or releases of Windows. The supported platforms for PEAT development or using the PEAT Python API is far more restricted and is generally recent releases of Ubuntu or Windows.
+   The PEAT "executable" (``peat`` on Linux, ``peat.exe`` on Windows, ``peat_macos_arm64`` or ``peat_macos_x86_64`` on macOS) is the standard method of using PEAT. The executable is distribution-agnostic and should work on most distributions of Linux, releases of Windows, and macOS 15 or newer. The supported platforms for PEAT development or using the PEAT Python API is far more restricted and is generally recent releases of Ubuntu, Windows, or macOS.
 
 - Linux
    - Ubuntu
@@ -28,20 +28,26 @@ Supported platforms
    - Certain network-related features will not work in WSL, notably MAC address lookups, and a few other functions may not work fully.
 - :term:`Docker`
    - Docker 18.03+, Linux host: PEAT is fully supported on Linux-based Docker hosts. PEAT is regularly tested on Docker 20+.
-   - Windows and OSX Docker hosts should work but are untested.
+   - Windows and macOS Docker hosts should work but are untested. Note that Docker Desktop on macOS runs containers in a Linux VM, so the container can't scan the host's networks directly (``--network host`` reaches the VM, not the Mac). Use the native macOS executable or Python package for scanning from a Mac.
    - Versions of Docker older than 18.03 may work, but are unsupported and may not work in recent releases of PEAT.
 - :term:`Podman`
    - Podman 1.0+: Tested on :term:`RHEL` 6 and RHEL 7. Non-RHEL hosts are untested for Podman.
-- MacOS/OSX
-   - OSX is supported on a best-effort basis. There are known issues with some networking components when running on OSX and issues with system dependencies.
+- macOS
+   - macOS is fully supported for the ``peat`` executable, development, and the Python API, on both Apple Silicon (arm64) and Intel (x86_64) Macs.
+   - Tested in CI (GitHub Actions) on every commit:
+      - macOS 15 Sequoia (Apple Silicon): Python 3.11, 3.12, and 3.13
+      - macOS 15 Sequoia (Intel): Python 3.12
+      - macOS 26 Tahoe (Apple Silicon): Python 3.12
+   - The macOS executables are built on macOS 15, and require macOS 15 or newer. Older releases of macOS may work with a direct Python install, but are not tested.
+   - Refer to :ref:`macos-limitations` for the features that are limited or unavailable on macOS.
 
 Hardware
 ========
 The system hardware requirements for running PEAT are minimal. The limits vary slightly by system.
 
-- Minimum 64-bit x86 CPU (Linux) or 32-bit x86 CPU (Windows); Dual-core 2.4Ghz 64-bit x86 CPU is recommended. Additional cores will not noticeably improve performance.
+- Minimum 64-bit x86 CPU (Linux), 32-bit x86 CPU (Windows), or Apple Silicon or 64-bit Intel CPU (macOS); Dual-core 2.4Ghz 64-bit x86 CPU is recommended. Additional cores will not noticeably improve performance.
 - Minimum of 64MB available memory (RAM); 256MB is recommended for scanning very large networks or when running PEAT as a container.
-- Minimum of 50MB disk space in the platform's temporary directory (``/tmp`` on Linux or ``AppData`` on Windows). This is needed to extract and execute the Python code.
+- Minimum of 50MB disk space in the platform's temporary directory (``/tmp`` on Linux, ``$TMPDIR`` on macOS, or ``AppData`` on Windows). This is needed to extract and execute the Python code.
 - Minimum of ~100MB disk space in the configured output directory; 1Gb is recommended for storing multiple runs and increased output verbosity, 5-10GB is recommended if pulling from 100+ devices, especially if those devices have significant amounts of logic or configuration.
 
 Network
@@ -57,7 +63,7 @@ System configuration
 --------------------
 - Access to a terminal is recommended for running PEAT.
 - (Windows-only) PowerShell is the preferred terminal on Windows. PEAT will run fine in a legacy Windows cmd terminal, but some terminal-related functionality may be degraded (e.g. text formatting and colors).
-- **Administrator (Windows) or root (Linux) permissions are required for some network features**. Note that these permissions are *NOT* required for the offline functions of PEAT (parsing, pillage, etc.).
+- **Administrator (Windows) or root (Linux and macOS) permissions are required for some network features**. Note that these permissions are *NOT* required for the offline functions of PEAT (parsing, pillage, etc.).
    - Permissions are required to use of lightweight :term:`ARP` and :term:`ICMP` requests for host status checking. These methods have less impact on the devices being scanned and are significantly faster than using TCP SYNs.
    - Lack of permissions potentially affects PEAT's ability to do broadcast scanning
    - Lack of permissions potentially affects PEAT's ability to use serial devices
@@ -73,6 +79,21 @@ Optional software
    - Firefox: version 60 or newer
    - Edge
 - Containerization: :term:`Docker` or :term:`Podman` are required to run the containerized distribution of PEAT. See :ref:`platforms-section` above for details on specific versions required.
+
+.. _macos-limitations:
+
+macOS limitations
+=================
+PEAT's features work the same on macOS as on Linux, with the following exceptions, most of which are inherent to the platform.
+
+- **Root is required for ARP and ICMP host checks.** Scapy sends and receives raw packets on macOS using Berkeley Packet Filter devices (``/dev/bpf*``), which only root can open by default. Run PEAT with ``sudo`` for the fastest and lightest host discovery. Without it, PEAT falls back to TCP SYN online checks (the same as an unprivileged Linux user) and logs a warning. Installing the "ChmodBPF" launch daemon that ships with `Wireshark <https://www.wireshark.org/>`__ gives members of the ``access_bpf`` group access to the BPF devices without ``sudo``, and PEAT will detect and use that access.
+- **Pillage disk image mounting is not supported.** ``peat pillage`` on raw disk images requires Linux-specific tools (``qemu-nbd`` and kernel modules). Pillaging a directory of files works on macOS.
+- **Serial port names are different.** macOS names serial devices after the adapter (e.g. ``/dev/cu.usbserial-1410``) instead of numbering them. Pass ``--serial-ports`` (``-s``) the device path (``/dev/cu.usbserial-1410``) or the device name (``usbserial-1410``) to select a specific device. Port numbers and ranges (e.g. ``0`` or ``0-4``) also work, and on macOS they're an index into the sorted list of ``/dev/cu.*`` devices (``0`` is the first device, excluding the built-in Bluetooth and debug console ports). Use the ``/dev/cu.*`` "callout" devices, not ``/dev/tty.*``, since opening a ``tty`` device waits for a carrier detect signal that most devices never send.
+- **YMODEM transfers to SEL relays need lrzsz.** Install it with `Homebrew <https://brew.sh/>`__: ``brew install lrzsz``.
+- **ARP cache lookups use the** ``arp`` **command.** macOS doesn't have ``/proc/net/arp``, so MAC address resolution runs ``arp -an``. This is slightly slower than on Linux, but otherwise works the same.
+- **The default macOS filesystem (APFS) is case-insensitive.** Files that differ only by case (e.g. ``CONFIG.TXT`` and ``config.txt`` pulled from a device) will overwrite each other in PEAT's output. If this matters for your use case, set the output directory (``-o``) to a case-sensitive APFS volume.
+- **The local firewall may prompt.** If the macOS Application Firewall is enabled, it may ask whether to allow the ``peat`` executable (or Python) to accept incoming connections the first time PEAT listens for broadcast responses. Allow it, or broadcast scanning may not find devices.
+- **The executables are not signed or notarized.** The installer script and ``curl`` downloads are not affected, but if the executable is downloaded with a web browser, macOS Gatekeeper will block it. Remove the quarantine attribute to run it: ``xattr -d com.apple.quarantine ./peat_macos_arm64``.
 
 Virtual Machine (VM) requirements and limitations
 =================================================

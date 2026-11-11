@@ -1,0 +1,1 @@
+Added an OpenSSF Scorecard GitHub Actions workflow that publishes supply-chain security results to the code scanning dashboard and the public Scorecard API, and a Scorecard badge to the README (`#15 <https://github.com/sandialabs/PEAT/issues/15>`_).

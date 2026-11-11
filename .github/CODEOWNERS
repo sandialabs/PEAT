@@ -1,0 +1,46 @@
+# Code owners for PEAT
+#
+# Owners listed here are automatically requested as reviewers on any
+# Pull Request that modifies files matching their pattern, and are the
+# people to ask about that area of the codebase.
+#
+# Rules:
+# - Use GitHub usernames (@username) or teams (@org/team-name) only,
+#   NOT full names or email addresses.
+# - The LAST matching pattern takes precedence, so keep the catch-all
+#   default at the top and more specific paths below it.
+# - This file complements AUTHORS, which lists everyone who has
+#   contributed to PEAT. Being in AUTHORS does not make someone a code owner.
+#
+# Syntax reference:
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Default owners for everything in the repository
+*                                 @GhostofGoes @BugFriendlyGarden
+
+# CI, release process, and changelog tooling
+/.github/workflows/               @GhostofGoes @BugFriendlyGarden
+/.github/pull_request_template.md @GhostofGoes @BugFriendlyGarden
+/CHANGELOG.rst                    @GhostofGoes @BugFriendlyGarden
+
+# Command-line interface
+/peat/cli_args.py                 @GhostofGoes @BugFriendlyGarden
+/peat/cli_main.py                 @GhostofGoes @BugFriendlyGarden
+
+# File signatures and parse API
+/peat/file_signature.py           @marshall-sg
+/peat/api/parse_api.py            @marshall-sg
+/tests/test_file_signature.py     @marshall-sg
+
+# Results encryption
+/peat/results_crypto.py           @moonjck
+/tests/test_results_crypto.py     @moonjck
+
+# MySQL/MariaDB protocol
+/peat/protocols/mysql.py          @jgallagheriii
+/tests/protocols/test_mysql*.py   @jgallagheriii
+
+# OpenPLC device module
+/peat/modules/openplc/            @Th3BanHamm3r
+/docs/openplc.rst                 @Th3BanHamm3r
+/tests/modules/openplc/           @Th3BanHamm3r

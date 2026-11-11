@@ -162,6 +162,15 @@ def port_nums_to_addresses(port_values: list[str]) -> list[str]:
        >>> port_nums_to_addresses(["/dev/ttyS0", "/dev/ttyUSB0"])  # doctest: +SKIP
        ['/dev/ttyS0', '/dev/ttyUSB0']
 
+    On macOS, numbers are an index into the sorted list of serial devices
+    (:func:`platform_port_fmt`), and device names are also accepted
+    (:func:`macos_ports_by_name`).
+
+    .. code-block:: python
+
+       >>> port_nums_to_addresses(["0", "usbserial-A10KJ3XB"])  # doctest: +SKIP
+       ['/dev/cu.usbserial-1410', '/dev/cu.usbserial-A10KJ3XB']
+
     Args:
         port_values: Mixed port number or dash-separated range strings to convert
 
@@ -175,18 +184,41 @@ def port_nums_to_addresses(port_values: list[str]) -> list[str]:
 
     port_addr_set = set()
     try:
+        # Enumerate the macOS serial devices at most once, and only if needed
+        mac_ports_cache: list[list[str]] = []
+
+        def mac_ports() -> list[str]:
+            if not mac_ports_cache:
+                mac_ports_cache.append(macos_serial_ports() if consts.MACOS else [])
+            return mac_ports_cache[0]
+
         for value in port_values:
-            v = value.strip().split("-")
-            if len(v) == 1 and isint(v[0]):
+            value = value.strip()
+            v = value.split("-")
+            if "/" in value:
+                # platform-specific port path, e.g. /dev/ttyS0, /dev/cu.usbserial-1410,
+                # or /dev/serial/by-id/usb-FTDI_FT232R-if00-port0 (may contain dashes)
+                port_addr_set.add(value)
+            elif not consts.MACOS and len(v) == 1 and "COM" in value:
+                # Windows port string, e.g. COM0 or \\.\COM10
+                port_addr_set.add(value)
+            elif len(v) == 1 and isint(v[0]):
                 # single number - convert to port string(s) and add to set
-                port_addr_set.update(platform_port_fmt(int(v[0])))
-            elif len(v) == 1 and ("/" in v[0] or "COM" in v[0]):
-                # platform-specific port string, e.g. /dev/ttyS0 or COM0
-                port_addr_set.add(v[0].strip())
+                ports = platform_port_fmt(int(v[0]), mac_ports())
+                port_addr_set.update(ports)
+                _warn_no_macos_ports(value, ports, mac_ports())
             elif len(v) == 2 and isint(v[0]) and isint(v[1]) and int(v[0]) <= int(v[1]):
                 # ascending range - convert each number in it and add to set
+                ports = []
                 for i in range(int(v[0]), int(v[1]) + 1):
-                    port_addr_set.update(platform_port_fmt(i))
+                    ports.extend(platform_port_fmt(i, mac_ports()))
+                port_addr_set.update(ports)
+                _warn_no_macos_ports(value, ports, mac_ports())
+            elif consts.MACOS and value:
+                # macOS device name, e.g. "cu.usbserial-1410" or "usbserial-1410"
+                named = macos_ports_by_name(value, mac_ports())
+                port_addr_set.update(named)
+                _warn_no_macos_ports(value, named, mac_ports())
             else:
                 log.warning(f"Unable to parse port value: {value}")
     except OSError as err:
@@ -206,18 +238,80 @@ def port_nums_to_addresses(port_values: list[str]) -> list[str]:
     return sorted_ports
 
 
-def platform_port_fmt(num: int) -> list[str]:
+def macos_serial_ports() -> list[str]:
+    """
+    Sorted list of the "callout" serial devices (``/dev/cu.*``) on a macOS system.
+
+    The callout devices are used instead of the "dial-in" devices (``/dev/tty.*``)
+    since opening a dial-in device blocks until the DCD (carrier detect) line is
+    asserted, which most USB serial adapters connected to devices won't do.
+    Built-in pseudo-ports (Bluetooth and the debug console) are excluded.
+    """
+    try:
+        ports = [port.device for port in list_ports.comports()]
+    except Exception as ex:
+        log.warning(f"Failed to list serial ports: {ex}")
+        return []
+
+    return sorted(
+        p
+        for p in ports
+        if p.startswith("/dev/cu.")
+        and not any(x in p for x in ["Bluetooth-Incoming-Port", "debug-console"])
+    )
+
+
+def _warn_no_macos_ports(value: str, ports: list[str], mac_ports: list[str]) -> None:
+    if consts.MACOS and not ports:
+        log.warning(
+            f"No serial devices for port value '{value}' (found {len(mac_ports)} "
+            f"serial devices: {mac_ports}). On macOS, use a device name (e.g. "
+            f"'usbserial-1410'), or a number, which is an index into the sorted "
+            f"list of /dev/cu.* devices."
+        )
+
+
+def macos_ports_by_name(name: str, mac_ports: list[str] | None = None) -> list[str]:
+    """
+    macOS serial devices (:func:`macos_serial_ports`) matching a device name,
+    with or without the ``/dev/`` and ``cu.`` prefixes (case-insensitive).
+    For example, ``usbserial-1410`` and ``cu.usbserial-1410`` both
+    match ``/dev/cu.usbserial-1410``.
+
+    Args:
+        name: Device name to look for
+        mac_ports: Serial devices to search, if already enumerated
+    """
+    if mac_ports is None:
+        mac_ports = macos_serial_ports()
+    name = name.lower().removeprefix("/dev/").removeprefix("cu.")
+    return [p for p in mac_ports if p.lower().removeprefix("/dev/cu.") == name]
+
+
+def platform_port_fmt(num: int, mac_ports: list[str] | None = None) -> list[str]:
     """
     Formats an integer into a platform-specific serial port address string.
 
+    On macOS, the integer is an index into the sorted list of serial
+    devices on the system (:func:`macos_serial_ports`), e.g. ``0`` is the
+    first USB serial adapter (``/dev/cu.usbserial-1410``), and an empty
+    list is returned if there's no device at that index.
+
     Args:
         num: An integer to format into a platform-specific serial port string
+        mac_ports: macOS serial devices, if already enumerated
 
     Returns:
         A list of platform-specific serial port strings
     """
     pnum = abs(num)
-    if consts.POSIX:
+    if consts.MACOS:
+        # macOS serial devices are named after the adapter (e.g. "/dev/cu.usbserial-1410"),
+        # so the number is used as an index into the sorted list of ports on the system.
+        if mac_ports is None:
+            mac_ports = macos_serial_ports()
+        return [mac_ports[pnum]] if pnum < len(mac_ports) else []
+    elif consts.POSIX:
         return [
             f"/dev/ttyS{pnum}",
             f"/dev/ttyUSB{pnum}",

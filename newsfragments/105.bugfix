@@ -1,0 +1,8 @@
+Fixed several bugs when running on macOS:
+
+- TCP SYN online checks treated "connection refused" as offline on macOS, so hosts with closed ports were reported as down.
+- MAC address lookups failed and logged an error for every host, since macOS has no ``/proc/net/arp``. The ARP cache is now read with ``arp -an``.
+- Raw packet capability is now detected by opening a BPF device, which is what Scapy uses on macOS, and PEAT suggests ``sudo`` when it isn't available.
+- Promiscuous mode detection now works on macOS.
+- Serial ports given as paths containing dashes (e.g. ``/dev/cu.usbserial-1410`` or ``/dev/serial/by-id/...``) were rejected. On macOS, numeric serial port values now refer to the sorted ``/dev/cu.*`` devices.
+- The default interface MAC address was set to the interface's IP address.

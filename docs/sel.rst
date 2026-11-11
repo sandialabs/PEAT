@@ -155,7 +155,7 @@ The code gets called from :class:`~peat.modules.sel.sel_relay.SELRelay` class, i
 YMODEM notes
 ^^^^^^^^^^^^
 
-YMODEM is required for relays that don't have the ``file show`` command. PySerial doesn't support YMODEM, and the Python ``modem`` package hasn't been updated in over 11 years, so we're forced to subprocess and call the ``rz`` / ``sz`` commands from the ``lrzsz`` project. This is not available on Windows, but is available on Linux (``sudo apt install lrzsz``) and MacOS (``sudo brew install lrzsz``).
+YMODEM is required for relays that don't have the ``file show`` command. PySerial doesn't support YMODEM, and the Python ``modem`` package hasn't been updated in over 11 years, so we're forced to subprocess and call the ``rz`` / ``sz`` commands from the ``lrzsz`` project. This is not available on Windows, but is available on Linux (``sudo apt install lrzsz``) and MacOS (``brew install lrzsz``).
 
 - ``show`` supported: 700G, 351S, 351
 - ``read``: 451, 2032 (Requires Ymodem to transfer the file)

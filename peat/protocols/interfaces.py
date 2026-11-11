@@ -1,3 +1,6 @@
+import re
+import shutil
+import subprocess
 from ipaddress import IPv4Address, IPv4Interface, IPv4Network
 from pathlib import Path
 
@@ -104,7 +107,7 @@ def update_local_interface_cache():
             if af_inet:
                 state.default_interface_ip = af_inet[0].get("addr", "")
 
-            af_link = state.local_interface_details[iface].get("af_inet")
+            af_link = state.local_interface_details[iface].get("af_link")
             if af_link:
                 state.default_interface_mac = af_link[0].get("addr", "")
     except Exception:
@@ -115,6 +118,9 @@ def is_promiscuous(iface: str) -> bool:
     """
     Checks if a local network interface is in promiscuous mode.
 
+    On Linux, the interface flags are read from ``/sys/class/net``. On macOS,
+    the flags are read from the output of ``ifconfig <iface>``.
+
     .. warning::
        This method does not support Windows (however, :term:`WSL` works fine)
 
@@ -124,7 +130,9 @@ def is_promiscuous(iface: str) -> bool:
     Returns:
         If the interface is in promiscuous mode
     """
-    if consts.POSIX:  # NOTE: this seems to work fine on WSL
+    if consts.MACOS:
+        return _is_promiscuous_macos(iface)
+    elif consts.POSIX:  # NOTE: this seems to work fine on WSL
         # Source: https://goyalankit.com/blog/promiscuous-mode-detection
         flag_file = Path(f"/sys/class/net/{iface}/flags").resolve()
 
@@ -142,6 +150,52 @@ def is_promiscuous(iface: str) -> bool:
                 f"'{iface}': file '{str(flag_file)}' does not exist"
             )
 
+    return False
+
+
+def _is_promiscuous_macos(iface: str) -> bool:
+    if not iface:
+        return False
+
+    try:
+        proc = subprocess.run(
+            [shutil.which("ifconfig") or "/sbin/ifconfig", iface],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+    except Exception as ex:
+        log.debug(f"Failed promiscuous mode detection for interface '{iface}': {ex}")
+        return False
+
+    if proc.returncode != 0 or not proc.stdout:
+        log.debug(
+            f"Failed promiscuous mode detection for interface '{iface}': "
+            f"ifconfig exited with code {proc.returncode}"
+        )
+        return False
+
+    return parse_ifconfig_promisc(iface, proc.stdout.decode(errors="replace"))
+
+
+def parse_ifconfig_promisc(iface: str, ifconfig_output: str) -> bool:
+    """
+    Checks if the flags in BSD-style ``ifconfig`` output (e.g. macOS) include ``PROMISC``.
+
+    Example: ``en0: flags=8963<UP,BROADCAST,SMART,RUNNING,PROMISC,SIMPLEX,MULTICAST> mtu 1500``
+    """
+    match = re.search(r"flags=([0-9a-fA-F]+)<([^>]*)>", ifconfig_output)
+    if not match:
+        log.debug(f"Failed promiscuous mode detection for interface '{iface}': no flags found")
+        return False
+
+    if "PROMISC" in match.group(2).split(","):
+        log.debug(f"Interface '{iface}' is in promiscuous mode")
+        return True
+
+    log.debug(
+        f"Interface '{iface}' is not in promiscuous mode, as expected (Flags: {match.group(0)})"
+    )
     return False
 
 

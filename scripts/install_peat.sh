@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# PEAT easy installer (POSIX sh)
+# PEAT easy installer (POSIX sh) for Linux and macOS
 # Installs latest release PEAT binary /usr/local/bin/peat,
 # man page to /usr/local/share/man/man1, and updates the
 # manual database (if 'mandb' command is present).
@@ -10,7 +10,6 @@ set -eu
 REPO="${REPO:-sandialabs/PEAT}"
 API_URL="https://github.com/$REPO/releases/latest/download"
 
-BIN_URL="$API_URL/peat"
 MAN_URL="$API_URL/peat.1"
 
 BIN_DIR="/usr/local/bin"
@@ -30,13 +29,31 @@ download_to() {
   out=$2
 
   if need_cmd curl; then
-    curl -sfL -o "$out" "$url"
+    curl -sfL -o "$out" "$url" || die "Failed to download $url"
   elif need_cmd wget; then
-    wget -qO "$out" "$url"
+    wget -qO "$out" "$url" || die "Failed to download $url"
   else
     die "Neither curl nor wget is available; please install one to proceed."
   fi
 }
+
+# Select the executable for this platform
+OS_NAME="$(uname -s)"
+case "$OS_NAME" in
+  Linux)
+    BIN_URL="$API_URL/peat"
+    ;;
+  Darwin)
+    case "$(uname -m)" in
+      arm64) BIN_URL="$API_URL/peat_macos_arm64" ;;
+      x86_64) BIN_URL="$API_URL/peat_macos_x86_64" ;;
+      *) die "Unsupported macOS architecture: $(uname -m)" ;;
+    esac
+    ;;
+  *)
+    die "Unsupported OS: $OS_NAME (use install_peat.ps1 on Windows)"
+    ;;
+esac
 
 
 # Require privileges (we write to /usr/local)
@@ -85,7 +102,8 @@ fi
 if need_cmd mandb; then
     say "Updating man database (mandb)..."
     mandb >/dev/null 2>&1 || mandb || true
-else
+elif [ "$OS_NAME" != "Darwin" ]; then
+    # macOS 'man' searches /usr/local/share/man by default, no database update needed
     say "WARN: 'mandb' command not present, skipping man page update"
 fi
 

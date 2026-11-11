@@ -26,8 +26,27 @@ Building the executable
 
    # Build Linux executable
    # This runs staticx to include system libraries and be fully portable.
-   # This WILL NOT work on Windows, and probably won't work with Mac.
+   # This WILL NOT work on Windows or macOS (use "pdm run build-exe" there).
    pdm run build-linux-exe
+
+   # Test
+   ./dist/peat --version
+   ./dist/peat --help
+
+macOS
+-----
+
+macOS Executable using PyInstaller
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+The macOS executables are built with PyInstaller using the same spec file as Windows (``distribution/peat.spec``). StaticX is Linux-only and isn't needed, since macOS executables are compatible with the release they're built on and newer releases. PyInstaller builds for the architecture of the Python interpreter, so the GitHub Actions build workflow builds ``peat_macos_arm64`` on an Apple Silicon runner and ``peat_macos_x86_64`` on an Intel runner, each on the oldest macOS release tested in CI.
+
+.. code-block:: bash
+
+   # Ensure PDM has initialized venv
+   pdm install -d
+
+   # Build macOS executable for the current architecture (arm64 or x86_64)
+   pdm run build-exe
 
    # Test
    ./dist/peat --version
@@ -95,12 +114,12 @@ General build guidance
    # make sure you have the following dependencies (linux) if you run into build issues
    sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5 graphviz
 
-   # Build Windows executable with PyInstaller
+   # Build Windows or macOS executable with PyInstaller
    pdm run build-exe
 
    # Build Linux executable
    # This runs staticx to include system libraries and be fully portable.
-   # This WILL NOT work on Windows, and probably won't work with Mac.
+   # This WILL NOT work on Windows or macOS (use "pdm run build-exe" there).
    # Also, you may need to install some tools:
    # sudo apt install -qyf python3-dev patchelf binutils scons libpq-dev libpq5
    pdm run build-linux-exe
@@ -138,6 +157,8 @@ There are three forms of testing:
 - Quality: linting and code quality checks
 - Unit tests: uses ``pytest`` to test the CLI interface and individual functions and methods in the code. There are also unit tests that only run against live devices in CI, these are marked with ``@pytest.mark.gitlab_ci_only``.
 - Live tests: run the PEAT executable against live devices and an Elasticsearch server in a separate repository's CI pipeline. This validates the "end to end" user experience. However, it won't catch logic failures (e.g. bad output or missing files) and failures are more time consuming to debug than with unit tests. **NOTE: these tests are not run on GitHub**.
+
+Unit tests and code quality checks run in GitHub Actions (``.github/workflows/tests.yml``) on every push and pull request, on Linux, Windows, and macOS (Apple Silicon and Intel). The tested OS and Python versions are listed in :ref:`platforms-section`. The ``All Tests Passed`` job only succeeds if every other job in that workflow passed (or was skipped), so it's the single status check to mark as required in the repository's branch protection rules.
 
 Running the tests
 -----------------

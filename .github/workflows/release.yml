@@ -285,7 +285,8 @@ jobs:
           fetch-depth: 0
           ref: ${{ inputs.target_branch }}
       # Each artifact uploaded by build.yml (actions/upload-artifact "name:"
-      # values: linux_exe, windows_exe, peat_docs, manpage, python_package) is
+      # values: linux_exe, windows_exe, macos_exe_arm64, macos_exe_x86_64,
+      # peat_docs, manpage, python_package) is
       # downloaded into a directory of the same name in the working directory.
       - name: Download build artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
@@ -294,6 +295,8 @@ jobs:
           ls -lAht ./
           ls -lAht ./linux_exe
           ls -lAht ./windows_exe
+          ls -lAht ./macos_exe_arm64
+          ls -lAht ./macos_exe_x86_64
           ls -lAht ./peat_docs
           ls -lAht ./manpage
           ls -lAht ./python_package
@@ -301,6 +304,7 @@ jobs:
         run: |
           chmod +x linux_exe/*
           chmod +x windows_exe/*
+          chmod +x macos_exe_arm64/* macos_exe_x86_64/*
       - name: Create Linux release bundle
         run: |
           mkdir peat_linux
@@ -341,6 +345,8 @@ jobs:
           test -f "peat_docs.zip"
           test -f "linux_exe/peat"
           test -f "windows_exe/peat.exe"
+          test -f "macos_exe_arm64/peat_macos_arm64"
+          test -f "macos_exe_x86_64/peat_macos_x86_64"
       # NOTE: This will trigger the Docker workflow
       - name: Create GitHub Release
         uses: softprops/action-gh-release@718ea10b132b3b2eba29c1007bb80653f286566b
@@ -354,6 +360,8 @@ jobs:
           files: |
             linux_exe/peat
             windows_exe/peat.exe
+            macos_exe_arm64/peat_macos_arm64
+            macos_exe_x86_64/peat_macos_x86_64
             peat_linux_${{ env.TAG_NAME }}.tgz
             peat_windows_${{ env.TAG_NAME }}.zip
             peat_docs.zip

@@ -112,7 +112,7 @@ def validate_image_mounting() -> bool:
     if consts.WSL or not consts.LINUX:
         log.error(
             "To mount an image for searching, you must be running on Linux "
-            "(Windows, WSL, or OSX are not supported at this time)"
+            "(Windows, WSL, or macOS are not supported at this time)"
         )
         return False
     elif os.geteuid() != 0:

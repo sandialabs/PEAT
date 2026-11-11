@@ -28,7 +28,7 @@ class SELSerial(SELAscii):
     updated in over 11 years, so we're forced to subprocess and call the rz/sz
     commands from the ``lrzsz`` project. This is not available on Windows, but
     is available on Linux (``sudo apt install lrzsz``) and
-    MacOS (``sudo brew install lrzsz``).
+    macOS (``brew install lrzsz``).
 
     - ``show`` supported: 700G, 351S, 351
     - ``read``: 451, 2032 (Requires Ymodem to transfer the file)
@@ -138,8 +138,8 @@ class SELSerial(SELAscii):
         if sz_path is None:
             raise CommError(
                 "Could not find path to 'sz' command, which is required "
-                "for YMODEM serial file uploads to SEL devices. Have "
-                "you apt-installed 'lrzsz'?"
+                "for YMODEM serial file uploads to SEL devices. Install "
+                "'lrzsz' ('apt install lrzsz' on Linux, 'brew install lrzsz' on macOS)."
             )
         return sz_path
 
@@ -157,8 +157,8 @@ class SELSerial(SELAscii):
         if rz_path is None:
             raise CommError(
                 "Could not find path to 'rz' command, which is required "
-                "for YMODEM serial file downloads from SEL devices. Have "
-                "you apt-installed 'lrzsz'?"
+                "for YMODEM serial file downloads from SEL devices. Install "
+                "'lrzsz' ('apt install lrzsz' on Linux, 'brew install lrzsz' on macOS)."
             )
         return rz_path
 

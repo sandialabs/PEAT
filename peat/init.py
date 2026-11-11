@@ -207,7 +207,7 @@ def initialize_peat(conf: dict, entrypoint: consts.EntrypointType = "Package") -
         and not entrypoint == "Package"
         and (
             conf.get("func", "") not in ["parse", "pillage"]  # Skip passive
-            and not conf.get("ports")  # Skip serial
+            and not (conf.get("ports") or conf.get("port_list"))  # Skip serial
         )
     ):
         # Suggest user run as Administrator on Windows
@@ -217,6 +217,13 @@ def initialize_peat(conf: dict, entrypoint: consts.EntrypointType = "Package") -
                 "scanning performance. To fix this, re-run PEAT from "
                 "an Administrator-level command prompt (right click -> "
                 "'Run as Administrator')"
+            )
+        # Suggest user run with sudo on macOS (Scapy needs access to /dev/bpf*)
+        elif consts.MACOS and not state.raw_socket_capable:
+            log.warning(
+                "PEAT is unable to access BPF devices (/dev/bpf*) for raw packet "
+                "operations, so ARP and ICMP host checks are disabled and scanning "
+                "will be slower. To fix this, re-run PEAT with 'sudo'."
             )
 
         # Check if default interface is promiscuous (e.g Netmeld didn't reset it)

@@ -41,6 +41,26 @@ def test_get_platform_info():
     assert info == consts.SYSINFO
 
 
+def test_platform_flags():
+    # Exactly one of the platform families should be detected
+    assert sum([consts.WINDOWS, consts.LINUX, consts.MACOS]) == 1
+    if consts.MACOS:
+        assert consts.POSIX
+        assert not consts.WSL
+
+
+def test_get_platform_info_macos(mocker):
+    mocker.patch.object(consts, "LINUX", False)
+    mocker.patch.object(consts, "MACOS", True)
+    mocker.patch("platform.system", return_value="Darwin")
+    mocker.patch("platform.release", return_value="24.3.0")
+    mocker.patch("platform.mac_ver", return_value=("15.3.1", ("", "", ""), "arm64"))
+    info = consts.get_platform_info()
+    assert info["os_family"] == "darwin"
+    assert info["os_ver"] == "15.3.1"
+    assert info["os_full"] == "Darwin 24.3.0 (macOS 15.3.1)"
+
+
 def test_lower_dict():
     assert consts.lower_dict({}) == {}
     assert consts.lower_dict({}, children=False) == {}

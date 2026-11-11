@@ -150,6 +150,11 @@ def test_serial_scan(mocker):
         },
     )
     mocker.patch.object(datastore, "objects", [])
+    # On macOS, port numbers index the serial devices present on the system,
+    # so provide one to make the result the same on every platform.
+    mocker.patch(
+        "peat.protocols.serial.macos_serial_ports", return_value=["/dev/cu.usbserial-0000"]
+    )
 
     assert not scan_api.serial_scan([])
     assert not scan_api.serial_scan(["bogusportlist"])

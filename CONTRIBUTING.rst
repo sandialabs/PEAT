@@ -513,6 +513,7 @@ Git
 - Requirements before *merging* an PR:
 
   #. Add your name and any other contributors to the feature to ``AUTHORS``
+  #. If you are taking ownership of a new area of the codebase (e.g. a new device module), add your GitHub username for that path to ``.github/CODEOWNERS``
   #. Add and/or update the list of authors in the relevant module-level docstring(s) for your changing, including email addresses. This makes it clear who to contact about a particular portion of the codebase.
   #. There is a minimal set of tests for the change (if applicable)
   #. GitHub Actions CI pipeline passes
@@ -572,6 +573,7 @@ Project structure
 - ``.gitattributes``  Controls how Git treats file types and line endings (for example, it ensures Bash scripts always have ``LF`` line endings, even when the repository is cloned on Windows)
 - ``.gitignore``      Anything that shouldn't be pushed to GitHub, like temp files and virtual environments
 - ``AUTHORS``         Everyone who has contributed to PEAT
+- ``.github/CODEOWNERS``  GitHub usernames of the people responsible for each area of the codebase. They are automatically requested as reviewers on Pull Requests that change those areas (`Reference <https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners>`__)
 - ``Dockerfile``      Used to build a Docker image for the PEAT CLI
 - ``LICENSE``         Licensing
 - ``pdm.lock``        Used by PDM to pin the versions of dependencies based on what's defined in ``pyproject.toml``, and ensure their SHA256 hashes match when installing.

@@ -1,0 +1,1 @@
+Added a ``.github/CODEOWNERS`` file so maintainers of each area of the codebase are automatically requested as reviewers on Pull Requests.

@@ -123,9 +123,18 @@ jobs:
     runs-on: ${{ matrix.platform }}
     strategy:
       # OS images: https://github.com/actions/runner-images
+      # macOS: every supported Python is tested on macOS 15 (Apple Silicon), and the
+      # other macOS images (including Intel) are tested with the release build Python.
+      # Keep the list of tested versions in docs/system_requirements.rst in sync.
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
-        platform: ["ubuntu-24.04", "windows-latest", "windows-2022", "macos-latest"]
+        platform: ["ubuntu-24.04", "windows-latest", "windows-2022", "macos-15"]
+        # macos-14 isn't tested since GitHub retires it on 2026-11-02 (actions/runner-images#13518)
+        include:
+          - python-version: "3.12"
+            platform: "macos-26"
+          - python-version: "3.12"
+            platform: "macos-15-intel"
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
@@ -151,3 +160,27 @@ jobs:
             htmlcov/
             pytest_files/
           if-no-files-found: error
+  # Single status check that can be marked as "required" in branch protection,
+  # instead of having to require every job in the unit test matrix individually.
+  # NOTE: add any new jobs in this workflow to "needs".
+  all-tests-passed:
+    name: All Tests Passed
+    if: always()
+    needs: [commits, check-newsfragments, check-changelog, code-quality, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+      - name: Check results of required jobs
+        env:
+          NEEDS_JSON: ${{ toJSON(needs) }}
+        run: |
+          echo "$NEEDS_JSON"
+          if ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}; then
+            echo "::error ::One or more required jobs failed or were cancelled"
+            exit 1
+          fi
