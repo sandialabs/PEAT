@@ -1,0 +1,1 @@
+Releases now include a Linux ARM64 (aarch64) executable, ``peat_linux_arm64`` (plus ``sneakypeat_linux_arm64`` and a ``peat_linux_arm64_<version>.tgz`` bundle), built with StaticX on a GitHub ARM64 runner. ``install_peat.sh`` installs it on ARM64 Linux.
