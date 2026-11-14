@@ -285,7 +285,7 @@ jobs:
           fetch-depth: 0
           ref: ${{ inputs.target_branch }}
       # Each artifact uploaded by build.yml (actions/upload-artifact "name:"
-      # values: linux_exe, windows_exe, macos_exe_arm64, macos_exe_x86_64,
+      # values: linux_exe, linux_exe_arm64, windows_exe, macos_exe_arm64, macos_exe_x86_64,
       # peat_docs, manpage, python_package) is
       # downloaded into a directory of the same name in the working directory.
       - name: Download build artifacts
@@ -294,6 +294,7 @@ jobs:
         run: |
           ls -lAht ./
           ls -lAht ./linux_exe
+          ls -lAht ./linux_exe_arm64
           ls -lAht ./windows_exe
           ls -lAht ./macos_exe_arm64
           ls -lAht ./macos_exe_x86_64
@@ -302,7 +303,7 @@ jobs:
           ls -lAht ./python_package
       - name: Mark files executable
         run: |
-          chmod +x linux_exe/*
+          chmod +x linux_exe/* linux_exe_arm64/*
           chmod +x windows_exe/*
           chmod +x macos_exe_arm64/* macos_exe_x86_64/*
       - name: Create Linux release bundle
@@ -315,6 +316,18 @@ jobs:
           cp linux_exe/peat peat_linux/
           ls -lAht peat_linux/
           tar -czf "peat_linux_${{ env.TAG_NAME }}.tgz" peat_linux/
+      # Same layout as the x86_64 bundle (the executable is named "peat"
+      # inside it), in a separate staging directory
+      - name: Create Linux arm64 release bundle
+        run: |
+          mkdir -p arm64/peat_linux
+          cp distribution/linux-install-script.sh arm64/peat_linux/
+          cp examples/peat-config.yaml arm64/peat_linux/
+          cp examples/peat-config-simple.yaml arm64/peat_linux/
+          cp manpage/peat.1 arm64/peat_linux/
+          cp linux_exe_arm64/peat_linux_arm64 arm64/peat_linux/peat
+          ls -lAht arm64/peat_linux/
+          tar -C arm64 -czf "peat_linux_arm64_${{ env.TAG_NAME }}.tgz" peat_linux/
       - name: Create Windows release bundle
         run: |
           mkdir peat_windows
@@ -341,9 +354,12 @@ jobs:
           find . -maxdepth 2 -type f | sort
 
           test -f "peat_linux_${TAG_NAME}.tgz"
+          test -f "peat_linux_arm64_${TAG_NAME}.tgz"
           test -f "peat_windows_${TAG_NAME}.zip"
           test -f "peat_docs.zip"
           test -f "linux_exe/peat"
+          test -f "linux_exe_arm64/peat_linux_arm64"
+          test -f "linux_exe_arm64/sneakypeat_linux_arm64"
           test -f "windows_exe/peat.exe"
           test -f "macos_exe_arm64/peat_macos_arm64"
           test -f "macos_exe_x86_64/peat_macos_x86_64"
@@ -359,16 +375,19 @@ jobs:
           preserve_order: true
           files: |
             linux_exe/peat
+            linux_exe_arm64/peat_linux_arm64
             windows_exe/peat.exe
             macos_exe_arm64/peat_macos_arm64
             macos_exe_x86_64/peat_macos_x86_64
             peat_linux_${{ env.TAG_NAME }}.tgz
+            peat_linux_arm64_${{ env.TAG_NAME }}.tgz
             peat_windows_${{ env.TAG_NAME }}.zip
             peat_docs.zip
             manpage/peat.1
             python_package/*.whl
             python_package/*.tar.gz
             linux_exe/sneakypeat
+            linux_exe_arm64/sneakypeat_linux_arm64
             windows_exe/sneakypeat.exe
           draft: true
           name: "${{ env.TAG_NAME }}"

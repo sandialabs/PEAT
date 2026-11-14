@@ -7,7 +7,7 @@ PEAT is distributed in multiple formats customized to each supported platform. A
 
 Installation
 ------------
-The recommended method of installation for most users is to use the latest pre-built executable release (``peat`` on Linux, ``peat.exe`` on Windows, and ``peat_macos_arm64`` or ``peat_macos_x86_64`` on macOS). Additionally, a :term:`Container` image is available for use with :term:`Docker` or :term:`Podman`.
+The recommended method of installation for most users is to use the latest pre-built executable release (``peat`` on x86_64 Linux, ``peat_linux_arm64`` on ARM64 Linux, ``peat.exe`` on Windows, and ``peat_macos_arm64`` or ``peat_macos_x86_64`` on macOS). Additionally, a :term:`Container` image is available for use with :term:`Docker` or :term:`Podman`.
 
 Linux
 ^^^^^
@@ -179,9 +179,9 @@ PEAT Releases
 -------------
 PEAT releases are managed via `GitHub Releases <https://github.com/sandialabs/PEAT/releases>`__, and usually consist of the following:
 
-- The Linux, Windows, and macOS executables (``peat``, ``peat.exe``, ``peat_macos_arm64``, and ``peat_macos_x86_64``)
+- The Linux, Windows, and macOS executables (``peat``, ``peat_linux_arm64``, ``peat.exe``, ``peat_macos_arm64``, and ``peat_macos_x86_64``)
 - The Python source distribution (``.tar.gz``) and binary wheel (``.whl``)
 - The Linux man page (``peat.1`` file)
 - The :term:`Container` image via GitHub Container Registry (``ghcr.io``)
 - The documentation in HTML format (``peat_docs.zip``)
-- Sneakypeat executables (``sneakypeat`` and ``sneakypeat.exe``)
+- Sneakypeat executables (``sneakypeat``, ``sneakypeat_linux_arm64``, and ``sneakypeat.exe``)

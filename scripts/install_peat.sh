@@ -41,7 +41,11 @@ download_to() {
 OS_NAME="$(uname -s)"
 case "$OS_NAME" in
   Linux)
-    BIN_URL="$API_URL/peat"
+    case "$(uname -m)" in
+      x86_64) BIN_URL="$API_URL/peat" ;;
+      aarch64|arm64) BIN_URL="$API_URL/peat_linux_arm64" ;;
+      *) die "Unsupported Linux architecture: $(uname -m)" ;;
+    esac
     ;;
   Darwin)
     case "$(uname -m)" in

@@ -8,7 +8,7 @@ Requirements for deploying and running PEAT, including platforms it can run on, 
 Supported platforms
 ===================
 .. note::
-   The PEAT "executable" (``peat`` on Linux, ``peat.exe`` on Windows, ``peat_macos_arm64`` or ``peat_macos_x86_64`` on macOS) is the standard method of using PEAT. The executable is distribution-agnostic and should work on most distributions of Linux, releases of Windows, and macOS 15 or newer. The supported platforms for PEAT development or using the PEAT Python API is far more restricted and is generally recent releases of Ubuntu, Windows, or macOS.
+   The PEAT "executable" (``peat`` on x86_64 Linux, ``peat_linux_arm64`` on ARM64 Linux, ``peat.exe`` on Windows, ``peat_macos_arm64`` or ``peat_macos_x86_64`` on macOS) is the standard method of using PEAT. The executable is distribution-agnostic and should work on most distributions of Linux, releases of Windows, and macOS 15 or newer. The supported platforms for PEAT development or using the PEAT Python API is far more restricted and is generally recent releases of Ubuntu, Windows, or macOS.
 
 - Linux
    - Ubuntu
@@ -45,7 +45,7 @@ Hardware
 ========
 The system hardware requirements for running PEAT are minimal. The limits vary slightly by system.
 
-- Minimum 64-bit x86 CPU (Linux), 32-bit x86 CPU (Windows), or Apple Silicon or 64-bit Intel CPU (macOS); Dual-core 2.4Ghz 64-bit x86 CPU is recommended. Additional cores will not noticeably improve performance.
+- Minimum 64-bit x86 or ARM64 (aarch64) CPU (Linux), 32-bit x86 CPU (Windows), or Apple Silicon or 64-bit Intel CPU (macOS); Dual-core 2.4Ghz 64-bit x86 CPU is recommended. Additional cores will not noticeably improve performance.
 - Minimum of 64MB available memory (RAM); 256MB is recommended for scanning very large networks or when running PEAT as a container.
 - Minimum of 50MB disk space in the platform's temporary directory (``/tmp`` on Linux, ``$TMPDIR`` on macOS, or ``AppData`` on Windows). This is needed to extract and execute the Python code.
 - Minimum of ~100MB disk space in the configured output directory; 1Gb is recommended for storing multiple runs and increased output verbosity, 5-10GB is recommended if pulling from 100+ devices, especially if those devices have significant amounts of logic or configuration.

@@ -125,9 +125,23 @@ jobs:
           if-no-files-found: error
 
   linux-build:
-    name: Build Linux Executables
+    name: Build Linux Executables (${{ matrix.arch }})
     # NOTE: ubuntu-24 needed for python3.12
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.platform }}
+    strategy:
+      matrix:
+        include:
+          # x86_64 keeps the artifact and file names releases have always used
+          - platform: ubuntu-24.04
+            arch: x86_64
+            file_arch: x86-64
+            artifact: linux_exe
+            suffix: ""
+          - platform: ubuntu-24.04-arm
+            arch: arm64
+            file_arch: aarch64
+            artifact: linux_exe_arm64
+            suffix: _linux_arm64
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
@@ -141,7 +155,7 @@ jobs:
       - name: Install apt dependencies
         uses: awalsh128/cache-apt-pkgs-action@553a35bb8ebd9fcabcb1c9451aa4c98e1b4ca8a9 # v1.6.3
         with:
-          packages: python3-dev python3-pip patchelf binutils scons libpq-dev libpq5
+          packages: python3-dev python3-pip python3-venv patchelf binutils scons libpq-dev libpq5
       # For some reason setup-pdm action isn't playing nice with PyInstaller,
       # have to manually do the install here
       - name: Install tool dependencies
@@ -152,10 +166,22 @@ jobs:
           pdm config check_update false
           pdm --version
       # NOTE: Pip is needed to manually reinstall psycopg2
+      # staticx publishes x86_64 wheels only, so on arm64 it is built from its
+      # sdist, whose setup.py imports pkg_resources (removed in setuptools 81).
+      # Build it without isolation, in a venv that has an older setuptools.
       - name: Install Python packages (venv)
+        if: matrix.arch == 'x86_64'
         run: |
           pdm sync -G exe
           pdm run python -m ensurepip
+      - name: Install Python packages (venv, arm64)
+        if: matrix.arch == 'arm64'
+        run: |
+          pdm venv create -f python3
+          pdm use -f .venv
+          pdm run python -m ensurepip
+          pdm run python -m pip install 'setuptools<81' wheel 'pdm-backend>=2.3.0'
+          pdm sync -G exe --no-isolation
       - name: Build executable
         run: pdm run build-linux-exe
       - name: List executable contents
@@ -163,6 +189,8 @@ jobs:
       - name: Check executable
         run: |
           ls -lAht dist/
+          file dist/peat
+          file dist/peat | grep -q "${{ matrix.file_arch }}"
           ./dist/peat --help
           ./dist/peat --version
           ./dist/peat parse --list-modules
@@ -176,13 +204,18 @@ jobs:
           ls -lAht dist/
           ./dist/sneakypeat --help
           ./dist/sneakypeat --scan localhost
+      - name: Rename executables (arm64)
+        if: matrix.suffix != ''
+        run: |
+          mv dist/peat "dist/peat${{ matrix.suffix }}"
+          mv dist/sneakypeat "dist/sneakypeat${{ matrix.suffix }}"
       - name: Upload artifacts
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: linux_exe
+          name: ${{ matrix.artifact }}
           path: |
-            dist/peat
-            dist/sneakypeat
+            dist/peat${{ matrix.suffix }}
+            dist/sneakypeat${{ matrix.suffix }}
           if-no-files-found: error
 
   windows-build:
