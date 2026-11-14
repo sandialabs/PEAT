@@ -1,0 +1,1 @@
+Allowed the Ubuntu apt mirrors that non-Azure GitHub runners use in the docs jobs' Harden Runner egress allowlist, so the Graphviz install no longer times out.
