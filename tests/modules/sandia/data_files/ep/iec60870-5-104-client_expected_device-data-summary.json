@@ -1,0 +1,51 @@
+{
+    "created": "2026-10-26T00:32:53.126381",
+    "description": {
+        "brand": "SCEPTRE",
+        "full": "Sandia National Laboratories SCEPTRE",
+        "model": "SCEPTRE",
+        "product": "SCEPTRE",
+        "vendor": {
+            "id": "Sandia",
+            "name": "Sandia National Laboratories"
+        }
+    },
+    "id": "fep-1",
+    "name": "fep-1",
+    "type": "FEP",
+    "os": {
+        "full": "Canonical Ubuntu",
+        "name": "Ubuntu",
+        "vendor": {
+            "id": "Canonical",
+            "name": "Canonical"
+        }
+    },
+    "service": [
+        {
+            "enabled": true,
+            "extra": {
+                "command_interface": "tcp://127.0.0.1:1330",
+                "connections": [
+                    {
+                        "endpoint": "tcp://127.0.0.1:2404"
+                    }
+                ]
+            },
+            "protocol": "iec60870_5_104",
+            "role": "client"
+        }
+    ],
+    "related": {
+        "ip": [
+            "127.0.0.1"
+        ],
+        "ports": [
+            1330,
+            2404
+        ],
+        "protocols": [
+            "iec60870_5_104"
+        ]
+    }
+}

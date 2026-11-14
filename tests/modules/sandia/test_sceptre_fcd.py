@@ -4,22 +4,28 @@ import pytest
 
 from peat import SCEPTRE, config, datastore
 
-# TODO: add additional files that didn't have tests, including:
-#   sceptre-bennu/data/configs/ep/dnp3-client.xml
-#   sceptre-bennu/data/configs/ep/dnp3-server.xml
-#   sceptre-bennu/data/configs/ep/iec60870-5-104-client.xml
-#   sceptre-bennu/data/configs/ep/iec60870-5-104-server.xml
-#   sceptre-bennu/data/configs/ep/modbus-client.xml
+# Configs from sandialabs/sceptre-bennu and sandialabs/sceptre-phenix-topologies.
+# See data_files/SOURCES.md for the source URL, commit, and license of each file.
 data_files = [
-    "bp-dnp3-client.xml",
-    "bp-dnp3-server.xml",
-    "bp-modbus-client.xml",
-    "bp-modbus-server.xml",
-    "ep-bacnet-client.xml",
-    "ep-bacnet-server.xml",
-    "ep-modbus-serial-client.xml",
-    "ep-modbus-serial-server.xml",
-    "ep-sunspec-server.xml",
+    "bp/dnp3-client.xml",
+    "bp/dnp3-server.xml",
+    "bp/modbus-client.xml",
+    "bp/modbus-server.xml",
+    "ep/bacnet-client.xml",
+    "ep/bacnet-server.xml",
+    "ep/dnp3-client.xml",
+    "ep/dnp3-server.xml",
+    "ep/iec60870-5-104-client.xml",
+    "ep/iec60870-5-104-server.xml",
+    "ep/modbus-client.xml",
+    "ep/modbus-serial-client.xml",
+    "ep/modbus-serial-server.xml",
+    "ep/modbus-server.xml",
+    "ep/sunspec-server.xml",
+    "phenix-soap/rtu-1_config.xml",
+    "phenix-soap/rtu-2_config.xml",
+    "phenix-soap/rtu-3_config.xml",
+    "phenix-soap/rtu-4_config.xml",
 ]
 
 
@@ -29,9 +35,6 @@ data_files = [
 # "pdm run python tests/generate_test_data_files.py SCEPTRE"
 
 
-# TODO: Re-add bennu tests from open-source sceptre-bennu after open sourcing
-# https://github.com/sandialabs/sceptre-bennu/tree/main/data/configs
-@pytest.mark.skip("Re-add bennu tests from open-source sceptre-bennu after open sourcing")
 @pytest.mark.parametrize("input_filename", data_files)
 def test_parse_sceptre_fcd(
     json_data,
@@ -55,16 +58,15 @@ def test_parse_sceptre_fcd(
 
     # Check the exported data without the raw data nearly matches what's expected
     exported_summary = parsed_device.export_summary()
+    expected_prefix = f"{source_path.parent.name}/{source_path.stem}_expected"
     dev_data_compare(
-        json_data(f"{source_path.stem}_expected_device-data-summary.json"),
+        json_data(f"{expected_prefix}_device-data-summary.json"),
         exported_summary,
     )
 
     # Check the exported full data nearly matches what's expected
     exported_full = parsed_device.export(include_original=True)
-    dev_data_compare(
-        json_data(f"{source_path.stem}_expected_device-data-full.json"), exported_full
-    )
+    dev_data_compare(json_data(f"{expected_prefix}_device-data-full.json"), exported_full)
 
     assert filecmp.cmp(parsed_device._out_dir / source_path.name, source_path)
     assert_glob_path(parsed_device._out_dir, "device-data-summary.json")

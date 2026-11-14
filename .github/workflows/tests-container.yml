@@ -113,3 +113,73 @@ jobs:
           name: mysql-test-results
           path: pytest_files/
           if-no-files-found: ignore
+
+  bennu-tests:
+    name: SCEPTRE bennu VM
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      BENNU_FTP_PORT: 2121
+      BENNU_SERIAL_LOG: bennu-vm/serial.log
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Install QEMU and libguestfs
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qemu-system-x86 qemu-utils libguestfs-tools
+          # libguestfs needs to read the host kernel to build its appliance
+          sudo chmod 0644 /boot/vmlinuz*
+      - name: Get bennu image digest
+        id: digest
+        run: |
+          digest="$(scripts/run-bennu-vm.sh digest)"
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+      - name: Cache bennu image
+        id: cache
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5.1.0
+        with:
+          path: bennu.qc2
+          key: bennu-qc2-${{ steps.digest.outputs.digest }}
+      - name: Download bennu image
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: scripts/run-bennu-vm.sh pull bennu.qc2
+      - name: Start bennu VM
+        run: scripts/run-bennu-vm.sh start bennu.qc2 tests/modules/sandia/data_files/ep/dnp3-server.xml ./bennu-vm
+      - name: Setup PDM
+        uses: pdm-project/setup-pdm@94a823180e06fcde4ad29308721954a521c96ed0 # v4
+        with:
+          python-version: "3.12"
+          cache: true
+      - name: Install dependencies
+        run: pdm sync -G test
+      - name: Run bennu VM Tests
+        run: pdm run pytest --basetemp=./pytest_files -s -v --run-container ./tests/modules/sandia/test_sceptre_bennu_vm.py
+      - name: Run peat pull against bennu VM
+        run: |
+          pdm run peat pull -d sceptre -i 127.0.0.1 --assume-online -c examples/peat-config-sceptre-testing.yaml -o ./peat_results
+          test -s ./peat_results/*/devices/*/ftp_files/config.xml
+          # The push tests leave bennu-field-deviced.firmware on the VM, which is pulled instead
+          test -n "$(find ./peat_results -path '*/ftp_files/bennu-field-deviced*' -size +0)"
+      - name: Stop bennu VM
+        if: always()
+        run: scripts/run-bennu-vm.sh stop ./bennu-vm
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bennu-test-results
+          path: |
+            pytest_files/
+            peat_results/
+            bennu-vm/serial.log
+          if-no-files-found: ignore

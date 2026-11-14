@@ -138,8 +138,8 @@ device_options:
     log_pull_timeout: 30.0
   sceptre_plc_compatible_st_logic: false
   sceptre:
-    ftp_testing: false
-    bennu_filename: "bennu-field-deviced.firmware"
+    home: "/home/sceptre"
+    firmware_filename: "ferrofire.firmware"
   sel:
     pull_methods:
       - http

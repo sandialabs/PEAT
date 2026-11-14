@@ -1,13 +1,16 @@
-# pip3 install Twisted
-# sudo -H $(which twistd) -n ftp --auth=anonymous -r examples/devices/sceptre/
+# Config for testing the SCEPTRE module against a local bennu field device VM
+#
+# scripts/run-bennu-vm.sh pull bennu.qc2
+# scripts/run-bennu-vm.sh start bennu.qc2 examples/devices/sceptre/ep/dnp3-server.xml ./bennu-vm
 # peat pull -d sceptre -i 127.0.0.1 --assume-online -v -c ./examples/peat-config-sceptre-testing.yaml
+# scripts/run-bennu-vm.sh stop ./bennu-vm
 
 metadata:
   name: "sceptre-test-config"
-  description: "Config for testing SCEPTRE module FTP functionality locally using twistd"
+  description: "Config for testing SCEPTRE module FTP functionality against a local bennu VM"
   author: "cegoes"
   created: "March 14th, 2022"
-  updated: ""
+  updated: "October 26th, 2026"
 
 no_logo: true
 
@@ -20,7 +23,5 @@ hosts:
     options:
       ftp:
         port: 2121
-        user: anonymous
-        pass: anonymous
-      sceptre:
-        ftp_testing: true
+        user: sceptre
+        pass: sceptre
