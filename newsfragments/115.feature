@@ -1,0 +1,1 @@
+Added SSH and telnet support to the SCEPTRE module: field devices that expose a shell instead of FTP (such as the ferrofire Buildroot image) can be identified, pulled, and pushed (config and firmware), with new sceptre.home and sceptre.firmware_filename options.

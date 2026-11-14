@@ -447,6 +447,15 @@ device_options:
   # Enable SCEPTRE/OpenPLC compatibility changes to Structured Text logic output
   sceptre_plc_compatible_st_logic: false
 
+  # Configuration specific to the SCEPTRE module (SSH and telnet devices)
+  sceptre:
+    # Home directory of the SCEPTRE user on devices accessed over SSH or telnet.
+    home: "/home/sceptre"
+
+    # Name of the firmware file on devices accessed over SSH or telnet.
+    # This will be auto-determined if a scan is performed.
+    firmware_filename: "ferrofire.firmware"
+
   # Configuration specific to the SEL modules (SELRelay and SELRTAC)
   sel:
     # Select what protocols PEAT is allowed to use

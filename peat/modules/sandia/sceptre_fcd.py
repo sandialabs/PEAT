@@ -54,9 +54,27 @@ file, so PEAT refuses to push it. Config pushes aren't supported, since the
 field device only reads ``/etc/sceptre/config.xml`` at startup, and that file
 isn't reachable over FTP.
 
+SSH and telnet devices
+
+Some SCEPTRE field devices expose a shell instead of FTP, such as the ferrofire
+Buildroot image. PEAT logs in as ``sceptre`` (``ssh.user``/``ssh.pass`` and
+``telnet.user``/``telnet.pass``) and works on files in ``sceptre.home``
+(``/home/sceptre``): ``config.xml`` and the firmware file named by
+``sceptre.firmware_filename``, or the first ``*.firmware`` the device lists.
+A device verified over SSH or telnet, but not FTP, is pulled and pushed over
+that shell. Both config and firmware can be pushed, and any firmware is
+written, since these devices run whatever firmware file they're given.
+
+.. code-block:: bash
+
+   peat push -d sceptre -i 192.0.2.20 -t config -- ./config.xml
+   peat push -d sceptre -i 192.0.2.20 -t firmware -- ./ferrofire
+
 Listening services
 
 - FTP (TCP 21)
+- SSH (TCP 22), SFTP subsystem, ferrofire Buildroot image
+- Telnet (TCP 23), ferrofire Buildroot image
 
 Data collected
 
@@ -78,11 +96,14 @@ Authors
 - Christopher Goes
 """  # noqa: E501
 
+import functools
 import hashlib
 import ipaddress
+import re
+import sys
 from pathlib import Path, PurePosixPath
 from random import randint
-from typing import Final
+from typing import Final, Literal
 from xml.etree.ElementTree import Element, fromstring
 
 from peat import (
@@ -98,9 +119,11 @@ from peat import (
     config,
     consts,
     datastore,
+    exit_handler,
 )
 from peat.data.data_utils import match_all
 from peat.file_signature import FileSignature
+from peat.modules.sandia.sceptre_shell import SceptreShell
 from peat.protocols import FTP
 
 # Protocol data point elements: (measurement_type, read_write)
@@ -136,6 +159,13 @@ FIRMWARE_PREFIX: Final[str] = "bennu-field-deviced"
 # bennu-watcherd installs valid firmware uploaded with this name
 FIRMWARE_UPLOAD_NAME: Final[str] = f"{FIRMWARE_PREFIX}.firmware"
 
+# Shell protocols for SCEPTRE devices that expose a shell instead of FTP
+# (for example the ferrofire Buildroot field device image)
+SHELL_PROTOCOLS: Final[tuple[str, str]] = ("ssh", "telnet")
+
+# Firmware file names accepted from a device's file listing
+FIRMWARE_NAME: Final[re.Pattern[str]] = re.compile(r"[\w.\-]+\.firmware")
+
 
 class SCEPTRE(DeviceModule):
     """
@@ -157,6 +187,18 @@ class SCEPTRE(DeviceModule):
         "ftp": {
             "user": "sceptre",
             "pass": "sceptre",
+        },
+        "ssh": {
+            "user": "sceptre",
+            "pass": "sceptre",
+        },
+        "telnet": {
+            "user": "sceptre",
+            "pass": "sceptre",
+        },
+        "sceptre": {
+            "home": "/home/sceptre",
+            "firmware_filename": "ferrofire.firmware",
         },
     }
 
@@ -220,7 +262,110 @@ class SCEPTRE(DeviceModule):
         svc = Service(protocol="ftp", port=port, transport="tcp", status="verified")
         dev.store("service", svc, interface_lookup={"ip": dev.ip})
 
+        dev._cache["sceptre_ftp_verified"] = True
         return True
+
+    @classmethod
+    def _verify_shell(cls, dev: DeviceData, protocol: Literal["ssh", "telnet"]) -> bool:
+        """
+        Verify it's a SCEPTRE device (e.g. the ferrofire Buildroot image) by logging in
+        with SSH or telnet and checking the home directory for "config.xml" and a
+        ".firmware" file.
+        """
+        try:
+            shell = SceptreShell.open(dev, protocol)
+        except Exception as ex:
+            cls.log.debug(f"Failed to verify {protocol} for {dev.ip}: {ex}")
+            return False
+
+        try:
+            files = shell.list_home()
+            # The configured name if the device has it (it's what the device runs);
+            # otherwise the name comes from the device, so only accept safe characters
+            want = dev.options["sceptre"]["firmware_filename"]
+            firmware = (
+                want
+                if want in files
+                else next((f for f in files if FIRMWARE_NAME.fullmatch(f)), None)
+            )
+            if "config.xml" not in files or not firmware:
+                cls.log.debug(f"Failed to verify {protocol} for {dev.ip}: expected files missing")
+                shell.close()
+                return False
+        except Exception as ex:
+            cls.log.debug(f"Failed to verify {protocol} for {dev.ip}: {ex}")
+            shell.close()
+            return False
+
+        dev._runtime_options.setdefault("sceptre", {})["firmware_filename"] = firmware
+        dev.related.files.update(files)
+        dev._cache[f"sceptre_{protocol}_verified"] = True
+
+        # Keep one session for _pull. If another protocol already has one,
+        # this one is dropped, and _pull reopens it if it's the one used.
+        if any(dev._cache.get(f"sceptre_{p}_shell") for p in SHELL_PROTOCOLS):
+            shell.close()
+        else:
+            cls._cache_shell(dev, protocol, shell)
+
+        port = dev.options[protocol]["port"]
+        svc = Service(protocol=protocol, port=port, transport="tcp", status="verified")
+        dev.store("service", svc, interface_lookup={"ip": dev.ip})
+        return True
+
+    @classmethod
+    def _cache_shell(cls, dev: DeviceData, protocol: str, shell: SceptreShell) -> None:
+        """Keep the session for _pull, and close it when PEAT exits."""
+        dev._cache[f"sceptre_{protocol}_shell"] = shell
+        exit_handler.register(shell.close, "CONNECTION")
+
+    @classmethod
+    def _use_shell(cls, dev: DeviceData, protocol: Literal["ssh", "telnet"]) -> bool:
+        """
+        Make ``protocol``'s session the only cached one, verifying or
+        opening it as needed.
+        """
+        for other in SHELL_PROTOCOLS:
+            stale = dev._cache.get(f"sceptre_{other}_shell")
+            if other != protocol and stale:
+                stale.close()
+                dev._cache.pop(f"sceptre_{other}_shell")
+
+        if dev._cache.get(f"sceptre_{protocol}_shell"):
+            return True
+        if not dev._cache.get(f"sceptre_{protocol}_verified"):
+            return cls._verify_shell(dev, protocol)
+        try:
+            cls._cache_shell(dev, protocol, SceptreShell.open(dev, protocol))
+        except Exception as ex:
+            cls.log.debug(f"Failed to open {protocol} for {dev.ip}: {ex}")
+            return False
+        return True
+
+    @classmethod
+    def _get_shell(cls, dev: DeviceData) -> SceptreShell | None:
+        """
+        The shell session chosen by ``_pull``, if the device isn't using FTP.
+        """
+        return dev._cache.get(f"sceptre_{dev._cache.get('sceptre_protocol')}_shell")
+
+    @classmethod
+    def _download_shell(
+        cls, dev: DeviceData, shell: SceptreShell, filename: str
+    ) -> tuple[bytes | None, Path | None]:
+        try:
+            data = shell.read_file(filename)
+            downloaded_path = None
+            if config.DEVICE_DIR:
+                downloaded_path = dev.write_file(
+                    data=data,
+                    filename=filename,
+                    out_dir=dev.get_sub_dir(f"{shell.protocol}_files"),
+                )
+            return data, downloaded_path
+        except Exception as ex:
+            cls.log.debug(f"Failed to get {shell.protocol} file {filename} from {dev.ip}: {ex}")
+        return None, None
 
     @classmethod
     def _download_ftp(
@@ -298,14 +443,80 @@ class SCEPTRE(DeviceModule):
 
     @classmethod
     def _pull(cls, dev: DeviceData) -> bool:
-        result = True
-        if not cls.pull_firmware(dev):
-            result = False
+        # Use the first verified service (ftp, ssh, telnet). If none was verified,
+        # try FTP first, as always, then fall back to ssh and telnet.
+        verified = [
+            p for p in ("ftp", *SHELL_PROTOCOLS) if dev._cache.get(f"sceptre_{p}_verified")
+        ]
+        for protocol in verified[:1] or ["ftp", *SHELL_PROTOCOLS]:
+            if protocol != "ftp" and not cls._use_shell(dev, protocol):
+                continue
+            dev._cache["sceptre_protocol"] = protocol
 
-        if not cls.pull_config(dev):
-            result = False
+            if protocol != "ftp" and dev.options["sceptre"]["firmware_filename"].startswith(
+                "ferrofire"
+            ):
+                dev.os.name = "Buildroot"
+                dev.os.vendor.name = "Buildroot"
+                dev.os.vendor.id = "Buildroot"
+                dev.description.model = "ferrofire"
 
-        return result
+            firmware = cls.pull_firmware(dev)
+            config_ok = cls.pull_config(dev)
+            if firmware or config_ok:
+                return bool(firmware and config_ok)
+
+        cls.log.error(f"Failed to pull from {dev.ip}: no service worked")
+        return False
+
+    @classmethod
+    def _push_shell(
+        cls, dev: DeviceData, to_push: bytes | str | Path, push_type: consts.PushType
+    ) -> bool:
+        """
+        Push config.xml or the firmware file over SSH or telnet.
+
+        Any firmware is written, since a device that exposes a shell (such as
+        the ferrofire image) runs whatever firmware file it's given.
+        """
+        # DeviceModule.push() leaves files as a Path, and stdin as the str "-"
+        if isinstance(to_push, Path):
+            try:
+                to_push = to_push.read_bytes()
+            except OSError as ex:  # includes IsADirectoryError
+                cls.log.error(f"Failed to push {push_type}: can't read {to_push}: {ex}")
+                return False
+        elif to_push == "-":
+            to_push = sys.stdin.buffer.read()
+        elif isinstance(to_push, str):
+            to_push = to_push.encode()
+
+        # An empty file would wipe the device's config or firmware
+        if not to_push:
+            cls.log.error(f"Refusing to push {push_type}: payload is empty (0 bytes)")
+            return False
+
+        # Verified protocols first, each falling back to the other
+        verified = [p for p in SHELL_PROTOCOLS if dev._cache.get(f"sceptre_{p}_verified")]
+        for protocol in verified or SHELL_PROTOCOLS:
+            if cls._use_shell(dev, protocol):
+                break
+        else:
+            cls.log.error(f"Failed to push to {dev.ip}: neither ssh nor telnet is available")
+            return False
+
+        shell = dev._cache[f"sceptre_{protocol}_shell"]
+        if push_type == "config":
+            filename = "config.xml"
+        else:
+            filename = dev.options["sceptre"]["firmware_filename"]
+        try:
+            shell.write_file(filename, to_push)
+        except Exception as ex:
+            cls.log.error(f"Failed to push {filename} to {dev.ip} over {protocol}: {ex}")
+            return False
+        cls.log.info(f"Pushed {filename} ({len(to_push)} bytes) to {dev.ip} over {protocol}")
+        return True
 
     @classmethod
     def pull_config(cls, dev: DeviceData) -> bool:
@@ -315,7 +526,12 @@ class SCEPTRE(DeviceModule):
         bennu field devices use a single XML file for their configuration,
         called ``config.xml`` by default.
         """
-        data, file_path, filename = cls._download_ftp(dev, ["config.xml"], "config", ".xml")
+        shell = cls._get_shell(dev)
+        if shell:
+            filename = "config.xml"
+            data, file_path = cls._download_shell(dev, shell, filename)
+        else:
+            data, file_path, filename = cls._download_ftp(dev, ["config.xml"], "config", ".xml")
 
         if data is None:
             cls.log.error(f"Failed to pull config from {dev.ip}")
@@ -337,9 +553,10 @@ class SCEPTRE(DeviceModule):
     @classmethod
     def pull_firmware(cls, dev: DeviceData) -> bytes:
         """
-        Retrieves the ``bennu-field-deviced`` binary via FTP.
+        Retrieves the ``bennu-field-deviced`` binary via FTP, or the firmware
+        file (``sceptre.firmware_filename``) on devices pulled over SSH or telnet.
 
-        Files are tried in this order:
+        Over FTP, files are tried in this order:
 
         1. ``bennu-field-deviced.firmware``, the last firmware uploaded, if
            ``bennu-watcherd`` accepts it (see :func:`accepted_firmware_hashes`),
@@ -349,26 +566,31 @@ class SCEPTRE(DeviceModule):
            (``/usr/bin/bennu-field-deviced``).
         3. The first file starting with ``bennu-field-deviced``.
         """
-        uploaded, uploaded_path, uploaded_name = cls._download_ftp(dev, [FIRMWARE_UPLOAD_NAME])
-        original, original_path, original_name = cls._download_ftp(dev, [FIRMWARE_PREFIX])
-
-        if uploaded is not None and (
-            original is None
-            or hashlib.sha256(uploaded).hexdigest() in accepted_firmware_hashes(original)
-        ):
-            data, file_path, filename = uploaded, uploaded_path, uploaded_name
-        elif original is not None:
-            if uploaded is not None:
-                cls.log.warning(
-                    f"'{FIRMWARE_UPLOAD_NAME}' on {dev.ip} isn't firmware bennu-watcherd "
-                    f"accepts, so the original binary '{FIRMWARE_PREFIX}' is running"
-                )
-            data, file_path, filename = original, original_path, original_name
+        shell = cls._get_shell(dev)
+        if shell:
+            filename = dev.options["sceptre"]["firmware_filename"]
+            data, file_path = cls._download_shell(dev, shell, filename)
         else:
-            data, file_path, filename = cls._download_ftp(dev, [], FIRMWARE_PREFIX)
+            uploaded, uploaded_path, uploaded_name = cls._download_ftp(dev, [FIRMWARE_UPLOAD_NAME])
+            original, original_path, original_name = cls._download_ftp(dev, [FIRMWARE_PREFIX])
 
-        # Both files are saved, since a rejected upload is useful evidence
-        dev.related.files.update(name for name in (uploaded_name, original_name) if name)
+            if uploaded is not None and (
+                original is None
+                or hashlib.sha256(uploaded).hexdigest() in accepted_firmware_hashes(original)
+            ):
+                data, file_path, filename = uploaded, uploaded_path, uploaded_name
+            elif original is not None:
+                if uploaded is not None:
+                    cls.log.warning(
+                        f"'{FIRMWARE_UPLOAD_NAME}' on {dev.ip} isn't firmware bennu-watcherd "
+                        f"accepts, so the original binary '{FIRMWARE_PREFIX}' is running"
+                    )
+                data, file_path, filename = original, original_path, original_name
+            else:
+                data, file_path, filename = cls._download_ftp(dev, [], FIRMWARE_PREFIX)
+
+            # Both files are saved, since a rejected upload is useful evidence
+            dev.related.files.update(name for name in (uploaded_name, original_name) if name)
 
         if data is None:
             cls.log.error(f"Failed to pull firmware from {dev.ip}")
@@ -383,8 +605,9 @@ class SCEPTRE(DeviceModule):
             dev.firmware.file.device = dev.get_id()
             dev.firmware.file.name = filename
 
-        dev.firmware.file.directory = "/"
-        dev.firmware.file.path = PurePosixPath("/", filename)
+        directory = dev.options["sceptre"]["home"] if shell else "/"
+        dev.firmware.file.directory = directory
+        dev.firmware.file.path = PurePosixPath(directory, filename)
         dev.related.files.add(filename)
 
         dev.populate_fields()
@@ -417,7 +640,16 @@ class SCEPTRE(DeviceModule):
         Config pushes aren't supported. The field device only reads
         ``/etc/sceptre/config.xml`` when it starts, and that file is outside
         of the FTP server's root directory.
+
+        Devices verified over SSH or telnet, but not FTP, are pushed with
+        :meth:`_push_shell` instead, which also pushes configs.
         """
+        # Devices verified over SSH or telnet, but not FTP, are pushed over that shell
+        if not dev._cache.get("sceptre_ftp_verified") and any(
+            dev._cache.get(f"sceptre_{p}_verified") for p in SHELL_PROTOCOLS
+        ):
+            return cls._push_shell(dev, to_push, push_type)
+
         if push_type != "firmware":
             cls.log.error(
                 f"Push of '{push_type}' to {dev.ip} isn't supported: bennu field devices "
@@ -1036,7 +1268,27 @@ SCEPTRE.ip_methods = [
         protocol="ftp",
         transport="tcp",
         default_port=21,
-    )
+    ),
+    IPMethod(
+        name="SCEPTRE SSH",
+        description=str(SCEPTRE._verify_shell.__doc__).strip(),
+        type="unicast_ip",
+        identify_function=functools.partial(SCEPTRE._verify_shell, protocol="ssh"),
+        reliability=8,
+        protocol="ssh",
+        transport="tcp",
+        default_port=22,
+    ),
+    IPMethod(
+        name="SCEPTRE Telnet",
+        description=str(SCEPTRE._verify_shell.__doc__).strip(),
+        type="unicast_ip",
+        identify_function=functools.partial(SCEPTRE._verify_shell, protocol="telnet"),
+        reliability=7,
+        protocol="telnet",
+        transport="tcp",
+        default_port=23,
+    ),
 ]
 
 
