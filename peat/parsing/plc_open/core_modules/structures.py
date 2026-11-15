@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # This file is part of Beremiz, a Integrated Development Environment for
 # programming IEC 61131-3 automates supporting plcopen standard and CanFestival.
 #
@@ -19,35 +22,41 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+
+
+import re
 from collections import OrderedDict
 from functools import reduce
 
-from .plcopen import LoadProject
-from .definitions import *
-
+from . plcopen import LoadProject
+from . definitions import *
 
 TypeHierarchy = dict(TypeHierarchy_list)
 
 
-def IsOfType(typ, reference):
-    """If the given data type is the same that "reference" meta-type or one of its types."""
+def IsOfType(type, reference):
+    """
+    Returns true if the given data type is the same that "reference" meta-type or one of its types.
+    """
     if reference is None:
         return True
-    elif typ == reference:
+    elif type == reference:
         return True
     else:
-        parent_type = TypeHierarchy[typ]
+        parent_type = TypeHierarchy[type]
         if parent_type is not None:
             return IsOfType(parent_type, reference)
     return False
 
 
-def GetSubTypes(typ):
-    """Returns list of all types that correspond to the ANY* meta type"""
-    return [typename
-            for typename, _parenttype in list(TypeHierarchy.items())
-            if not typename.startswith("ANY") and IsOfType(typename, typ)]
+def GetSubTypes(type):
+    """
+    Returns list of all types that correspont to the ANY* meta type
+    """
+    return [typename for typename, _parenttype in list(TypeHierarchy.items()) if not typename.startswith("ANY") and IsOfType(typename, type)]
 
+
+DataTypeRange = dict(DataTypeRange_list)
 
 """
 Ordered list of common Function Blocks defined in the IEC 61131-3
@@ -71,17 +80,34 @@ StdBlckLst = [{"name": libname, "list":
                [GetBlockInfos(pous) for pous in lib.getpous()]}
               for libname, lib in StdBlckLibs.items()]
 
+# -------------------------------------------------------------------------------
+#                             Test identifier
+# -------------------------------------------------------------------------------
 
-def csv_file_to_table(filepath):
-    """Take a .csv file and translate it it a 'csv_table'"""
-    rows = []
-    with open(filepath, "r") as csvfile:
-        for line in csvfile:
-            cols = []
-            for col in line.split(';'):
-                cols.append(col.strip())
-            rows.append(cols)
-    return rows
+IDENTIFIER_MODEL = re.compile(
+    "(?:%(letter)s|_(?:%(letter)s|%(digit)s))(?:_?(?:%(letter)s|%(digit)s))*$" %
+    {"letter": "[a-zA-Z]", "digit": "[0-9]"})
+
+
+def TestIdentifier(identifier):
+    """
+    Test if identifier is valid
+    """
+    return IDENTIFIER_MODEL.match(identifier) is not None
+
+# -------------------------------------------------------------------------------
+#                        Standard functions list generation
+# -------------------------------------------------------------------------------
+
+
+def csv_file_to_table(file):
+    """
+    take a .csv file and translate it it a "csv_table"
+    """
+    table = [[column.strip()
+              for column in line.split(';')]
+             for line in file.readlines()]
+    return table
 
 
 def find_section(section_name, table):
@@ -105,25 +131,21 @@ def get_standard_funtions_input_variables(table):
     fields = [True, True]
     while fields[1]:
         fields = table.pop(0)
-        variable_from_csv = dict([(champ, val)
-                                  for champ, val in zip(variables, fields[1:])
-                                  if champ != ''])
+        variable_from_csv = dict([(champ, val) for champ, val in zip(variables, fields[1:]) if champ != ''])
         standard_funtions_input_variables[variable_from_csv['name']] = variable_from_csv['type']
     return standard_funtions_input_variables
 
 
 def csv_input_translate(str_decl, variables, base):
     """
-    translate .csv file input declaration into PLCOpenEditor interesting values
+    translate .csv file input declaration into PLCOpenEditor interessting values
     in : "(ANY_NUM, ANY_NUM)" and { ParameterName: Type, ...}
     return [("IN1","ANY_NUM","none"),("IN2","ANY_NUM","none")]
     """
     decl = str_decl.replace('(', '').replace(')', '').replace(' ', '').split(',')
     params = []
 
-    len_of_not_predifined_variable = len([True
-                                          for param_type in decl
-                                          if param_type not in variables])
+    len_of_not_predifined_variable = len([True for param_type in decl if param_type not in variables])
 
     for param_type in decl:
         if param_type in list(variables.keys()):
@@ -177,9 +199,7 @@ def get_standard_funtions(table):
                 Current_section = {"name": section_name, "list": []}
                 Standard_Functions_Decl.append(Current_section)
             if Current_section:
-                Function_decl = dict([(champ, val)
-                                      for champ, val in zip(fonctions, fields[1:])
-                                      if champ])
+                Function_decl = dict([(champ, val) for champ, val in zip(fonctions, fields[1:]) if champ])
                 baseinputnumber = int(Function_decl.get("baseinputnumber", 1))
                 Function_decl["baseinputnumber"] = baseinputnumber
                 for param, value in Function_decl.items():
@@ -187,8 +207,7 @@ def get_standard_funtions(table):
                         Function_decl[param] = translate[param](value)
                 Function_decl["type"] = "function"
 
-                if Function_decl["name"].startswith('*') or \
-                        Function_decl["name"].endswith('*'):
+                if Function_decl["name"].startswith('*') or Function_decl["name"].endswith('*'):
                     input_ovrloading_types = GetSubTypes(Function_decl["inputs"][0][1])
                     output_types = GetSubTypes(Function_decl["outputs"][0][1])
                 else:
@@ -203,10 +222,9 @@ def get_standard_funtions(table):
                         Function_decl["inputs"] = []
                         for decl_tpl in fdc:
                             if IsOfType(intype, decl_tpl[1]):
-                                Function_decl["inputs"] += [
-                                    (decl_tpl[0], intype, decl_tpl[2])]
+                                Function_decl["inputs"] += [(decl_tpl[0], intype, decl_tpl[2])]
                             else:
-                                Function_decl["inputs"] += [decl_tpl]  #()
+                                Function_decl["inputs"] += [(decl_tpl)]
 
                             if funcdeclname_orig.startswith('*'):
                                 funcdeclin = intype + '_' + funcdeclname
@@ -239,8 +257,7 @@ def get_standard_funtions(table):
                                           [IsOfType(
                                               Function_decl["inputs"][0][1],
                                               testtype) for testtype in InTypes])
-                            if inps and outs and \
-                                    Function_decl["outputs"][0][1] != Function_decl["inputs"][0][1]:
+                            if inps and outs and Function_decl["outputs"][0][1] != Function_decl["inputs"][0][1]:
                                 store = True
                                 break
                             else:
@@ -250,12 +267,12 @@ def get_standard_funtions(table):
                             Function_decl_copy = Function_decl.copy()
                             Current_section["list"].append(Function_decl_copy)
             else:
-                raise Exception("First function must be in a category")
+                raise ValueError("First function must be in a category")
 
     return Standard_Functions_Decl
 
 
-StdBlckLst.extend(get_standard_funtions(csv_file_to_table(StdFuncsCSV)))
+StdBlckLst.extend(get_standard_funtions(csv_file_to_table(open(StdFuncsCSV))))
 
 # Dictionary to speedup block type fetching by name
 StdBlckDct = OrderedDict()
@@ -280,8 +297,7 @@ for section in StdBlckLst:
 # Keywords for Pou Declaration
 POU_BLOCK_START_KEYWORDS = ["FUNCTION", "FUNCTION_BLOCK", "PROGRAM"]
 POU_BLOCK_END_KEYWORDS = ["END_FUNCTION", "END_FUNCTION_BLOCK", "END_PROGRAM"]
-POU_KEYWORDS = ["EN", "ENO", "F_EDGE", "R_EDGE"] \
-               + POU_BLOCK_START_KEYWORDS + POU_BLOCK_END_KEYWORDS
+POU_KEYWORDS = ["EN", "ENO", "F_EDGE", "R_EDGE"] + POU_BLOCK_START_KEYWORDS + POU_BLOCK_END_KEYWORDS
 for category in StdBlckLst:
     for block in category["list"]:
         if block["name"] not in POU_KEYWORDS:
@@ -291,27 +307,20 @@ for category in StdBlckLst:
 # Keywords for Type Declaration
 TYPE_BLOCK_START_KEYWORDS = ["TYPE", "STRUCT"]
 TYPE_BLOCK_END_KEYWORDS = ["END_TYPE", "END_STRUCT"]
-TYPE_KEYWORDS = ["ARRAY", "OF", "T", "D", "TIME_OF_DAY", "DATE_AND_TIME"] \
-                + TYPE_BLOCK_START_KEYWORDS + TYPE_BLOCK_END_KEYWORDS
-TYPE_KEYWORDS.extend([keyword
-                      for keyword in list(TypeHierarchy.keys())
-                      if keyword not in TYPE_KEYWORDS])
+TYPE_KEYWORDS = ["ARRAY", "OF", "T", "D", "TIME_OF_DAY", "DATE_AND_TIME"] + TYPE_BLOCK_START_KEYWORDS + TYPE_BLOCK_END_KEYWORDS
+TYPE_KEYWORDS.extend([keyword for keyword in list(TypeHierarchy.keys()) if keyword not in TYPE_KEYWORDS])
 
 
 # Keywords for Variable Declaration
-VAR_BLOCK_START_KEYWORDS = ["VAR", "VAR_INPUT", "VAR_OUTPUT",
-                            "VAR_IN_OUT", "VAR_TEMP", "VAR_EXTERNAL"]
+VAR_BLOCK_START_KEYWORDS = ["VAR", "VAR_INPUT", "VAR_OUTPUT", "VAR_IN_OUT", "VAR_TEMP", "VAR_EXTERNAL"]
 VAR_BLOCK_END_KEYWORDS = ["END_VAR"]
-VAR_KEYWORDS = ["AT", "CONSTANT", "RETAIN", "NON_RETAIN"] \
-               + VAR_BLOCK_START_KEYWORDS + VAR_BLOCK_END_KEYWORDS
+VAR_KEYWORDS = ["AT", "CONSTANT", "RETAIN", "NON_RETAIN"] + VAR_BLOCK_START_KEYWORDS + VAR_BLOCK_END_KEYWORDS
 
 
 # Keywords for Configuration Declaration
-CONFIG_BLOCK_START_KEYWORDS = ["CONFIGURATION", "RESOURCE",
-                               "VAR_ACCESS", "VAR_CONFIG", "VAR_GLOBAL"]
+CONFIG_BLOCK_START_KEYWORDS = ["CONFIGURATION", "RESOURCE", "VAR_ACCESS", "VAR_CONFIG", "VAR_GLOBAL"]
 CONFIG_BLOCK_END_KEYWORDS = ["END_CONFIGURATION", "END_RESOURCE", "END_VAR"]
-CONFIG_KEYWORDS = ["ON", "PROGRAM", "WITH", "READ_ONLY", "READ_WRITE", "TASK"] \
-                  + CONFIG_BLOCK_START_KEYWORDS + CONFIG_BLOCK_END_KEYWORDS
+CONFIG_KEYWORDS = ["ON", "PROGRAM", "WITH", "READ_ONLY", "READ_WRITE", "TASK"] + CONFIG_BLOCK_START_KEYWORDS + CONFIG_BLOCK_END_KEYWORDS
 
 # Keywords for Structured Function Chart
 SFC_BLOCK_START_KEYWORDS = ["ACTION", "INITIAL_STEP", "STEP", "TRANSITION"]
@@ -331,7 +340,7 @@ IL_KEYWORDS = [
 ST_BLOCK_START_KEYWORDS = ["IF", "ELSIF", "ELSE", "CASE", "FOR", "WHILE", "REPEAT"]
 ST_BLOCK_END_KEYWORDS = ["END_IF", "END_CASE", "END_FOR", "END_WHILE", "END_REPEAT"]
 ST_KEYWORDS = [
-    "TRUE", "FALSE", "THEN", "OF", "TO", "BY", "DO", "DO", "UNTIL", "EXIT",
+    "TRUE", "FALSE", "THEN", "OF", "TO", "BY", "DO", "DO", "UNTIL", "EXIT", "CONTINUE",
     "RETURN", "NOT", "MOD", "AND", "XOR", "OR"
 ] + ST_BLOCK_START_KEYWORDS + ST_BLOCK_END_KEYWORDS
 

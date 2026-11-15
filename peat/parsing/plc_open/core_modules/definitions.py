@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 # This file is part of Beremiz, a Integrated Development Environment for
 # programming IEC 61131-3 automates supporting plcopen standard and CanFestival.
 #
@@ -20,20 +23,34 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+
+
+# PEAT: resources are located with peat.utils.get_resource() instead of util.paths,
+# and NoTranslate comes from the local _compat module instead of util.TranslationCatalogs
 from peat.utils import get_resource
+from ._compat import NoTranslate
 
-_ = lambda z:z  # Patch usages of gettext
+# Override gettext _ in this module
+# since we just want string to be added to dictionnary
+# but translation should happen here
+_ = NoTranslate
 
+LANGUAGES = ["IL", "ST", "FBD", "LD", "SFC"]
+
+LOCATIONDATATYPES = {"X": ["BOOL"],
+                     "B": ["SINT", "USINT", "BYTE", "STRING"],
+                     "W": ["INT", "UINT", "WORD", "WSTRING"],
+                     "D": ["DINT", "UDINT", "REAL", "DWORD"],
+                     "L": ["LINT", "ULINT", "LREAL", "LWORD"]}
 
 # -------------------------------------------------------------------------------
 #                        Function Block Types definitions
 # -------------------------------------------------------------------------------
-StdTC6Libs = [
-    (_("Standard function blocks"),
-     get_resource(__package__, "Standard_Function_Blocks.xml")),
-    (_("Additional function blocks"),
-     get_resource(__package__, "Additional_Function_Blocks.xml"))
-]
+
+# PEAT: get_resource() instead of join(sd, ...)
+StdTC6Libs = [(_("Standard function blocks"),   get_resource(__package__, "Standard_Function_Blocks.xml")),
+              (_("Additional function blocks"), get_resource(__package__, "Additional_Function_Blocks.xml"))]
+
 StdFuncsCSV = get_resource(__package__, "iec_std.csv")
 
 
@@ -46,13 +63,15 @@ def GetBlockInfos(pou):
         for var_name, var_type, var_modifier in infos["inputs"]]
     return infos
 
-
 # -------------------------------------------------------------------------------
 #                           Data Types definitions
 # -------------------------------------------------------------------------------
-#: Ordered list of common data types defined in the IEC 61131-3
+
+
+#: Ordored list of common data types defined in the IEC 61131-3
 #: Each type is associated to his direct parent type. It defines then a hierarchy
 #: between type that permits to make a comparison of two types
+
 TypeHierarchy_list = [
     ("ANY", None),
     ("ANY_DERIVED", "ANY"),
@@ -87,7 +106,20 @@ TypeHierarchy_list = [
     ("WORD", "ANY_NBIT"),
     ("DWORD", "ANY_NBIT"),
     ("LWORD", "ANY_NBIT")
-    # ("WSTRING", "ANY_STRING")
+    # ("WSTRING", "ANY_STRING") # TODO
+]
+
+DefaultType = "DINT"
+
+DataTypeRange_list = [
+    ("SINT",  (-2**7,  2**7 - 1)),
+    ("INT",   (-2**15, 2**15 - 1)),
+    ("DINT",  (-2**31, 2**31 - 1)),
+    ("LINT",  (-2**63, 2**63 - 1)),
+    ("USINT", (0,      2**8 - 1)),
+    ("UINT",  (0,      2**16 - 1)),
+    ("UDINT", (0,      2**32 - 1)),
+    ("ULINT", (0,      2**64 - 1))
 ]
 
 ANY_TO_ANY_FILTERS = {
@@ -136,3 +168,6 @@ ANY_TO_ANY_FILTERS = {
         (("ULINT",), ("LWORD",))
     ]
 }
+
+# remove gettext override
+del _

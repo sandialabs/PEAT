@@ -15,6 +15,7 @@ data_files = [
     (os.path.join(core_mods_src, 'Additional_Function_Blocks.xml'), core_mods_dst),
     (os.path.join(core_mods_src, 'Standard_Function_Blocks.xml'), core_mods_dst),
     (os.path.join(core_mods_src, 'tc6_xml_v201.xsd'), core_mods_dst),
+    (os.path.join(core_mods_src, 'TC6_XML_V10_B.xsd'), core_mods_dst),
     (os.path.join(os.path.join('..', 'peat', 'parsing', 'plc_open'), 'COPYING'), 'peat/parsing/plc_open'),
 ]  # type: list[tuple[str, str]]
 

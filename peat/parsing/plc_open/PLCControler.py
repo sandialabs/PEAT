@@ -20,8 +20,12 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-from .PLCGenerator import *
+from functools import reduce
 from typing import Optional
+
+from .core_modules.plcopen import LoadProjectXML, PLCOpenParser
+from .core_modules.structures import StdBlckDct, TypeHierarchy
+from .PLCGenerator import GenerateCurrentProgram, PLCGenException
 
 
 class PLCControler:
@@ -36,13 +40,15 @@ class PLCControler:
         self.TotalTypesDict = StdBlckDct.copy()
 
     # !! USED BY logic_gen.py !!
-    def GenerateProgram(self, filepath: str = None) -> tuple[str, list, list]:
+    def GenerateProgram(self, filepath: Optional[str] = None,
+                        **kwargs) -> tuple[str, list, list]:
         """
         Generate a ST program from a TC6 XML file.
         OpenXMLFile needs to be called before this.
 
         Args:
-            filepath: Path to the TC6 XML file with the program
+            filepath: Path to write the generated ST program to (optional)
+            kwargs: Passed through to GenerateCurrentProgram (e.g. ``noconfig=True``)
 
         Returns:
             tuple with the generated program string,
@@ -53,11 +59,12 @@ class PLCControler:
         warnings = []
         if self.Project is not None:
             try:
-                self.ProgramChunks = GenerateCurrentProgram(self, self.Project, errors, warnings)
+                self.ProgramChunks = GenerateCurrentProgram(
+                    self, self.Project, errors, warnings, **kwargs)
                 program_text = "".join([item[0] for item in self.ProgramChunks])
                 if filepath is not None:
-                    with open(filepath, 'w') as programfile:
-                        programfile.write(program_text.encode('utf-8'))
+                    with open(filepath, "w", encoding="utf-8") as programfile:
+                        programfile.write(program_text)
                 return program_text, errors, warnings
             except PLCGenException as e:
                 errors.append(str(e))
@@ -66,16 +73,22 @@ class PLCControler:
         return "", errors, warnings
 
     # !! USED BY logic_gen.py !!
-    def load_project(self, project_xml: bytes) -> str:
+    def load_project(self, project_xml: bytes | str):
         """Load project XML.
 
         Call this before calling GenerateProgram.
 
         Args:
-            project_xml: TC6 XML string
+            project_xml: TC6 XML, as UTF-8 encoded bytes or a string
 
         Returns:
-            Error message"""
+            Error, or None if the project loaded and validated without errors"""
+        if isinstance(project_xml, bytes):
+            try:
+                project_xml = project_xml.decode("utf-8")
+            except UnicodeDecodeError as err:
+                self.Project = None
+                return f"Project file syntax error: {err}"
         self.Project, error = LoadProjectXML(project_xml)
         if self.Project is None:
             return "Project file syntax error: " + error
@@ -160,15 +173,19 @@ class PLCControler:
             if basetype is not None:
                 return self.IsOfType(basetype, reference)
 
+        return False
+
     def GetDataType(self, typename: str):
         """Return Data Type Object"""
         result = self.Project.getdataType(typename)
         if result is not None:
             return result
         for confnodetype in self.ConfNodeTypes:
-            result = confnodetype["types"].getdataType(typename)
-            if result is not None:
-                return result
+            confnodetype_types = confnodetype["types"]
+            if confnodetype_types is not None:
+                result = confnodetype_types.getdataType(typename)
+                if result is not None:
+                    return result
         return None
 
     @staticmethod
